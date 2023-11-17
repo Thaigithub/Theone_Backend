@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  SUPER_ADMIN
+  ADMIN
+  COMPANY
+  CUSTOMER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  WITHDRAWN
+}
+
+enum AuthenticationProviderType {
+  KAKAO
+  NAVER
+  GOOGLE
+  APPLE
+  FACEBOOK
+}
+
+model User {
+  id              Int     @id @default(autoincrement())
+  username        String  @unique
+  password        String
+  name            String
+  type            UserType
+  status          UserStatus
+  isActive        Boolean @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  authenticationProviders AuthenticationProvider[]
+
+  @@map("users")
+}
+
+
+model AuthenticationProvider {
+  id              Int     @id @default(autoincrement())
+  key             String
+  type            AuthenticationProviderType
+  userId          Int @map("user_id")
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User @relation(fields: [userId], references: [id])
+
+  @@map("authentication_providers")
+}
