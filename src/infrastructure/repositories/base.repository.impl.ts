@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { BaseRepository } from '../../domain/base.repository';
 import { BaseEntity } from '../../domain/entities/base.entity';
 import { PrismaModel } from '../../domain/entities/prisma.model';
+import { BaseRepository } from '../../domain/repositories/base.repository';
 
 @Injectable()
 export class BaseRepositoryImpl<E extends BaseEntity> implements BaseRepository<E> {

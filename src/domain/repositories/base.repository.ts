@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseEntity } from './entities/base.entity';
+import { BaseEntity } from '../entities/base.entity';
 
 @Injectable()
 export abstract class BaseRepository<E extends BaseEntity> {
