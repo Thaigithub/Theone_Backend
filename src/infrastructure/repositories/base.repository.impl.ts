@@ -1,58 +1,55 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
-import { BaseRepository } from "../../domain/base.repository";
-import { BaseEntity } from "../../domain/entities/base.entity";
-
+import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { BaseRepository } from '../../domain/base.repository';
+import { BaseEntity } from '../../domain/entities/base.entity';
+import { PrismaModel } from '../../domain/entities/prisma.model';
 
 @Injectable()
 export class BaseRepositoryImpl<E extends BaseEntity> implements BaseRepository<E> {
   constructor(
-    private readonly prisma : PrismaClient,
-    private readonly model : PrismaModel
+    private readonly prisma: PrismaClient,
+    private readonly model: PrismaModel,
   ) {}
 
   async findAll(): Promise<E[]> {
-    return await this.prisma[this.model].findMany() as any
+    return await this.prisma[this.model.toString()].findMany();
   }
-  
+
   async find(id: number): Promise<E> {
-    return await this.prisma[this.model].findUnique({
-      where: {id}
-    }) as any
+    return (await this.prisma[this.model.toString()].findUnique({
+      where: { id },
+    })) as any;
   }
 
   async create(data: any): Promise<E> {
-    return await this.prisma[this.model].create({ data }) as any
+    return (await this.prisma[this.model.toString()].create({ data })) as any;
   }
 
   async update(id: number, data: any): Promise<E> {
-    return await this.prisma[this.model].update({
-      where: {
-        id
-      },
-      data
-    }) as any
-  }
-  
-  async delete(id: number): Promise<E> {
-    return await this.prisma[this.model].delete({
+    return (await this.prisma[this.model.toString()].update({
       where: {
         id,
       },
-    }) as any
+      data,
+    })) as any;
+  }
+
+  async delete(id: number): Promise<E> {
+    return (await this.prisma[this.model.toString()].delete({
+      where: {
+        id,
+      },
+    })) as any;
   }
 
   async softDelete(id: number): Promise<E> {
-    return await this.prisma[this.model].update({
+    return (await this.prisma[this.model.toString()].update({
       where: {
-        id
+        id,
       },
       data: {
-        isActive : false
-      }
-    }) as any
+        isActive: false,
+      },
+    })) as any;
   }
-
-
-
 }

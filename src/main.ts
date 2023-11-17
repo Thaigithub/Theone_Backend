@@ -1,8 +1,9 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
+import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import { cleanEnv, port, str } from 'envalid';
 import { rateLimit } from 'express-rate-limit';
@@ -11,21 +12,22 @@ import { APP_SECRET, CREDENTIALS, HOST, NODE_ENV, ORIGIN, PORT } from './app.con
 import { AppModule } from './app.module';
 import { LoggingInterceptor } from './infrastructure/interceptors/logging.interceptor';
 import { ErrorMiddleware } from './infrastructure/middlewares/error.middleware';
-
+import { ValidationPipe } from './infrastructure/pipes/validation.pipe';
 
 async function bootstrap() {
   try {
-    validateEnv()
+    validateEnv();
     const app = await NestFactory.create(AppModule, {
       cors: {
         origin: ORIGIN,
         credentials: CREDENTIALS,
       },
     });
+    Logger.log(HOST, PORT);
 
-    Logger.log(`🚀 Environment: ${chalk.hex('#33d32e').bold(`${NODE_ENV?.toUpperCase()}`)}`, 'Bootstrap');
+    Logger.log(`🚀 Environment: ${chalk.hex('#33d32e').bold(`${NODE_ENV?.toUpperCase()}`)}`);
 
-    app.use(helmet())
+    app.use(helmet());
     app.use(cookieParser(APP_SECRET));
     app.use(compression());
     app.use(bodyParser.json({ limit: '50mb' }));
@@ -58,28 +60,24 @@ async function bootstrap() {
     Logger.log('Mapped {/api, GET} Swagger api route', 'RouterExplorer');
 
     await app.listen(PORT || 3000);
+
     NODE_ENV !== 'production'
-      ? Logger.log(`🪭  Server ready at http://${HOST}:${chalk.hex('#ff6e26').bold(`${PORT}`)}`, 'Bootstrap', false)
-      : Logger.log(`🪽 Server is listening on port ${chalk.hex('#87e8de').bold(`${PORT}`)}`, 'Bootstrap', false);
-  } catch(error){
-    Logger.error(`❌  Error starting server, ${error}`, '', 'Bootstrap', false);
+      ? Logger.log(`🪭  Server ready at http://${chalk.hex('#e5ff00').bold(`${HOST}`)}:${chalk.hex('#ff6e26').bold(`${PORT}`)}`)
+      : Logger.log(`🪽 Server is listening on port ${chalk.hex('#87e8de').bold(`${PORT}`)}`);
+  } catch (error) {
+    Logger.error(`❌  Error starting server, ${error}`);
     process.exit();
   }
-
 }
 
 function validateEnv() {
   cleanEnv(process.env, {
     DATABASE_URL: str(),
-    PORT: port()
-  })
+    PORT: port(),
+  });
 }
 
 bootstrap().catch(e => {
-  Logger.error(`❌  Error starting server, ${e}`, '', 'Bootstrap', false);
+  Logger.error(`❌  Error starting server, ${e}`);
   throw e;
 });
-function compression(): any {
-  throw new Error('Function not implemented.');
-}
-

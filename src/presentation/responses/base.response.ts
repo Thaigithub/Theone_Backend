@@ -1,11 +1,10 @@
-
 export class BaseResponse<T> {
-  data: Nullable<T | null>
-  error: any
+  data: Nullable<T | null>;
+  error: any;
 
   private constructor(data: Nullable<T>, error: any) {
-    this.data = data
-    this.error = error
+    this.data = data;
+    this.error = error;
   }
 
   public static of<T>(data: T): BaseResponse<T> {
