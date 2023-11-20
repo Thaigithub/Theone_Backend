@@ -7,5 +7,7 @@ import { UpsertUserRequest } from '../../presentation/requests/upsert-user.reque
 
 @Injectable()
 export class AuthUseCaseImpl implements AuthUseCase {
-
+    async googleLogin(request: any): Promise<string> {
+        return 'Hello'
+    }
 }

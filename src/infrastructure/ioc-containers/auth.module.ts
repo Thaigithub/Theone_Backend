@@ -5,7 +5,7 @@ import { AuthController } from '../../presentation/controllers/auth.controller';
 import { UserRepositoryImpl } from '../repositories/user.repository.impl';
 import { AuthUseCaseImpl } from '../use-cases/auth.use-case.impl';
 import { PrismaModule } from './prisma.module';
-
+import { GoogleStrategy } from '../strategy/auth.strategy';
 @Module({
   imports: [PrismaModule],
   controllers: [AuthController],
@@ -18,7 +18,8 @@ import { PrismaModule } from './prisma.module';
       provide: UserRepository,
       useClass: UserRepositoryImpl,
     },
+    GoogleStrategy
   ],
   exports: [AuthUseCase],
 })
-export class UserModule {}
+export class AuthModule {}
