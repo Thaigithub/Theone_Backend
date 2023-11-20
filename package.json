@@ -43,6 +43,8 @@
     "ioredis": "^5.3.2",
     "lodash": "^4.17.21",
     "nodemailer": "^6.9.5",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
