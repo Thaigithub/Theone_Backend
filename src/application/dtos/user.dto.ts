@@ -1,5 +1,7 @@
 import { UserStatus, UserType } from '@prisma/client';
 import { User } from '../../domain/entities/user.entity';
+import { GenUID } from 'common/utils/uid';
+import { DbType } from 'common/constant';
 
 export class UserDTO {
   id: number;
@@ -35,3 +37,7 @@ export class UserDTO {
     return new UserDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
   }
 }
+
+export const fakeUidUser = (userId: number): string => {
+  return GenUID(userId, DbType.User, 0).toString();
+};

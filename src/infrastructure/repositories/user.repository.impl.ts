@@ -18,4 +18,10 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
       },
     });
   }
+
+  async findOne(userId: number): Promise<User> {
+    return await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+  }
 }

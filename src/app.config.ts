@@ -19,4 +19,5 @@ export const {
   MAIL_USER,
   MAIL_PASSWORD,
   MAIL_FROM,
+  JWT_SECRET_KEY,
 } = process.env;

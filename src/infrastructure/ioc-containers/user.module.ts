@@ -19,6 +19,6 @@ import { PrismaModule } from './prisma.module';
       useClass: UserRepositoryImpl,
     },
   ],
-  exports: [UserUseCase],
+  exports: [UserUseCase, UserRepository],
 })
 export class UserModule {}
