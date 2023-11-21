@@ -20,7 +20,6 @@ export class UserUseCaseImpl implements UserUseCase {
 
   async createUser(request: UpsertUserRequest): Promise<void> {
     const user = new User(request.username, await hash(request.password, 10), request.name, UserType.CUSTOMER, UserStatus.PENDING);
-
     await this.userRepository.create(user);
   }
 }

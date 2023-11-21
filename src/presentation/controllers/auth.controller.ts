@@ -1,8 +1,10 @@
-import { Body, Req, Controller, Get, HttpStatus, Inject, UseGuards, Res } from '@nestjs/common';
+import { Body, Req, Post, Controller, Get, HttpStatus, Inject, UseGuards, Res } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthUseCase } from '../../application/use-cases/auth.use-case';
 import { BaseResponse } from '../responses/base.response';
 import { AuthGuard } from '@nestjs/passport'
+import { LoginRequest } from 'presentation/requests/login.request';
+import { LoginResponse } from 'presentation/responses/login.response';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -44,4 +46,11 @@ export class AuthController {
   async kakaoAuth(@Res() res) {}
 
   
+  @Post('login')
+  @ApiOperation({ summary: 'User Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  async login(@Body() authUserDto: LoginRequest): Promise<BaseResponse<LoginResponse>> {
+    return BaseResponse.of(await this.authUseCase.login(authUserDto));
+  }
 }

@@ -25,4 +25,5 @@ export const {
   KAKAP_REST_API,
   KAKAP_CLIENT_SECRET,
   KAKAP_CALLBACK_URL
+  JWT_SECRET_KEY,
 } = process.env;

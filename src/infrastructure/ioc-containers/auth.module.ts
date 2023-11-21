@@ -7,8 +7,23 @@ import { AuthUseCaseImpl } from '../use-cases/auth.use-case.impl';
 import { PrismaModule } from './prisma.module';
 import { GoogleStrategy } from '../strategy/google.strategy';
 import { KakaoStrategy } from '../strategy/kakao.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JWT_SECRET_KEY } from 'app.config';
+import { UserModule } from './user.module';
+import { JwtStrategy } from 'application/passport/strategies/jwt.strategy';
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    PrismaModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: JWT_SECRET_KEY,
+      signOptions: { algorithm: 'HS384' },
+      verifyOptions: { algorithms: ['HS384'] },
+    }),
+    PrismaModule,
+    UserModule,
+  ],
   controllers: [AuthController],
   providers: [
     {
@@ -21,6 +36,7 @@ import { KakaoStrategy } from '../strategy/kakao.strategy';
     },
     GoogleStrategy,
     KakaoStrategy,
+    JwtStrategy,
   ],
   exports: [AuthUseCase],
 })
