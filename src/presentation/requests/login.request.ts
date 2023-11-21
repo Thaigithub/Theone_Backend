@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsString, Length } from 'class-validator';
 
-export class AuthUserDto {
+export class LoginRequest {
   @Expose()
   @IsString()
   @ApiProperty({ example: 'user@example.com' })
@@ -14,7 +14,7 @@ export class AuthUserDto {
   public password: string;
 }
 
-export class ChangePasswordDto {
+export class ChangePasswordRequest {
   @Expose()
   @IsString()
   @Length(8)

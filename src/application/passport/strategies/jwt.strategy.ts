@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
@@ -27,7 +27,7 @@ const extractJwtFromCookie: JwtFromRequestFunction = request => {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private readonly authUseCase: AuthUseCase) {
+  constructor(@Inject(AuthUseCase) private readonly authUseCase: AuthUseCase) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromCookie, ExtractJwt.fromAuthHeaderAsBearerToken()]),
       secretOrKey: JWT_SECRET_KEY,
@@ -39,7 +39,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload) {
     const userId = UID.fromBase58(payload.sub.userId).getLocalID();
     const payloadData = await this.authUseCase.verifyPayload(userId);
-
     return payloadData;
   }
 }

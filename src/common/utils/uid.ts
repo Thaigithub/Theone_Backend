@@ -60,12 +60,3 @@ export class UID {
 export const GenUID = (localID: number, objectType: number, shardID: number): UID => {
   return new UID(localID, objectType, shardID);
 };
-
-// Usage
-/*
-const userId = 1
-const userUID = GenUID(userId, DbType.User, 0).toString()
-
-const uid = UID.fromBase58(userUID)
-console.log(uid?.getLocalID()) // 1
-*/

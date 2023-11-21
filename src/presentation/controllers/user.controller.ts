@@ -1,10 +1,10 @@
 import { Body, Controller, Get, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserDTO } from '../../application/dtos/user.dto';
 import { UserUseCase } from '../../application/use-cases/user.use-case';
 import { UpsertUserRequest } from '../requests/upsert-user.request';
 import { BaseResponse } from '../responses/base.response';
 import { JWTAuthGuard } from 'application/passport/guards/jwt-auth.guard';
+import { GetUserResponse } from 'presentation/responses/get-user.response';
 
 @ApiTags('Users')
 @Controller('users')
@@ -21,8 +21,8 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-  async getUsers(): Promise<UserDTO[]> {
-    return await this.userUseCase.getUsers();
+  async getUsers(): Promise<BaseResponse<GetUserResponse>> {
+    return BaseResponse.of(new GetUserResponse(await this.userUseCase.getUsers()));
   }
 
   @Post()
