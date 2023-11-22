@@ -1,12 +1,12 @@
 import { Injectable, Logger, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { fakeUidUser } from 'application/dtos/user.dto';
-import { JwtFakePayloadData, JwtPayloadData } from 'application/passport/strategies/jwt.strategy';
+import { fakeUidUser } from '../../application/dtos/user.dto';
+import { JwtFakePayloadData, JwtPayloadData } from '../passport/strategies/jwt.strategy';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { compare } from 'bcrypt';
 import { UserRepository } from 'domain/repositories/user.repository';
-import { LoginRequest } from 'presentation/requests/login.request';
-import { LoginResponse } from 'presentation/responses/login.response';
+import { LoginRequest } from '../../presentation/requests/login.request';
+import { LoginResponse } from '../../presentation/responses/login.response';
 
 @Injectable()
 export class AuthUseCaseImpl implements AuthUseCase {
@@ -66,4 +66,11 @@ export class AuthUseCaseImpl implements AuthUseCase {
 
     return this.jwtService.sign(payload);
   }
+
+  async googleLogin(request: any): Promise<string> {
+      return "Hello"
+  }
+  async kakaoLogin(request: any): Promise<string> {
+    return "Hello"
+}
 }

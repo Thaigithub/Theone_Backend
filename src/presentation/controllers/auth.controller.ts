@@ -1,10 +1,10 @@
 import { Body, Req, Post, Controller, Get, HttpStatus, Inject, UseGuards, Res } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport'
 import { AuthUseCase } from '../../application/use-cases/auth.use-case';
 import { BaseResponse } from '../responses/base.response';
-import { AuthGuard } from '@nestjs/passport'
-import { LoginRequest } from 'presentation/requests/login.request';
-import { LoginResponse } from 'presentation/responses/login.response';
+import { LoginRequest } from '../requests/login.request';
+import { LoginResponse } from '../responses/login.response';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -12,7 +12,7 @@ import { LoginResponse } from 'presentation/responses/login.response';
 @ApiConsumes('application/json')
 export class AuthController {
   constructor(@Inject(AuthUseCase) private readonly authUseCase: AuthUseCase) {}
-
+  // GOOGLE
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
@@ -31,10 +31,10 @@ export class AuthController {
   })
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-  async googleAuthRedirect(@Req() req) {
-    console.log(await this.authUseCase.googleLogin(req));
+  async googleAuthCallback(@Req() req) {
+    return await this.authUseCase.googleLogin(req);
   }
-
+  // KAKAO
   @Get('/login/kakao')
   @UseGuards(AuthGuard('kakao'))
   @ApiOperation({
@@ -45,7 +45,18 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
   async kakaoAuth(@Res() res) {}
 
-  
+  @Get('/login/kakao/callback')
+  @UseGuards(AuthGuard('kakao'))
+  @ApiOperation({
+    summary: 'Kakao login callback',
+    description: 'This callback endpoint logging with kakao account',
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+  async kakaoAuthCallback(@Req() req) {
+    return await this.authUseCase.kakaoLogin(req);
+  }
+
   @Post('login')
   @ApiOperation({ summary: 'User Login' })
   @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })

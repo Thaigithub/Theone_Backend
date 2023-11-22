@@ -3,7 +3,7 @@ import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@n
 import { UserUseCase } from '../../application/use-cases/user.use-case';
 import { UpsertUserRequest } from '../requests/upsert-user.request';
 import { BaseResponse } from '../responses/base.response';
-import { JWTAuthGuard } from 'application/passport/guards/jwt-auth.guard';
+import { JWTAuthGuard } from '../../infrastructure/passport/guards/jwt-auth.guard';
 import { GetUserResponse } from 'presentation/responses/get-user.response';
 
 @ApiTags('Users')

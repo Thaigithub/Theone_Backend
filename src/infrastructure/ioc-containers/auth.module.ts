@@ -5,13 +5,13 @@ import { AuthController } from '../../presentation/controllers/auth.controller';
 import { UserRepositoryImpl } from '../repositories/user.repository.impl';
 import { AuthUseCaseImpl } from '../use-cases/auth.use-case.impl';
 import { PrismaModule } from './prisma.module';
-import { GoogleStrategy } from '../strategy/google.strategy';
-import { KakaoStrategy } from '../strategy/kakao.strategy';
+import { GoogleStrategy } from '../passport/strategies/google.strategy';
+import { KakaoStrategy } from '../passport/strategies/kakao.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
 import { UserModule } from './user.module';
-import { JwtStrategy } from 'application/passport/strategies/jwt.strategy';
+import { JwtStrategy } from '../passport/strategies/jwt.strategy';
 @Module({
   imports: [
     PrismaModule,
