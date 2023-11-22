@@ -1,10 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Inject, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserUseCase } from '../../application/use-cases/user.use-case';
 import { UpsertUserRequest } from '../requests/upsert-user.request';
 import { BaseResponse } from '../responses/base.response';
 import { JWTAuthGuard } from 'application/passport/guards/jwt-auth.guard';
 import { GetUserResponse } from 'presentation/responses/get-user.response';
+// import { Roles, RolesGuard } from 'application/passport/guards/roles.guard';
+// import { UserType } from '@prisma/client';
 
 @ApiTags('Users')
 @Controller('users')
@@ -14,6 +16,8 @@ export class UserController {
   constructor(@Inject(UserUseCase) private readonly userUseCase: UserUseCase) {}
 
   @Get()
+  // @Roles(UserType.CUSTOMER)
+  // @UseGuards(JWTAuthGuard, RolesGuard)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Find users',
@@ -21,7 +25,8 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-  async getUsers(): Promise<BaseResponse<GetUserResponse>> {
+  async getUsers(@Request() req): Promise<BaseResponse<GetUserResponse>> {
+    console.log(req.user);
     return BaseResponse.of(new GetUserResponse(await this.userUseCase.getUsers()));
   }
 

@@ -1,14 +1,14 @@
-import { UserStatus, UserType } from '@prisma/client';
-import { User } from '../../domain/entities/user.entity';
+import { AccountStatus, AccountType } from '@prisma/client';
+import { Account } from '../../domain/entities/user.entity';
 import { GenUID } from 'common/utils/uid';
 import { DbType } from 'common/constant';
 
-export class UserDTO {
+export class AccountDTO {
   id: number;
   username: string;
   name: string;
-  type: UserType;
-  status: UserStatus;
+  type: AccountType;
+  status: AccountStatus;
   isActive: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -17,8 +17,8 @@ export class UserDTO {
     id: number,
     username: string,
     name: string,
-    type: UserType,
-    status: UserStatus,
+    type: AccountType,
+    status: AccountStatus,
     isActive: boolean,
     createdAt: Date | string,
     updatedAt: Date | string,
@@ -33,8 +33,8 @@ export class UserDTO {
     this.updatedAt = updatedAt;
   }
 
-  static from(domain: User): UserDTO {
-    return new UserDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
+  static from(domain: Account): AccountDTO {
+    return new AccountDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
   }
 }
 

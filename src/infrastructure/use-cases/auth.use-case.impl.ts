@@ -1,7 +1,7 @@
 import { Injectable, Logger, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { fakeUidUser } from 'application/dtos/user.dto';
-import { JwtFakePayloadData, JwtPayloadData } from 'application/passport/strategies/jwt.strategy';
+import { JwtFakePayloadData, JwtPayloadData } from 'infrastructure/passport/strategies/jwt.strategy';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { compare } from 'bcrypt';
 import { UserRepository } from 'domain/repositories/user.repository';

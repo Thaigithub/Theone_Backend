@@ -1,4 +1,4 @@
-import { JwtFakePayloadData, JwtPayloadData } from 'application/passport/strategies/jwt.strategy';
+import { JwtFakePayloadData, JwtPayloadData } from 'infrastructure/passport/strategies/jwt.strategy';
 import { LoginRequest } from 'presentation/requests/login.request';
 import { LoginResponse } from 'presentation/responses/login.response';
 
