@@ -46,7 +46,7 @@ model Account {
   admin           Admin?
   member          Member?
   company         Company?
-  otp     OTPProvider?  
+  otp             OtpProvider?  
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")

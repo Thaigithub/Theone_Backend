@@ -8,8 +8,7 @@ import { BaseRepositoryImpl } from './base.repository.impl';
 @Injectable()
 export class AccountRepositoryImpl extends BaseRepositoryImpl<Account> implements AccountRepository {
   constructor(private readonly prismaService: PrismaService) {
-    super(prismaService, PrismaModel.USER);
-    this.prismaService.oTPProvider
+    super(prismaService, PrismaModel.ACCOUNT);
   }
 
   async findByUsername(username: string): Promise<Account> {

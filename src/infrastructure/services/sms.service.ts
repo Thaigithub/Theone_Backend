@@ -1,39 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import CoolsmsMessageService from 'coolsms-node-sdk';
 import { COOLSMS_KEY, COOLSMS_SECRET, SENDER_PHONE_NUMBER } from 'app.config';
-import { OTPGenerator } from 'common/utils/otp-generator';
 
 @Injectable()
-export class OTPService {
-  private messageService: CoolsmsMessageService;
+export class OtpService {
+  private coolsmsMessageService: CoolsmsMessageService;
   constructor() {
-    this.messageService = new CoolsmsMessageService(COOLSMS_KEY, COOLSMS_SECRET);
+    this.coolsmsMessageService = new CoolsmsMessageService(COOLSMS_KEY, COOLSMS_SECRET);
   }
-  async sendOTPSMS(phoneNumber: string): Promise<any> {
-    const OTP = OTPGenerator.generateOTPString();
+  async sendOTPSMS(phoneNumber: string,otp:string): Promise<boolean> {
     try {
-      const response = await this.messageService.sendOne({
-        to: '수신번호',
-        from: SENDER_PHONE_NUMBER,
-        text: OTP,
-        autoTypeDetect: true,
-      });
-      if (response.statusCode) {
-        console.log(response);
-        return true;
-      } else {
-      }
-      const key = `otp:${phoneNumber}`;
-      
+      // const response = await this.coolsmsMessageService.sendOne({
+      //   to: phoneNumber,
+      //   from: SENDER_PHONE_NUMBER,
+      //   text: otp,
+      //   autoTypeDetect: true,
+      // });
+      // if (response.statusCode) {
+      //   return true;
+      // } else {
+      // }
+      return true;
     } catch (error) {
       throw new Error(`SMS sending failed: ${error.message}`);
     }
-  }
-
-  async verifyOTP(request: OTPVerificationRequest): Promise<boolean> {
-    const key = `otp:${request.phoneNumber}`;
-    const storedOTP = await this.redisClient.get(key);
-    return storedOTP === request.code;
   }
 }
 
