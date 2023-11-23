@@ -19,7 +19,7 @@ export class AccountUseCaseImpl implements AccountUseCase {
   }
 
   async createAccount(request: UpsertAccountRequest): Promise<void> {
-    const account = new Account(request.username, await hash(request.password, 10), request.name, AccountType.MEMBER, AccountStatus.PENDING);
+    const account = new Account(request.username, await hash(request.password, 10), AccountType.MEMBER, AccountStatus.PENDING);
     await this.accountRepository.create(account);
   }
 }

@@ -116,6 +116,19 @@ model otp_providers {
   accounts     Account   @relation(fields: [account_id], references: [id])
 }
 
+model File {
+  id            Int      @id @default(autoincrement())
+  type          FileType
+  key           String?
+  fileName      String?  @map("file_name")
+  size          BigInt
+  isDeactivated Boolean  @default(false) @map("is_deactivated")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("files")
+}
+
 enum AccountType {
   ADMIN
   COMPANY
@@ -148,4 +161,15 @@ enum MemberLevel {
   SIVER
   TWO
   THREE
+}
+
+enum FileType {
+  PDF
+  ZIP
+  RAR
+  JPEG
+  PNG
+  CSV
+  EXCEL
+  WORD
 }

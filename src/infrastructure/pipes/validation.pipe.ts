@@ -6,7 +6,6 @@ import { ValidationError, validate, validateOrReject } from 'class-validator';
 export class ValidationPipe implements PipeTransform<any> {
   async transform(value: any, metadata: any) {
     const { metatype } = metadata;
-
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
@@ -47,8 +46,8 @@ export class ValidationPipe implements PipeTransform<any> {
     }
   }
 
-  private toValidate(metaType: Function): boolean {
-    const types: Function[] = [String, Boolean, Number, Array, Object];
+  private toValidate(metaType: any): boolean {
+    const types: any[] = [String, Boolean, Number, Array, Object];
     return !types.includes(metaType);
   }
 }
