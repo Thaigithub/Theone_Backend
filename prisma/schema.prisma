@@ -46,6 +46,7 @@ model Account {
   admin           Admin?
   member          Member?
   company         Company?
+  otp     OTPProvider?  
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -135,4 +136,15 @@ model AuthenticationProvider {
   account         Account @relation(fields: [accountId], references: [id])
 
   @@map("authentication_providers")
+}
+
+model OtpProvider {
+  id               Int       @id @default(autoincrement())
+  accountId       Int     @unique @map("account_id") 
+  account         Account @relation(fields: [accountId], references: [id])
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  phoneNumber      String? @unique @map("phone_number")
+  otpCode          String? @map("otp_code")
+
+  @@map("otp_providers")
 }

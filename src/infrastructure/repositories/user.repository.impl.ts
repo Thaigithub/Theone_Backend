@@ -9,6 +9,7 @@ import { BaseRepositoryImpl } from './base.repository.impl';
 export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements UserRepository {
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.USER);
+    this.prismaService.oTPProvider
   }
 
   async findByUsername(username: string): Promise<User> {

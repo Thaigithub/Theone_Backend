@@ -20,4 +20,7 @@ export const {
   MAIL_PASSWORD,
   MAIL_FROM,
   JWT_SECRET_KEY,
+  COOLSMS_KEY,
+  COOLSMS_SECRET,
+  SENDER_PHONE_NUMBER
 } = process.env;
