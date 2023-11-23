@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common"
 import { AdminMemberUseCase  } from "application/use-cases/admin-user.use-case"
 import { AdminMemberRepository } from "domain/repositories/admin-member.repository"
 import { AdminMemberRequest } from "presentation/requests/admin-member.request";
+import { GetMembersResponse } from "presentation/responses/admin-member.response";
 
 @Injectable()
 export class AdminMemberUseCaseImpl implements AdminMemberUseCase {
@@ -9,7 +10,9 @@ export class AdminMemberUseCaseImpl implements AdminMemberUseCase {
     @Inject(AdminMemberRepository) private adminMemberRepository: AdminMemberRepository
   ) {}
 
-  async getMembers(query: AdminMemberRequest): Promise<any> {
-    return await this.adminMemberRepository.findByQuery(query)
+  async getMembers(query: AdminMemberRequest): Promise<GetMembersResponse> {
+    const members = await this.adminMemberRepository.findByQuery(query);
+    const total = members.length;
+    return new GetMembersResponse(members, total);
   }
 }
