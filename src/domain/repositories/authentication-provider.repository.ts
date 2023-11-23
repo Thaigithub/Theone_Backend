@@ -4,5 +4,5 @@ import { BaseRepository } from './base.repository';
 
 @Injectable()
 export abstract class AuthenticationProviderRepository extends BaseRepository<AuthenticationProvider> {
-  abstract findByUserId(userId: number): Promise<AuthenticationProvider>;
+  abstract findByAccountId(accountId: number): Promise<AuthenticationProvider>;
 }

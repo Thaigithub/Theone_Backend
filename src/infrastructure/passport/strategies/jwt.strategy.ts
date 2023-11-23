@@ -6,12 +6,12 @@ import { UID } from 'common/utils/uid';
 import { Strategy, ExtractJwt, JwtFromRequestFunction } from 'passport-jwt';
 
 export interface JwtFakePayloadData {
-  userId: string;
+  accountId: string;
   type: string;
 }
 
 export interface JwtPayloadData {
-  userId: number;
+  accountId: number;
   type: string;
 }
 
@@ -37,8 +37,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload) {
-    const userId = UID.fromBase58(payload.sub.userId).getLocalID();
-    const payloadData = await this.authUseCase.verifyPayload(userId);
+    const accountId = UID.fromBase58(payload.sub.accountId).getLocalID();
+    const payloadData = await this.authUseCase.verifyPayload(accountId);
     return payloadData;
   }
 }

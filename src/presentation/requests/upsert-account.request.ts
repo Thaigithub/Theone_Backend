@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 
-export abstract class UpsertUserRequest {
+export abstract class UpsertAccountRequest {
   @Expose()
   @IsNotEmpty()
   // @ApiProperty({ example: 'walaict' })

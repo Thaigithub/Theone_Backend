@@ -1,5 +1,5 @@
 import { AccountStatus, AccountType } from '@prisma/client';
-import { Account } from '../../domain/entities/user.entity';
+import { Account } from '../../domain/entities/account.entity';
 import { GenUID } from 'common/utils/uid';
 import { DbType } from 'common/constant';
 
@@ -38,6 +38,6 @@ export class AccountDTO {
   }
 }
 
-export const fakeUidUser = (userId: number): string => {
-  return GenUID(userId, DbType.User, 0).toString();
+export const fakeUidAccount = (accountId: number): string => {
+  return GenUID(accountId, DbType.Account, 0).toString();
 };

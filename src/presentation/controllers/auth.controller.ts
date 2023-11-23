@@ -13,8 +13,8 @@ export class AuthController {
   constructor(@Inject(AuthUseCase) private readonly authUseCase: AuthUseCase) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'User Login' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
+  @ApiOperation({ summary: 'Account Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Account logged in successfully' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
   async login(@Body() authUserDto: LoginRequest): Promise<BaseResponse<LoginResponse>> {
     return BaseResponse.of(await this.authUseCase.login(authUserDto));
