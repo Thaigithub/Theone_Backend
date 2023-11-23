@@ -6,7 +6,6 @@ import { ValidationError, validate, validateOrReject } from 'class-validator';
 export class ValidationPipe implements PipeTransform<any> {
   async transform(value: any, metadata: any) {
     const { metatype } = metadata;
-    console.log('meta ', metadata);
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
