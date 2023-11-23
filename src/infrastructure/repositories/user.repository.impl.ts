@@ -11,11 +11,7 @@ export class AccountRepositoryImpl extends BaseRepositoryImpl<Account> implement
     super(prismaService, PrismaModel.ACCOUNT);
   }
 
-<<<<<<< HEAD
-  async findByUsername(username: string): Promise<User> {
-=======
   async findByUsername(username: string): Promise<Account> {
->>>>>>> origin/develop
     return await this.prismaService.account.findUnique({
       where: {
         username,
