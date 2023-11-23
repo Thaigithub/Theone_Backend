@@ -1,9 +1,13 @@
 import { AccountStatus, AccountType } from '@prisma/client';
+<<<<<<< HEAD:src/application/dtos/user.dto.ts
 import { User } from '../../domain/entities/user.entity';
+=======
+import { Account } from '../../domain/entities/account.entity';
+>>>>>>> origin/develop:src/application/dtos/account.dto.ts
 import { GenUID } from 'common/utils/uid';
 import { DbType } from 'common/constant';
 
-export class UserDTO {
+export class AccountDTO {
   id: number;
   username: string;
   name: string;
@@ -33,11 +37,11 @@ export class UserDTO {
     this.updatedAt = updatedAt;
   }
 
-  static from(domain: User): UserDTO {
-    return new UserDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
+  static from(domain: Account): AccountDTO {
+    return new AccountDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
   }
 }
 
-export const fakeUidUser = (userId: number): string => {
-  return GenUID(userId, DbType.User, 0).toString();
+export const fakeUidAccount = (accountId: number): string => {
+  return GenUID(accountId, DbType.Account, 0).toString();
 };

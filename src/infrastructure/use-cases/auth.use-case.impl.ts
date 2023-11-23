@@ -1,41 +1,41 @@
 import { Injectable, Logger, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { fakeUidUser } from '../../application/dtos/user.dto';
-import { JwtFakePayloadData, JwtPayloadData } from '../passport/strategies/jwt.strategy';
+import { fakeUidAccount } from 'application/dtos/account.dto';
+import { JwtFakePayloadData, JwtPayloadData } from 'infrastructure/passport/strategies/jwt.strategy';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { compare } from 'bcrypt';
-import { UserRepository } from 'domain/repositories/user.repository';
-import { LoginRequest } from '../../presentation/requests/login.request';
-import { LoginResponse } from '../../presentation/responses/login.response';
+import { AccountRepository } from 'domain/repositories/account.repository';
+import { LoginRequest } from 'presentation/requests/login.request';
+import { LoginResponse } from 'presentation/responses/login.response';
 
 @Injectable()
 export class AuthUseCaseImpl implements AuthUseCase {
   private readonly logger = new Logger(AuthUseCaseImpl.name);
 
   constructor(
-    @Inject(UserRepository) private readonly userRepository: UserRepository,
+    @Inject(AccountRepository) private readonly accountRepository: AccountRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async login(loginData: LoginRequest): Promise<LoginResponse> {
-    this.logger.log('Login user');
+    this.logger.log('Login account');
 
-    const user = await this.userRepository.findByUsername(loginData.username);
+    const account = await this.accountRepository.findByUsername(loginData.username);
 
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+    if (!account) {
+      throw new UnauthorizedException('Account not found');
     }
 
-    const passwordMatch = await compare(loginData.password, user.password);
+    const passwordMatch = await compare(loginData.password, account.password);
 
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    const uid = fakeUidUser(user.id);
-    const type = user.type;
+    const uid = fakeUidAccount(account.id);
+    const type = account.type;
     const payload: JwtFakePayloadData = {
-      userId: uid,
+      accountId: uid,
       type,
     };
 
@@ -44,16 +44,16 @@ export class AuthUseCaseImpl implements AuthUseCase {
     return { token, uid, type };
   }
 
-  async verifyPayload(userId: number): Promise<JwtPayloadData> {
-    const user = await this.userRepository.findOne(userId);
+  async verifyPayload(accountId: number): Promise<JwtPayloadData> {
+    const account = await this.accountRepository.findOne(accountId);
 
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+    if (!account) {
+      throw new UnauthorizedException('Account not found');
     }
 
     const payloadData: JwtPayloadData = {
-      userId: user.id,
-      type: user.type,
+      accountId: account.id,
+      type: account.type,
     };
 
     return payloadData;

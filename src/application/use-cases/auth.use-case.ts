@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { JwtFakePayloadData, JwtPayloadData } from '../../infrastructure//passport/strategies/jwt.strategy';
 import { LoginRequest } from '../../presentation/requests/login.request';
 import { LoginResponse } from '../../presentation/responses/login.response';
+=======
+import { JwtFakePayloadData, JwtPayloadData } from 'infrastructure/passport/strategies/jwt.strategy';
+import { LoginRequest } from 'presentation/requests/login.request';
+import { LoginResponse } from 'presentation/responses/login.response';
+>>>>>>> origin/develop
 
 export interface AuthUseCase {
   login(loginData: LoginRequest): Promise<LoginResponse>;
