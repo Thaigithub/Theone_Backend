@@ -6,7 +6,6 @@ export class Account extends BaseEntity implements Prisma.AccountUncheckedCreate
     super();
     this.username = username;
     this.password = password;
-    this.name = name;
     this.type = type;
     this.status = status;
   }
@@ -14,7 +13,6 @@ export class Account extends BaseEntity implements Prisma.AccountUncheckedCreate
   id?: number;
   username: string;
   password: string;
-  name: string;
   type: $Enums.AccountType;
   status: $Enums.AccountStatus;
   isActive?: boolean;
