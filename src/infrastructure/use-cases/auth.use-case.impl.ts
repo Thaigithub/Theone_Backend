@@ -68,9 +68,11 @@ export class AuthUseCaseImpl implements AuthUseCase {
   }
 
   async googleLogin(request: any): Promise<string> {
-      return "Hello"
+    console.log(Object.keys(request))
+    // const user = await this.userRepository.findByEmail(request.user.email);
+    return "Hello"
   }
   async kakaoLogin(request: any): Promise<string> {
     return "Hello"
-}
+  }
 }

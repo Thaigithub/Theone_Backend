@@ -1,8 +1,8 @@
 import { $Enums, Prisma } from '@prisma/client';
 import { BaseEntity } from './base.entity';
 
-export class User extends BaseEntity implements Prisma.UserUncheckedCreateInput {
-  constructor(username: string, password: string, name: string, type: $Enums.UserType, status: $Enums.UserStatus) {
+export class User extends BaseEntity implements Prisma.AccountUncheckedCreateInput {
+  constructor(username: string, password: string, name: string, type: $Enums.AccountType, status: $Enums.AccountStatus) {
     super();
     this.username = username;
     this.password = password;
@@ -15,10 +15,10 @@ export class User extends BaseEntity implements Prisma.UserUncheckedCreateInput 
   username: string;
   password: string;
   name: string;
-  type: $Enums.UserType;
-  status: $Enums.UserStatus;
+  type: $Enums.AccountType;
+  status: $Enums.AccountStatus;
   isActive?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
-  authenticationProviders?: Prisma.AuthenticationProviderUncheckedCreateNestedManyWithoutUserInput;
+  authenticationProviders?: Prisma.AuthenticationProviderUncheckedCreateNestedManyWithoutAccountInput;
 }

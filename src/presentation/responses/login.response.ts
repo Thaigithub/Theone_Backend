@@ -1,7 +1,7 @@
-import { UserType } from '@prisma/client';
+import { AccountType } from '@prisma/client';
 
 export class LoginResponse {
   token: string;
   uid: string;
-  type: UserType;
+  type: AccountType;
 }

@@ -6,4 +6,5 @@ import { BaseRepository } from './base.repository';
 export abstract class UserRepository extends BaseRepository<User> {
   abstract findByUsername(username: string): Promise<User>;
   abstract findOne(userId: number): Promise<User>;
+  abstract findByEmail(username: string): Promise<User>;
 }

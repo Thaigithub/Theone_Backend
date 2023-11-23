@@ -12,7 +12,7 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
   }
 
   async findByUsername(username: string): Promise<User> {
-    return await this.prismaService.user.findUnique({
+    return await this.prismaService.account.findUnique({
       where: {
         username,
       },
@@ -20,8 +20,15 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
   }
 
   async findOne(userId: number): Promise<User> {
-    return await this.prismaService.user.findUnique({
+    return await this.prismaService.account.findUnique({
       where: { id: userId },
+    });
+  }
+  async findByEmail(username: string): Promise<User> {
+    return await this.prismaService.account.findUnique({
+      where: {
+        username,
+      },
     });
   }
 }

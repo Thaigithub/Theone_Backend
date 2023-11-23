@@ -10,18 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserType {
-  SUPER_ADMIN
+enum AccountType {
   ADMIN
   COMPANY
   CUSTOMER
 }
 
-enum UserStatus {
+enum AccountStatus {
   PENDING
   APPROVED
   SUSPENDED
   WITHDRAWN
+}
+
+enum AdminLevel {
+  SUPERADMIN
+  GENERAL
 }
 
 enum AuthenticationProviderType {
@@ -32,20 +36,90 @@ enum AuthenticationProviderType {
   FACEBOOK
 }
 
-model User {
+model Account {
   id              Int     @id @default(autoincrement())
   username        String  @unique
-  password        String
+  password        String  
   name            String
-  type            UserType
-  status          UserStatus
-  isActive        Boolean @default(false)
+  type            AccountType
+  status          AccountStatus
+  admin           Admin?
+  member          Member?
+  company         Company?
+  isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   authenticationProviders AuthenticationProvider[]
 
-  @@map("users")
+  @@map("accounts")
+}
+
+model Admin {
+  id              Int     @id @default(autoincrement())
+  name            String
+  level           AdminLevel
+  accountId       Int     @unique @map("account_id")
+  account         Account @relation(fields: [accountId], references: [id])
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Member {
+  id              Int     @id @default(autoincrement())
+  name            String
+  accountId       Int     @unique @map("account_id")
+  account         Account @relation(fields: [accountId], references: [id])
+  leader          Team[]
+  teams           MembersOnTeams[]
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("members")
+}
+
+model Company {
+  id              Int     @id @default(autoincrement())
+  name            String
+  address         String
+  accountId       Int     @unique @map("account_id")
+  account         Account @relation(fields: [accountId], references: [id])
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("companies")
+}
+
+model Team {
+  id              Int     @id @default(autoincrement())
+  code            String
+  name            String
+  leaderId        Int     @map("leader_id")
+  leader          Member  @relation(fields: [leaderId], references: [id])
+  members         MembersOnTeams[]
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+model MembersOnTeams {
+  team            Team  @relation(fields: [teamId], references: [id])
+  teamId          Int @map("team_id")
+  member          Member @relation(fields: [memberId], references: [id])
+  memberId        Int @map("member_id")
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("members_on_teams")
+  @@id([memberId, teamId])
 }
 
 
@@ -53,12 +127,12 @@ model AuthenticationProvider {
   id              Int     @id @default(autoincrement())
   key             String
   type            AuthenticationProviderType
-  userId          Int @map("user_id")
+  accountId       Int @map("account_id")
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  user            User @relation(fields: [userId], references: [id])
+  account         Account @relation(fields: [accountId], references: [id])
 
   @@map("authentication_providers")
 }

@@ -1,4 +1,4 @@
-import { UserStatus, UserType } from '@prisma/client';
+import { AccountStatus, AccountType } from '@prisma/client';
 import { User } from '../../domain/entities/user.entity';
 import { GenUID } from 'common/utils/uid';
 import { DbType } from 'common/constant';
@@ -7,8 +7,8 @@ export class UserDTO {
   id: number;
   username: string;
   name: string;
-  type: UserType;
-  status: UserStatus;
+  type: AccountType;
+  status: AccountStatus;
   isActive: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -17,8 +17,8 @@ export class UserDTO {
     id: number,
     username: string,
     name: string,
-    type: UserType,
-    status: UserStatus,
+    type: AccountType,
+    status: AccountStatus,
     isActive: boolean,
     createdAt: Date | string,
     updatedAt: Date | string,
