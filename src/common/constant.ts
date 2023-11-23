@@ -1,3 +1,3 @@
 export const DbType = {
-  User: 1,
+  Account: 1,
 };

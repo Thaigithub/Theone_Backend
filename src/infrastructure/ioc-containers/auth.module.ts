@@ -5,7 +5,7 @@ import { JWT_SECRET_KEY } from 'app.config';
 import { PrismaModule } from './prisma.module';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { AuthController } from 'presentation/controllers/auth.controller';
-import { UserModule } from './user.module';
+import { AccountModule } from './account.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
 import { AuthUseCaseImpl } from 'infrastructure/use-cases/auth.use-case.impl';
 
@@ -18,7 +18,7 @@ import { AuthUseCaseImpl } from 'infrastructure/use-cases/auth.use-case.impl';
       verifyOptions: { algorithms: ['HS384'] },
     }),
     PrismaModule,
-    UserModule,
+    AccountModule,
   ],
   controllers: [AuthController],
   providers: [
