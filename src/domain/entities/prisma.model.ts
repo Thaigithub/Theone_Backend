@@ -4,6 +4,7 @@
 export enum PrismaModel {
   ACCOUNT = 'account',
   AUTHENTICATION_PROVIDER = 'authenticationProvider',
-  OTP_PROVIDER='otpProvider',
-  TEAM ='team'
+  TEAM ='team',
+  OTP_PROVIDER = 'otpProvider',
+  FILE = 'file',
 }

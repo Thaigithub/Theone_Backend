@@ -18,11 +18,4 @@ export abstract class UpsertAccountRequest {
   //   description: 'Password must be at least 8 characters long and contain both letters and numbers',
   // })
   password: string;
-
-  @Expose()
-  @IsNotEmpty()
-  // @IsString()
-  // @IsNotEmpty()
-  // @ApiProperty({ example: 'the name of an user' })
-  public name: string;
 }

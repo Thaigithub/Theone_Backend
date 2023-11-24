@@ -6,7 +6,6 @@ import { DbType } from 'common/constant';
 export class AccountDTO {
   id: number;
   username: string;
-  name: string;
   type: AccountType;
   status: AccountStatus;
   isActive: boolean;
@@ -16,7 +15,6 @@ export class AccountDTO {
   constructor(
     id: number,
     username: string,
-    name: string,
     type: AccountType,
     status: AccountStatus,
     isActive: boolean,
@@ -25,7 +23,6 @@ export class AccountDTO {
   ) {
     this.id = id;
     this.username = username;
-    this.name = name;
     this.type = type;
     this.status = status;
     this.isActive = isActive;
@@ -34,7 +31,7 @@ export class AccountDTO {
   }
 
   static from(domain: Account): AccountDTO {
-    return new AccountDTO(domain.id, domain.username, domain.name, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
+    return new AccountDTO(domain.id, domain.username, domain.type, domain.status, domain.isActive, domain.createdAt, domain.updatedAt);
   }
 }
 

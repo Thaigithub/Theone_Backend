@@ -25,6 +25,19 @@ model Account {
   @@map("accounts")
 }
 
+model OtpProvider {
+  id               Int       @id @default(autoincrement())
+  accountId       Int     @unique @map("account_id") 
+  account         Account @relation(fields: [accountId], references: [id])
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  phoneNumber      String? @unique @map("phone_number")
+  otpCode          String? @map("otp_code")
+
+  @@map("otp_providers")
+}
+
+
+
 model Admin {
   id        Int        @id @default(autoincrement())
   name      String
@@ -108,26 +121,18 @@ model AuthenticationProvider {
   @@map("authentication_providers")
 }
 
-model OtpProvider {
-  id          Int       @id @default(autoincrement())
-  accountId   Int       @unique @map("account_id")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  phoneNumber String?   @unique @map("phone_number")
-  otpCode     String?   @map("otp_code")
-  account     Account   @relation(fields: [accountId], references: [id])
 
-  @@map("otp_providers")
-}
+model File {
+  id            Int      @id @default(autoincrement())
+  type          FileType
+  key           String?
+  fileName      String?  @map("file_name")
+  size          BigInt
+  isDeactivated Boolean  @default(false) @map("is_deactivated")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-model files {
-  id             Int      @id @default(autoincrement())
-  type           FileType
-  key            String?
-  file_name      String?
-  size           BigInt
-  is_deactivated Boolean  @default(false)
-  created_at     DateTime @default(now())
-  updated_at     DateTime
+  @@map("files")
 }
 
 enum AccountType {
@@ -164,6 +169,7 @@ enum AuthenticationProviderType {
   FACEBOOK
 }
 
+
 enum MemberLevel {
   PLATINUM
   GOLD
@@ -184,3 +190,4 @@ enum FileType {
   EXCEL
   WORD
 }
+
