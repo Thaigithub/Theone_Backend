@@ -12,7 +12,7 @@ import { Roles, RolesGuard } from 'infrastructure/passport/guards/roles.guard';
 @ApiConsumes('application/json')
 export class CompanyController {
     constructor(@Inject (CompanyUseCase) private readonly companyUseCase: CompanyUseCase) {}
-    @Get('details')
+    @Get('/company/details')
     // @Roles(UserType.CUSTOMER)
     // @UseGuards(JWTAuthGuard, RolesGuard)
     @UseGuards(JWTAuthGuard)
