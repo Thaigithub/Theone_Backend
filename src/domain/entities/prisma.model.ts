@@ -3,5 +3,4 @@
 */
 export enum PrismaModel {
   ACCOUNT = 'account',
-  AUTHENTICATION_PROVIDER = 'authenticationProvider',
 }

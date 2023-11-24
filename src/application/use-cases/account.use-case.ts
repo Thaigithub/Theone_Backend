@@ -1,4 +1,4 @@
-import { UpsertAccountRequest } from '../../presentation/requests/upsert-account.request';
+import { UpsertAccountRequest } from 'presentation/requests/upsert-account.request';
 import { AccountDTO } from '../dtos/account.dto';
 
 export interface AccountUseCase {

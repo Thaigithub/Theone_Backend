@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -27,20 +27,23 @@ enum AdminLevel {
   SUPERADMIN
   GENERAL
 }
-
-enum AuthenticationProviderType {
-  KAKAO
-  NAVER
-  GOOGLE
-  APPLE
-  FACEBOOK
+enum CompanyType {
+  CORPORATION
+  INDIVIDUAL
+  OTHER
 }
+// enum AuthenticationProviderType {
+//   KAKAO
+//   NAVER
+//   GOOGLE
+//   APPLE
+//   FACEBOOK
+// }
 
 model Account {
   id              Int     @id @default(autoincrement())
   username        String  @unique
-  password        String  
-  name            String
+  password        String
   type            AccountType
   status          AccountStatus
   admin           Admin?
@@ -50,17 +53,16 @@ model Account {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  authenticationProviders AuthenticationProvider[]
+  // authenticationProviders AuthenticationProvider[]
 
   @@map("accounts")
 }
 
 model Admin {
-  id              Int     @id @default(autoincrement())
+  id              Int     @id @unique @map("account_id")
+  account         Account @relation(fields: [id], references: [id])
   name            String
   level           AdminLevel
-  accountId       Int     @unique @map("account_id")
-  account         Account @relation(fields: [accountId], references: [id])
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -69,10 +71,9 @@ model Admin {
 }
 
 model Member {
-  id              Int     @id @default(autoincrement())
+  id              Int     @id @unique @map("account_id")
+  account         Account @relation(fields: [id], references: [id])
   name            String
-  accountId       Int     @unique @map("account_id")
-  account         Account @relation(fields: [accountId], references: [id])
   leader          Team[]
   teams           MembersOnTeams[]
   isActive        Boolean @default(true)
@@ -82,16 +83,23 @@ model Member {
   @@map("members")
 }
 
-model Company {
-  id              Int     @id @default(autoincrement())
+model Company { 
+  id              Int     @id @unique @map("account_id")
+  account         Account @relation(fields: [id], references: [id])
   name            String
   address         String
-  accountId       Int     @unique @map("account_id")
-  account         Account @relation(fields: [accountId], references: [id])
+  estDate         DateTime @map("est_date")
+  businessRegNumber         String @unique @map("buss_reg_number")
+  corporateRegNumber        String @unique @map("corp_reg_number")
+  type            CompanyType
+  email           String @unique
+  phone           String
+  presentativeName          String @map("pres_name")
+  contactPhone    String @map("contact_phone")
+  contactName     String @map("contact_name")
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
-
   @@map("companies")
 }
 
@@ -123,16 +131,16 @@ model MembersOnTeams {
 }
 
 
-model AuthenticationProvider {
-  id              Int     @id @default(autoincrement())
-  key             String
-  type            AuthenticationProviderType
-  accountId       Int @map("account_id")
-  isActive        Boolean @default(true)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+// model AuthenticationProvider {
+//   id              Int     @id @default(autoincrement())
+//   key             String
+//   type            AuthenticationProviderType
+//   accountId       Int @map("account_id")
+//   isActive        Boolean @default(true)
+//   createdAt       DateTime @default(now()) @map("created_at")
+//   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  account         Account @relation(fields: [accountId], references: [id])
+//   account         Account @relation(fields: [accountId], references: [id])
 
-  @@map("authentication_providers")
-}
+//   @@map("authentication_providers")
+// }

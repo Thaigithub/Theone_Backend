@@ -5,9 +5,8 @@ import { UpsertAccountRequest } from '../requests/upsert-account.request';
 import { BaseResponse } from '../responses/base.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 import { GetAccountResponse } from 'presentation/responses/get-account.response';
-// import { Roles, RolesGuard } from 'application/passport/guards/roles.guard';
-// import { UserType } from '@prisma/client';
-
+import { Roles, RolesGuard } from 'infrastructure/passport/guards/roles.guard';
+import { AccountType } from '@prisma/client'
 @ApiTags('Accounts')
 @Controller('accounts')
 @ApiProduces('application/json')
@@ -16,8 +15,8 @@ export class AccountController {
   constructor(@Inject(AccountUseCase) private readonly accountUseCase: AccountUseCase) {}
 
   @Get()
-  // @Roles(UserType.CUSTOMER)
-  // @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(AccountType.CUSTOMER)
+  @UseGuards(JWTAuthGuard, RolesGuard)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Find accounts',
