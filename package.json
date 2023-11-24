@@ -18,8 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "NODE_ENV=development node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "dbcreate":"dotenv -e .env.development -- npx prisma migrate dev",
-    "dbwatch":"dotenv -e .env.development -- npx prisma studio"
+    "prisma:create":"dotenv -e .env.development -- npx prisma migrate dev",
+    "prisma:pull": "dotenv -e .env.development -- npx prisma db pull",
+    "prisma:push": "dotenv -e .env.development -- npx prisma db push",
+    "prisma:studio": "dotenv -e .env.development -- npx prisma studio"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.9.1",
@@ -31,6 +33,7 @@
     "@nestjs/swagger": "^7.1.12",
     "@prisma/client": "^5.6.0",
     "axios": "^1.6.2",
+    "aws-sdk": "^2.1502.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "bs58": "^5.0.0",
@@ -39,6 +42,7 @@
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
+    "coolsms-node-sdk": "^2.0.1",
     "dotenv": "^16.3.1",
     "envalid": "^8.0.0",
     "express-rate-limit": "^7.0.2",
@@ -52,7 +56,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

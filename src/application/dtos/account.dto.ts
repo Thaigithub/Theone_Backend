@@ -6,7 +6,6 @@ import { DbType } from 'common/constant';
 export class AccountDTO {
   id: number;
   username: string;
-  name: string;
   type: AccountType;
   status: AccountStatus;
   isActive: boolean;

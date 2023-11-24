@@ -9,8 +9,4 @@ export abstract class UpsertAccountRequest {
   @Expose()
   @IsNotEmpty()
   password: string;
-
-  @Expose()
-  @IsNotEmpty()
-  public name: string;
 }

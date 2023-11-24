@@ -9,6 +9,11 @@ import { JWT_SECRET_KEY } from 'app.config';
 import { AccountModule } from './account.module';
 import { CompanyModule } from './company.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
+import { OtpProviderModule } from './otp-provider.module';
+import { OtpProviderRepositoryImpl } from 'infrastructure/repositories/otp-provider.repository.impl';
+import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
+import { OtpModule } from './sms.module';
+import { OtpService } from 'infrastructure/services/sms.service';
 
 @Module({
   imports: [
@@ -21,7 +26,9 @@ import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
     }),
     PrismaModule,
     AccountModule,
-    CompanyModule
+    CompanyModule,
+    OtpProviderModule,
+    OtpModule
   ],
   controllers: [AuthController],
   providers: [
@@ -29,7 +36,12 @@ import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
       provide: AuthUseCase,
       useClass: AuthUseCaseImpl,
     },
+    {
+      provide: OtpProviderRepository,
+      useClass: OtpProviderRepositoryImpl,
+    },
     JwtStrategy,
+    OtpService,
   ],
   exports: [AuthUseCase],
 })
