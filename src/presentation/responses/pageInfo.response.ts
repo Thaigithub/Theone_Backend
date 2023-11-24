@@ -1,8 +1,4 @@
 export class PageInfo {
-  pageSize: number;
-  next: number;
-  pageNumber: number;
-  prev: number;
   total: number;
 }
 

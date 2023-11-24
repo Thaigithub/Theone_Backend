@@ -4,23 +4,23 @@ import { TeamDTO } from 'application/dtos/team.dto';
 import { TeamUseCase } from 'application/use-cases/team.use-case';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
 import { BaseResponse } from 'presentation/responses/base.response';
+import { Pagination } from 'presentation/responses/pageInfo.response';
 
 @ApiTags('AdminTeamManagementController')
 @Controller('admin/teams')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
-export class AdminTeamManagementController {
+export class AdminTeamController {
   constructor(@Inject(TeamUseCase) private readonly teamUseCase: TeamUseCase) {}
-  
 
   @Post()
   @ApiOperation({
-    summary: 'Create account',
-    description: 'This endpoint creates a account in the system',
+    summary: 'Search teams with filter and pagination',
+    description: 'This endpoint list of teams with given filter',
   })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed' })
-  async searchTeamFilter(@Body() request:TeamSearchRequest ): Promise<any> {
-    return request;
+  @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams returned' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
+  async searchTeamFilter(@Body() request: TeamSearchRequest): Promise<BaseResponse<Pagination<TeamDTO>>> {
+    return BaseResponse.of(await this.teamUseCase.searchTeams(request));
   }
 }

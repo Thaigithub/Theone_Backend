@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma.module';
-import { AdminTeamManagementController } from 'presentation/controllers/admin/team-management.controller';
 import { TeamRepository } from 'domain/repositories/team.repository';
 import { TeamRepositoryImpl } from 'infrastructure/repositories/team.repository.impl';
 import { TeamUseCase } from 'application/use-cases/team.use-case';
 import { TeamUseCaseImpl } from 'infrastructure/use-cases/teams.use-case.impl';
+import { AdminTeamController } from 'presentation/controllers/admin/admin-team.controller';
 
 @Module({
   imports: [PrismaModule],
-  controllers: [AdminTeamManagementController],
+  controllers: [AdminTeamController],
   providers: [
     {
       provide: TeamUseCase,
@@ -19,6 +19,6 @@ import { TeamUseCaseImpl } from 'infrastructure/use-cases/teams.use-case.impl';
       useClass: TeamRepositoryImpl,
     },
   ],
-  exports: [],
+  exports: [TeamUseCase],
 })
-export class AdminModule {}
+export class AdminTeamModule {}
