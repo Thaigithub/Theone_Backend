@@ -15,7 +15,7 @@ export class AccountController {
   constructor(@Inject(AccountUseCase) private readonly accountUseCase: AccountUseCase) {}
 
   @Get()
-  @Roles(AccountType.CUSTOMER)
+  @Roles(AccountType.MEMBER)
   @UseGuards(JWTAuthGuard, RolesGuard)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({

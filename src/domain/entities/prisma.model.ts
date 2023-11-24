@@ -3,10 +3,6 @@
 */
 export enum PrismaModel {
   ACCOUNT = 'account',
-<<<<<<< HEAD
-=======
-  AUTHENTICATION_PROVIDER = 'authenticationProvider',
   OTP_PROVIDER = 'otpProvider',
   FILE = 'file',
->>>>>>> origin/develop
 }

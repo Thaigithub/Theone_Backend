@@ -13,7 +13,7 @@ datasource db {
 enum AccountType {
   ADMIN
   COMPANY
-  CUSTOMER
+  MEMBER
 }
 
 enum AccountStatus {
@@ -129,18 +129,3 @@ model MembersOnTeams {
   @@map("members_on_teams")
   @@id([memberId, teamId])
 }
-
-
-// model AuthenticationProvider {
-//   id              Int     @id @default(autoincrement())
-//   key             String
-//   type            AuthenticationProviderType
-//   accountId       Int @map("account_id")
-//   isActive        Boolean @default(true)
-//   createdAt       DateTime @default(now()) @map("created_at")
-//   updatedAt       DateTime @updatedAt @map("updated_at")
-
-//   account         Account @relation(fields: [accountId], references: [id])
-
-//   @@map("authentication_providers")
-// }
