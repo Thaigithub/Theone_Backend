@@ -1,35 +1,42 @@
-import { AccountStatus } from '@prisma/client';
-import { Expose } from 'class-transformer';
-import { IsEnum, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import { $Enums, AccountStatus } from '@prisma/client';
+import { Expose, Transform } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export enum SearchCategory {
+  id = 'id',
+  name = 'name'
+}
 
 export class AdminMemberRequest {
-  @Expose()
-  @IsNumber()
-  @IsOptional()
-  public page: number;
-
   @Expose()
   @IsEnum(AccountStatus)
   @IsOptional()
   public status: AccountStatus;
 
   @Expose()
-  @IsString()
+  @IsEnum($Enums.MemberLevel)
   @IsOptional()
-  public rating: string;
+  public level: $Enums.MemberLevel;
+
+  @Expose()
+  @IsEnum(SearchCategory)
+  @IsOptional()
+  public searchCategory: SearchCategory;
 
   @Expose()
   @IsString()
-  @IsIn(['id', 'name'])
   @IsOptional()
-  public searchCategory: string;
+  public searchKeyword: string;
 
   @Expose()
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  public keyword: string;
-}
+  @Transform(({ value }) => value !== undefined ?  parseInt(value) : undefined)
+  public pageSize: number;
 
-export class ChangePasswordRequest {
-  
+  @Expose()
+  @IsNumber()
+  @IsOptional()
+  @Transform(({ value }) => value !== undefined ?  parseInt(value) : undefined)
+  public pageNumber: number
 }
