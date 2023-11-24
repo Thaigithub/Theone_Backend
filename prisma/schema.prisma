@@ -8,22 +8,37 @@ datasource db {
 }
 
 model Account {
-  id                      Int                      @id @default(autoincrement())
-  username                String                   @unique
-  password                String
-  type                    AccountType
-  status                  AccountStatus
-  isActive                Boolean                  @default(true)
-  createdAt               DateTime                 @default(now()) @map("created_at")
-  updatedAt               DateTime                 @updatedAt @map("updated_at")
-  admin                   Admin?
+  id              Int     @id @default(autoincrement())
+  username        String  @unique
+  password        String  
+  name            String
+  type            AccountType
+  status          AccountStatus
+  admin           Admin?
+  member          Member?
+  company         Company?
+  otp             OtpProvider?  
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
   authenticationProviders AuthenticationProvider[]
-  company                 Company?
-  member                  Member?
-  otp_providers           otp_providers?
 
   @@map("accounts")
 }
+
+model OtpProvider {
+  id               Int       @id @default(autoincrement())
+  accountId       Int     @unique @map("account_id") 
+  account         Account @relation(fields: [accountId], references: [id])
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  phoneNumber      String? @unique @map("phone_number")
+  otpCode          String? @map("otp_code")
+
+  @@map("otp_providers")
+}
+
+
 
 model Admin {
   id        Int        @id @default(autoincrement())
@@ -107,15 +122,6 @@ model AuthenticationProvider {
   @@map("authentication_providers")
 }
 
-model otp_providers {
-  id           Int       @id @default(autoincrement())
-  account_id   Int       @unique
-  updated_at   DateTime?
-  phone_number String?   @unique
-  otp_code     String?
-  accounts     Account   @relation(fields: [account_id], references: [id])
-}
-
 model File {
   id            Int      @id @default(autoincrement())
   type          FileType
@@ -155,6 +161,7 @@ enum AuthenticationProviderType {
   FACEBOOK
 }
 
+
 enum MemberLevel {
   PLATINUM
   GOLD
@@ -173,3 +180,4 @@ enum FileType {
   EXCEL
   WORD
 }
+

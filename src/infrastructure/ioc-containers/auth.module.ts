@@ -8,6 +8,11 @@ import { AuthController } from 'presentation/controllers/auth.controller';
 import { AccountModule } from './account.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
 import { AuthUseCaseImpl } from 'infrastructure/use-cases/auth.use-case.impl';
+import { OtpProviderModule } from './otp-provider.module';
+import { OtpProviderRepositoryImpl } from 'infrastructure/repositories/otp-provider.repository.impl';
+import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
+import { OtpModule } from './sms.module';
+import { OtpService } from 'infrastructure/services/sms.service';
 
 @Module({
   imports: [
@@ -19,6 +24,8 @@ import { AuthUseCaseImpl } from 'infrastructure/use-cases/auth.use-case.impl';
     }),
     PrismaModule,
     AccountModule,
+    OtpProviderModule,
+    OtpModule
   ],
   controllers: [AuthController],
   providers: [
@@ -26,7 +33,12 @@ import { AuthUseCaseImpl } from 'infrastructure/use-cases/auth.use-case.impl';
       provide: AuthUseCase,
       useClass: AuthUseCaseImpl,
     },
+    {
+      provide: OtpProviderRepository,
+      useClass: OtpProviderRepositoryImpl,
+    },
     JwtStrategy,
+    OtpService,
   ],
   exports: [AuthUseCase],
 })
