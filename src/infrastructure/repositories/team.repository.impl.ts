@@ -5,16 +5,13 @@ import { TeamRepository } from 'domain/repositories/team.repository';
 import { PrismaService } from 'infrastructure/services/prisma.service';
 import { PrismaModel } from 'domain/entities/prisma.model';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
-import { TeamDTO } from 'application/dtos/team.dto';
 import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from 'domain/enums/team-search';
-import { PageInfo, Pagination } from 'presentation/responses/pageInfo.response';
-
 @Injectable()
-export class TeamRepositoryImpl extends BaseRepositoryImpl<Team> implements TeamRepository {
+export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamRepository {
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.TEAM);
   }
-  async searchTeamFilter(request: TeamSearchRequest): Promise<Pagination<TeamDTO>> {
+  async searchTeamFilter(request: TeamSearchRequest): Promise<any> {
     const { keyWord, pageNumber, pageSize, searchCategory, sortOptions, teamStatus } = request;
     const where: Prisma.TeamWhereInput = {};
     if (teamStatus !== TeamStatusForSearch.DEFAULT) {
@@ -38,10 +35,10 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<Team> implements Team
         }
       } else {
         where.OR = [
-            { code: { contains: unifiedKeyword } },
-            { name: { contains: unifiedKeyword } },
-            { leader: { name: { contains: unifiedKeyword } } }
-          ];
+          { code: { contains: unifiedKeyword } },
+          { name: { contains: unifiedKeyword } },
+          { leader: { name: { contains: unifiedKeyword } } },
+        ];
       }
     }
 
@@ -67,20 +64,7 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<Team> implements Team
         leader: true,
       },
     });
-
-    const teamsDto = teams.map(team => {
-      const teamSize = team.members.length;
-      const leaderName = team.leader.name;
-      const leaderContact = team.leader.contact;
-      return TeamDTO.from(team, leaderName, leaderContact, teamSize);
-    });
-    const pageInfo: PageInfo = {
-      total: teams.length,
-    };
-    const result: Pagination<TeamDTO> = {
-      data: teamsDto,
-      pageInfo: pageInfo,
-    };
-    return result;
+    
+    return teams;
   }
 }

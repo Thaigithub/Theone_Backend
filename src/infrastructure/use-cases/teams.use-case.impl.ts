@@ -8,8 +8,17 @@ import { Pagination } from 'presentation/responses/pageInfo.response';
 @Injectable()
 export class TeamUseCaseImpl implements TeamUseCase {
   constructor(@Inject(TeamRepository) private readonly teamRepository: TeamRepository) {}
-    searchTeams(request: TeamSearchRequest): Promise<Pagination<TeamDTO>> {
-        return this.teamRepository.searchTeamFilter(request)
-    }
-
+  async searchTeams(request: TeamSearchRequest): Promise<Pagination<TeamDTO>> {
+    const teams = await this.teamRepository.searchTeamFilter(request);
+    const teamsDto = teams.map(team => {
+      const teamSize = team.me;
+      const leaderName = team.leader.name;
+      const leaderContact = team.leader.contact;
+      return TeamDTO.from(team, leaderName, leaderContact, teamSize);
+    });
+    return {
+      data: teamsDto,
+      pageInfo: { total: teams.length }
+    };
+  }
 }
