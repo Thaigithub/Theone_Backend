@@ -6,8 +6,10 @@ import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 import { GetCompanyDetailsResponse, GetCompanySearchResponse } from 'presentation/responses/admin-company.response';
 import { CompanySearchRequest, CompanyStatusChangeRequest, CompanyDownloadRequest } from 'presentation/requests/admin-company.request';
 import { Response } from 'express'
-@ApiTags('Companies')
-@Controller('companies')
+
+
+@ApiTags('Admin Companies')
+@Controller('/admin/companies')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminCompanyController {
