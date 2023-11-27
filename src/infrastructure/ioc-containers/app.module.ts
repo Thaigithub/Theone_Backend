@@ -5,12 +5,6 @@ import { AuthModule } from './auth.module';
 import { AdminMemberModule } from './admin-member.module';
 import { AdminCompanyModule } from './admin-company.module';
 @Module({
-  imports: [
-    PrismaModule,
-    AccountModule,
-    AuthModule,
-    AdminMemberModule,
-    AdminCompanyModule,
-  ],
+  imports: [PrismaModule, AccountModule, AuthModule, AdminMemberModule, AdminCompanyModule],
 })
 export class AppModule {}

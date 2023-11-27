@@ -15,8 +15,8 @@ import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
     },
     {
       provide: CompanyUseCase,
-      useClass: CompanyUseCaseImpl
-    }
+      useClass: CompanyUseCaseImpl,
+    },
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })

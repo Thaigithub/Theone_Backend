@@ -14,51 +14,55 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
   async findByEmail(email: string): Promise<Company> {
     return await this.prismaService.company.findUnique({
       where: {
-        email
+        email,
       },
     });
   }
   async findOne(id: number): Promise<Company> {
     return await this.prismaService.company.findUnique({
       where: {
-        id
+        id,
       },
-      include:{
-        account: true
-      }
+      include: {
+        account: true,
+      },
     });
   }
   async findRequest(request: CompanySearchRequest): Promise<Company[]> {
     const query = {
-      'take': parseInt(request.pagesize),
-    }
+      take: parseInt(request.pagesize),
+    };
     if (request.pagenumber) {
-      query['skip'] = parseInt(request.pagenumber)*query['take']
+      query['skip'] = parseInt(request.pagenumber) * query['take'];
     }
-    ['pagenumber','pagesize'].forEach(key=>delete request[key])
+    ['pagenumber', 'pagesize'].forEach(key => delete request[key]);
 
-    query['where'] = Object.keys(request).map(key=> {
-        if (request[key]!==undefined) return {[key]:request[key]}
+    query['where'] = Object.keys(request)
+      .map(key => {
+        if (request[key] !== undefined) return { [key]: request[key] };
       })
-      .filter(value=>value!==undefined)
-      .reduce((acc, object)=>{
-        const key = Object.keys(object)[0]
-        if (key==='status') {
+      .filter(value => value !== undefined)
+      .reduce((acc, object) => {
+        const key = Object.keys(object)[0];
+        if (key === 'status') {
           switch (object[key]) {
-            case "SUSPENDED": object[key]=$Enums.AccountStatus.SUSPENDED
-            case "WITHDRAWN": object[key]=$Enums.AccountStatus.WITHDRAWN
-            default: object[key]=$Enums.AccountStatus.APPROVED
+            case 'SUSPENDED':
+              object[key] = $Enums.AccountStatus.SUSPENDED;
+            case 'WITHDRAWN':
+              object[key] = $Enums.AccountStatus.WITHDRAWN;
+            default:
+              object[key] = $Enums.AccountStatus.APPROVED;
           }
-          acc['account'] = {[key]:object[key]}
-          return acc
+          acc['account'] = { [key]: object[key] };
+          return acc;
         }
-        if (key==='id') object[key]=parseInt(object[key])
-        acc[key] = object[key]
-        return acc
-      },{})
-    return await this.prismaService.company.findMany(query)
+        if (key === 'id') object[key] = parseInt(object[key]);
+        acc[key] = object[key];
+        return acc;
+      }, {});
+    return await this.prismaService.company.findMany(query);
   }
-  async updateStatus(companyId: number, status: $Enums.AccountStatus):Promise<void>{
-    await this.prismaService.account.update({where:{id:companyId},data:{status:status}})
+  async updateStatus(companyId: number, status: $Enums.AccountStatus): Promise<void> {
+    await this.prismaService.account.update({ where: { id: companyId }, data: { status: status } });
   }
 }

@@ -8,12 +8,12 @@ export interface AuthUseCase {
   login(loginData: LoginRequest): Promise<LoginResponse>;
   verifyPayload(userId: number): Promise<JwtPayloadData>;
   signToken(payloadData: JwtFakePayloadData): string;
-  googleLogin(request:any): Promise<LoginResponse>;
-  appleLogin(request:any): Promise<LoginResponse>;
-  kakaoLogin(request:any): Promise<LoginResponse>;
-  naverLogin(request:any): Promise<LoginResponse>;
-  sendOtp(otpRequest:UserIdSmsRequest|PasswordSmsRequest,isPasswordRequest:boolean):Promise<boolean>;
-  verifyOtp(otpCode:OtpVerificationRequest,isPasswordRequest:boolean):Promise<UserIdSmsResponse|PasswordSmsResponse>;
+  googleLogin(request: any): Promise<LoginResponse>;
+  appleLogin(request: any): Promise<LoginResponse>;
+  kakaoLogin(request: any): Promise<LoginResponse>;
+  naverLogin(request: any): Promise<LoginResponse>;
+  sendOtp(otpRequest: UserIdSmsRequest | PasswordSmsRequest, isPasswordRequest: boolean): Promise<boolean>;
+  verifyOtp(otpCode: OtpVerificationRequest, isPasswordRequest: boolean): Promise<UserIdSmsResponse | PasswordSmsResponse>;
 }
 
 export const AuthUseCase = Symbol('AuthUseCase');

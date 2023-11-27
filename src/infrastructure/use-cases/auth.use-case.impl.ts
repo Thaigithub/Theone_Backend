@@ -13,16 +13,16 @@ import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, APPLE_OAUTH_RESTAPI, KAKAO_VERI
 import { JwksClient } from 'jwks-rsa';
 import Axios from 'axios';
 import { CompanyDTO } from 'application/dtos/company.dto';
-import { hash } from 'bcrypt'
+import { hash } from 'bcrypt';
 import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
 import { OTPGenerator } from 'common/utils/otp-generator';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
 import { OtpService } from 'infrastructure/services/sms.service';
-const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 const appleclient = new JwksClient({
-  jwksUri: APPLE_OAUTH_RESTAPI
-})
+  jwksUri: APPLE_OAUTH_RESTAPI,
+});
 
 @Injectable()
 export class AuthUseCaseImpl implements AuthUseCase {
@@ -125,82 +125,79 @@ export class AuthUseCaseImpl implements AuthUseCase {
     };
     return this.jwtService.sign(payload);
   }
-  
+
   async googleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
-    try{
-      const payload = (await googleclient.verifyIdToken({
-        idToken: request.idToken,
-        audience: GOOGLE_CLIENT_ID,
-      })).getPayload();
-      var profile = null
+    try {
+      const payload = (
+        await googleclient.verifyIdToken({
+          idToken: request.idToken,
+          audience: GOOGLE_CLIENT_ID,
+        })
+      ).getPayload();
+      var profile = null;
       if (request.member) {
         // const account = await this.memberRepository.findByUsername(loginData.username);
-      }
-      else {
+      } else {
         profile = await this.companyRepository.findByEmail(payload.email);
       }
-      return this.loginSignupSocialFlow(profile)
-    }
-    catch (error) {
-      console.log(error)
+      return this.loginSignupSocialFlow(profile);
+    } catch (error) {
+      console.log(error);
     }
   }
 
   async appleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
-    const json = this.jwtService.decode(request.idToken, {complete: true})
-    const kid = json.header.kid
-    const applekey = (await appleclient.getSigningKey(kid)).getPublicKey()
-    const payload = await this.jwtService.verify(applekey,json)
-    var profile = null
+    const json = this.jwtService.decode(request.idToken, { complete: true });
+    const kid = json.header.kid;
+    const applekey = (await appleclient.getSigningKey(kid)).getPublicKey();
+    const payload = await this.jwtService.verify(applekey, json);
+    var profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
-    }
-    else {
+    } else {
       profile = await this.companyRepository.findByEmail(payload.email);
     }
-    return this.loginSignupSocialFlow(profile)
+    return this.loginSignupSocialFlow(profile);
   }
 
   async kakaoLogin(request: SocialLoginRequest): Promise<LoginResponse> {
-    const payload = await (Axios.post(KAKAO_VERIFY_URL, {
+    const payload = await Axios.post(KAKAO_VERIFY_URL, {
       headers: {
-        "Authorization": `Bearer ${request.idToken}`,
-        "Content-Type": "application/json; charset=utf-8"
-      }
-    }).then(response => response.data))['kakao_account']
-    var profile = null
+        Authorization: `Bearer ${request.idToken}`,
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+    }).then(response => response.data)['kakao_account'];
+    var profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
-    }
-    else {
+    } else {
       profile = await this.companyRepository.findByEmail(payload.email);
     }
-    return this.loginSignupSocialFlow(profile)
+    return this.loginSignupSocialFlow(profile);
   }
 
   async naverLogin(request: SocialLoginRequest): Promise<LoginResponse> {
-    const payload = await (Axios.post(NAVER_VERIFY_URL, {
+    const payload = await Axios.post(NAVER_VERIFY_URL, {
       headers: {
-        "Authorization": `Bearer ${request.idToken}`,
-        "Content-Type": "application/json; charset=utf-8"
-      }
-    }).then(response => response.data))['reponse']
-    var profile = null
+        Authorization: `Bearer ${request.idToken}`,
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+    }).then(response => response.data)['reponse'];
+    var profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
-    }
-    else {
+    } else {
       profile = await this.companyRepository.findByEmail(payload.email);
     }
-    return this.loginSignupSocialFlow(profile)
+    return this.loginSignupSocialFlow(profile);
   }
 
-  async loginSignupSocialFlow(profile:CompanyDTO):Promise<LoginResponse> {
-    const uid = fakeUidAccount(profile.id)
-    const type = (await this.accountRepository.findOne(profile.id)).type
+  async loginSignupSocialFlow(profile: CompanyDTO): Promise<LoginResponse> {
+    const uid = fakeUidAccount(profile.id);
+    const type = (await this.accountRepository.findOne(profile.id)).type;
     const payload: JwtFakePayloadData = {
       accountId: uid,
-      type: type
+      type: type,
     };
 
     const token = this.signToken(payload);

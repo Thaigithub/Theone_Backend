@@ -4,7 +4,7 @@ import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { BaseResponse } from '../responses/base.response';
 import { LoginRequest, SocialLoginRequest } from '../requests/login.request';
 import { LoginResponse } from '../responses/login.response';
-import {  OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
+import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
 
 @ApiTags('Auth')
