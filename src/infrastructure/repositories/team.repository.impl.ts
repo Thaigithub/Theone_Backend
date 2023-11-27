@@ -17,8 +17,8 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamR
     if (teamStatus !== TeamStatusForSearch.DEFAULT) {
       where.status = teamStatus as TeamStatus;
     }
-    const unifiedKeyword = keyWord.toLowerCase();
     if (keyWord) {
+      const unifiedKeyword = keyWord.toLowerCase();
       if (searchCategory !== SearchCategoryForSearch.DEFAULT) {
         switch (searchCategory) {
           case SearchCategoryForSearch.TEAM_CODE:
@@ -51,7 +51,7 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamR
         orderBy = { members: { _count: 'asc' } };
         break;
       default:
-        orderBy = { createdAt: 'asc' }; // Default sorting
+        orderBy = { createdAt: 'asc' };
         break;
     }
     const teams = await this.prismaService.team.findMany({
