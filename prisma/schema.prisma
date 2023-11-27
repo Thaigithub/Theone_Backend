@@ -26,17 +26,15 @@ model Account {
 }
 
 model OtpProvider {
-  id               Int       @id @default(autoincrement())
-  accountId       Int     @unique @map("account_id") 
-  account         Account @relation(fields: [accountId], references: [id])
-  updatedAt   DateTime?   @updatedAt @map("updated_at")
-  phoneNumber      String? @unique @map("phone_number")
-  otpCode          String? @map("otp_code")
+  id          Int       @id @default(autoincrement())
+  accountId   Int       @unique @map("account_id")
+  account     Account   @relation(fields: [accountId], references: [id])
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  phoneNumber String?   @unique @map("phone_number")
+  otpCode     String?   @map("otp_code")
 
   @@map("otp_providers")
 }
-
-
 
 model Admin {
   id        Int        @id @default(autoincrement())
@@ -121,7 +119,6 @@ model AuthenticationProvider {
   @@map("authentication_providers")
 }
 
-
 model File {
   id            Int      @id @default(autoincrement())
   type          FileType
@@ -169,7 +166,6 @@ enum AuthenticationProviderType {
   FACEBOOK
 }
 
-
 enum MemberLevel {
   PLATINUM
   GOLD
@@ -177,8 +173,6 @@ enum MemberLevel {
   TWO
   THREE
 }
-
-
 
 enum FileType {
   PDF
@@ -190,4 +184,3 @@ enum FileType {
   EXCEL
   WORD
 }
-

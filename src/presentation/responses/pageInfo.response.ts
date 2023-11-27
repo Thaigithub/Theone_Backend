@@ -3,6 +3,6 @@ export class PageInfo {
 }
 
 export class Pagination<T>{
-    data:  T[];
-    pageInfo:PageInfo;
+  data: T[];
+  pageInfo: PageInfo;
 }

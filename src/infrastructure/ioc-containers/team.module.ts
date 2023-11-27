@@ -21,4 +21,4 @@ import { AdminTeamController } from 'presentation/controllers/admin/admin-team.c
   ],
   exports: [TeamUseCase],
 })
-export class TeamModule {}
+export class TeamModule { }

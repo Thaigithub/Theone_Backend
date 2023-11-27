@@ -11,7 +11,7 @@ import { Pagination } from 'presentation/responses/pageInfo.response';
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminTeamController {
-  constructor(@Inject(TeamUseCase) private readonly teamUseCase: TeamUseCase) {}
+  constructor(@Inject(TeamUseCase) private readonly teamUseCase: TeamUseCase) { }
 
   @Post()
   @ApiOperation({

@@ -8,7 +8,7 @@ import { Pagination } from 'presentation/responses/pageInfo.response';
 
 @Injectable()
 export class TeamUseCaseImpl implements TeamUseCase {
-  constructor(@Inject(TeamRepository) private readonly teamRepository: TeamRepository) {}
+  constructor(@Inject(TeamRepository) private readonly teamRepository: TeamRepository) { }
   async searchTeams(request: TeamSearchRequest): Promise<Pagination<TeamDTO>> {
     const teams = await this.teamRepository.searchTeamFilter(request);
     const teamsDto = teams.map(team => {
@@ -20,7 +20,7 @@ export class TeamUseCaseImpl implements TeamUseCase {
     PaginationValidationService.validate(teamsDto, request.pageNumber, request.pageSize);
     const startIndex = (request.pageNumber - 1) * request.pageSize;
     const endIndex = startIndex + request.pageSize;
-    const paginatedItems = teamsDto.slice(startIndex, endIndex);  
+    const paginatedItems = teamsDto.slice(startIndex, endIndex);
     return {
       data: paginatedItems,
       pageInfo: { total: teams.length },

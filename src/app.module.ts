@@ -6,8 +6,8 @@ import { AdminMemberModule } from 'infrastructure/ioc-containers/admin-member.mo
 import { TeamModule } from 'infrastructure/ioc-containers/team.module';
 
 @Module({
-  imports: [PrismaModule, AccountModule, AuthModule, AdminMemberModule,TeamModule],
+  imports: [PrismaModule, AccountModule, AuthModule, AdminMemberModule, TeamModule],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
