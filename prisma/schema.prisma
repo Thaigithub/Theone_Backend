@@ -20,49 +20,56 @@ model Account {
   authenticationProviders AuthenticationProvider[]
   company                 Company?
   member                  Member?
-  otp                     OtpProvider?
+  otp_providers           OtpProvider?
 
   @@map("accounts")
 }
 
 model OtpProvider {
-  id               Int       @id @default(autoincrement())
-  accountId       Int     @unique @map("account_id") 
-  account         Account @relation(fields: [accountId], references: [id])
-  updatedAt   DateTime?   @updatedAt @map("updated_at")
-  phoneNumber      String? @unique @map("phone_number")
-  otpCode          String? @map("otp_code")
+  id         Int       @id @default(autoincrement())
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+  otpCode    String?   @map("otp_code")
+  account_id Int       @unique
+  accounts   Account   @relation(fields: [account_id], references: [id])
 
   @@map("otp_providers")
 }
 
-
-
 model Admin {
-  id        Int        @id @default(autoincrement())
-  name      String
-  level     AdminLevel
-  accountId Int        @unique @map("account_id")
-  isActive  Boolean    @default(true)
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  account   Account    @relation(fields: [accountId], references: [id])
+  id          Int           @id @default(autoincrement())
+  name        String
+  level       AdminLevel
+  accountId   Int           @unique @map("account_id")
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  account     Account       @relation(fields: [accountId], references: [id])
+  permissions permissions[]
 
   @@map("admins")
 }
 
 model Member {
-  id        Int              @id @default(autoincrement())
-  name      String
-  accountId Int              @unique @map("account_id")
-  isActive  Boolean          @default(true)
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  contact   String
-  level     MemberLevel
-  account   Account          @relation(fields: [accountId], references: [id])
-  teams     MembersOnTeams[]
-  leader    Team[]
+  id                 Int              @id @default(autoincrement())
+  name               String
+  accountId          Int              @unique @map("account_id")
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  contact            String
+  level              MemberLevel
+  disabled           DisabledType
+  withdrawDate       DateTime?        @db.Date
+  bankName           String?
+  accountNumber      String?
+  authenticationDate DateTime?        @db.Date
+  registrationNumber String?
+  serialNumber       String?
+  dateOfIssue        DateTime?        @db.Date
+  Certificate        Certificate[]
+  account            Account          @relation(fields: [accountId], references: [id])
+  teams              MembersOnTeams[]
+  leader             Team[]
 
   @@map("members")
 }
@@ -75,6 +82,7 @@ model Company {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  email     String?
   account   Account  @relation(fields: [accountId], references: [id])
 
   @@map("companies")
@@ -84,11 +92,11 @@ model Team {
   id        Int              @id @default(autoincrement())
   code      String
   name      String
-  status    TeamStatus
   leaderId  Int              @map("leader_id")
   isActive  Boolean          @default(true)
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
+  status    TeamStatus
   members   MembersOnTeams[]
   leader    Member           @relation(fields: [leaderId], references: [id])
 
@@ -121,7 +129,6 @@ model AuthenticationProvider {
   @@map("authentication_providers")
 }
 
-
 model File {
   id            Int      @id @default(autoincrement())
   type          FileType
@@ -135,18 +142,38 @@ model File {
   @@map("files")
 }
 
+model Certificate {
+  id              Int               @id @default(autoincrement())
+  name            String
+  photo           String
+  status          CertificateStatus
+  acquisitionDate DateTime          @map("acquisition_date")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  memberId        Int               @map("member_id")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  member          Member            @relation(fields: [memberId], references: [id])
+}
+
+model functions {
+  id          Int          @id @default(autoincrement())
+  name        FunctionName
+  created_at  DateTime     @default(now())
+  updated_at  DateTime
+  permissions permissions?
+}
+
+model permissions {
+  id          Int       @id @default(autoincrement())
+  admin_id    Int
+  function_id Int       @unique
+  admins      Admin     @relation(fields: [admin_id], references: [id])
+  functions   functions @relation(fields: [function_id], references: [id])
+}
+
 enum AccountType {
   ADMIN
   COMPANY
   MEMBER
-}
-
-enum TeamStatus {
-  GENERAL
-  STOPPED
-  NOT_EXPOSED
-  WAITING_ACTIVITY
-  DELETED
 }
 
 enum AccountStatus {
@@ -169,7 +196,6 @@ enum AuthenticationProviderType {
   FACEBOOK
 }
 
-
 enum MemberLevel {
   PLATINUM
   GOLD
@@ -177,8 +203,6 @@ enum MemberLevel {
   TWO
   THREE
 }
-
-
 
 enum FileType {
   PDF
@@ -191,3 +215,62 @@ enum FileType {
   WORD
 }
 
+enum TeamStatus {
+  GENERAL
+  STOPPED
+  NOT_EXPOSED
+  WAITING_ACTIVITY
+  DELETED
+}
+
+enum DisabledType {
+  DISABLED
+  NONE
+  MODERATE
+}
+
+enum CertificateStatus {
+  REQUESTING
+  REJECTED
+  APPROVED
+  REAPPLY
+}
+
+enum FunctionName {
+  MEMBER_MANAGEMENT
+  TEAM_MANAGEMENT
+  COMPANY_LIST
+  SPECIAL_APPLICATION
+  CERTIFICATION_APPLICATION
+  DISABLED_REGISTRATION
+  CAREER_REGISTRATION
+  SITE_APPLICATION
+  ANNOUNCEMENT_MANAGEMENT
+  GENERAL_SUPPORT_MANAGEMENT
+  MATCHING_SETTING_MANAGEMENT
+  MATCHING_SETTING
+  HEADHUNTING_REQUEST
+  HEADHUNTING_MANAGEMENT
+  HEADHUNTING_MANPOWER
+  CONTRACT_MANAGEMENT
+  EVALUATION_MANAGEMENT
+  PRODUCT_PAYMENT_MANAGEMENT
+  PRODUCT_POSSESSION_STATUS
+  PRODUCT_USAGE_STATUS
+  REFUND_MANAGEMENT
+  SETTLEMENT_MANAGEMENT
+  POINT_MANAGEMENT
+  BANNER_MANAGEMENT
+  PRODUCT_BANNER_MANAGEMENT
+  PRODUCT_BANNER_INQUIRY
+  CODE_MANAGEMENT
+  ADVERTISING_BANNER_MANAGEMENT
+  ANNOUNCEMENTS
+  FAQ
+  INQUIRY
+  TERMS_AND_CONDITIONS
+  LABOR_CONSULTATION_MANAGEMENT
+  REPORT_MANAGEMENT
+  SALARY_REPORT_PROXY_APPLICATION
+  ADMINISTRATOR_MANAGEMENT
+}
