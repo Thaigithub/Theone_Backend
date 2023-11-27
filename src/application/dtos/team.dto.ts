@@ -21,9 +21,9 @@ export class TeamDTO {
     isActive?: boolean,
     createdAt?: Date | string,
     updatedAt?: Date | string,
-    teamSize?: number,
     leaderName?: string,
     leaderContact?: string,
+    teamSize?: number,
   ) {
     this.id = id;
     this.code = code;
@@ -33,12 +33,13 @@ export class TeamDTO {
     this.isActive = isActive;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.teamSize = teamSize;
     this.leaderName = leaderName;
+    this.teamSize = teamSize;
     this.leaderContact = leaderContact;
+    this.teamSize=teamSize;
   }
   static from(domain: Team, leaderName?: string, leaderContact?: string, teamSize?: number): TeamDTO {
     return new TeamDTO(domain.id, domain.code, domain.name, domain.status, domain.leaderId,
-         domain.isActive, domain.createdAt, domain.updatedAt,teamSize,leaderName,leaderContact);
+         domain.isActive, domain.createdAt, domain.updatedAt,leaderName,leaderContact,teamSize);
   }
 }

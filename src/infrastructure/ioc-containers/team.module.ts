@@ -3,7 +3,7 @@ import { PrismaModule } from './prisma.module';
 import { TeamRepository } from 'domain/repositories/team.repository';
 import { TeamRepositoryImpl } from 'infrastructure/repositories/team.repository.impl';
 import { TeamUseCase } from 'application/use-cases/team.use-case';
-import { TeamUseCaseImpl } from 'infrastructure/use-cases/teams.use-case.impl';
+import { TeamUseCaseImpl } from 'infrastructure/use-cases/team.use-case.impl';
 import { AdminTeamController } from 'presentation/controllers/admin/admin-team.controller';
 
 @Module({
@@ -21,4 +21,4 @@ import { AdminTeamController } from 'presentation/controllers/admin/admin-team.c
   ],
   exports: [TeamUseCase],
 })
-export class AdminTeamModule {}
+export class TeamModule {}

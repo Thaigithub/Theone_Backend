@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepositoryImpl } from './base.repository.impl';
-import { Prisma, Team, TeamStatus } from '@prisma/client';
+import { Prisma, TeamStatus } from '@prisma/client';
 import { TeamRepository } from 'domain/repositories/team.repository';
 import { PrismaService } from 'infrastructure/services/prisma.service';
 import { PrismaModel } from 'domain/entities/prisma.model';
@@ -12,7 +12,7 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamR
     super(prismaService, PrismaModel.TEAM);
   }
   async searchTeamFilter(request: TeamSearchRequest): Promise<any> {
-    const { keyWord, pageNumber, pageSize, searchCategory, sortOptions, teamStatus } = request;
+    const { keyWord, searchCategory, sortOptions, teamStatus } = request;
     const where: Prisma.TeamWhereInput = {};
     if (teamStatus !== TeamStatusForSearch.DEFAULT) {
       where.status = teamStatus as TeamStatus;
@@ -57,14 +57,11 @@ export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamR
     const teams = await this.prismaService.team.findMany({
       where,
       orderBy,
-      take: pageSize,
-      skip: (pageNumber - 1) * pageSize,
       include: {
         members: true,
         leader: true,
       },
     });
-    
     return teams;
   }
 }
