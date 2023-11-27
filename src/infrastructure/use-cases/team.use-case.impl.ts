@@ -20,7 +20,7 @@ export class TeamUseCaseImpl implements TeamUseCase {
     PaginationValidationService.validate(teamsDto, request.pageNumber, request.pageSize);
     const startIndex = (request.pageNumber - 1) * request.pageSize;
     const endIndex = startIndex + request.pageSize;
-    const paginatedItems = teamsDto.slice(startIndex, endIndex);  
+    const paginatedItems = teamsDto.slice(startIndex, endIndex);
     return {
       data: paginatedItems,
       pageInfo: { total: teams.length },

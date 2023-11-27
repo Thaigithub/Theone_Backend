@@ -36,10 +36,21 @@ export class TeamDTO {
     this.leaderName = leaderName;
     this.teamSize = teamSize;
     this.leaderContact = leaderContact;
-    this.teamSize=teamSize;
+    this.teamSize = teamSize;
   }
   static from(domain: Team, leaderName?: string, leaderContact?: string, teamSize?: number): TeamDTO {
-    return new TeamDTO(domain.id, domain.code, domain.name, domain.status, domain.leaderId,
-         domain.isActive, domain.createdAt, domain.updatedAt,leaderName,leaderContact,teamSize);
+    return new TeamDTO(
+      domain.id,
+      domain.code,
+      domain.name,
+      domain.status,
+      domain.leaderId,
+      domain.isActive,
+      domain.createdAt,
+      domain.updatedAt,
+      leaderName,
+      leaderContact,
+      teamSize,
+    );
   }
 }

@@ -1,6 +1,5 @@
 import { BaseRepository } from './base.repository';
 import { Injectable } from '@nestjs/common';
-
 import { TeamSearchRequest } from 'presentation/requests/team.request';
 
 @Injectable()

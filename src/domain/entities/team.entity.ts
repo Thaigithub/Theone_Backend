@@ -4,11 +4,11 @@ import { BaseEntity } from './base.entity';
 export class Team extends BaseEntity implements Prisma.TeamUncheckedCreateInput {
   constructor(code: string, name: string, leaderId: number, isActive: boolean, status: $Enums.TeamStatus) {
     super();
-    this.code=code;
-    this.name=name;
-    this.leaderId=leaderId;
-    this.isActive=isActive;
-    this.status=status
+    this.code = code;
+    this.name = name;
+    this.leaderId = leaderId;
+    this.isActive = isActive;
+    this.status = status;
   }
   id?: number;
   code: string;

@@ -7,7 +7,7 @@ export class TeamSearchRequest {
   @ApiProperty({ example: 'DEFAULT' })
   @IsEnum(SortOptionForSearch)
   @Expose()
-  sortOptions: SortOptionForSearch=SortOptionForSearch.DEFAULT;
+  sortOptions: SortOptionForSearch = SortOptionForSearch.DEFAULT;
 
   @ApiProperty({ example: 'ALL' })
   @IsEnum(TeamStatusForSearch)
@@ -24,13 +24,13 @@ export class TeamSearchRequest {
   @IsString()
   keyWord: string;
 
-  @ApiProperty({ example:1 })
+  @ApiProperty({ example: 1 })
   @Expose()
   @IsNumber()
-  pageNumber:number;
+  pageNumber: number;
 
-  @ApiProperty({ example: 10})
+  @ApiProperty({ example: 10 })
   @Expose()
   @IsNumber()
-  pageSize:number;
+  pageSize: number;
 }
