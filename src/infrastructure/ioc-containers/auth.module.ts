@@ -5,7 +5,7 @@ import { AuthUseCaseImpl } from '../use-cases/auth.use-case.impl';
 import { PrismaModule } from './prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JWT_SECRET_KEY } from 'app.config';
+import { JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_HOURS } from 'app.config';
 import { AccountModule } from './account.module';
 import { AdminCompanyModule } from './admin-company.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
@@ -21,14 +21,14 @@ import { OtpService } from 'infrastructure/services/sms.service';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: JWT_SECRET_KEY,
-      signOptions: { algorithm: 'HS384' },
+      signOptions: { algorithm: 'HS384', expiresIn: JWT_ACCESS_TOKEN_EXPIRE_HOURS },
       verifyOptions: { algorithms: ['HS384'] },
     }),
     PrismaModule,
     AccountModule,
     AdminCompanyModule,
     OtpProviderModule,
-    OtpModule
+    OtpModule,
   ],
   controllers: [AuthController],
   providers: [

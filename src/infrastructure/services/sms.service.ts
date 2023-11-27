@@ -8,7 +8,7 @@ export class OtpService {
   constructor() {
     this.coolsmsMessageService = new CoolsmsMessageService(COOLSMS_KEY, COOLSMS_SECRET);
   }
-  async sendOTPSMS(phoneNumber: string,otp:string): Promise<boolean> {
+  async sendOTPSMS(phoneNumber: string, otp: string): Promise<boolean> {
     try {
       // const response = await this.coolsmsMessageService.sendOne({
       //   to: phoneNumber,
@@ -26,4 +26,3 @@ export class OtpService {
     }
   }
 }
-

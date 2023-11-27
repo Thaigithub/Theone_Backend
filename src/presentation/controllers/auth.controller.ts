@@ -6,7 +6,7 @@ import { LoginRequest, SocialLoginRequest } from '../requests/login.request';
 import { LoginResponse } from '../responses/login.response';
 import {  OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
-import { hash } from 'bcrypt';
+
 @ApiTags('Auth')
 @Controller('auth')
 @ApiProduces('application/json')
@@ -63,7 +63,7 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number not found' })
   async sendOTPToGetUserId(@Body() body: UserIdSmsRequest): Promise<BaseResponse<boolean>> {
-      return BaseResponse.of(await this.authUseCase.sendOtp(body,false));
+    return BaseResponse.of(await this.authUseCase.sendOtp(body, false));
   }
 
   @Post('sms/send-otp-request-to-get-password')
@@ -74,7 +74,7 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number or userName not found' })
   async sendOTPToGetPassword(@Body() body: PasswordSmsRequest): Promise<BaseResponse<boolean>> {
-    return BaseResponse.of(await this.authUseCase.sendOtp(body,true));
+    return BaseResponse.of(await this.authUseCase.sendOtp(body, true));
   }
 
   @Post('sms/verify-otp-to-get-userId')
@@ -84,8 +84,8 @@ export class AuthController {
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed' })
-  async verifyOTPToGetUserID(@Body() body: OtpVerificationRequest): Promise<BaseResponse<UserIdSmsResponse|PasswordSmsResponse>> {
-    return BaseResponse.of(await this.authUseCase.verifyOtp(body,false));
+  async verifyOTPToGetUserID(@Body() body: OtpVerificationRequest): Promise<BaseResponse<UserIdSmsResponse | PasswordSmsResponse>> {
+    return BaseResponse.of(await this.authUseCase.verifyOtp(body, false));
   }
 
   @Post('sms/verify-otp-to-get-password')
@@ -96,8 +96,6 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed' })
   async verifyOTPToGetPassword(@Body() body: OtpVerificationRequest): Promise<any> {
-    return BaseResponse.of(await this.authUseCase.verifyOtp(body,true));
+    return BaseResponse.of(await this.authUseCase.verifyOtp(body, true));
   }
-
-
 }

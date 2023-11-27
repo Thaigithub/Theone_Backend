@@ -31,13 +31,19 @@ export class AdminMemberRepositoryImpl extends BaseRepositoryImpl<any> implement
       where: {
         type: AccountType.MEMBER,
         status: query.status,
-        username: query.searchCategory === SearchCategory.id ? {
-          contains: query.searchKeyword
-        } : undefined,
+        username:
+          query.searchCategory === SearchCategory.id
+            ? {
+                contains: query.searchKeyword,
+              }
+            : undefined,
         member: {
-          name: query.searchCategory === SearchCategory.name ? {
-            contains: query.searchKeyword
-          } : undefined,
+          name:
+            query.searchCategory === SearchCategory.name
+              ? {
+                  contains: query.searchKeyword,
+                }
+              : undefined,
           level: query.level,
         },
       },
@@ -45,7 +51,7 @@ export class AdminMemberRepositoryImpl extends BaseRepositoryImpl<any> implement
       // Pagination
       // If both pageNumber and pageSize is provided then handle the pagination
       skip: query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
-      take: query.pageNumber && query.pageSize ? query.pageSize : undefined
+      take: query.pageNumber && query.pageSize ? query.pageSize : undefined,
     });
   }
 }

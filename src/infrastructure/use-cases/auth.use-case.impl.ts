@@ -33,11 +33,11 @@ export class AuthUseCaseImpl implements AuthUseCase {
     @Inject(CompanyRepository) private readonly companyRepository: CompanyRepository,
     @Inject(OtpProviderRepository) private readonly otpProviderRepository: OtpProviderRepository,
     private readonly jwtService: JwtService,
-    private readonly otpService:OtpService
+    private readonly otpService: OtpService,
   ) {}
   async verifyOtp(otpCode: OtpVerificationRequest, isPasswordRequest: boolean): Promise<UserIdSmsResponse | PasswordSmsResponse> {
     this.logger.log('Verifying Otp request');
-    const result =  await this.otpProviderRepository.checkOtpValid(otpCode.phoneNumber, otpCode.code);
+    const result = await this.otpProviderRepository.checkOtpValid(otpCode.phoneNumber, otpCode.code);
     if (!result) {
       throw new BadRequestException('Verify Otp failed');
     }
@@ -70,9 +70,9 @@ export class AuthUseCaseImpl implements AuthUseCase {
       throw new NotFoundException('OtpProvider not found');
     }
     const otp = OTPGenerator.generateOTPString();
-    const result=await this.otpService.sendOTPSMS(otpRequest.phoneNumber,otp)
-    if(!result){
-     throw new BadRequestException("Sending Otp failed");
+    const result = await this.otpService.sendOTPSMS(otpRequest.phoneNumber, otp);
+    if (!result) {
+      throw new BadRequestException('Sending Otp failed');
     }
     this.otpProviderRepository.update(otpProvider.id, { otpCode: otp });
     return true;

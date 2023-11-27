@@ -6,9 +6,7 @@ import { GetMembersResponse } from "presentation/responses/admin-member.response
 
 @Injectable()
 export class AdminMemberUseCaseImpl implements AdminMemberUseCase {
-  constructor(
-    @Inject(AdminMemberRepository) private adminMemberRepository: AdminMemberRepository
-  ) {}
+  constructor(@Inject(AdminMemberRepository) private adminMemberRepository: AdminMemberRepository) {}
 
   async getMembers(query: AdminMemberRequest): Promise<GetMembersResponse> {
     const members = await this.adminMemberRepository.findByQuery(query);

@@ -5,8 +5,9 @@ import { UpsertAccountRequest } from '../requests/upsert-account.request';
 import { BaseResponse } from '../responses/base.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 import { GetAccountResponse } from 'presentation/responses/get-account.response';
-import { Roles, RolesGuard } from 'infrastructure/passport/guards/roles.guard';
-import { AccountType } from '@prisma/client'
+import { FunctionName } from '@prisma/client';
+import { FunctionPermission, PermissionGuard } from 'infrastructure/passport/guards/permission.guard';
+
 @ApiTags('Accounts')
 @Controller('accounts')
 @ApiProduces('application/json')
@@ -15,9 +16,8 @@ export class AccountController {
   constructor(@Inject(AccountUseCase) private readonly accountUseCase: AccountUseCase) {}
 
   @Get()
-  @Roles(AccountType.MEMBER)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @UseGuards(JWTAuthGuard)
+  @FunctionPermission(FunctionName.MEMBER_MANAGEMENT)
+  @UseGuards(JWTAuthGuard, PermissionGuard)
   @ApiOperation({
     summary: 'Find accounts',
     description: 'This endpoint retrieves a list of all accounts in the system.',
