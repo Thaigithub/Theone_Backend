@@ -6,3 +6,10 @@ export class GetCompanyDetailsResponse {
         this.company = company;
     }
 }
+
+export class GetCompanySearchResponse {
+    companies: CompanyDTO[];
+    constructor(companies: CompanyDTO[]){
+        this.companies = companies;
+    }
+}

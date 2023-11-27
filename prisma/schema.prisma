@@ -10,75 +10,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AccountType {
-  ADMIN
-  COMPANY
-  MEMBER
-}
-
-enum AccountStatus {
-  PENDING
-  APPROVED
-  SUSPENDED
-  WITHDRAWN
-}
-
-enum AdminLevel {
-  SUPERADMIN
-  GENERAL
-}
-enum CompanyType {
-  CORPORATION
-  INDIVIDUAL
-  OTHER
-}
-// enum AuthenticationProviderType {
-//   KAKAO
-//   NAVER
-//   GOOGLE
-//   APPLE
-//   FACEBOOK
-// }
-
 model Account {
   id              Int     @id @default(autoincrement())
   username        String  @unique
-  password        String
+  password        String  
   type            AccountType
   status          AccountStatus
   admin           Admin?
   member          Member?
   company         Company?
+  otp             OtpProvider?  
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // authenticationProviders AuthenticationProvider[]
 
   @@map("accounts")
 }
 
+model OtpProvider {
+  id               Int       @id @default(autoincrement())
+  accountId       Int     @unique @map("account_id") 
+  account         Account @relation(fields: [accountId], references: [id])
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  phoneNumber      String? @unique @map("phone_number")
+  otpCode          String? @map("otp_code")
+
+  @@map("otp_providers")
+}
+
+
+
 model Admin {
-  id              Int     @id @unique @map("account_id")
-  account         Account @relation(fields: [id], references: [id])
-  name            String
-  level           AdminLevel
-  isActive        Boolean @default(true)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  name      String
+  level     AdminLevel
+  id        Int        @unique @map("account_id")
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  account   Account    @relation(fields: [id], references: [id])
 
   @@map("admins")
 }
 
 model Member {
-  id              Int     @id @unique @map("account_id")
-  account         Account @relation(fields: [id], references: [id])
-  name            String
-  leader          Team[]
-  teams           MembersOnTeams[]
-  isActive        Boolean @default(true)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  name      String
+  id        Int              @unique @map("account_id")
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  contact   String
+  level     MemberLevel
+  account   Account          @relation(fields: [id], references: [id])
+  teams     MembersOnTeams[]
+  leader    Team[]
 
   @@map("members")
 }
@@ -104,28 +88,91 @@ model Company {
 }
 
 model Team {
-  id              Int     @id @default(autoincrement())
-  code            String
-  name            String
-  leaderId        Int     @map("leader_id")
-  leader          Member  @relation(fields: [leaderId], references: [id])
-  members         MembersOnTeams[]
-  isActive        Boolean @default(true)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id        Int              @id @default(autoincrement())
+  code      String
+  name      String
+  leaderId  Int              @map("leader_id")
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  members   MembersOnTeams[]
+  leader    Member           @relation(fields: [leaderId], references: [id])
 
   @@map("teams")
 }
 
 model MembersOnTeams {
-  team            Team  @relation(fields: [teamId], references: [id])
-  teamId          Int @map("team_id")
-  member          Member @relation(fields: [memberId], references: [id])
-  memberId        Int @map("member_id")
-  isActive        Boolean @default(true)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  teamId    Int      @map("team_id")
+  memberId  Int      @map("member_id")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  member    Member   @relation(fields: [memberId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
 
-  @@map("members_on_teams")
   @@id([memberId, teamId])
+  @@map("members_on_teams")
+}
+
+model File {
+  id            Int      @id @default(autoincrement())
+  type          FileType
+  key           String?
+  fileName      String?  @map("file_name")
+  size          BigInt
+  isDeactivated Boolean  @default(false) @map("is_deactivated")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("files")
+}
+
+enum AccountType {
+  ADMIN
+  COMPANY
+  MEMBER
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  WITHDRAWN
+}
+
+enum AdminLevel {
+  SUPERADMIN
+  GENERAL
+}
+
+enum AuthenticationProviderType {
+  KAKAO
+  NAVER
+  GOOGLE
+  APPLE
+  FACEBOOK
+}
+
+
+enum MemberLevel {
+  PLATINUM
+  GOLD
+  SIVER
+  TWO
+  THREE
+}
+enum CompanyType {
+  CORPORATION
+  INDIVIDUAL
+  OTHER
+}
+enum FileType {
+  PDF
+  ZIP
+  RAR
+  JPEG
+  PNG
+  CSV
+  EXCEL
+  WORD
 }

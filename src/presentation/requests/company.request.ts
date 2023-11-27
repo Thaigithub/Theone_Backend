@@ -1,15 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString, Length, IsBoolean } from 'class-validator';
-
+import { IsString, IsNumberString, IsOptional } from 'class-validator';
+import { AccountStatus } from '@prisma/client'
 export class CompanySearchRequest {
-  @Expose()
-  @IsString()
-  @ApiProperty({ example: 'asdfgasdgads' })
-  public idtoken: string;
+    @Expose()
+    @IsString()
+    public status: AccountStatus
 
-  @Expose()
-  @IsBoolean()
-  @ApiProperty({ example: 'true' })
-  public member: boolean;
+    @Expose()
+    @IsOptional()
+    @IsString()
+    @ApiProperty({ example: 'TheOne' })
+    public name: string
+
+    @Expose()
+    @IsOptional()
+    @IsString()
+    @ApiProperty({ example: '0123456789' })
+    public phone: string
+
+    @Expose()
+    @IsOptional()
+    @IsNumberString()
+    @ApiProperty({ example: '1' })
+    public id: string
+
+    
+    @Expose()
+    @IsOptional()
+    @IsNumberString()
+    @ApiProperty({ example: '1' })
+    public pagenumber: string
+
+    @Expose()
+    @IsOptional()
+    @IsNumberString()
+    @ApiProperty({ example: '1' })
+    public pagesize: string
 }
