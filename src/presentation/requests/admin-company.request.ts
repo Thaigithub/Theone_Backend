@@ -50,5 +50,5 @@ export class CompanyDownloadRequest {
   @ArrayNotEmpty({ message: 'The array must not be empty' })
   @IsNumber({}, { each: true, message: 'Each element of the array must be a number' })
   @ApiProperty({ example: [1,2,3] })
-  public CompanyId: number[];
+  public companyIds: number[];
 }

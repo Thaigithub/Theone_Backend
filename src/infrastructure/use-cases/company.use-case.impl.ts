@@ -5,9 +5,13 @@ import { CompanyUseCase } from 'application/use-cases/company.use-case';
 import { CompanySearchRequest, CompanyDownloadRequest } from 'presentation/requests/admin-company.request';
 import { $Enums } from '@prisma/client';
 import { Response } from 'express'
+import { ExcelService } from 'infrastructure/services/excel.service';
 @Injectable()
 export class CompanyUseCaseImpl implements CompanyUseCase {
-  constructor(@Inject(CompanyRepository) private readonly companyRepository: CompanyRepository) {}
+  constructor(
+    @Inject(CompanyRepository) private readonly companyRepository: CompanyRepository,
+    @Inject(ExcelService) private readonly excelService: ExcelService
+  ) {}
   async getCompanies(request: CompanySearchRequest): Promise<CompanyDTO[]> {
     const companies = await this.companyRepository.findRequest(request);
     return companies.map(company => CompanyDTO.from(company));
@@ -19,6 +23,10 @@ export class CompanyUseCaseImpl implements CompanyUseCase {
     await this.companyRepository.updateStatus(CompanyId, status);
   }
   async download(request: CompanyDownloadRequest, response: Response): Promise<void>{
-    const companies = await this.companyRepository.findbyIds(request.companyId)
+    const companies = await this.companyRepository.findByIds(request)
+    const excelStream = await this.excelService.createExcelFile(companies,'Company')
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.setHeader('Content-Disposition', 'attachment; filename=CompanyList.xlsx');
+    excelStream.pipe(response);
   }
 }

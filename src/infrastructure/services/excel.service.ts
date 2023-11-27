@@ -3,7 +3,7 @@ import * as ExcelJS from 'exceljs'
 import { Readable } from 'stream';
 @Injectable()
 export class ExcelService {
-    async createExcelFile(data: any[], worksheetName: string): Promise<Readable> {
+    async createExcelFile(data: any[], worksheetName: string|null): Promise<Readable> {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet(worksheetName?worksheetName:'Sheet1');
     

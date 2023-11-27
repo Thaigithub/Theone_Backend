@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma.module';
 import { AdminCompanyController } from 'presentation/controllers/admin-company.controller';
 import { CompanyUseCase } from 'application/use-cases/company.use-case';
 import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
+import { ExcelService } from 'infrastructure/services/excel.service';
 @Module({
   imports: [PrismaModule],
   controllers: [AdminCompanyController],
@@ -17,6 +18,7 @@ import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
       provide: CompanyUseCase,
       useClass: CompanyUseCaseImpl,
     },
+    ExcelService
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })

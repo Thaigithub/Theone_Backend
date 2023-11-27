@@ -56,7 +56,7 @@ export class AdminCompanyController {
   })
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-  async download(@Body() request: CompanyDownloadRequest, @Res() response: Response): Promise<BaseResponse<GetCompanySearchResponse>> {
-    return BaseResponse.of(new GetCompanySearchResponse(await this.companyUseCase.download(request,response)));
+  async download(@Body() request: CompanyDownloadRequest, @Res() response: Response): Promise<void> {
+    await this.companyUseCase.download(request,response);
   }
 }

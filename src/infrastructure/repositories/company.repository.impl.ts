@@ -4,7 +4,7 @@ import { Company } from 'domain/entities/company.entity';
 import { CompanyRepository } from 'domain/repositories/company.repository';
 import { PrismaService } from '../services/prisma.service';
 import { BaseRepositoryImpl } from './base.repository.impl';
-import { CompanySearchRequest } from 'presentation/requests/admin-company.request';
+import { CompanySearchRequest, CompanyDownloadRequest } from 'presentation/requests/admin-company.request';
 import { $Enums } from '@prisma/client';
 @Injectable()
 export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implements CompanyRepository {
@@ -64,5 +64,14 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
   }
   async updateStatus(companyId: number, status: $Enums.AccountStatus): Promise<void> {
     await this.prismaService.account.update({ where: { id: companyId }, data: { status: status } });
+  }
+  async findByIds(request: CompanyDownloadRequest): Promise<Company[]>{
+    return await this.prismaService.company.findMany({
+      where:{
+        id: {
+          in: request.companyIds
+        }
+      }
+    })
   }
 }
