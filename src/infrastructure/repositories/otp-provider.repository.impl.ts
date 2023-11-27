@@ -13,24 +13,24 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
     super(prismaService, PrismaModel.OTP_PROVIDER);
   }
    async getAccountInfo(phoneNumber: string): Promise<Account> {
-    const otpProvider =await this.prismaService.otpProvider.findUnique({
-      where:{
-        phoneNumber,
-      },
-      include:{
-        account: true,
-      }
-    });
-    if (otpProvider) {
-      return otpProvider.account;
-    } else {
-      return null; 
-    }
+    // const otpProvider =await this.prismaService.otpProvider.findUnique({
+    //   where:{
+    //     phoneNumber,
+    //   },
+    //   include:{
+    //     account: true,
+    //   }
+    // });
+    // if (otpProvider) {
+    //   return otpProvider.account;
+    // } else {
+    //   return null; 
+    // }
+    return
   }
   async checkOtpValid(phoneNumber: string, otpCode: string): Promise<boolean> {
     const otpProvider = await this.prismaService.otpProvider.findFirst({
       where: {
-        phoneNumber: phoneNumber,
         otpCode: otpCode,
       },
     });
@@ -50,7 +50,6 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
     const query = {
       where: {
         account: {
-          name: name,
         },
         phoneNumber: phoneNumber,
       },
