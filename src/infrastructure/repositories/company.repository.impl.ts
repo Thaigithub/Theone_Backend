@@ -30,12 +30,12 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
   }
   async findRequest(request: CompanySearchRequest): Promise<Company[]> {
     const query = {
-      take: parseInt(request.pagesize),
+      take: parseInt(request.pageSize),
     };
-    if (request.pagenumber) {
-      query['skip'] = parseInt(request.pagenumber) * query['take'];
+    if (request.pageNumber) {
+      query['skip'] = parseInt(request.pageNumber) * query['take'];
     }
-    ['pagenumber', 'pagesize'].forEach(key => delete request[key]);
+    ['pageNumber', 'pageSize'].forEach(key => delete request[key]);
 
     query['where'] = Object.keys(request)
       .map(key => {

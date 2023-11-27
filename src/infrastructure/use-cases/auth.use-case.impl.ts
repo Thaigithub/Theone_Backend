@@ -13,14 +13,13 @@ import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, APPLE_OAUTH_RESTAPI, KAKAO_VERI
 import { JwksClient } from 'jwks-rsa';
 import Axios from 'axios';
 import { CompanyDTO } from 'application/dtos/company.dto';
-import { hash } from 'bcrypt';
 import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
 import { OTPGenerator } from 'common/utils/otp-generator';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
 import { OtpService } from 'infrastructure/services/sms.service';
-const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
-const appleclient = new JwksClient({
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
+const appleClient = new JwksClient({
   jwksUri: APPLE_OAUTH_RESTAPI,
 });
 
@@ -129,14 +128,13 @@ export class AuthUseCaseImpl implements AuthUseCase {
   async googleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
     try {
       const payload = (
-        await googleclient.verifyIdToken({
+        await googleClient.verifyIdToken({
           idToken: request.idToken,
           audience: GOOGLE_CLIENT_ID,
         })
       ).getPayload();
-      var profile = null;
+      let profile = null;
       if (request.member) {
-        // const account = await this.memberRepository.findByUsername(loginData.username);
       } else {
         profile = await this.companyRepository.findByEmail(payload.email);
       }
@@ -149,9 +147,9 @@ export class AuthUseCaseImpl implements AuthUseCase {
   async appleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
     const json = this.jwtService.decode(request.idToken, { complete: true });
     const kid = json.header.kid;
-    const applekey = (await appleclient.getSigningKey(kid)).getPublicKey();
+    const applekey = (await appleClient.getSigningKey(kid)).getPublicKey();
     const payload = await this.jwtService.verify(applekey, json);
-    var profile = null;
+    let profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {
@@ -167,7 +165,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
         'Content-Type': 'application/json; charset=utf-8',
       },
     }).then(response => response.data)['kakao_account'];
-    var profile = null;
+    let profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {
@@ -183,7 +181,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
         'Content-Type': 'application/json; charset=utf-8',
       },
     }).then(response => response.data)['reponse'];
-    var profile = null;
+    let profile = null;
     if (request.member) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {

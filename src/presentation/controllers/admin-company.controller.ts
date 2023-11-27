@@ -1,4 +1,4 @@
-import { Body, Query, Param, Controller, Get, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Query, Param, Controller, Get, HttpStatus, Inject, Put, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CompanyUseCase } from 'application/use-cases/company.use-case';
 import { BaseResponse } from '../responses/base.response';
@@ -7,7 +7,7 @@ import { GetCompanyDetailsResponse, GetCompanySearchResponse } from 'presentatio
 import { CompanySearchRequest, CompanyStatusChangeRequest } from 'presentation/requests/admin-company.request';
 
 @ApiTags('Companies')
-@Controller('companies')
+@Controller('/admin')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminCompanyController {
@@ -24,7 +24,7 @@ export class AdminCompanyController {
     return BaseResponse.of(new GetCompanyDetailsResponse(await this.companyUseCase.getDetails(parseInt(id))));
   }
 
-  @Post('/company/:id/status/change')
+  @Put('/company/:id/status/change')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Change company status',
@@ -36,7 +36,7 @@ export class AdminCompanyController {
     await this.companyUseCase.changeStatus(parseInt(id), body.status);
   }
 
-  @Get()
+  @Get('/companies')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Find companies list',
