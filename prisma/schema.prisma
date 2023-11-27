@@ -20,31 +20,31 @@ model Account {
   authenticationProviders AuthenticationProvider[]
   company                 Company?
   member                  Member?
-  otp_providers           OtpProvider?
+  otp                     OtpProvider?
 
   @@map("accounts")
 }
 
 model OtpProvider {
-  id         Int       @id @default(autoincrement())
-  updatedAt  DateTime? @updatedAt @map("updated_at")
-  otpCode    String?   @map("otp_code")
-  account_id Int       @unique
-  accounts   Account   @relation(fields: [account_id], references: [id])
+  id        Int       @id @default(autoincrement())
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  otpCode   String?   @map("otp_code")
+  accountId Int       @unique @map("account_id")
+  account   Account   @relation(fields: [accountId], references: [id])
 
   @@map("otp_providers")
 }
 
 model Admin {
-  id          Int           @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
   level       AdminLevel
-  accountId   Int           @unique @map("account_id")
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  account     Account       @relation(fields: [accountId], references: [id])
-  permissions permissions[]
+  accountId   Int          @unique @map("account_id")
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  permissions Permission[]
+  account     Account      @relation(fields: [accountId], references: [id])
 
   @@map("admins")
 }
@@ -66,7 +66,7 @@ model Member {
   registrationNumber String?
   serialNumber       String?
   dateOfIssue        DateTime?        @db.Date
-  Certificate        Certificate[]
+  certificates       Certificate[]
   account            Account          @relation(fields: [accountId], references: [id])
   teams              MembersOnTeams[]
   leader             Team[]
@@ -142,6 +142,26 @@ model File {
   @@map("files")
 }
 
+model Permission {
+  id         Int      @id @default(autoincrement())
+  adminId    Int      @map("admin_id")
+  admin      Admin    @relation(fields: [adminId], references: [id])
+  functionId Int      @unique @map("function_id")
+  function   Function @relation(fields: [functionId], references: [id])
+
+  @@map("permissions")
+}
+
+model Function {
+  id         Int          @id @default(autoincrement())
+  name       FunctionName
+  permission Permission?
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  @@map("functions")
+}
+
 model Certificate {
   id              Int               @id @default(autoincrement())
   name            String
@@ -149,25 +169,48 @@ model Certificate {
   status          CertificateStatus
   acquisitionDate DateTime          @map("acquisition_date")
   createdAt       DateTime          @default(now()) @map("created_at")
-  memberId        Int               @map("member_id")
   updatedAt       DateTime          @updatedAt @map("updated_at")
+  memberId        Int               @map("member_id")
   member          Member            @relation(fields: [memberId], references: [id])
 }
 
-model functions {
-  id          Int          @id @default(autoincrement())
-  name        FunctionName
-  created_at  DateTime     @default(now())
-  updated_at  DateTime
-  permissions permissions?
-}
-
-model permissions {
-  id          Int       @id @default(autoincrement())
-  admin_id    Int
-  function_id Int       @unique
-  admins      Admin     @relation(fields: [admin_id], references: [id])
-  functions   functions @relation(fields: [function_id], references: [id])
+enum FunctionName {
+  MEMBER_MANAGEMENT
+  TEAM_MANAGEMENT
+  COMPANY_LIST
+  SPECIAL_APPLICATION
+  CERTIFICATION_APPLICATION
+  DISABLED_REGISTRATION
+  CAREER_REGISTRATION
+  SITE_APPLICATION
+  ANNOUNCEMENT_MANAGEMENT
+  GENERAL_SUPPORT_MANAGEMENT
+  MATCHING_SETTING_MANAGEMENT
+  MATCHING_SETTING
+  HEADHUNTING_REQUEST
+  HEADHUNTING_MANAGEMENT
+  HEADHUNTING_MANPOWER
+  CONTRACT_MANAGEMENT
+  EVALUATION_MANAGEMENT
+  PRODUCT_PAYMENT_MANAGEMENT
+  PRODUCT_POSSESSION_STATUS
+  PRODUCT_USAGE_STATUS
+  REFUND_MANAGEMENT
+  SETTLEMENT_MANAGEMENT
+  POINT_MANAGEMENT
+  BANNER_MANAGEMENT
+  PRODUCT_BANNER_MANAGEMENT
+  PRODUCT_BANNER_INQUIRY
+  CODE_MANAGEMENT
+  ADVERTISING_BANNER_MANAGEMENT
+  ANNOUNCEMENTS
+  FAQ
+  INQUIRY
+  TERMS_AND_CONDITIONS
+  LABOR_CONSULTATION_MANAGEMENT
+  REPORT_MANAGEMENT
+  SALARY_REPORT_PROXY_APPLICATION
+  ADMINISTRATOR_MANAGEMENT
 }
 
 enum AccountType {
@@ -234,43 +277,4 @@ enum CertificateStatus {
   REJECTED
   APPROVED
   REAPPLY
-}
-
-enum FunctionName {
-  MEMBER_MANAGEMENT
-  TEAM_MANAGEMENT
-  COMPANY_LIST
-  SPECIAL_APPLICATION
-  CERTIFICATION_APPLICATION
-  DISABLED_REGISTRATION
-  CAREER_REGISTRATION
-  SITE_APPLICATION
-  ANNOUNCEMENT_MANAGEMENT
-  GENERAL_SUPPORT_MANAGEMENT
-  MATCHING_SETTING_MANAGEMENT
-  MATCHING_SETTING
-  HEADHUNTING_REQUEST
-  HEADHUNTING_MANAGEMENT
-  HEADHUNTING_MANPOWER
-  CONTRACT_MANAGEMENT
-  EVALUATION_MANAGEMENT
-  PRODUCT_PAYMENT_MANAGEMENT
-  PRODUCT_POSSESSION_STATUS
-  PRODUCT_USAGE_STATUS
-  REFUND_MANAGEMENT
-  SETTLEMENT_MANAGEMENT
-  POINT_MANAGEMENT
-  BANNER_MANAGEMENT
-  PRODUCT_BANNER_MANAGEMENT
-  PRODUCT_BANNER_INQUIRY
-  CODE_MANAGEMENT
-  ADVERTISING_BANNER_MANAGEMENT
-  ANNOUNCEMENTS
-  FAQ
-  INQUIRY
-  TERMS_AND_CONDITIONS
-  LABOR_CONSULTATION_MANAGEMENT
-  REPORT_MANAGEMENT
-  SALARY_REPORT_PROXY_APPLICATION
-  ADMINISTRATOR_MANAGEMENT
 }

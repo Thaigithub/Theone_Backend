@@ -4,5 +4,5 @@ import { AdminMemberRequest } from 'presentation/requests/admin-member.request';
 
 @Injectable()
 export abstract class AdminMemberRepository extends BaseRepository<any> {
-    abstract findByQuery(query: AdminMemberRequest): Promise<any>
+  abstract findByQuery(query: AdminMemberRequest): Promise<any>;
 }

@@ -4,7 +4,7 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export enum SearchCategory {
   id = 'id',
-  name = 'name'
+  name = 'name',
 }
 
 export class AdminMemberRequest {
@@ -31,12 +31,12 @@ export class AdminMemberRequest {
   @Expose()
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => value !== undefined ?  parseInt(value) : undefined)
+  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
   public pageSize: number;
 
   @Expose()
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => value !== undefined ?  parseInt(value) : undefined)
-  public pageNumber: number
+  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
+  public pageNumber: number;
 }
