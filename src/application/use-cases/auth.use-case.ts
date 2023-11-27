@@ -8,8 +8,8 @@ export interface AuthUseCase {
   login(loginData: LoginRequest): Promise<LoginResponse>;
   verifyPayload(userId: number): Promise<JwtPayloadData>;
   signToken(payloadData: JwtFakePayloadData): string;
-  sendOtp(otpRequest:UserIdSmsRequest|PasswordSmsRequest,isPasswordRequest:boolean):Promise<boolean>;
-  verifyOtp(otpCode:OtpVerificationRequest,isPasswordRequest:boolean):Promise<UserIdSmsResponse|PasswordSmsResponse>;
+  sendOtp(otpRequest: UserIdSmsRequest | PasswordSmsRequest, isPasswordRequest: boolean): Promise<boolean>;
+  verifyOtp(otpCode: OtpVerificationRequest, isPasswordRequest: boolean): Promise<UserIdSmsResponse | PasswordSmsResponse>;
 }
 
 export const AuthUseCase = Symbol('AuthUseCase');

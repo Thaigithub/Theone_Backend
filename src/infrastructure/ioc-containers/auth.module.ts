@@ -19,14 +19,13 @@ import { OtpService } from 'infrastructure/services/sms.service';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: JWT_SECRET_KEY,
-      signOptions: { algorithm: 'HS384',expiresIn: JWT_ACCESS_TOKEN_EXPIRE_HOURS },
+      signOptions: { algorithm: 'HS384', expiresIn: JWT_ACCESS_TOKEN_EXPIRE_HOURS },
       verifyOptions: { algorithms: ['HS384'] },
-
     }),
     PrismaModule,
     AccountModule,
     OtpProviderModule,
-    OtpModule
+    OtpModule,
   ],
   controllers: [AuthController],
   providers: [

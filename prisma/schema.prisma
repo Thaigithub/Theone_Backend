@@ -36,15 +36,15 @@ model OtpProvider {
 }
 
 model Admin {
-  id         Int         @id @default(autoincrement())
-  name       String
-  level      AdminLevel
-  accountId  Int         @unique @map("account_id")
-  isActive   Boolean     @default(true)
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
+  id          Int          @id @default(autoincrement())
+  name        String
+  level       AdminLevel
+  accountId   Int          @unique @map("account_id")
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
   permissions Permission[]
-  account    Account     @relation(fields: [accountId], references: [id])
+  account     Account      @relation(fields: [accountId], references: [id])
 
   @@map("admins")
 }
@@ -66,7 +66,7 @@ model Member {
   registrationNumber String?
   serialNumber       String?
   dateOfIssue        DateTime?        @db.Date
-  Certificate        Certificate[]
+  certificates       Certificate[]
   account            Account          @relation(fields: [accountId], references: [id])
   teams              MembersOnTeams[]
   leader             Team[]
@@ -143,35 +143,35 @@ model File {
 }
 
 model Permission {
-  id                  Int     @id @default(autoincrement())
-  adminId             Int     @map("admin_id")
-  admin               Admin   @relation(fields: [adminId], references: [id])
-  functionId          Int     @unique @map("function_id")
-  function            Function @relation(fields: [functionId], references: [id])
+  id         Int      @id @default(autoincrement())
+  adminId    Int      @map("admin_id")
+  admin      Admin    @relation(fields: [adminId], references: [id])
+  functionId Int      @unique @map("function_id")
+  function   Function @relation(fields: [functionId], references: [id])
 
   @@map("permissions")
 }
 
 model Function {
-  id                  Int     @id @default(autoincrement())
-  name                FunctionName
-  permission          Permission?
-  createdAt           DateTime                   @default(now()) @map("created_at")
-  updatedAt           DateTime                   @updatedAt @map("updated_at")
+  id         Int          @id @default(autoincrement())
+  name       FunctionName
+  permission Permission?
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
 
   @@map("functions")
 }
 
 model Certificate {
-  id                  Int                       @id @default(autoincrement())
-  name                String
-  photo               String
-  status              CertificateStatus
-  acquisitionDate     DateTime                   @map("acquisition_date")
-  createdAt           DateTime                   @default(now()) @map("created_at")
-  updatedAt           DateTime                   @updatedAt @map("updated_at")
-  memberId            Int                @map("member_id")
-  members             Member            @relation(fields: [memberId], references: [id])
+  id              Int               @id @default(autoincrement())
+  name            String
+  photo           String
+  status          CertificateStatus
+  acquisitionDate DateTime          @map("acquisition_date")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  memberId        Int               @map("member_id")
+  member          Member            @relation(fields: [memberId], references: [id])
 }
 
 enum FunctionName {
@@ -212,6 +212,7 @@ enum FunctionName {
   SALARY_REPORT_PROXY_APPLICATION
   ADMINISTRATOR_MANAGEMENT
 }
+
 enum AccountType {
   ADMIN
   COMPANY
@@ -257,11 +258,12 @@ enum FileType {
   WORD
 }
 
-enum CertificateStatus {
-  REQUESTING
-  REJECTED
-  APPROVED
-  REAPPLY
+enum TeamStatus {
+  GENERAL
+  STOPPED
+  NOT_EXPOSED
+  WAITING_ACTIVITY
+  DELETED
 }
 
 enum DisabledType {
@@ -270,10 +272,9 @@ enum DisabledType {
   MODERATE
 }
 
-enum TeamStatus {
-  GENERAL
-  STOPPED
-  NOT_EXPOSED
-  WAITING_ACTIVITY
-  DELETED
+enum CertificateStatus {
+  REQUESTING
+  REJECTED
+  APPROVED
+  REAPPLY
 }

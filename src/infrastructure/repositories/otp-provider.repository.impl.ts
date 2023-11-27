@@ -12,7 +12,7 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.OTP_PROVIDER);
   }
-   async getAccountInfo(phoneNumber: string): Promise<Account> {
+  async getAccountInfo(phoneNumber: string): Promise<Account> {
     // const otpProvider =await this.prismaService.otpProvider.findUnique({
     //   where:{
     //     phoneNumber,
@@ -24,9 +24,9 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
     // if (otpProvider) {
     //   return otpProvider.account;
     // } else {
-    //   return null; 
+    //   return null;
     // }
-    return
+    return;
   }
   async checkOtpValid(phoneNumber: string, otpCode: string): Promise<boolean> {
     const otpProvider = await this.prismaService.otpProvider.findFirst({
@@ -41,16 +41,13 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
     const updatedAt = otpProvider.updatedAt;
     const currentTime = new Date();
     const timeDifference = currentTime.getTime() - updatedAt.getTime();
-    const timeDifferenceInMinutes = timeDifference / (1000 * 60); 
-    return timeDifferenceInMinutes <= parseInt(SMS_OTP_VALID_TIME,10);
-    
+    const timeDifferenceInMinutes = timeDifference / (1000 * 60);
+    return timeDifferenceInMinutes <= parseInt(SMS_OTP_VALID_TIME, 10);
   }
   async findOne(name: string, phoneNumber: string, userName?: string): Promise<OtpProvider> {
-  
     const query = {
       where: {
-        account: {
-        },
+        account: {},
         phoneNumber: phoneNumber,
       },
       include: {
