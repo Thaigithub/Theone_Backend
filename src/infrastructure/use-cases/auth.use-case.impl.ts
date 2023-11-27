@@ -129,7 +129,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
   async googleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
     try{
       const payload = (await googleclient.verifyIdToken({
-        idToken: request.idtoken,
+        idToken: request.idToken,
         audience: GOOGLE_CLIENT_ID,
       })).getPayload();
       var profile = null
@@ -147,7 +147,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
   }
 
   async appleLogin(request: SocialLoginRequest): Promise<LoginResponse> {
-    const json = this.jwtService.decode(request.idtoken, {complete: true})
+    const json = this.jwtService.decode(request.idToken, {complete: true})
     const kid = json.header.kid
     const applekey = (await appleclient.getSigningKey(kid)).getPublicKey()
     const payload = await this.jwtService.verify(applekey,json)
@@ -164,7 +164,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
   async kakaoLogin(request: SocialLoginRequest): Promise<LoginResponse> {
     const payload = await (Axios.post(KAKAO_VERIFY_URL, {
       headers: {
-        "Authorization": `Bearer ${request.idtoken}`,
+        "Authorization": `Bearer ${request.idToken}`,
         "Content-Type": "application/json; charset=utf-8"
       }
     }).then(response => response.data))['kakao_account']
@@ -181,7 +181,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
   async naverLogin(request: SocialLoginRequest): Promise<LoginResponse> {
     const payload = await (Axios.post(NAVER_VERIFY_URL, {
       headers: {
-        "Authorization": `Bearer ${request.idtoken}`,
+        "Authorization": `Bearer ${request.idToken}`,
         "Content-Type": "application/json; charset=utf-8"
       }
     }).then(response => response.data))['reponse']

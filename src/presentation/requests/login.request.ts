@@ -6,7 +6,7 @@ export class SocialLoginRequest {
   @Expose()
   @IsString()
   @ApiProperty({ example: 'asdfgasdgads' })
-  public idtoken: string;
+  public idToken: string;
 
   @Expose()
   @IsBoolean()

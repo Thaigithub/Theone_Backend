@@ -49,18 +49,18 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
   
     const query = {
       where: {
-        account: {
-          name: name,
-        },
+        // account: {
+        //   name: name,
+        // },
         phoneNumber: phoneNumber,
       },
       include: {
         account: true,
       },
     };
-    if (userName) {
-      query.where.account['username'] = userName;
-    }
+    // if (userName) {
+    //   query.where.account['username'] = userName;
+    // }
     return await this.prismaService.otpProvider.findFirst(query);
   }
 }

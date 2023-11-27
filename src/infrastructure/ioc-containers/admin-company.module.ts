@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { CompanyRepository } from 'domain/repositories/company.repository';
 import { CompanyRepositoryImpl } from '../repositories/company.repository.impl';
 import { PrismaModule } from './prisma.module';
-import { CompanyController } from 'presentation/controllers/company.controller';
+import { AdminCompanyController } from 'presentation/controllers/admin-company.controller';
 import { CompanyUseCase } from 'application/use-cases/company.use-case';
 import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
 @Module({
   imports: [PrismaModule],
-  controllers: [CompanyController],
+  controllers: [AdminCompanyController],
   providers: [
     {
       provide: CompanyRepository,
@@ -20,4 +20,4 @@ import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })
-export class CompanyModule {}
+export class AdminCompanyModule {}

@@ -33,8 +33,14 @@ export class CompanySearchRequest {
     public pagenumber: string
 
     @Expose()
-    @IsOptional()
     @IsNumberString()
     @ApiProperty({ example: '1' })
     public pagesize: string
+}
+
+export class CompanyStatusChangeRequest {
+    @Expose()
+    @IsString()
+    @ApiProperty({ example: 'APPROVED' })
+    public status: AccountStatus
 }
