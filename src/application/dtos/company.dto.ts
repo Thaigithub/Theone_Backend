@@ -32,7 +32,8 @@ export class CompanyDTO {
     contactName: string,
   ) {
     this.id = id;
-    (this.accountId = accountId), (this.name = name);
+    this.accountId = accountId;
+    this.name = name;
     this.address = address;
     this.estDate = estDate;
     this.businessRegNumber = businessRegNumber;
