@@ -17,7 +17,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "NODE_ENV=development node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prisma:create": "dotenv -e .env.development -- npx prisma migrate dev",
+    "prisma:pull": "dotenv -e .env.development -- npx prisma db pull",
+    "prisma:push": "dotenv -e .env.development -- npx prisma db push",
+    "prisma:studio": "dotenv -e .env.development -- npx prisma studio"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.9.1",
@@ -28,6 +32,8 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.12",
     "@prisma/client": "^5.6.0",
+    "aws-sdk": "^2.1502.0",
+    "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "bs58": "^5.0.0",
@@ -36,17 +42,23 @@
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
+    "coolsms-node-sdk": "^2.0.1",
     "dotenv": "^16.3.1",
     "envalid": "^8.0.0",
+    "exceljs": "^4.4.0",
     "express-rate-limit": "^7.0.2",
+    "google-auth-library": "^9.2.0",
     "helmet": "^7.0.0",
     "ioredis": "^5.3.2",
+    "jwks-rsa": "^3.1.0",
     "lodash": "^4.17.21",
     "nodemailer": "^6.9.5",
+    "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
