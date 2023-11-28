@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_HOURS } from 'app.config';
 import { AccountModule } from './account.module';
-import { AdminCompanyModule } from './admin-company.module';
+import { AdminModule } from './admin.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
 import { OtpProviderModule } from './otp-provider.module';
 import { OtpProviderRepositoryImpl } from 'infrastructure/repositories/otp-provider.repository.impl';
@@ -26,7 +26,7 @@ import { OtpService } from 'infrastructure/services/sms.service';
     }),
     PrismaModule,
     AccountModule,
-    AdminCompanyModule,
+    AdminModule,
     OtpProviderModule,
     OtpModule,
   ],
