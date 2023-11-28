@@ -20,4 +20,4 @@ import { CompanyUseCaseImpl } from '../use-cases/company.use-case.impl';
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })
-export class AdminCompanyModule {}
+export class AdminModule {}

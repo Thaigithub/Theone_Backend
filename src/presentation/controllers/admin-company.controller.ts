@@ -7,12 +7,12 @@ import { GetCompanyDetailsResponse, GetCompanySearchResponse } from 'presentatio
 import { CompanySearchRequest, CompanyStatusChangeRequest } from 'presentation/requests/admin-company.request';
 
 @ApiTags('Admin Companies')
-@Controller('/admin')
+@Controller('/admin/companies')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminCompanyController {
   constructor(@Inject(CompanyUseCase) private readonly companyUseCase: CompanyUseCase) {}
-  @Get('/company/:id/details/')
+  @Get('/:id/details/')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Find company detail',
@@ -24,7 +24,7 @@ export class AdminCompanyController {
     return BaseResponse.of(new GetCompanyDetailsResponse(await this.companyUseCase.getDetails(parseInt(id))));
   }
 
-  @Put('/company/:id/status/change')
+  @Put('/:id/status/change')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Change company status',
@@ -36,7 +36,7 @@ export class AdminCompanyController {
     await this.companyUseCase.changeStatus(parseInt(id), body.status);
   }
 
-  @Get('/companies')
+  @Get()
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Find companies list',
