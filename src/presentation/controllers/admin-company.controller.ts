@@ -24,7 +24,7 @@ export class AdminCompanyController {
     return BaseResponse.of(new GetCompanyDetailsResponse(await this.companyUseCase.getDetails(parseInt(id))));
   }
 
-  @Patch('/:id/status/change')
+  @Patch('/:id/status')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Change company status',
