@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString, IsNumberString, IsOptional, IsArray, IsNumber, ArrayNotEmpty } from 'class-validator';
+import { IsString, IsNumberString, IsOptional, IsArray, IsNumber, ArrayNotEmpty, IsEnum } from 'class-validator';
 import { AccountStatus } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 export class CompanySearchRequest {
   @Expose()
-  @IsString()
+  @IsEnum($Enums.AccountStatus)
   public status: AccountStatus;
 
   @Expose()
@@ -29,12 +30,13 @@ export class CompanySearchRequest {
   @IsOptional()
   @IsNumberString()
   @ApiProperty({ example: '1' })
-  public pagenumber: string;
+  public pageNumber: string;
 
   @Expose()
+  @IsOptional()
   @IsNumberString()
   @ApiProperty({ example: '1' })
-  public pagesize: string;
+  public pageSize: string;
 }
 
 export class CompanyStatusChangeRequest {
