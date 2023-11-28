@@ -1,7 +1,7 @@
 import { CompanyDownloadRequest, CompanySearchRequest } from 'presentation/requests/admin-company.request';
 import { CompanyDTO } from '../dtos/company.dto';
 import { $Enums } from '@prisma/client';
-import { Response } from 'express'
+import { Response } from 'express';
 export interface CompanyUseCase {
   getCompanies(request: CompanySearchRequest): Promise<CompanyDTO[]>;
   getDetails(CompanyId: number): Promise<CompanyDTO>;

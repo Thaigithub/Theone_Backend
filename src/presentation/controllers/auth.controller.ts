@@ -1,4 +1,4 @@
-import { Body, Post, Controller, HttpStatus, Inject} from '@nestjs/common';
+import { Body, Post, Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { BaseResponse } from '../responses/base.response';

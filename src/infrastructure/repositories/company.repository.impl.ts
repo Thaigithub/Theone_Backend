@@ -74,13 +74,13 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
       data: { status: status },
     });
   }
-  async findByIds(request: CompanyDownloadRequest): Promise<Company[]>{
+  async findByIds(request: CompanyDownloadRequest): Promise<Company[]> {
     return await this.prismaService.company.findMany({
-      where:{
+      where: {
         id: {
-          in: request.companyIds
-        }
-      }
-    })
+          in: request.companyIds,
+        },
+      },
+    });
   }
 }

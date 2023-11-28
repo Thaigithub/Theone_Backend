@@ -18,7 +18,7 @@ import { ExcelService } from 'infrastructure/services/excel.service';
       provide: CompanyUseCase,
       useClass: CompanyUseCaseImpl,
     },
-    ExcelService
+    ExcelService,
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })

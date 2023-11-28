@@ -5,7 +5,7 @@ import { BaseResponse } from '../responses/base.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 import { GetCompanyDetailsResponse, GetCompanySearchResponse } from 'presentation/responses/admin-company.response';
 import { CompanySearchRequest, CompanyStatusChangeRequest, CompanyDownloadRequest } from 'presentation/requests/admin-company.request';
-import { Response } from 'express'
+import { Response } from 'express';
 
 @ApiTags('Admin Companies')
 @Controller('/admin/companies')
@@ -58,6 +58,6 @@ export class AdminCompanyController {
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
   async download(@Body() request: CompanyDownloadRequest, @Res() response: Response): Promise<void> {
-    await this.companyUseCase.download(request,response);
+    await this.companyUseCase.download(request, response);
   }
 }

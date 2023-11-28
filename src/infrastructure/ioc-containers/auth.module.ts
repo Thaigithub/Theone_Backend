@@ -13,7 +13,8 @@ import { OtpProviderRepositoryImpl } from 'infrastructure/repositories/otp-provi
 import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
 import { OtpModule } from './sms.module';
 import { OtpService } from 'infrastructure/services/sms.service';
-
+import { CompanyRepository } from 'domain/repositories/company.repository';
+import { CompanyRepositoryImpl } from 'infrastructure/repositories/company.repository.impl';
 @Module({
   imports: [
     PrismaModule,
@@ -34,10 +35,13 @@ import { OtpService } from 'infrastructure/services/sms.service';
       provide: AuthUseCase,
       useClass: AuthUseCaseImpl,
     },
-    
     {
       provide: OtpProviderRepository,
       useClass: OtpProviderRepositoryImpl,
+    },
+    {
+      provide: CompanyRepository,
+      useClass: CompanyRepositoryImpl,
     },
     JwtStrategy,
     OtpService,
