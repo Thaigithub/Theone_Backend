@@ -7,14 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_HOURS } from 'app.config';
 import { AccountModule } from './account.module';
-import { AdminModule } from './admin.module';
 import { JwtStrategy } from 'infrastructure/passport/strategies/jwt.strategy';
 import { OtpProviderModule } from './otp-provider.module';
 import { OtpProviderRepositoryImpl } from 'infrastructure/repositories/otp-provider.repository.impl';
 import { OtpProviderRepository } from 'domain/repositories/otp-provider.repository';
 import { OtpModule } from './sms.module';
 import { OtpService } from 'infrastructure/services/sms.service';
-
+import { CompanyRepository } from 'domain/repositories/company.repository';
+import { CompanyRepositoryImpl } from 'infrastructure/repositories/company.repository.impl';
 @Module({
   imports: [
     PrismaModule,
@@ -26,7 +26,6 @@ import { OtpService } from 'infrastructure/services/sms.service';
     }),
     PrismaModule,
     AccountModule,
-    AdminModule,
     OtpProviderModule,
     OtpModule,
   ],
@@ -39,6 +38,10 @@ import { OtpService } from 'infrastructure/services/sms.service';
     {
       provide: OtpProviderRepository,
       useClass: OtpProviderRepositoryImpl,
+    },
+    {
+      provide: CompanyRepository,
+      useClass: CompanyRepositoryImpl,
     },
     JwtStrategy,
     OtpService,
