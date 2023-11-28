@@ -22,4 +22,4 @@ import { ExcelService } from 'infrastructure/services/excel.service';
   ],
   exports: [CompanyRepository, CompanyUseCase],
 })
-export class AdminCompanyModule {}
+export class AdminModule {}
