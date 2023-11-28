@@ -1,4 +1,4 @@
-import { Body, Query, Param, Controller, Get, HttpStatus, Inject, Put, UseGuards } from '@nestjs/common';
+import { Body, Query, Param, Controller, Get, HttpStatus, Inject, Patch, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CompanyUseCase } from 'application/use-cases/company.use-case';
 import { BaseResponse } from '../responses/base.response';
@@ -24,7 +24,7 @@ export class AdminCompanyController {
     return BaseResponse.of(new GetCompanyDetailsResponse(await this.companyUseCase.getDetails(parseInt(id))));
   }
 
-  @Put('/:id/status/change')
+  @Patch('/:id/status/change')
   @UseGuards(JWTAuthGuard)
   @ApiOperation({
     summary: 'Change company status',

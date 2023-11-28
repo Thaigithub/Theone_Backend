@@ -15,6 +15,7 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
     return await this.prismaService.company.findUnique({
       where: {
         email,
+        isActive:true
       },
     });
   }
@@ -22,6 +23,7 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
     return await this.prismaService.company.findUnique({
       where: {
         id,
+        isActive:true
       },
       include: {
         account: true,
@@ -60,9 +62,15 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
         acc[key] = object[key];
         return acc;
       }, {});
+    query['where']['isActive'] = true
     return await this.prismaService.company.findMany(query);
   }
   async updateStatus(companyId: number, status: $Enums.AccountStatus): Promise<void> {
-    await this.prismaService.account.update({ where: { id: companyId }, data: { status: status } });
+    await this.prismaService.account.update({
+      where: {
+        id: companyId,
+        isActive: true
+      },
+      data: { status: status } });
   }
 }
