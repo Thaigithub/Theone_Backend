@@ -30,7 +30,7 @@ export class CompanyRepositoryImpl extends BaseRepositoryImpl<Company> implement
   }
   async findRequest(request: CompanySearchRequest): Promise<Company[]> {
     const query = {
-      take: parseInt(request.pageSize),
+      take: request.pageSize !== undefined ? parseInt(request.pageSize) : 100,
     };
     if (request.pageNumber) {
       query['skip'] = parseInt(request.pageNumber) * query['take'];
