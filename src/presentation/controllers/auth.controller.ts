@@ -1,10 +1,10 @@
-import { Controller, Post, Body, HttpStatus, Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiConsumes, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import { Body, Post, Controller, Get, HttpStatus, Inject, UseGuards, Res } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
-import { LoginRequest } from 'presentation/requests/login.request';
+import { BaseResponse } from '../responses/base.response';
+import { LoginRequest, SocialLoginRequest } from '../requests/login.request';
+import { LoginResponse } from '../responses/login.response';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
-import { BaseResponse } from 'presentation/responses/base.response';
-import { LoginResponse } from 'presentation/responses/login.response';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
 
 @ApiTags('Auth')
@@ -13,12 +13,45 @@ import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/u
 @ApiConsumes('application/json')
 export class AuthController {
   constructor(@Inject(AuthUseCase) private readonly authUseCase: AuthUseCase) {}
-
+  // GOOGLE
+  @Post('login/google')
+  @ApiOperation({ summary: 'Google Account Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Google Account logged in successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  async googlelogin(@Body() authUserDto: SocialLoginRequest): Promise<BaseResponse<LoginResponse>> {
+    return BaseResponse.of(await this.authUseCase.googleLogin(authUserDto));
+  }
+  // APPLE
+  @Post('login/apple')
+  @ApiOperation({ summary: 'Apple Account Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Apple Account logged in successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  async applelogin(@Body() authUserDto: SocialLoginRequest): Promise<BaseResponse<LoginResponse>> {
+    return BaseResponse.of(await this.authUseCase.appleLogin(authUserDto));
+  }
+  // KAKAO
+  @Post('login/kakao')
+  @ApiOperation({ summary: 'Kakao Account Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Kakao Account logged in successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  async kakaologin(@Body() authUserDto: SocialLoginRequest): Promise<BaseResponse<LoginResponse>> {
+    return BaseResponse.of(await this.authUseCase.kakaoLogin(authUserDto));
+  }
+  // NAVER
+  @Post('login/naver')
+  @ApiOperation({ summary: 'Naver Account Login' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Naver Account logged in successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  async naverlogin(@Body() authUserDto: SocialLoginRequest): Promise<BaseResponse<LoginResponse>> {
+    return BaseResponse.of(await this.authUseCase.kakaoLogin(authUserDto));
+  }
+  // Normal
   @Post('login')
   @ApiOperation({ summary: 'User Login' })
   @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
   async login(@Body() authUserDto: LoginRequest): Promise<BaseResponse<LoginResponse>> {
+    // console.log(await hash(authUserDto.password,10))
     return BaseResponse.of(await this.authUseCase.login(authUserDto));
   }
 

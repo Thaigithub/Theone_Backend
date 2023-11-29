@@ -18,5 +18,4 @@ export class Account extends BaseEntity implements Prisma.AccountUncheckedCreate
   isActive?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
-  authenticationProviders?: Prisma.AuthenticationProviderUncheckedCreateNestedManyWithoutAccountInput;
 }

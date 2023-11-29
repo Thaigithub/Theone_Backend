@@ -54,9 +54,9 @@ export class OtpProviderRepositoryImpl extends BaseRepositoryImpl<OtpProvider> i
         account: true,
       },
     };
-    if (userName) {
-      query.where.account['username'] = userName;
-    }
+    // if (userName) {
+    //   query.where.account['username'] = userName;
+    // }
     return await this.prismaService.otpProvider.findFirst(query);
   }
 }

@@ -1,6 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString, Length } from 'class-validator';
+import { IsString, Length, IsBoolean } from 'class-validator';
+
+export class SocialLoginRequest {
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'asdfgasdgads' })
+  public idToken: string;
+
+  @Expose()
+  @IsBoolean()
+  @ApiProperty({ example: 'true' })
+  public member: boolean;
+}
 
 export class LoginRequest {
   @Expose()

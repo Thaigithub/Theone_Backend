@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-
 import { PrismaModule } from './prisma.module';
 import { FileController } from 'presentation/controllers/file.controller';
 import { StorageService } from 'application/services/storage.service';
