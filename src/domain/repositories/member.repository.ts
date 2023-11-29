@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from './base.repository';
 import { Member } from 'domain/entities/member.entity';
-import { GetListRequest } from 'presentation/requests/member.request';
+import { Member as MemberPrisma } from '@prisma/client';
+import { ChangeMemberRequest, GetListRequest } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
 export abstract class MemberRepository extends BaseRepository<Member> {
-  abstract findByQuery(query: GetListRequest, getTotal: boolean): Promise<MemberResponse[] | number>;
+  abstract findByQuery(query: GetListRequest): Promise<MemberResponse[]>;
+  abstract countByQuery(query: GetListRequest): Promise<number>;
+  abstract findByIds(memberIds: number[]): Promise<MemberPrisma[]>;
   abstract findById(id: number): Promise<MemberDetailsResponse>;
+  abstract updateMember(payload: ChangeMemberRequest): Promise<void>;
 }

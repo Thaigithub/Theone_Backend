@@ -7,7 +7,7 @@ import { CompanyDetailsResponse, CompanyResponse } from 'presentation/responses/
 import { CompanySearchRequest, CompanyStatusChangeRequest, CompanyDownloadRequest } from 'presentation/requests/admin-company.request';
 import { Response } from 'express';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
-@ApiTags('Admin Companies')
+@ApiTags('[ADMIN] Company management')
 @Controller('/admin/companies')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')

@@ -5,10 +5,10 @@ import { BaseResponse } from 'presentation/responses/base.response';
 import { MemberDetailsResponse } from 'presentation/responses/member.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 
-@ApiTags('Member Members')
+@ApiTags('[MEMBER] Members Management')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
-@Controller('/member')
+@Controller('member/members')
 export class MemberMemberController {
   constructor(@Inject(MemberUseCase) private readonly memberUseCase: MemberUseCase) {}
 
