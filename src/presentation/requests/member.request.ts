@@ -1,13 +1,8 @@
 import { $Enums, AccountStatus } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export enum SearchCategory {
-  id = 'id',
-  name = 'name',
-}
-
-export class AdminMemberRequest {
+export class GetListRequest {
   @Expose()
   @IsEnum(AccountStatus)
   @IsOptional()
@@ -19,9 +14,10 @@ export class AdminMemberRequest {
   public level: $Enums.MemberLevel;
 
   @Expose()
-  @IsEnum(SearchCategory)
+  @IsIn(['username', 'name'])
+  @IsString()
   @IsOptional()
-  public searchCategory: SearchCategory;
+  public searchCategory: string;
 
   @Expose()
   @IsString()

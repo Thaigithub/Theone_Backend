@@ -20,4 +20,22 @@ export class BaseResponse<T> {
   }
 }
 
+// export class PaginationResponse<T> {
+//   data: Nullable<T | null>;
+//   total: any;
+
+//   private constructor(data: Nullable<T>, total: number) {
+//     this.data = data;
+//     this.total = total;
+//   }
+
+//   public static of<T>(data: T[]): PaginationResponse<T[]> {
+//     return new PaginationResponse(data, data.length);
+//   }
+
+//   public static ok<T>(data: PaginationResponse<T[]>): PaginationResponse<T[]> {
+//     return new PaginationResponse(data.data, data.total);
+//   }
+// }
+
 type Nullable<T> = T | null;

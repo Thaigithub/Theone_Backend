@@ -11,7 +11,7 @@ export class SocialLoginRequest {
   @Expose()
   @IsBoolean()
   @ApiProperty({ example: 'true' })
-  public member: boolean;
+  public isMember: boolean;
 }
 
 export class LoginRequest {

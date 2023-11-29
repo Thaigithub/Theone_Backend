@@ -1,4 +1,4 @@
-import { Body, Post, Controller, Get, HttpStatus, Inject, UseGuards, Res } from '@nestjs/common';
+import { Body, Post, Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthUseCase } from 'application/use-cases/auth.use-case';
 import { BaseResponse } from '../responses/base.response';
@@ -6,7 +6,7 @@ import { LoginRequest, SocialLoginRequest } from '../requests/login.request';
 import { LoginResponse } from '../responses/login.response';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'presentation/requests/user-info.request';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
-
+// import { hash } from 'bcrypt';
 @ApiTags('Auth')
 @Controller('auth')
 @ApiProduces('application/json')
@@ -51,7 +51,7 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
   async login(@Body() authUserDto: LoginRequest): Promise<BaseResponse<LoginResponse>> {
-    // console.log(await hash(authUserDto.password,10))
+    // console.log(await hash(authUserDto.password, 10));
     return BaseResponse.of(await this.authUseCase.login(authUserDto));
   }
 

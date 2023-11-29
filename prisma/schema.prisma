@@ -52,26 +52,27 @@ model Admin {
 }
 
 model Member {
-  id                 Int              @id @default(autoincrement())
-  name               String
-  accountId          Int              @unique @map("account_id")
-  isActive           Boolean          @default(true)
-  createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  contact            String
-  level              MemberLevel
-  disabled           DisabledType
-  withdrawDate       DateTime?        @db.Date
-  bankName           String?
-  accountNumber      String?
-  authenticationDate DateTime?        @db.Date
-  registrationNumber String?
-  serialNumber       String?
-  dateOfIssue        DateTime?        @db.Date
-  certificates       Certificate[]
-  account            Account          @relation(fields: [accountId], references: [id])
-  teams              MembersOnTeams[]
-  leader             Team[]
+  id                           Int                           @id @default(autoincrement())
+  name                         String
+  accountId                    Int                           @unique @map("account_id")
+  isActive                     Boolean                       @default(true)
+  createdAt                    DateTime                      @default(now()) @map("created_at")
+  updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  contact                      String
+  email                        String                        @unique
+  desiredOccupation            String
+  signupMethod                 SignupMethodType
+  level                        MemberLevel
+  withdrawDate                 DateTime?                     @db.Date
+  authenticationDate           DateTime?                     @db.Date
+  certificates                 Certificate[]
+  account                      Account                       @relation(fields: [accountId], references: [id])
+  teams                        MembersOnTeams[]
+  leader                       Team[]
+  foreignWorker                ForeignWorker?
+  bankAccount                  BankAccount?
+  disability                   Disability?
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
 
   @@map("members")
 }
@@ -126,15 +127,66 @@ model MembersOnTeams {
   @@map("members_on_teams")
 }
 
+model ForeignWorker {
+  id                 Int      @id @default(autoincrement())
+  englishName        String
+  registrationNumber String
+  serialNumber       String
+  dateOfIssue        DateTime @db.Date
+  memberId           Int      @unique @map("member_id")
+  member             Member   @relation(fields: [memberId], references: [id])
+  fileId             Int      @unique
+  file               File     @relation(fields: [fileId], references: [id])
+
+  @@map("foreign_workers")
+}
+
+model BankAccount {
+  id            Int    @id @default(autoincrement())
+  accountHolder String
+  accountNumber String
+  bankName      String
+  memberId      Int    @unique @map("member_id")
+  member        Member @relation(fields: [memberId], references: [id])
+
+  @@map("bank_accounts")
+}
+
+model Disability {
+  id          Int          @id @default(autoincrement())
+  disableType DisabledType
+  memberId    Int          @unique
+  member      Member       @relation(fields: [memberId], references: [id])
+  fileId      Int          @unique
+  file        File         @relation(fields: [fileId], references: [id])
+
+  @@map("disabilities")
+}
+
+model BasicHealthSafetyCertificate {
+  id                 Int      @id @default(autoincrement())
+  registrationNumber String
+  dateOfCompletion   DateTime @db.Date
+  memberId           Int      @unique
+  member             Member   @relation(fields: [memberId], references: [id])
+  fileId             Int      @unique
+  file               File     @relation(fields: [fileId], references: [id])
+
+  @@map("h_s_edu_certificate")
+}
+
 model File {
-  id            Int      @id @default(autoincrement())
-  type          FileType
-  key           String?
-  fileName      String?  @map("file_name")
-  size          BigInt
-  isDeactivated Boolean  @default(false) @map("is_deactivated")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                           Int                           @id @default(autoincrement())
+  type                         FileType
+  key                          String?
+  fileName                     String?                       @map("file_name")
+  size                         BigInt
+  isDeactivated                Boolean                       @default(false) @map("is_deactivated")
+  createdAt                    DateTime                      @default(now()) @map("created_at")
+  updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  Disability                   Disability?
+  ForeignWorker                ForeignWorker?
+  BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
 
   @@map("files")
 }
@@ -169,6 +221,8 @@ model Certificate {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   memberId        Int               @map("member_id")
   member          Member            @relation(fields: [memberId], references: [id])
+
+  @@map("certificates")
 }
 
 enum FunctionName {
@@ -239,7 +293,7 @@ enum AuthenticationProviderType {
 enum MemberLevel {
   PLATINUM
   GOLD
-  SIVER
+  SILVER
   TWO
   THREE
 }
@@ -280,4 +334,12 @@ enum CertificateStatus {
   REJECTED
   APPROVED
   REAPPLY
+}
+
+enum SignupMethodType {
+  GENERAL
+  GOOGLE
+  APPLE
+  KAKAO
+  NAVER
 }

@@ -134,7 +134,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
         })
       ).getPayload();
       let profile = null;
-      if (request.member) {
+      if (request.isMember) {
       } else {
         profile = await this.companyRepository.findByEmail(payload.email);
       }
@@ -150,7 +150,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
     const applekey = (await appleClient.getSigningKey(kid)).getPublicKey();
     const payload = await this.jwtService.verify(applekey, json);
     let profile = null;
-    if (request.member) {
+    if (request.isMember) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {
       profile = await this.companyRepository.findByEmail(payload.email);
@@ -166,7 +166,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
       },
     }).then(response => response.data)['kakao_account'];
     let profile = null;
-    if (request.member) {
+    if (request.isMember) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {
       profile = await this.companyRepository.findByEmail(payload.email);
@@ -182,7 +182,7 @@ export class AuthUseCaseImpl implements AuthUseCase {
       },
     }).then(response => response.data)['reponse'];
     let profile = null;
-    if (request.member) {
+    if (request.isMember) {
       // const account = await this.memberRepository.findByUsername(loginData.username);
     } else {
       profile = await this.companyRepository.findByEmail(payload.email);

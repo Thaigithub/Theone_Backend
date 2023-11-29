@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString, IsNumberString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNumberString, IsOptional, IsArray, IsNumber, ArrayNotEmpty, IsEnum } from 'class-validator';
 import { AccountStatus } from '@prisma/client';
 import { $Enums } from '@prisma/client';
 export class CompanySearchRequest {
@@ -44,4 +44,13 @@ export class CompanyStatusChangeRequest {
   @IsString()
   @ApiProperty({ example: 'APPROVED' })
   public status: AccountStatus;
+}
+
+export class CompanyDownloadRequest {
+  @Expose()
+  @IsArray()
+  @ArrayNotEmpty({ message: 'The array must not be empty' })
+  @IsNumber({}, { each: true, message: 'Each element of the array must be a number' })
+  @ApiProperty({ example: [1, 2, 3] })
+  public companyIds: number[];
 }

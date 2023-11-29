@@ -2,56 +2,111 @@ import { Injectable } from '@nestjs/common';
 import { PrismaModel } from '../../domain/entities/prisma.model';
 import { PrismaService } from '../services/prisma.service';
 import { BaseRepositoryImpl } from './base.repository.impl';
-import { AdminMemberRepository } from 'domain/repositories/member.repository';
-import { AdminMemberRequest, SearchCategory } from 'presentation/requests/admin-member.request';
-import { AccountType } from '@prisma/client';
+import { MemberRepository } from 'domain/repositories/member.repository';
+import { Member } from 'domain/entities/member.entity';
+import { GetListRequest } from 'presentation/requests/member.request';
+import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
-export class AdminMemberRepositoryImpl extends BaseRepositoryImpl<any> implements AdminMemberRepository {
+export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements MemberRepository {
   constructor(private readonly prismaService: PrismaService) {
-    super(prismaService, PrismaModel.ACCOUNT);
+    super(prismaService, PrismaModel.MEMBER);
   }
 
-  async findByQuery(query: AdminMemberRequest): Promise<any> {
-    return await this.prismaService.account.findMany({
+  async findByQuery(query: GetListRequest, getTotal: boolean): Promise<MemberResponse[] | number> {
+    const members = await this.prismaService.member.findMany({
       // Retrieve specific fields
       select: {
-        username: true,
-        status: true,
-        member: {
+        id: true,
+        name: true,
+        contact: true,
+        level: true,
+        account: {
           select: {
-            name: true,
-            contact: true,
-            level: true,
+            username: true,
+            status: true,
           },
         },
       },
 
       // Conditions based on request query
       where: {
-        type: AccountType.MEMBER,
-        status: query.status,
-        username:
-          query.searchCategory === SearchCategory.id
-            ? {
-                contains: query.searchKeyword,
-              }
-            : undefined,
-        member: {
-          name:
-            query.searchCategory === SearchCategory.name
-              ? {
-                  contains: query.searchKeyword,
-                }
-              : undefined,
-          level: query.level,
+        name: query.searchCategory === 'name' ? { contains: query.searchKeyword } : undefined,
+        level: query.level,
+        account: {
+          username: query.searchCategory === 'username' ? { contains: query.searchKeyword } : undefined,
+          status: query.status,
         },
       },
 
       // Pagination
       // If both pageNumber and pageSize is provided then handle the pagination
-      skip: query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
-      take: query.pageNumber && query.pageSize ? query.pageSize : undefined,
+      skip: !getTotal && query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
+      take: !getTotal && query.pageNumber && query.pageSize ? query.pageSize : undefined,
+    });
+    return getTotal ? members.length : members;
+  }
+  async findById(id: number): Promise<MemberDetailsResponse> {
+    return await this.prismaService.member.findUnique({
+      where: {
+        id,
+        isActive: true,
+      },
+      select: {
+        name: true,
+        contact: true,
+        email: true,
+        desiredOccupation: true,
+        level: true,
+        signupMethod: true,
+        bankAccount: {
+          select: {
+            accountHolder: true,
+            accountNumber: true,
+            bankName: true,
+          },
+        },
+        foreignWorker: {
+          select: {
+            englishName: true,
+            registrationNumber: true,
+            serialNumber: true,
+            dateOfIssue: true,
+            file: {
+              select: {
+                key: true,
+                fileName: true,
+                size: true,
+              },
+            },
+          },
+        },
+        disability: {
+          select: {
+            disableType: true,
+            file: {
+              select: {
+                key: true,
+                fileName: true,
+                size: true,
+              },
+            },
+          },
+        },
+        basicHealthSafetyCertificate: {
+          select: {
+            registrationNumber: true,
+            dateOfCompletion: true,
+            file: {
+              select: {
+                key: true,
+                fileName: true,
+                size: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 }
