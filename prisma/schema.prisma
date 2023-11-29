@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,19 +11,18 @@ datasource db {
 }
 
 model Account {
-  id                      Int                      @id @default(autoincrement())
-  username                String                   @unique
-  password                String
-  type                    AccountType
-  status                  AccountStatus
-  isActive                Boolean                  @default(true)
-  createdAt               DateTime                 @default(now()) @map("created_at")
-  updatedAt               DateTime                 @updatedAt @map("updated_at")
-  admin                   Admin?
-  authenticationProviders AuthenticationProvider[]
-  company                 Company?
-  member                  Member?
-  otp                     OtpProvider?
+  id        Int           @id @default(autoincrement())
+  username  String        @unique
+  password  String
+  type      AccountType
+  status    AccountStatus
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  admin     Admin?
+  company   Company?
+  member    Member?
+  otp       OtpProvider?
 
   @@map("accounts")
 }
@@ -75,15 +77,23 @@ model Member {
 }
 
 model Company {
-  id        Int      @id @default(autoincrement())
-  name      String
-  address   String
-  accountId Int      @unique @map("account_id")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  email     String?
-  account   Account  @relation(fields: [accountId], references: [id])
+  id                 Int         @id @default(autoincrement())
+  accountId          Int         @unique @map("account_id")
+  account            Account     @relation(fields: [accountId], references: [id])
+  name               String
+  address            String
+  estDate            DateTime    @map("est_date")
+  businessRegNumber  String      @unique @map("buss_reg_number")
+  corporateRegNumber String      @unique @map("corp_reg_number")
+  type               CompanyType
+  email              String      @unique
+  phone              String
+  presentativeName   String      @map("pres_name")
+  contactPhone       String      @map("contact_phone")
+  contactName        String      @map("contact_name")
+  isActive           Boolean     @default(true)
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
 
   @@map("companies")
 }
@@ -114,19 +124,6 @@ model MembersOnTeams {
 
   @@id([memberId, teamId])
   @@map("members_on_teams")
-}
-
-model AuthenticationProvider {
-  id        Int                        @id @default(autoincrement())
-  key       String
-  type      AuthenticationProviderType
-  isActive  Boolean                    @default(true)
-  createdAt DateTime                   @default(now()) @map("created_at")
-  updatedAt DateTime                   @updatedAt @map("updated_at")
-  accountId Int                        @map("account_id")
-  account   Account                    @relation(fields: [accountId], references: [id])
-
-  @@map("authentication_providers")
 }
 
 model File {
@@ -245,6 +242,12 @@ enum MemberLevel {
   SIVER
   TWO
   THREE
+}
+
+enum CompanyType {
+  CORPORATION
+  INDIVIDUAL
+  OTHER
 }
 
 enum FileType {

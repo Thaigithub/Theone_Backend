@@ -1,5 +1,5 @@
 import { AccountStatus, AccountType } from '@prisma/client';
-import { Account } from '../../domain/entities/account.entity';
+import { Account } from 'domain/entities/account.entity';
 import { GenUID } from 'common/utils/uid';
 import { DbType } from 'common/constant';
 

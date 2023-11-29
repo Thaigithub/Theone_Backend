@@ -9,7 +9,7 @@ import { cleanEnv, port, str } from 'envalid';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { APP_SECRET, CREDENTIALS, HOST, NODE_ENV, ORIGIN, PORT } from './app.config';
-import { AppModule } from './app.module';
+import { AppModule } from './infrastructure/ioc-containers/app.module';
 import { LoggingInterceptor } from './infrastructure/interceptors/logging.interceptor';
 import { ErrorMiddleware } from './infrastructure/middlewares/error.middleware';
 import { ValidationPipe } from './infrastructure/pipes/validation.pipe';

@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
-import { AccountDTO } from '../../application/dtos/account.dto';
-import { AccountUseCase } from '../../application/use-cases/account.use-case';
-import { Account } from '../../domain/entities/account.entity';
-import { AccountRepository } from '../../domain/repositories/account.repository';
-import { UpsertAccountRequest } from '../../presentation/requests/upsert-account.request';
+import { AccountDTO } from 'application/dtos/account.dto';
+import { AccountUseCase } from 'application/use-cases/account.use-case';
+import { Account } from 'domain/entities/account.entity';
+import { AccountRepository } from 'domain/repositories/account.repository';
+import { UpsertAccountRequest } from 'presentation/requests/upsert-account.request';
 
 @Injectable()
 export class AccountUseCaseImpl implements AccountUseCase {

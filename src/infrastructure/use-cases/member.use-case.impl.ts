@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AdminMemberUseCase } from 'application/use-cases/admin-member.use-case';
-import { AdminMemberRepository } from 'domain/repositories/admin-member.repository';
+import { AdminMemberUseCase } from 'application/use-cases/member.use-case';
+import { AdminMemberRepository } from 'domain/repositories/member.repository';
 import { AdminMemberRequest } from 'presentation/requests/admin-member.request';
 import { GetMembersResponse } from 'presentation/responses/admin-member.response';
 

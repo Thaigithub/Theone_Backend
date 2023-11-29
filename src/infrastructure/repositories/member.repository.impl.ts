@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaModel } from '../../domain/entities/prisma.model';
 import { PrismaService } from '../services/prisma.service';
 import { BaseRepositoryImpl } from './base.repository.impl';
-import { AdminMemberRepository } from 'domain/repositories/admin-member.repository';
+import { AdminMemberRepository } from 'domain/repositories/member.repository';
 import { AdminMemberRequest, SearchCategory } from 'presentation/requests/admin-member.request';
 import { AccountType } from '@prisma/client';
 
