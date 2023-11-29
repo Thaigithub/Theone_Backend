@@ -1,61 +1,67 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Inject, Param, ParseIntPipe, Patch, Query, Res } from '@nestjs/common';
 import { MemberUseCase } from 'application/use-cases/member.use-case';
-import { GetListRequest } from 'presentation/requests/member.request';
+import { ChangeMemberRequest, GetListRequest, MemberDownloadRequest } from 'presentation/requests/member.request';
 import { BaseResponse } from 'presentation/responses/base.response';
-import { GetListResponse } from 'presentation/responses/member.response';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { GetListResponse, MemberDetailsResponse } from 'presentation/responses/member.response';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @ApiTags('[ADMIN] Member Management')
-@Controller('admin/member')
+@Controller('admin/members')
 export class AdminMemberController {
   constructor(@Inject(MemberUseCase) private readonly memberUseCase: MemberUseCase) {}
 
+  // Get members list by conditions
   @ApiOperation({
     summary: 'Listing members',
     description: 'Admin can search members by id, name, or can filter by membership level, account status',
   })
-  @ApiParam({
-    name: 'searchCategory',
-    type: 'string',
-    description: 'Choose either searching by id/name',
-    enum: ['id', 'name'],
-    required: false,
-  })
-  @ApiParam({
-    name: 'searchKeyword',
-    type: 'string',
-    description: 'Member id/name must contains keywords',
-    required: false,
-  })
-  @ApiParam({
-    name: 'status',
-    type: 'AccountStatus',
-    description: 'Filter by account status',
-    enum: ['PENDING', 'APPROVED', 'SUSPENDED', 'WITHDRAWN'],
-    required: false,
-  })
-  @ApiParam({
-    name: 'level',
-    type: 'MemberLevel',
-    description: 'Filter by membership level',
-    enum: ['PLATINUM', 'GOLD', 'SILVER', 'TWO', 'THREE'],
-    required: false,
-  })
-  @ApiParam({
-    name: 'pageSize',
-    type: 'number',
-    description: 'Number of member items per page',
-    required: false,
-  })
-  @ApiParam({
-    name: 'pageNumber',
-    type: 'number',
-    description: 'N_th batch of [pageSize]',
-    required: false,
+  @ApiResponse({
+    type: GetListResponse,
   })
   @Get()
-  // @UseGuards(JWTAuthGuard)
   async getList(@Query() query: GetListRequest): Promise<BaseResponse<GetListResponse>> {
     return BaseResponse.of(await this.memberUseCase.getList(query));
+  }
+
+  // Get member detail
+  @ApiOperation({
+    summary: 'Get member detail',
+    description: 'Retrieve member information detail',
+  })
+  @ApiResponse({
+    type: GetListResponse,
+  })
+  @Get('/:id')
+  async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberDetailsResponse>> {
+    return BaseResponse.of(await this.memberUseCase.getMemberDetails(id));
+  }
+
+  // Change member information
+  @ApiOperation({
+    summary: 'Change member information',
+    description: 'Admin can change account_status of member or membership_level',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @Patch()
+  async changeMemberInfo(@Query() payload: ChangeMemberRequest): Promise<BaseResponse<null>> {
+    await this.memberUseCase.changeMemberInfo(payload);
+    return BaseResponse.ok();
+  }
+
+  // Download member list in excel file
+  @ApiOperation({
+    summary: 'Download member in excel file',
+    description: 'Admin can retrieve an excel file contains information of selected members',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @Get('download')
+  async download(@Body() request: MemberDownloadRequest, @Res() response: Response): Promise<BaseResponse<null>> {
+    await this.memberUseCase.download(request.memberIds, response);
+    return BaseResponse.ok();
   }
 }

@@ -1,14 +1,54 @@
-import { $Enums, Account, BankAccount, BasicHealthSafetyCertificate, File, ForeignWorker, Member } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
+import { $Enums, Account, AccountStatus, BankAccount, BasicHealthSafetyCertificate, ForeignWorker, Member, MemberLevel, File } from '@prisma/client';
 
 export class MemberResponse {
+  @ApiProperty({ type: 'string' })
   id: Member['id'];
+
+  @ApiProperty({ type: 'string' })
   name: Member['name'];
+
+  @ApiProperty({ type: 'string' })
   contact: Member['contact'];
+
+  @ApiProperty({
+    type: 'string',
+    example: [...Object.values(MemberLevel)],
+  })
   level: Member['level'];
+
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      username: {
+        type: 'string',
+      },
+      status: {
+        type: 'string',
+        example: [...Object.values(AccountStatus)],
+      },
+    },
+  })
   account: {
     username: Account['username'];
     status: Account['status'];
   };
+}
+
+export class GetListResponse {
+  @ApiProperty({ type: () => [MemberResponse] })
+  members: MemberResponse[];
+
+  @ApiProperty({
+    type: 'number',
+    examples: [0, 1, 2],
+  })
+  total: number;
+
+  constructor(members: MemberResponse[], total: number) {
+    this.members = members;
+    this.total = total;
+  }
 }
 
 export class MemberDetailsResponse {
@@ -51,14 +91,4 @@ export class MemberDetailsResponse {
       size: File['size'];
     };
   };
-}
-
-export class GetListResponse {
-  members: MemberResponse[];
-  total: number;
-
-  constructor(members: MemberResponse[], total: number) {
-    this.members = members;
-    this.total = total;
-  }
 }

@@ -4,7 +4,8 @@ import { PrismaService } from '../services/prisma.service';
 import { BaseRepositoryImpl } from './base.repository.impl';
 import { MemberRepository } from 'domain/repositories/member.repository';
 import { Member } from 'domain/entities/member.entity';
-import { GetListRequest } from 'presentation/requests/member.request';
+import { Member as MemberPrisma } from '@prisma/client';
+import { ChangeMemberRequest, GetListRequest } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
@@ -13,8 +14,20 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
     super(prismaService, PrismaModel.MEMBER);
   }
 
-  async findByQuery(query: GetListRequest, getTotal: boolean): Promise<MemberResponse[] | number> {
-    const members = await this.prismaService.member.findMany({
+  private parseConditionsFromQuery(query: GetListRequest) {
+    return {
+      isActive: true,
+      name: query.keywordByName && { contains: query.keywordByName },
+      level: query.level,
+      account: {
+        username: query.keywordByUsername && { contains: query.keywordByUsername },
+        status: query.status,
+      },
+    };
+  }
+
+  async findByQuery(query: GetListRequest): Promise<MemberResponse[]> {
+    return await this.prismaService.member.findMany({
       // Retrieve specific fields
       select: {
         id: true,
@@ -30,22 +43,33 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
       },
 
       // Conditions based on request query
-      where: {
-        name: query.searchCategory === 'name' ? { contains: query.searchKeyword } : undefined,
-        level: query.level,
-        account: {
-          username: query.searchCategory === 'username' ? { contains: query.searchKeyword } : undefined,
-          status: query.status,
-        },
-      },
+      where: this.parseConditionsFromQuery(query),
 
       // Pagination
       // If both pageNumber and pageSize is provided then handle the pagination
-      skip: !getTotal && query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
-      take: !getTotal && query.pageNumber && query.pageSize ? query.pageSize : undefined,
+      skip: query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
+      take: query.pageNumber && query.pageSize ? query.pageSize : undefined,
     });
-    return getTotal ? members.length : members;
   }
+
+  async countByQuery(query: GetListRequest): Promise<number> {
+    return await this.prismaService.member.count({
+      // Conditions based on request query
+      where: this.parseConditionsFromQuery(query),
+    });
+  }
+
+  async findByIds(memberIds: number[]): Promise<MemberPrisma[]> {
+    return await this.prismaService.member.findMany({
+      where: {
+        isActive: true,
+        id: {
+          in: memberIds,
+        },
+      },
+    });
+  }
+
   async findById(id: number): Promise<MemberDetailsResponse> {
     return await this.prismaService.member.findUnique({
       where: {
@@ -104,6 +128,23 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
                 size: true,
               },
             },
+          },
+        },
+      },
+    });
+  }
+
+  async updateMember(payload: ChangeMemberRequest): Promise<void> {
+    await this.prismaService.member.update({
+      where: {
+        isActive: true,
+        id: payload.id,
+      },
+      data: {
+        level: payload.level,
+        account: {
+          update: {
+            status: payload.status,
           },
         },
       },

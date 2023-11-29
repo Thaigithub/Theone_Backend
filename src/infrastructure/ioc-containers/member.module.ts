@@ -6,6 +6,8 @@ import { MemberUseCase } from 'application/use-cases/member.use-case';
 import { MemberUseCaseImpl } from 'infrastructure/use-cases/member.use-case.impl';
 import { MemberRepository } from 'domain/repositories/member.repository';
 import { MemberRepositoryImpl } from 'infrastructure/repositories/member.repository.impl';
+import { ExcelService } from 'infrastructure/services/excel.service';
+
 @Module({
   imports: [PrismaModule],
   controllers: [AdminMemberController, MemberMemberController],
@@ -18,6 +20,7 @@ import { MemberRepositoryImpl } from 'infrastructure/repositories/member.reposit
       provide: MemberRepository,
       useClass: MemberRepositoryImpl,
     },
+    ExcelService,
   ],
   exports: [MemberUseCase, MemberRepository],
 })

@@ -60,11 +60,11 @@ model Member {
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
   contact                      String
   email                        String                        @unique
-  desiredOccupation            String
-  signupMethod                 SignupMethodType
+  desiredOccupation            String                        @map("desired_occupation")
+  signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
-  withdrawDate                 DateTime?                     @db.Date
-  authenticationDate           DateTime?                     @db.Date
+  withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
+  authenticationDate           DateTime?                     @map("authentication_date") @db.Date
   certificates                 Certificate[]
   account                      Account                       @relation(fields: [accountId], references: [id])
   teams                        MembersOnTeams[]
