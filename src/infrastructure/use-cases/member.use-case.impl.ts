@@ -1,16 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AdminMemberUseCase } from 'application/use-cases/member.use-case';
-import { AdminMemberRepository } from 'domain/repositories/member.repository';
-import { AdminMemberRequest } from 'presentation/requests/admin-member.request';
-import { GetMembersResponse } from 'presentation/responses/admin-member.response';
+import { MemberUseCase } from 'application/use-cases/member.use-case';
+import { MemberRepository } from 'domain/repositories/member.repository';
+import { GetListRequest } from 'presentation/requests/member.request';
+import { GetListResponse, MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
-export class AdminMemberUseCaseImpl implements AdminMemberUseCase {
-  constructor(@Inject(AdminMemberRepository) private adminMemberRepository: AdminMemberRepository) {}
+export class MemberUseCaseImpl implements MemberUseCase {
+  constructor(@Inject(MemberRepository) private memberRepository: MemberRepository) {}
 
-  async getMembers(query: AdminMemberRequest): Promise<GetMembersResponse> {
-    const members = await this.adminMemberRepository.findByQuery(query);
-    const total = members.length;
-    return new GetMembersResponse(members, total);
+  async getList(query: GetListRequest): Promise<GetListResponse> {
+    const members = (await this.memberRepository.findByQuery(query, false)) as MemberResponse[];
+    const total = (await this.memberRepository.findByQuery(query, true)) as number;
+    return new GetListResponse(members, total);
+  }
+  async getMemberDetails(id: number): Promise<MemberDetailsResponse> {
+    return await this.memberRepository.findById(id);
   }
 }

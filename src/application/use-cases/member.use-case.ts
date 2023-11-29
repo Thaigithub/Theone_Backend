@@ -1,8 +1,9 @@
-import { AdminMemberRequest } from 'presentation/requests/admin-member.request';
-import { GetMembersResponse } from 'presentation/responses/admin-member.response';
+import { GetListRequest } from 'presentation/requests/member.request';
+import { GetListResponse, MemberDetailsResponse } from 'presentation/responses/member.response';
 
-export interface AdminMemberUseCase {
-  getMembers(query: AdminMemberRequest): Promise<GetMembersResponse>;
+export interface MemberUseCase {
+  getList(query: GetListRequest): Promise<GetListResponse>;
+  getMemberDetails(id: number): Promise<MemberDetailsResponse>;
 }
 
-export const AdminMemberUseCase = Symbol('AdminMemberUseCase');
+export const MemberUseCase = Symbol('MemberUseCase');

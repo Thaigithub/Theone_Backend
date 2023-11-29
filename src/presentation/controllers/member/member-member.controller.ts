@@ -1,0 +1,26 @@
+import { Controller, Get, Inject, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { MemberUseCase } from 'application/use-cases/member.use-case';
+import { BaseResponse } from 'presentation/responses/base.response';
+import { MemberDetailsResponse } from 'presentation/responses/member.response';
+import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
+
+@ApiTags('Member Members')
+@ApiProduces('application/json')
+@ApiConsumes('application/json')
+@Controller('/member')
+export class MemberMemberController {
+  constructor(@Inject(MemberUseCase) private readonly memberUseCase: MemberUseCase) {}
+
+  @Get('/details')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({
+    summary: 'Find member detail',
+    description: 'This endpoint retrieves member details in the system.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+  async getMemberDetails(@Req() request: any): Promise<BaseResponse<MemberDetailsResponse>> {
+    return BaseResponse.of(await this.memberUseCase.getMemberDetails(request.user.accountId));
+  }
+}

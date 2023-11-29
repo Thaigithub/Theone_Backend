@@ -4,7 +4,7 @@ import { TeamDTO } from 'application/dtos/team.dto';
 import { TeamUseCase } from 'application/use-cases/team.use-case';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
 import { BaseResponse } from 'presentation/responses/base.response';
-import { Pagination } from 'presentation/responses/pageInfo.response';
+import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 
 @ApiTags('AdminTeamManagementController')
 @Controller('admin/teams')
@@ -20,7 +20,7 @@ export class AdminTeamController {
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams returned' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
-  async searchTeamFilter(@Body() request: TeamSearchRequest): Promise<BaseResponse<Pagination<TeamDTO>>> {
+  async searchTeamFilter(@Body() request: TeamSearchRequest): Promise<BaseResponse<PaginationResponse<TeamDTO>>> {
     return BaseResponse.of(await this.teamUseCase.searchTeams(request));
   }
 }

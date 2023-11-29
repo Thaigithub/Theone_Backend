@@ -4,6 +4,7 @@ import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'pr
 import { LoginResponse } from 'presentation/responses/login.response';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'presentation/responses/user-info.request';
 
+
 export interface AuthUseCase {
   login(loginData: LoginRequest): Promise<LoginResponse>;
   verifyPayload(userId: number): Promise<JwtPayloadData>;
