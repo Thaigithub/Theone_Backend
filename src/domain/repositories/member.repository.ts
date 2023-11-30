@@ -11,5 +11,6 @@ export abstract class MemberRepository extends BaseRepository<Member> {
   abstract countByQuery(query: GetListRequest): Promise<number>;
   abstract findByIds(memberIds: number[]): Promise<MemberPrisma[]>;
   abstract findById(id: number): Promise<MemberDetailsResponse>;
+  abstract findIdByAccountId(id: number): Promise<number>;
   abstract updateMember(payload: ChangeMemberRequest): Promise<void>;
 }

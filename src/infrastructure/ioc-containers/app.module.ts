@@ -4,7 +4,8 @@ import { AccountModule } from './account.module';
 import { AuthModule } from './auth.module';
 import { CompanyModule } from './company.module';
 import { MemberModule } from './member.module';
+import { CertificateModule } from './certificate.module';
 @Module({
-  imports: [PrismaModule, AccountModule, AuthModule, CompanyModule, MemberModule],
+  imports: [PrismaModule, AccountModule, AuthModule, CompanyModule, MemberModule, CertificateModule],
 })
 export class AppModule {}

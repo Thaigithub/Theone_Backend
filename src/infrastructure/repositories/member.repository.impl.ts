@@ -13,6 +13,17 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.MEMBER);
   }
+  async findIdByAccountId(id: number): Promise<number> {
+    const result = await this.prismaService.member.findUnique({
+      where: {
+        accountId: id,
+      },
+      select: {
+        id: true,
+      },
+    });
+    return result.id;
+  }
 
   private parseConditionsFromQuery(query: GetListRequest) {
     return {

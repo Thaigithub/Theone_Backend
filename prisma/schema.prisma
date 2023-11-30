@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -187,6 +184,7 @@ model File {
   Disability                   Disability?
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  certificate                  Certificate?
 
   @@map("files")
 }
@@ -212,15 +210,17 @@ model Function {
 }
 
 model Certificate {
-  id              Int               @id @default(autoincrement())
-  name            String
-  photo           String
-  status          CertificateStatus
-  acquisitionDate DateTime          @map("acquisition_date")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  memberId        Int               @map("member_id")
-  member          Member            @relation(fields: [memberId], references: [id])
+  id                Int               @id @default(autoincrement())
+  name              String
+  status            CertificateStatus
+  acquisitionDate   DateTime          @map("acquisition_date")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  memberId          Int               @map("member_id")
+  certificateNumber String?           @map("certificate_number")
+  fileId            Int               @unique @map("file_Id")
+  file              File              @relation(fields: [fileId], references: [id])
+  member            Member            @relation(fields: [memberId], references: [id])
 
   @@map("certificates")
 }
