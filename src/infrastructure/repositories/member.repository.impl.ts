@@ -5,7 +5,7 @@ import { BaseRepositoryImpl } from './base.repository.impl';
 import { MemberRepository } from 'domain/repositories/member.repository';
 import { Member } from 'domain/entities/member.entity';
 import { Member as MemberPrisma } from '@prisma/client';
-import { ChangeMemberRequest, GetListRequest } from 'presentation/requests/member.request';
+import { ChangeMemberRequest, GetListRequest, UpsertBankAccountRequest } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
@@ -145,6 +145,27 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
         account: {
           update: {
             status: payload.status,
+          },
+        },
+      },
+    });
+  }
+  async upsertBankAccount(id: number, request: UpsertBankAccountRequest): Promise<void> {
+    await this.prismaService.member.update({
+      where: { accountId: id },
+      data: {
+        bankAccount: {
+          upsert: {
+            update: {
+              accountHolder: request.accountHolder,
+              accountNumber: request.accountNumber,
+              bankName: request.bankName,
+            },
+            create: {
+              accountHolder: request.accountHolder,
+              accountNumber: request.accountNumber,
+              bankName: request.bankName,
+            },
           },
         },
       },

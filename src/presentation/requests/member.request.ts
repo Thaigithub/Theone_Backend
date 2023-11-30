@@ -1,7 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { AccountStatus, MemberLevel } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+export class UpsertBankAccountRequest {
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'TheOne' })
+  public accountHolder: string;
+
+  @Expose()
+  @IsNumberString()
+  @ApiProperty({ example: '1233534' })
+  public accountNumber: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'ACB' })
+  public bankName: string;
+}
 
 export class GetListRequest {
   @ApiProperty({

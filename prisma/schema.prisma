@@ -60,7 +60,7 @@ model Member {
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
   contact                      String
   email                        String                        @unique
-  desiredOccupation            String                        @map("desired_occupation")
+  desiredOccupation            String?                       @map("desired_occupation")
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
