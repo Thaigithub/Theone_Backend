@@ -27,11 +27,10 @@ export class MemberCertificateController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Result of certificates' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Get certificates failed' })
   async getMemberCertificates(
-    @Query('page',ParseIntPipe) page: number, // Use @Query for query parameters
-    @Query('size',ParseIntPipe) size: number,
+    @Query('page', ParseIntPipe) page: number, // Use @Query for query parameters
+    @Query('size', ParseIntPipe) size: number,
     @Request() req,
   ): Promise<BaseResponse<PaginationResponse<GetMemberCertificateResponse>>> {
-    console.log(req.user.accountId,page,size);
     const result = await this.userCertificateUseCase.getPaginatedCertificates({
       memberId: req.user.accountId,
       page: page,

@@ -6,10 +6,56 @@ import { PrismaService } from 'infrastructure/services/prisma.service';
 import { PrismaModel } from 'domain/entities/prisma.model';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
 import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from 'domain/enums/team-search';
+import { GetTeamDetailsResponse, GetTeamMemberDetails } from 'presentation/responses/admin-team.response';
 @Injectable()
 export class TeamRepositoryImpl extends BaseRepositoryImpl<any> implements TeamRepository {
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.TEAM);
+  }
+  async getTeamDetail(id: number): Promise<GetTeamDetailsResponse> {
+    const team = await this.prismaService.team.findUniqueOrThrow({
+      where: {
+        id,
+      },
+      select: {
+        name: true,
+      },
+    });
+    const members = await this.prismaService.membersOnTeams.findMany({
+      where: {
+        teamId: id,
+      },
+      select: {
+        member: {
+          select: {
+            id: true,
+            name: true,
+            level: true,
+            account: {
+              select: {
+                username: true,
+                status: true,
+              },
+            },
+            contact: true,
+          },
+        },
+      },
+    });
+    return {
+      teamName: team.name,
+      members: members.map(
+        memberInfo =>
+          ({
+            id: memberInfo.member.id,
+            userName: memberInfo.member.account.username,
+            name: memberInfo.member.name,
+            level: memberInfo.member.level,
+            contact: memberInfo.member.contact,
+            memberStatus: memberInfo.member.account.status,
+          }) as GetTeamMemberDetails,
+      ),
+    };
   }
   async searchTeamFilter(request: TeamSearchRequest): Promise<any> {
     const { keyWord, searchCategory, sortOptions, teamStatus } = request;
