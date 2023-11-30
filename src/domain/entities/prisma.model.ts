@@ -8,4 +8,5 @@ export enum PrismaModel {
   OTP_PROVIDER = 'otpProvider',
   FILE = 'file',
   MEMBER = 'member',
+  CERTIFICATE = 'certificate',
 }
