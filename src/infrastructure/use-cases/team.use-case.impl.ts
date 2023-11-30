@@ -4,11 +4,16 @@ import { TeamUseCase } from 'application/use-cases/team.use-case';
 import { PaginationValidationService } from 'common/utils/pagination-validator';
 import { TeamRepository } from 'domain/repositories/team.repository';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
+import { GetTeamDetailsResponse } from 'presentation/responses/admin-team.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 
 @Injectable()
 export class TeamUseCaseImpl implements TeamUseCase {
   constructor(@Inject(TeamRepository) private readonly teamRepository: TeamRepository) {}
+  async getTeamDetail(id: number): Promise<GetTeamDetailsResponse> {
+    const result = await this.teamRepository.getTeamDetail(id);
+    return result;
+  }
   async searchTeams(request: TeamSearchRequest): Promise<PaginationResponse<TeamDTO>> {
     const teams = await this.teamRepository.searchTeamFilter(request);
     const teamsDto = teams.map(team => {
