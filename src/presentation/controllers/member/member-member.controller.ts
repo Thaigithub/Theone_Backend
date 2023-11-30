@@ -4,7 +4,7 @@ import { MemberUseCase } from 'application/use-cases/member.use-case';
 import { BaseResponse } from 'presentation/responses/base.response';
 import { MemberDetailsResponse } from 'presentation/responses/member.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
-import { UpsertBankAccountRequest } from 'presentation/requests/member.request';
+import { UpsertBankAccountRequest, UpsertHSTCertificateRequest } from 'presentation/requests/member.request';
 
 @ApiTags('[MEMBER] Members Management')
 @ApiProduces('application/json')
@@ -35,5 +35,17 @@ export class MemberMemberController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
   async upsertBankAccount(@Req() request: any, @Body() bankAccount: UpsertBankAccountRequest): Promise<void> {
     await this.memberUseCase.upsertBankAccount(request.user.accountId, bankAccount);
+  }
+
+  @Put('hst-certificate')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({
+    summary: 'Find company detail',
+    description: 'This endpoint create bank account in the system.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+  async upsertHSTCertificate(@Req() request: any, @Body() hstCertificate: UpsertHSTCertificateRequest): Promise<void> {
+    await this.memberUseCase.upsertHSTCertificate(request.user.accountId, hstCertificate);
   }
 }

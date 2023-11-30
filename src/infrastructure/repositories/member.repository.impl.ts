@@ -5,7 +5,7 @@ import { BaseRepositoryImpl } from './base.repository.impl';
 import { MemberRepository } from 'domain/repositories/member.repository';
 import { Member } from 'domain/entities/member.entity';
 import { Member as MemberPrisma } from '@prisma/client';
-import { ChangeMemberRequest, GetListRequest, UpsertBankAccountRequest } from 'presentation/requests/member.request';
+import { ChangeMemberRequest, GetListRequest, UpsertBankAccountRequest, UpsertHSTCertificateRequest } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
@@ -176,6 +176,41 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
               accountHolder: request.accountHolder,
               accountNumber: request.accountNumber,
               bankName: request.bankName,
+            },
+          },
+        },
+      },
+    });
+  }
+  async upsertHSTCertificate(id: number, request: UpsertHSTCertificateRequest): Promise<void> {
+    await this.prismaService.member.update({
+      where: { accountId: id },
+      data: {
+        basicHealthSafetyCertificate: {
+          upsert: {
+            update: {
+              registrationNumber: request.registrationNumber,
+              dateOfCompletion: new Date(request.dateOfCompletion).toISOString(),
+              file: {
+                update: {
+                  type: request.fileType,
+                  key: request.fileKey,
+                  size: request.fileSize,
+                  fileName: request.fileName,
+                },
+              },
+            },
+            create: {
+              registrationNumber: request.registrationNumber,
+              dateOfCompletion: new Date(request.dateOfCompletion).toISOString(),
+              file: {
+                create: {
+                  type: request.fileType,
+                  key: request.fileKey,
+                  size: request.fileSize,
+                  fileName: request.fileName,
+                },
+              },
             },
           },
         },

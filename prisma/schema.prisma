@@ -134,17 +134,21 @@ model ForeignWorker {
   member             Member   @relation(fields: [memberId], references: [id])
   fileId             Int      @unique
   file               File     @relation(fields: [fileId], references: [id])
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   @@map("foreign_workers")
 }
 
 model BankAccount {
-  id            Int    @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   accountHolder String
   accountNumber String
   bankName      String
-  memberId      Int    @unique @map("member_id")
-  member        Member @relation(fields: [memberId], references: [id])
+  memberId      Int      @unique @map("member_id")
+  member        Member   @relation(fields: [memberId], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("bank_accounts")
 }
@@ -156,6 +160,8 @@ model Disability {
   member      Member       @relation(fields: [memberId], references: [id])
   fileId      Int          @unique
   file        File         @relation(fields: [fileId], references: [id])
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
 
   @@map("disabilities")
 }
@@ -168,8 +174,10 @@ model BasicHealthSafetyCertificate {
   member             Member   @relation(fields: [memberId], references: [id])
   fileId             Int      @unique
   file               File     @relation(fields: [fileId], references: [id])
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
-  @@map("h_s_edu_certificate")
+  @@map("hst_certificates")
 }
 
 model File {

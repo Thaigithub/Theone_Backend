@@ -1,7 +1,43 @@
-import { AccountStatus, MemberLevel } from '@prisma/client';
+import { AccountStatus, FileType, MemberLevel } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEnum, IsISO8601, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+export class UpsertHSTCertificateRequest {
+  @Expose()
+  @IsNumberString()
+  @ApiProperty({ example: '123456' })
+  public registrationNumber: string;
+
+  @Expose()
+  @IsISO8601()
+  @ApiProperty({ example: '2020-10-10T00:00:00Z' })
+  public dateOfCompletion: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'asdfhjawbecqertq' })
+  public fileKey: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'basic.pdf' })
+  public fileName: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    type: 'enum',
+    enum: FileType,
+    example: FileType.PDF,
+  })
+  public fileType: FileType;
+
+  @Expose()
+  @IsNumber()
+  @ApiProperty({ example: 100 })
+  public fileSize: number;
+}
+
 export class UpsertBankAccountRequest {
   @Expose()
   @IsString()
