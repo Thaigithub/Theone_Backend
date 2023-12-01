@@ -7,5 +7,6 @@ export interface TeamUseCase {
   searchTeams(request: TeamSearchRequest): Promise<PaginationResponse<TeamDTO>>;
   getTeamDetail(id: number): Promise<GetTeamDetailsResponse>;
   download(teamIds: number[], response: Response): Promise<void>;
+  downloadTeamDetails(teamId: number, response: Response): Promise<void>;
 }
 export const TeamUseCase = Symbol('TeamUseCase');

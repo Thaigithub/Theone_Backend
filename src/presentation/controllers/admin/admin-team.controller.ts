@@ -46,6 +46,20 @@ export class AdminTeamController {
     return;
   }
 
+  @Get('download-team-details')
+  @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @ApiConsumes('application/json')
+  @ApiOperation({
+    summary: 'Download team Details in excel file',
+    description: 'Admin can retrieve an excel file contains information of team Details',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'download team details excel file successfully' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'download team details excel file failed' })
+  async downloadTeamDetails(@Query('teamId', ParseIntPipe) teamId: number, @Res() response: Response): Promise<BaseResponse<void>> {
+    await this.teamUseCase.downloadTeamDetails(teamId, response);
+    return BaseResponse.ok();
+  }
+
   @Get(':id')
   @HttpCode(200)
   @ApiOperation({

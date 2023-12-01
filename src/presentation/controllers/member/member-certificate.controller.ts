@@ -8,7 +8,7 @@ import { BaseResponse } from 'presentation/responses/base.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 import { GetMemberCertificateResponse } from 'presentation/responses/member-certificate.response';
 
-@ApiTags('MemberCertificateController')
+@ApiTags('[Member] Certificate')
 @Controller('member/certificates')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')

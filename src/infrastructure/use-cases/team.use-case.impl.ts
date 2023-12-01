@@ -5,7 +5,7 @@ import { PaginationValidationService } from 'common/utils/pagination-validator';
 import { TeamRepository } from 'domain/repositories/team.repository';
 import { ExcelService } from 'infrastructure/services/excel.service';
 import { TeamSearchRequest } from 'presentation/requests/team.request';
-import { GetAdminTeamResponse, GetTeamDetailsResponse } from 'presentation/responses/admin-team.response';
+import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from 'presentation/responses/admin-team.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 import { Response } from 'express';
 
@@ -15,6 +15,14 @@ export class TeamUseCaseImpl implements TeamUseCase {
     @Inject(TeamRepository) private readonly teamRepository: TeamRepository,
     @Inject(ExcelService) private readonly excelService: ExcelService,
   ) {}
+  async downloadTeamDetails(teamId: number, response: Response): Promise<void> {
+    const teamDetails = await this.teamRepository.getTeamDetail(teamId);
+    const excelData: Omit<GetTeamMemberDetails, 'id'>[] = teamDetails.members.map(({ id, ...rest }) => rest);
+    const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
+    excelStream.pipe(response);
+  }
   async download(teamIds: number[], response: Response): Promise<void> {
     const teams = await this.teamRepository.getTeamWithIds(teamIds);
     const excelData: Omit<GetAdminTeamResponse, 'id' | 'isActive'>[] = teams.map(({ id, isActive, ...rest }) => rest);
