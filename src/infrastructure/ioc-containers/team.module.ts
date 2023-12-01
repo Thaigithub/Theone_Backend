@@ -5,6 +5,7 @@ import { TeamRepositoryImpl } from 'infrastructure/repositories/team.repository.
 import { TeamUseCase } from 'application/use-cases/team.use-case';
 import { TeamUseCaseImpl } from 'infrastructure/use-cases/team.use-case.impl';
 import { AdminTeamController } from 'presentation/controllers/admin/admin-team.controller';
+import { ExcelService } from 'infrastructure/services/excel.service';
 
 @Module({
   imports: [PrismaModule],
@@ -18,6 +19,7 @@ import { AdminTeamController } from 'presentation/controllers/admin/admin-team.c
       provide: TeamRepository,
       useClass: TeamRepositoryImpl,
     },
+    ExcelService,
   ],
   exports: [TeamUseCase],
 })
