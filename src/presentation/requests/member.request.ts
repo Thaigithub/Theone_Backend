@@ -1,7 +1,51 @@
-import { AccountStatus, FileType, MemberLevel } from '@prisma/client';
+import { AccountStatus, DisabledLevel, DisabledType, FileType, MemberLevel } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsEnum, IsISO8601, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+export class UpsertDisabilityRequest {
+  @Expose()
+  @IsEnum(DisabledLevel)
+  @ApiProperty({
+    type: 'enum',
+    enum: DisabledLevel,
+    example: DisabledLevel,
+  })
+  public disabledLevel: DisabledLevel;
+
+  @Expose()
+  @IsEnum(DisabledType)
+  @ApiProperty({
+    type: 'enum',
+    enum: DisabledType,
+    example: DisabledType.DISABLED,
+  })
+  public disabledType: DisabledType;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'asdfhjawbecqertq' })
+  public fileKey: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'basic.pdf' })
+  public fileName: string;
+
+  @Expose()
+  @IsEnum(FileType)
+  @ApiProperty({
+    type: 'enum',
+    enum: FileType,
+    example: FileType.PDF,
+  })
+  public fileType: FileType;
+
+  @Expose()
+  @IsNumber()
+  @ApiProperty({ example: 100 })
+  public fileSize: number;
+}
+
 export class UpsertHSTCertificateRequest {
   @Expose()
   @IsString()
@@ -24,7 +68,7 @@ export class UpsertHSTCertificateRequest {
   public fileName: string;
 
   @Expose()
-  @IsString()
+  @IsEnum(FileType)
   @ApiProperty({
     type: 'enum',
     enum: FileType,
@@ -70,7 +114,7 @@ export class UpsertForeignWorkerRequest {
   public fileName: string;
 
   @Expose()
-  @IsString()
+  @IsEnum(FileType)
   @ApiProperty({
     type: 'enum',
     enum: FileType,

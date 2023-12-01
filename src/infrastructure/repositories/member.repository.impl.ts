@@ -11,6 +11,7 @@ import {
   UpsertBankAccountRequest,
   UpsertForeignWorkerRequest,
   UpsertHSTCertificateRequest,
+  UpsertDisabilityRequest,
 } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
@@ -248,6 +249,41 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
               serialNumber: request.serialNumber,
               registrationNumber: request.registrationNumber,
               dateOfIssue: new Date(request.dateOfIssue).toISOString(),
+              file: {
+                create: {
+                  type: request.fileType,
+                  key: request.fileKey,
+                  size: request.fileSize,
+                  fileName: request.fileName,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  async upsertDisability(id: number, request: UpsertDisabilityRequest): Promise<void> {
+    await this.prismaService.member.update({
+      where: { accountId: id },
+      data: {
+        disability: {
+          upsert: {
+            update: {
+              disableLevel: request.disabledLevel,
+              disableType: request.disabledType,
+              file: {
+                update: {
+                  type: request.fileType,
+                  key: request.fileKey,
+                  size: request.fileSize,
+                  fileName: request.fileName,
+                },
+              },
+            },
+            create: {
+              disableLevel: request.disabledLevel,
+              disableType: request.disabledType,
               file: {
                 create: {
                   type: request.fileType,

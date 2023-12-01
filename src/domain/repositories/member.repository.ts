@@ -8,6 +8,7 @@ import {
   UpsertBankAccountRequest,
   UpsertForeignWorkerRequest,
   UpsertHSTCertificateRequest,
+  UpsertDisabilityRequest,
 } from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
@@ -22,4 +23,5 @@ export abstract class MemberRepository extends BaseRepository<Member> {
   abstract upsertBankAccount(id: number, request: UpsertBankAccountRequest): Promise<void>;
   abstract upsertHSTCertificate(id: number, request: UpsertHSTCertificateRequest): Promise<void>;
   abstract upsertForeignWorker(id: number, request: UpsertForeignWorkerRequest): Promise<void>;
+  abstract upsertDisability(id: number, request: UpsertDisabilityRequest): Promise<void>;
 }

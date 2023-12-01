@@ -4,7 +4,12 @@ import { MemberUseCase } from 'application/use-cases/member.use-case';
 import { BaseResponse } from 'presentation/responses/base.response';
 import { MemberDetailsResponse } from 'presentation/responses/member.response';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
-import { UpsertBankAccountRequest, UpsertForeignWorkerRequest, UpsertHSTCertificateRequest } from 'presentation/requests/member.request';
+import {
+  UpsertBankAccountRequest,
+  UpsertForeignWorkerRequest,
+  UpsertHSTCertificateRequest,
+  UpsertDisabilityRequest,
+} from 'presentation/requests/member.request';
 
 @ApiTags('[MEMBER] Members Management')
 @ApiProduces('application/json')
@@ -62,5 +67,17 @@ export class MemberMemberController {
   async upsertForeignWorker(@Req() request: any, @Body() foreigWworker: UpsertForeignWorkerRequest): Promise<BaseResponse<null>> {
     await this.memberUseCase.upsertForeignWorker(request.user.accountId, foreigWworker);
     return BaseResponse.ok();
+  }
+
+  @Put('disability')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({
+    summary: 'Upsert disability detail',
+    description: 'This endpoint upsert disability in the system.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+  async upsertDisability(@Req() request: any, @Body() disability: UpsertDisabilityRequest): Promise<void> {
+    await this.memberUseCase.upsertDisability(request.user.accountId, disability);
   }
 }
