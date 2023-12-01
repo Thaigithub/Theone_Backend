@@ -5,8 +5,9 @@ export class GetAdminTeamResponse {
   name: Team['name'];
   isActive: Team['isActive'];
   status: Team['status'];
-  leader: Member;
-  members: Member[];
+  leaderName: string;
+  leaderContact: string;
+  members?: number;
 }
 
 export class GetTeamMemberDetails {

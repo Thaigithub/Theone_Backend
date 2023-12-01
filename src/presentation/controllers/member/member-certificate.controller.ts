@@ -1,10 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { CertificateUseCase } from 'application/use-cases/certificate.use-case';
 import { JWTAuthGuard } from 'infrastructure/passport/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'infrastructure/passport/guards/roles.guard';
-import { GetMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
 import { BaseResponse } from 'presentation/responses/base.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 import { GetMemberCertificateResponse } from 'presentation/responses/member-certificate.response';
