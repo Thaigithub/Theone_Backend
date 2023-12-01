@@ -4,7 +4,7 @@ import { ArrayNotEmpty, IsArray, IsEnum, IsISO8601, IsNumber, IsNumberString, Is
 import { ApiProperty } from '@nestjs/swagger';
 export class UpsertHSTCertificateRequest {
   @Expose()
-  @IsNumberString()
+  @IsString()
   @ApiProperty({ example: '123456' })
   public registrationNumber: string;
 
@@ -12,6 +12,52 @@ export class UpsertHSTCertificateRequest {
   @IsISO8601()
   @ApiProperty({ example: '2020-10-10T00:00:00Z' })
   public dateOfCompletion: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'asdfhjawbecqertq' })
+  public fileKey: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'basic.pdf' })
+  public fileName: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    type: 'enum',
+    enum: FileType,
+    example: FileType.PDF,
+  })
+  public fileType: FileType;
+
+  @Expose()
+  @IsNumber()
+  @ApiProperty({ example: 100 })
+  public fileSize: number;
+}
+
+export class UpsertForeignWorkerRequest {
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: 'The One' })
+  public englishName: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: '123456' })
+  public registrationNumber: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({ example: '123456' })
+  public serialNumber: string;
+
+  @Expose()
+  @IsISO8601()
+  @ApiProperty({ example: '2020-10-10T00:00:00Z' })
+  public dateOfIssue: string;
 
   @Expose()
   @IsString()

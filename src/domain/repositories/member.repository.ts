@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { BaseRepository } from './base.repository';
 import { Member } from 'domain/entities/member.entity';
 import { Member as MemberPrisma } from '@prisma/client';
-import { ChangeMemberRequest, GetListRequest, UpsertBankAccountRequest, UpsertHSTCertificateRequest } from 'presentation/requests/member.request';
+import {
+  ChangeMemberRequest,
+  GetListRequest,
+  UpsertBankAccountRequest,
+  UpsertForeignWorkerRequest,
+  UpsertHSTCertificateRequest,
+} from 'presentation/requests/member.request';
 import { MemberDetailsResponse, MemberResponse } from 'presentation/responses/member.response';
 
 @Injectable()
@@ -15,4 +21,5 @@ export abstract class MemberRepository extends BaseRepository<Member> {
   abstract updateMember(payload: ChangeMemberRequest): Promise<void>;
   abstract upsertBankAccount(id: number, request: UpsertBankAccountRequest): Promise<void>;
   abstract upsertHSTCertificate(id: number, request: UpsertHSTCertificateRequest): Promise<void>;
+  abstract upsertForeignWorker(id: number, request: UpsertForeignWorkerRequest): Promise<void>;
 }
