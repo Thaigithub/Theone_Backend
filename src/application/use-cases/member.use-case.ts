@@ -4,6 +4,7 @@ import {
   UpsertBankAccountRequest,
   UpsertForeignWorkerRequest,
   UpsertHSTCertificateRequest,
+  UpsertDisabilityRequest,
 } from 'presentation/requests/member.request';
 import { GetListResponse, MemberDetailsResponse } from 'presentation/responses/member.response';
 import { Response } from 'express';
@@ -16,6 +17,7 @@ export interface MemberUseCase {
   upsertBankAccount(id: number, bankAccount: UpsertBankAccountRequest): Promise<void>;
   upsertHSTCertificate(id: number, hstCertificate: UpsertHSTCertificateRequest): Promise<void>;
   upsertForeignWorker(id: number, foreignWorker: UpsertForeignWorkerRequest): Promise<void>;
+  upsertDisability(id: number, disability: UpsertDisabilityRequest): Promise<void>;
 }
 
 export const MemberUseCase = Symbol('MemberUseCase');

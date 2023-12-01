@@ -7,6 +7,7 @@ import {
   UpsertBankAccountRequest,
   UpsertForeignWorkerRequest,
   UpsertHSTCertificateRequest,
+  UpsertDisabilityRequest,
 } from 'presentation/requests/member.request';
 import { GetListResponse, MemberDetailsResponse } from 'presentation/responses/member.response';
 import { Response } from 'express';
@@ -48,5 +49,8 @@ export class MemberUseCaseImpl implements MemberUseCase {
   }
   async upsertForeignWorker(id: number, foreignWorker: UpsertForeignWorkerRequest): Promise<void> {
     await this.memberRepository.upsertForeignWorker(id, foreignWorker);
+  }
+  async upsertDisability(id: number, disability: UpsertDisabilityRequest): Promise<void> {
+    await this.memberRepository.upsertDisability(id, disability);
   }
 }
