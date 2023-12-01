@@ -1,7 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MemberUseCase } from 'application/use-cases/member.use-case';
 import { MemberRepository } from 'domain/repositories/member.repository';
-import { ChangeMemberRequest, GetListRequest, UpsertBankAccountRequest, UpsertHSTCertificateRequest } from 'presentation/requests/member.request';
+import {
+  ChangeMemberRequest,
+  GetListRequest,
+  UpsertBankAccountRequest,
+  UpsertForeignWorkerRequest,
+  UpsertHSTCertificateRequest,
+} from 'presentation/requests/member.request';
 import { GetListResponse, MemberDetailsResponse } from 'presentation/responses/member.response';
 import { Response } from 'express';
 import { ExcelService } from 'infrastructure/services/excel.service';
@@ -39,5 +45,8 @@ export class MemberUseCaseImpl implements MemberUseCase {
   }
   async upsertHSTCertificate(id: number, hstCertificate: UpsertHSTCertificateRequest): Promise<void> {
     await this.memberRepository.upsertHSTCertificate(id, hstCertificate);
+  }
+  async upsertForeignWorker(id: number, foreignWorker: UpsertForeignWorkerRequest): Promise<void> {
+    await this.memberRepository.upsertForeignWorker(id, foreignWorker);
   }
 }
