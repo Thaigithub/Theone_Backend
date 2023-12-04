@@ -19,9 +19,15 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': [
-      'off',
+      'warn',
       {
         endOfLine: 'auto',
+        singleQuote: true,
+        trailingComma: 'all',
+        tabWidth: 4,
+        useTabs: false,
+        endOfLine: 'auto',
+        semi: true,
         printWidth: 130,
       },
     ],
