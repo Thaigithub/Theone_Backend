@@ -7,7 +7,7 @@ import { Member } from 'domain/entities/member.entity';
 import { Member as MemberPrisma } from '@prisma/client';
 import {
   ChangeMemberRequest,
-  GetListRequest,
+  GetMemberListRequest,
   UpsertBankAccountRequest,
   UpsertForeignWorkerRequest,
   UpsertHSTCertificateRequest,
@@ -32,7 +32,7 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
     return result.id;
   }
 
-  private parseConditionsFromQuery(query: GetListRequest) {
+  private parseConditionsFromQuery(query: GetMemberListRequest) {
     return {
       isActive: true,
       name: query.keywordByName && { contains: query.keywordByName },
@@ -44,7 +44,19 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
     };
   }
 
-  async findByQuery(query: GetListRequest): Promise<MemberResponse[]> {
+  async findMemberId(accountId: number): Promise<number> {
+    const member = await this.prismaService.member.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        accountId,
+      },
+    });
+    return member.id;
+  }
+
+  async findByQuery(query: GetMemberListRequest): Promise<MemberResponse[]> {
     return await this.prismaService.member.findMany({
       // Retrieve specific fields
       select: {
@@ -70,7 +82,7 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
     });
   }
 
-  async countByQuery(query: GetListRequest): Promise<number> {
+  async countByQuery(query: GetMemberListRequest): Promise<number> {
     return await this.prismaService.member.count({
       // Conditions based on request query
       where: this.parseConditionsFromQuery(query),
@@ -152,11 +164,11 @@ export class MemberRepositoryImpl extends BaseRepositoryImpl<Member> implements 
     });
   }
 
-  async updateMember(payload: ChangeMemberRequest): Promise<void> {
+  async updateMember(id: number, payload: ChangeMemberRequest): Promise<void> {
     await this.prismaService.member.update({
       where: {
         isActive: true,
-        id: payload.id,
+        id,
       },
       data: {
         level: payload.level,

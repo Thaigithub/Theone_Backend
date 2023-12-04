@@ -35,9 +35,9 @@ export class MemberResponse {
   };
 }
 
-export class GetListResponse {
+export class GetMemberListResponse {
   @ApiProperty({ type: () => [MemberResponse] })
-  members: MemberResponse[];
+  list: MemberResponse[];
 
   @ApiProperty({
     type: 'number',
@@ -45,8 +45,8 @@ export class GetListResponse {
   })
   total: number;
 
-  constructor(members: MemberResponse[], total: number) {
-    this.members = members;
+  constructor(list: MemberResponse[], total: number) {
+    this.list = list;
     this.total = total;
   }
 }

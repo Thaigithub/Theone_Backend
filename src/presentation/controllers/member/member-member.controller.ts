@@ -27,6 +27,7 @@ export class MemberMemberController {
   @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
   async getMemberDetails(@Req() request: any): Promise<BaseResponse<MemberDetailsResponse>> {
+    console.log(request.user);
     return BaseResponse.of(await this.memberUseCase.getMemberDetails(request.user.accountId));
   }
 
