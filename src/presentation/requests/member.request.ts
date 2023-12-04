@@ -17,7 +17,7 @@ export class UpsertDisabilityRequest {
   @ApiProperty({
     type: 'enum',
     enum: DisabledType,
-    example: DisabledType.DISABLED,
+    example: DisabledType.BURN,
   })
   public disabledType: DisabledType;
 

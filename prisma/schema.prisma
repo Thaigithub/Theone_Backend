@@ -358,9 +358,13 @@ enum TeamStatus {
 }
 
 enum DisabledType {
-  DISABLED
+  BURN
   NONE
-  MODERATE
+}
+
+enum DisabledLevel {
+  MILD
+  SEVERE
 }
 
 enum CertificateStatus {

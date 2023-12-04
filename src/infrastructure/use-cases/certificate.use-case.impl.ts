@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateUseCase } from 'application/use-cases/certificate.use-case';
 import { CertificateRepository } from 'domain/repositories/certificate.repository';
 import { MemberRepository } from 'domain/repositories/member.repository';
-import { GetMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
+import { GetMemberCertificateRequest, UpSertMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
 import { GetMemberCertificateResponse } from 'presentation/responses/member-certificate.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 
@@ -12,6 +12,16 @@ export class CertificateUseCaseImpl implements CertificateUseCase {
     @Inject(CertificateRepository) private readonly certificateRepository: CertificateRepository,
     @Inject(MemberRepository) private readonly memberRepository: MemberRepository,
   ) {}
+  async deleteCertificate(id: number): Promise<void> {
+    await this.certificateRepository.delelteCertificate(id);
+  }
+  async saveCertificate(accountId: number, request: UpSertMemberCertificateRequest): Promise<void> {
+    const memberId = await this.memberRepository.findIdByAccountId(accountId);
+    if (!memberId) {
+      throw new NotFoundException('Member not found');
+    }
+    await this.certificateRepository.createCertificate(memberId, request);
+  }
   async getCertificateDetails(id: number): Promise<GetMemberCertificateResponse> {
     const result = await this.certificateRepository.findCertificateDetail(id);
     return result;
