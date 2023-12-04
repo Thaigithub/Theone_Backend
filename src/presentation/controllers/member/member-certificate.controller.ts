@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { CertificateUseCase } from 'application/use-cases/certificate.use-case';
@@ -7,6 +7,7 @@ import { Roles, RolesGuard } from 'infrastructure/passport/guards/roles.guard';
 import { BaseResponse } from 'presentation/responses/base.response';
 import { PaginationResponse } from 'presentation/responses/pageInfo.response';
 import { GetMemberCertificateResponse } from 'presentation/responses/member-certificate.response';
+import { UpSertMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
 
 @ApiTags('[Member] Certificate')
 @Controller('member/certificates')
@@ -51,5 +52,35 @@ export class MemberCertificateController {
   async getCertificateDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<GetMemberCertificateResponse>> {
     const result = await this.userCertificateUseCase.getCertificateDetails(id);
     return BaseResponse.of(result);
+  }
+
+  @Post('save')
+  @HttpCode(200)
+  @Roles(AccountType.MEMBER)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Save a new certificate',
+    description: 'This endpoint is provided for use to upload new certificate',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Create certificate successfully' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Create certificate  failed' })
+  async saveCertificate(@Body() request: UpSertMemberCertificateRequest, @Request() req): Promise<BaseResponse<void>> {
+    await this.userCertificateUseCase.saveCertificate(req.user.accountId, request);
+    return BaseResponse.ok();
+  }
+
+  @Delete('delete/:id')
+  @HttpCode(200)
+  @Roles(AccountType.MEMBER)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Delete a certificate',
+    description: 'This endpoint is provided for use to delete certificate',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Delete certificate successfully' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Delete certificate failed' })
+  async deleteCertificate(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    await this.userCertificateUseCase.deleteCertificate(id);
+    return BaseResponse.ok();
   }
 }

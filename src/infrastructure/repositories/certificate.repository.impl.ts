@@ -3,14 +3,50 @@ import { BaseRepositoryImpl } from './base.repository.impl';
 import { PrismaService } from 'infrastructure/services/prisma.service';
 import { PrismaModel } from 'domain/entities/prisma.model';
 import { CertificateRepository } from 'domain/repositories/certificate.repository';
-import { GetMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
-import { Certificate } from '@prisma/client';
+import { GetMemberCertificateRequest, UpSertMemberCertificateRequest } from 'presentation/requests/member-certificate.request';
+import { Certificate, CertificateStatus } from '@prisma/client';
 import { GetMemberCertificateResponse } from 'presentation/responses/member-certificate.response';
 
 @Injectable()
 export class CertificateRepositoryImpl extends BaseRepositoryImpl<Certificate> implements CertificateRepository {
   constructor(private readonly prismaService: PrismaService) {
     super(prismaService, PrismaModel.CERTIFICATE);
+  }
+  async delelteCertificate(id: number): Promise<void> {
+    const existingCertificate: Certificate | null = await this.prismaService.certificate.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingCertificate) {
+      throw new Error(`Certificate with ID ${id} does not exist.`);
+    }
+    await this.prismaService.certificate.delete({
+      where: {
+        id,
+      },
+    });
+  }
+  async createCertificate(memberId: number, upsertRequest: UpSertMemberCertificateRequest): Promise<void> {
+    const newFile = await this.prismaService.file.create({
+      data: {
+        type: upsertRequest.fileType,
+        key: upsertRequest.fileKey,
+        size: upsertRequest.fileSize,
+        fileName: upsertRequest.fileName,
+      },
+    });
+    await this.prismaService.certificate.create({
+      data: {
+        name: upsertRequest.name,
+        acquisitionDate: new Date(upsertRequest.acquisitionDate),
+        certificateNumber: upsertRequest.certificateNumber,
+        memberId: memberId,
+        fileId: newFile.id,
+        status: CertificateStatus.REQUESTING,
+      },
+    });
   }
   async findCertificateDetail(id: number): Promise<GetMemberCertificateResponse> {
     const result = await this.prismaService.certificate.findUniqueOrThrow({
