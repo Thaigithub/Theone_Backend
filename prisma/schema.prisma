@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,7 +16,7 @@ model Account {
   password  String
   type      AccountType
   status    AccountStatus
-  isActive  Boolean       @default(true)
+  isActive  Boolean       @default(true) @map("is_active")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
   admin     Admin?
@@ -39,7 +42,7 @@ model Admin {
   name        String
   level       AdminLevel
   accountId   Int          @unique @map("account_id")
-  isActive    Boolean      @default(true)
+  isActive    Boolean      @default(true) @map("is_active")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   permissions Permission[]
@@ -52,12 +55,12 @@ model Member {
   id                           Int                           @id @default(autoincrement())
   name                         String
   accountId                    Int                           @unique @map("account_id")
-  isActive                     Boolean                       @default(true)
+  isActive                     Boolean                       @default(true) @map("is_active")
   createdAt                    DateTime                      @default(now()) @map("created_at")
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
   contact                      String
   email                        String                        @unique
-  desiredOccupation            String?                       @map("desired_occupation")
+  desiredOccupation            String                        @map("desired_occupation")
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
@@ -70,6 +73,7 @@ model Member {
   bankAccount                  BankAccount?
   disability                   Disability?
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  Career                       Career[]
 
   @@map("members")
 }
@@ -89,7 +93,7 @@ model Company {
   presentativeName   String      @map("pres_name")
   contactPhone       String      @map("contact_phone")
   contactName        String      @map("contact_name")
-  isActive           Boolean     @default(true)
+  isActive           Boolean     @default(true) @map("is_active")
   createdAt          DateTime    @default(now()) @map("created_at")
   updatedAt          DateTime    @updatedAt @map("updated_at")
 
@@ -101,7 +105,7 @@ model Team {
   code      String
   name      String
   leaderId  Int              @map("leader_id")
-  isActive  Boolean          @default(true)
+  isActive  Boolean          @default(true) @map("is_active")
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
   status    TeamStatus
@@ -114,7 +118,7 @@ model Team {
 model MembersOnTeams {
   teamId    Int      @map("team_id")
   memberId  Int      @map("member_id")
-  isActive  Boolean  @default(true)
+  isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   member    Member   @relation(fields: [memberId], references: [id])
@@ -126,14 +130,15 @@ model MembersOnTeams {
 
 model ForeignWorker {
   id                 Int      @id @default(autoincrement())
-  englishName        String
-  registrationNumber String
-  serialNumber       String
-  dateOfIssue        DateTime @db.Date
+  englishName        String   @map("english_name")
+  registrationNumber String   @map("registration_number")
+  serialNumber       String   @map("serial_number")
+  dateOfIssue        DateTime @map("date_of_issue") @db.Date
   memberId           Int      @unique @map("member_id")
   member             Member   @relation(fields: [memberId], references: [id])
-  fileId             Int      @unique
+  fileId             Int      @unique @map("file_id")
   file               File     @relation(fields: [fileId], references: [id])
+  isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -142,11 +147,12 @@ model ForeignWorker {
 
 model BankAccount {
   id            Int      @id @default(autoincrement())
-  accountHolder String
-  accountNumber String
-  bankName      String
+  accountHolder String   @map("account_holder")
+  accountNumber String   @map("account_number")
+  bankName      String   @map("bank_name")
   memberId      Int      @unique @map("member_id")
   member        Member   @relation(fields: [memberId], references: [id])
+  isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -154,30 +160,33 @@ model BankAccount {
 }
 
 model Disability {
-  id          Int          @id @default(autoincrement())
-  disableType DisabledType
-  memberId    Int          @unique
-  member      Member       @relation(fields: [memberId], references: [id])
-  fileId      Int          @unique
-  file        File         @relation(fields: [fileId], references: [id])
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  id           Int           @id @default(autoincrement())
+  disableType  DisabledType  @map("disable_type")
+  disableLevel DisabledLevel
+  memberId     Int           @unique @map("member_id")
+  member       Member        @relation(fields: [memberId], references: [id])
+  fileId       Int           @unique @map("file_id")
+  file         File          @relation(fields: [fileId], references: [id])
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
   @@map("disabilities")
 }
 
 model BasicHealthSafetyCertificate {
   id                 Int      @id @default(autoincrement())
-  registrationNumber String
-  dateOfCompletion   DateTime @db.Date
-  memberId           Int      @unique
+  registrationNumber String   @map("registration_number")
+  dateOfCompletion   DateTime @map("date_of_completion") @db.Date
+  memberId           Int      @unique @map("member_id")
   member             Member   @relation(fields: [memberId], references: [id])
-  fileId             Int      @unique
+  fileId             Int      @unique @map("file_id")
   file               File     @relation(fields: [fileId], references: [id])
+  isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
-  @@map("hst_certificates")
+  @@map("h_s_edu_certificate")
 }
 
 model File {
@@ -192,7 +201,7 @@ model File {
   Disability                   Disability?
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
-  certificate                  Certificate?
+  Certificate                  Certificate?
 
   @@map("files")
 }
@@ -220,17 +229,34 @@ model Function {
 model Certificate {
   id                Int               @id @default(autoincrement())
   name              String
+  photo             String
   status            CertificateStatus
+  certificateNumber String            @map("certificate_number")
   acquisitionDate   DateTime          @map("acquisition_date")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   memberId          Int               @map("member_id")
-  certificateNumber String?           @map("certificate_number")
-  fileId            Int               @unique @map("file_Id")
-  file              File              @relation(fields: [fileId], references: [id])
   member            Member            @relation(fields: [memberId], references: [id])
+  fileId            Int               @unique @map("file_id")
+  file              File              @relation(fields: [fileId], references: [id])
 
   @@map("certificates")
+}
+
+model Career {
+  id            Int        @id @default(autoincrement())
+  companyName   String     @map("company_name")
+  siteName      String     @map("site_name")
+  startDate     DateTime   @map("start_date")
+  endDate       DateTime   @map("end_date")
+  type          CareerType
+  isExperienced Boolean    @map("is_experienced")
+  occupation    String
+  isActive      Boolean    @default(true) @map("is_active")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  memberId      Int        @map("member_id")
+  member        Member     @relation(fields: [memberId], references: [id])
 }
 
 enum FunctionName {
@@ -350,4 +376,14 @@ enum SignupMethodType {
   APPLE
   KAKAO
   NAVER
+}
+
+enum CareerType {
+  GENERAL
+  CERTIFICATION
+}
+
+enum DisabledLevel {
+  MILD
+  SEVERE
 }

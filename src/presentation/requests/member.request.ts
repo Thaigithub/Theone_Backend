@@ -145,7 +145,7 @@ export class UpsertBankAccountRequest {
   public bankName: string;
 }
 
-export class GetListRequest {
+export class GetMemberListRequest {
   @ApiProperty({
     type: 'enum',
     enum: AccountStatus,
@@ -191,7 +191,7 @@ export class GetListRequest {
   @Expose()
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
+  @Transform(({ value }) => value && parseInt(value))
   public pageSize: number;
 
   @ApiProperty({
@@ -201,19 +201,11 @@ export class GetListRequest {
   @Expose()
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
+  @Transform(({ value }) => value && parseInt(value))
   public pageNumber: number;
 }
 
 export class ChangeMemberRequest {
-  @ApiProperty({
-    type: 'number',
-  })
-  @Expose()
-  @IsNumber()
-  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
-  public id: number;
-
   @ApiProperty({
     type: MemberLevel,
     required: false,
