@@ -229,7 +229,6 @@ model Function {
 model Certificate {
   id                Int               @id @default(autoincrement())
   name              String
-  photo             String
   status            CertificateStatus
   certificateNumber String            @map("certificate_number")
   acquisitionDate   DateTime          @map("acquisition_date")
@@ -385,9 +384,4 @@ enum SignupMethodType {
 enum CareerType {
   GENERAL
   CERTIFICATION
-}
-
-enum DisabledLevel {
-  MILD
-  SEVERE
 }
