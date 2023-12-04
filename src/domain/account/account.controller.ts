@@ -5,7 +5,7 @@ import { GetAccountResponse } from 'domain/account/response/account-get.response
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthPermissionGuard, FunctionPermission } from 'domain/auth/auth-permission.guard';
 import { BaseResponse } from '../../utils/generics/base.response';
-import { AccountUseCase } from './account.use-case';
+import { AccountUseCase } from './account.usecase';
 import { AccountUpsertRequest } from './request/account-upsert.request';
 
 @ApiTags('Accounts')

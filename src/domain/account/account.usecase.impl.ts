@@ -3,7 +3,7 @@ import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Account } from 'domain/account/account.entity';
 import { AccountRepository } from 'domain/account/account.repository';
-import { AccountUseCase } from 'domain/account/account.use-case';
+import { AccountUseCase } from 'domain/account/account.usecase';
 import { AccountDTO } from 'domain/account/dto/account.dto';
 import { AccountUpsertRequest } from 'domain/account/request/account-upsert.request';
 

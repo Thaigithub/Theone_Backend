@@ -3,7 +3,7 @@ import { TeamDTO } from 'domain/team/dto/team.dto';
 import { TeamSearchRequest } from 'domain/team/request/team.request';
 import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from 'domain/team/response/admin-team.response';
 import { TeamRepository } from 'domain/team/team.repository';
-import { TeamUseCase } from 'domain/team/team.use-case';
+import { TeamUseCase } from 'domain/team/team.usecase';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';

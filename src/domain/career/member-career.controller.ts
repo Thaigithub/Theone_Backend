@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
-import { CareerUseCase } from 'domain/career/career.use-case';
+import { CareerUseCase } from 'domain/career/career.usecase';
 import { CreateCareerRequest, GetCareerListRequest } from 'domain/career/request/career.request';
 import { GetCareerListResponse } from 'domain/career/response/career.response';
 import { BaseResponse } from 'utils/generics/base.response';

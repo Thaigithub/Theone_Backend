@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpStatus, Inject, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
-import { MemberUseCase } from 'domain/member/member.use-case';
+import { MemberUseCase } from 'domain/member/member.usecase';
 import {
     UpsertBankAccountRequest,
     UpsertDisabilityRequest,

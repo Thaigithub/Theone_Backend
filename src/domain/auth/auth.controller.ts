@@ -1,7 +1,7 @@
 import { Body, Controller, HttpStatus, Inject, Post } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { hash } from 'bcrypt';
-import { AuthUseCase } from 'domain/auth/auth.use-case';
+import { AuthUseCase } from 'domain/auth/auth.usecase';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'domain/auth/request/auth-user-info.request';
 import { PasswordSmsResponse, UserIdSmsResponse } from 'domain/auth/response/auth-user-info.response';
 import { BaseResponse } from '../../utils/generics/base.response';

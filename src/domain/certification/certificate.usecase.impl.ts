@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateRepository } from 'domain/certification/certificate.repository';
-import { CertificateUseCase } from 'domain/certification/certificate.use-case';
+import { CertificateUseCase } from 'domain/certification/certificate.usecase';
 import {
     GetMemberCertificateRequest,
     UpSertMemberCertificateRequest,

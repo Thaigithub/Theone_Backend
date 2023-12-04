@@ -6,7 +6,7 @@ import { compare } from 'bcrypt';
 import { AccountRepository } from 'domain/account/account.repository';
 import { fakeUidAccount } from 'domain/account/dto/account.dto';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from 'domain/auth/auth-jwt.strategy';
-import { AuthUseCase } from 'domain/auth/auth.use-case';
+import { AuthUseCase } from 'domain/auth/auth.usecase';
 import { LoginRequest, SocialLoginRequest } from 'domain/auth/request/auth-login.request';
 import { OtpVerificationRequest, PasswordSmsRequest, UserIdSmsRequest } from 'domain/auth/request/auth-user-info.request';
 import { AuthLoginResponse } from 'domain/auth/response/auth-login.response';

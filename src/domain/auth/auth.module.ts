@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JWT_ACCESS_TOKEN_EXPIRE_HOURS, JWT_SECRET_KEY } from 'app.config';
 import { AuthJwtStrategy } from 'domain/auth/auth-jwt.strategy';
 import { AuthController } from 'domain/auth/auth.controller';
-import { AuthUseCase } from 'domain/auth/auth.use-case';
+import { AuthUseCase } from 'domain/auth/auth.usecase';
 import { OtpProviderRepository } from 'domain/opt-provider/otp-provider.repository';
 import { OtpProviderRepositoryImpl } from 'domain/opt-provider/otp-provider.repository.impl';
 import { OtpService } from 'services/sms/sms.service';
@@ -13,7 +13,7 @@ import { OtpModule } from '../../services/sms/sms.module';
 import { AccountModule } from '../account/account.module';
 import { CompanyModule } from '../company/company.module';
 import { OtpProviderModule } from '../opt-provider/otp-provider.module';
-import { AuthUseCaseImpl } from './auth.use-case.impl';
+import { AuthUseCaseImpl } from './auth.usecase.impl';
 @Module({
     imports: [
         PrismaModule,

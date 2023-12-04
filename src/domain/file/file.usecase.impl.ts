@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FileRepository } from 'domain/file/file.repository';
-import { FileUseCase } from 'domain/file/file.use-case';
+import { FileUseCase } from 'domain/file/file.usecase';
 import { StorageService } from 'services/storage/storage.service';
 
 @Injectable()

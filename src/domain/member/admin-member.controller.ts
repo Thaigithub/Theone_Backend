@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpStatus, Inject, Param, ParseIntPipe, Patch, Query, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { MemberUseCase } from 'domain/member/member.use-case';
+import { MemberUseCase } from 'domain/member/member.usecase';
 import { ChangeMemberRequest, GetMemberListRequest, MemberDownloadRequest } from 'domain/member/request/member.request';
 import { GetMemberListResponse, MemberDetailsResponse } from 'domain/member/response/member.response';
 import { Response } from 'express';

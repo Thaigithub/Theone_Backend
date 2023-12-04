@@ -3,8 +3,8 @@ import { AdminMemberController } from 'domain/member/admin-member.controller';
 import { MemberMemberController } from 'domain/member/member-member.controller';
 import { MemberRepository } from 'domain/member/member.repository';
 import { MemberRepositoryImpl } from 'domain/member/member.repository.impl';
-import { MemberUseCase } from 'domain/member/member.use-case';
-import { MemberUseCaseImpl } from 'domain/member/member.use-case.impl';
+import { MemberUseCase } from 'domain/member/member.usecase';
+import { MemberUseCaseImpl } from 'domain/member/member.usecase.impl';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaModule } from '../../helpers/entity/prisma.module';
 

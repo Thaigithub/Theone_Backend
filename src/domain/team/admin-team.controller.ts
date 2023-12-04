@@ -16,7 +16,7 @@ import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@n
 import { TeamDTO } from 'domain/team/dto/team.dto';
 import { TeamSearchRequest } from 'domain/team/request/team.request';
 import { GetTeamDetailsResponse } from 'domain/team/response/admin-team.response';
-import { TeamUseCase } from 'domain/team/team.use-case';
+import { TeamUseCase } from 'domain/team/team.usecase';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';

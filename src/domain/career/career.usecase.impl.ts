@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CareerRepository } from 'domain/career/career.repository';
-import { CareerUseCase } from 'domain/career/career.use-case';
+import { CareerUseCase } from 'domain/career/career.usecase';
 import { CreateCareerRequest, GetCareerListRequest } from 'domain/career/request/career.request';
 import { GetCareerListResponse } from 'domain/career/response/career.response';
 import { MemberRepository } from 'domain/member/member.repository';

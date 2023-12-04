@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MemberRepository } from 'domain/member/member.repository';
-import { MemberUseCase } from 'domain/member/member.use-case';
+import { MemberUseCase } from 'domain/member/member.usecase';
 import {
     ChangeMemberRequest,
     GetMemberListRequest,

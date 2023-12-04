@@ -17,7 +17,7 @@ import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@n
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { CertificateUseCase } from 'domain/certification/certificate.use-case';
+import { CertificateUseCase } from 'domain/certification/certificate.usecase';
 import { UpSertMemberCertificateRequest } from 'domain/certification/request/member-certificate.request';
 import { GetMemberCertificateResponse } from 'domain/certification/response/member-certificate.response';
 import { BaseResponse } from 'utils/generics/base.response';

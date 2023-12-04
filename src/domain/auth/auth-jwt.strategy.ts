@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
-import { AuthUseCase } from 'domain/auth/auth.use-case';
+import { AuthUseCase } from 'domain/auth/auth.usecase';
 import { ExtractJwt, JwtFromRequestFunction, Strategy } from 'passport-jwt';
 import { UID } from 'utils/uid';
 

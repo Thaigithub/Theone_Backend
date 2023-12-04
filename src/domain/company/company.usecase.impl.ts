@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { $Enums } from '@prisma/client';
 import { CompanyRepository } from 'domain/company/company.repository';
-import { CompanyUseCase } from 'domain/company/company.use-case';
+import { CompanyUseCase } from 'domain/company/company.usecase';
 import { CompanyDownloadRequest, CompanySearchRequest } from 'domain/company/request/admin-company.request';
 import { CompanyDetailsResponse, CompanyResponse } from 'domain/company/response/company.response';
 import { Response } from 'express';

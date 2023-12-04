@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpStatus, Inject, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
-import { CompanyUseCase } from 'domain/company/company.use-case';
+import { CompanyUseCase } from 'domain/company/company.usecase';
 import {
     CompanyDownloadRequest,
     CompanySearchRequest,
