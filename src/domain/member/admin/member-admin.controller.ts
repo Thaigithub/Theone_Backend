@@ -51,8 +51,9 @@ export class MemberAdminController {
         @Res() response: Response,
     ): Promise<BaseResponse<null>> {
         let memberIds = [];
-        if (Array.isArray(query.memberIds)) memberIds = (query.memberIds as string[]).map((item) => parseInt(item));
-        else memberIds = [parseInt(query.memberIds)];
+        if (Array.isArray(query.memberIds)) {
+            memberIds = query.memberIds.map((item) => parseInt(item));
+        } else if (typeof query.memberIds === 'string') memberIds = [parseInt(query.memberIds)];
         await this.memberAdminService.download(memberIds, response);
         return BaseResponse.ok();
     }

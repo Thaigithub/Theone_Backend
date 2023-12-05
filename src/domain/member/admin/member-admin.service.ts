@@ -73,8 +73,8 @@ export class MemberAdminService {
     async getDetail(id: number): Promise<MemberDetailResponse> {
         return await this.prismaService.member.findUnique({
             where: {
-                id,
                 isActive: true,
+                id,
             },
             select: {
                 name: true,

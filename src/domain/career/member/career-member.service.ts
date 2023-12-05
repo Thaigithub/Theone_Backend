@@ -10,6 +10,7 @@ export class CareerMemberService {
 
     private parseConditionsFromQuery(query: GetCareersListRequest, request: any) {
         return {
+            isActive: true,
             type: query.type,
             member: {
                 accountId: request.user.accountId,
@@ -50,10 +51,13 @@ export class CareerMemberService {
     }
 
     async deleteCareer(careerId: number, memberId: number): Promise<void> {
-        await this.prismaService.career.delete({
+        await this.prismaService.career.update({
             where: {
                 id: careerId,
                 memberId,
+            },
+            data: {
+                isActive: false,
             },
         });
     }
