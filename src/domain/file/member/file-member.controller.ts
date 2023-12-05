@@ -8,7 +8,7 @@ import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.r
 import { DomainType, StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 
-@ApiTags('[COMPANY] File')
+@ApiTags('[MEMBER] File')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 @Controller('/member/files')

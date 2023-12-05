@@ -88,13 +88,6 @@ class DownloadMembersRequest {
     @IsArray({ message: 'memberIds must be an array' })
     @ArrayNotEmpty({ message: 'The array must not be empty' })
     @IsNumberString({}, { each: true, message: 'Each element of the array must be a number' })
-    @ApiProperty({
-        type: 'array',
-        items: {
-            type: 'number',
-        },
-        example: [1, 2, 3],
-    })
     public memberIds: string[];
 }
 
