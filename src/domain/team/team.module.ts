@@ -1,26 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AdminTeamController } from 'domain/team/admin-team.controller';
-import { TeamRepository } from 'domain/team/team.repository';
-import { TeamRepositoryImpl } from 'domain/team/team.repository.impl';
-import { TeamUseCase } from 'domain/team/team.usecase';
-import { TeamUseCaseImpl } from 'domain/team/team.usecase.impl';
+import { AdminTeamController } from 'domain/team/admin/admin-team.controller';
+import { ExcelModule } from 'services/excel/excel.module';
 import { ExcelService } from 'services/excel/excel.service';
-import { PrismaModule } from '../../helpers/entity/prisma.module';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { PrismaModule } from '../../services/prisma/prisma.module';
+import { TeamService } from './team.service';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, ExcelModule],
     controllers: [AdminTeamController],
-    providers: [
-        {
-            provide: TeamUseCase,
-            useClass: TeamUseCaseImpl,
-        },
-        {
-            provide: TeamRepository,
-            useClass: TeamRepositoryImpl,
-        },
-        ExcelService,
-    ],
-    exports: [TeamUseCase],
+    providers: [TeamService, PrismaService, ExcelService],
+    exports: [TeamService],
 })
 export class TeamModule {}

@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
-import { AuthUseCase } from 'domain/auth/auth.usecase';
 import { ExtractJwt, JwtFromRequestFunction, Strategy } from 'passport-jwt';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { UID } from 'utils/uid';
 
 export interface AuthJwtFakePayloadData {
@@ -27,7 +27,7 @@ const extractJwtFromCookie: JwtFromRequestFunction = (request) => {
 
 @Injectable()
 export class AuthJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-    constructor(@Inject(AuthUseCase) private readonly authUseCase: AuthUseCase) {
+    constructor(private readonly prismaService: PrismaService) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromCookie, ExtractJwt.fromAuthHeaderAsBearerToken()]),
             secretOrKey: JWT_SECRET_KEY,
@@ -38,7 +38,26 @@ export class AuthJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     async validate(payload: AuthJwtPayload) {
         const accountId = UID.fromBase58(payload.sub.accountId).getLocalID();
-        const payloadData = await this.authUseCase.verifyPayload(accountId);
+        const payloadData = await this.verifyPayload(accountId);
+        return payloadData;
+    }
+
+    async verifyPayload(accountId: number): Promise<AuthJwtPayloadData> {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+            },
+        });
+
+        if (!account) {
+            throw new UnauthorizedException('Account not found');
+        }
+
+        const payloadData: AuthJwtPayloadData = {
+            accountId: account.id,
+            type: account.type,
+        };
+
         return payloadData;
     }
 }

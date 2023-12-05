@@ -3,17 +3,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JWT_ACCESS_TOKEN_EXPIRE_HOURS, JWT_SECRET_KEY } from 'app.config';
 import { AuthJwtStrategy } from 'domain/auth/auth-jwt.strategy';
-import { AuthController } from 'domain/auth/auth.controller';
-import { AuthUseCase } from 'domain/auth/auth.usecase';
-import { OtpProviderRepository } from 'domain/opt-provider/otp-provider.repository';
-import { OtpProviderRepositoryImpl } from 'domain/opt-provider/otp-provider.repository.impl';
-import { OtpService } from 'services/sms/sms.service';
-import { PrismaModule } from '../../helpers/entity/prisma.module';
-import { OtpModule } from '../../services/sms/sms.module';
-import { AccountModule } from '../account/account.module';
-import { CompanyModule } from '../company/company.module';
-import { OtpProviderModule } from '../opt-provider/otp-provider.module';
-import { AuthUseCaseImpl } from './auth.usecase.impl';
+import { OtpModule } from 'domain/otp/otp.module';
+import { OtpService } from 'domain/otp/otp.service';
+import { PrismaModule } from 'services/prisma/prisma.module';
+import { AuthAdminController } from './admin/auth-admin.controller';
+import { AuthAdminService } from './admin/auth-admin.service';
+import { AuthCompanyController } from './company/auth-company.controller';
+import { AuthCompanyService } from './company/auth-company.service';
+import { AuthMemberController } from './member/auth-member.controller';
+import { AuthMemberService } from './member/auth-member.service';
 @Module({
     imports: [
         PrismaModule,
@@ -24,24 +22,9 @@ import { AuthUseCaseImpl } from './auth.usecase.impl';
             verifyOptions: { algorithms: ['HS384'] },
         }),
         PrismaModule,
-        AccountModule,
-        OtpProviderModule,
         OtpModule,
-        CompanyModule,
     ],
-    controllers: [AuthController],
-    providers: [
-        {
-            provide: AuthUseCase,
-            useClass: AuthUseCaseImpl,
-        },
-        {
-            provide: OtpProviderRepository,
-            useClass: OtpProviderRepositoryImpl,
-        },
-        AuthJwtStrategy,
-        OtpService,
-    ],
-    exports: [AuthUseCase],
+    controllers: [AuthAdminController, AuthCompanyController, AuthMemberController],
+    providers: [AuthJwtStrategy, AuthAdminService, AuthCompanyService, AuthMemberService, OtpService],
 })
 export class AuthModule {}

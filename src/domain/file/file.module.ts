@@ -1,30 +1,21 @@
 import { Module } from '@nestjs/common';
-import { FileController } from 'domain/file/file.controller';
-import { FileRepository } from 'domain/file/file.repository';
-import { FileRepositoryImpl } from 'domain/file/file.repository.impl';
-import { FileUseCase } from 'domain/file/file.usecase';
-import { FileUseCaseImpl } from 'domain/file/file.usecase.impl';
 import { StorageService } from 'services/storage/storage.service';
 import { StorageServiceImpl } from 'services/storage/storage.service.impl';
-import { PrismaModule } from '../../helpers/entity/prisma.module';
+import { PrismaModule } from '../../services/prisma/prisma.module';
+import { FileAdminController } from './admin/file-admin.controller';
+import { FileCompanyController } from './company/file-company.controller';
+import { FileMemberController } from './member/file-member.controller';
+import { FileUserController } from './user/file-user.controller';
 
 @Module({
     imports: [PrismaModule],
-    controllers: [FileController],
+    controllers: [FileAdminController, FileCompanyController, FileMemberController, FileUserController],
     providers: [
-        {
-            provide: FileUseCase,
-            useClass: FileUseCaseImpl,
-        },
-        {
-            provide: FileRepository,
-            useClass: FileRepositoryImpl,
-        },
         {
             provide: StorageService,
             useClass: StorageServiceImpl,
         },
     ],
-    exports: [StorageService, FileUseCase, FileRepository],
+    exports: [StorageService],
 })
 export class FileModule {}

@@ -1,24 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AccountController } from 'domain/account/account.controller';
-import { AccountRepository } from 'domain/account/account.repository';
-import { AccountUseCase } from 'domain/account/account.usecase';
-import { PrismaModule } from '../../helpers/entity/prisma.module';
-import { AccountRepositoryImpl } from './account.repository.impl';
-import { AccountUseCaseImpl } from './account.usecase.impl';
+import { PrismaModule } from '../../services/prisma/prisma.module';
+import { AccountAdminController } from './admin/account-admin.controller';
+import { AccountAdminService } from './admin/account-admin.service';
+import { AccountCompanyController } from './company/account-company.controller';
+import { AccountCompanyService } from './company/account-company.service';
 
 @Module({
     imports: [PrismaModule],
-    controllers: [AccountController],
-    providers: [
-        {
-            provide: AccountUseCase,
-            useClass: AccountUseCaseImpl,
-        },
-        {
-            provide: AccountRepository,
-            useClass: AccountRepositoryImpl,
-        },
-    ],
-    exports: [AccountUseCase, AccountRepository],
+    controllers: [AccountAdminController, AccountCompanyController],
+    providers: [AccountAdminService, AccountCompanyService],
 })
 export class AccountModule {}
