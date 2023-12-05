@@ -11,18 +11,19 @@ datasource db {
 }
 
 model Account {
-  id        Int           @id @default(autoincrement())
-  username  String        @unique
-  password  String
-  type      AccountType
-  status    AccountStatus
-  isActive  Boolean       @default(true) @map("is_active")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  admin     Admin?
-  company   Company?
-  member    Member?
-  otp       OtpProvider?
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  password     String
+  type         AccountType
+  status       AccountStatus
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  lastAccessAt DateTime      @default(now()) @map("last_access_at")
+  admin        Admin?
+  company      Company?
+  member       Member?
+  otps         OtpProvider[]
 
   @@map("accounts")
 }
@@ -31,8 +32,10 @@ model OtpProvider {
   id        Int       @id @default(autoincrement())
   updatedAt DateTime? @updatedAt @map("updated_at")
   otpCode   String?   @map("otp_code")
-  accountId Int       @unique @map("account_id")
+  checked   Boolean   @default(false)
+  accountId Int       @map("account_id")
   account   Account   @relation(fields: [accountId], references: [id])
+  otpType   OtpType   @map("otp_type")
 
   @@map("otp_providers")
 }
@@ -229,7 +232,7 @@ model Function {
 model Certificate {
   id                Int               @id @default(autoincrement())
   name              String
-  status            CertificateStatus
+  status            CertificateStatus @default(REQUESTING)
   certificateNumber String            @map("certificate_number")
   acquisitionDate   DateTime          @map("acquisition_date")
   createdAt         DateTime          @default(now()) @map("created_at")
@@ -238,6 +241,7 @@ model Certificate {
   member            Member            @relation(fields: [memberId], references: [id])
   fileId            Int               @unique @map("file_id")
   file              File              @relation(fields: [fileId], references: [id])
+  isSpecial         Boolean           @default(false)
 
   @@map("certificates")
 }
@@ -384,4 +388,9 @@ enum SignupMethodType {
 enum CareerType {
   GENERAL
   CERTIFICATION
+}
+
+enum OtpType {
+  EMAIL
+  PHONE
 }

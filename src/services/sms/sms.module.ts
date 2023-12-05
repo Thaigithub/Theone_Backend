@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { OtpService } from 'services/sms/sms.service';
+import { SmsService } from './sms.service';
 
 @Module({
-    providers: [OtpService],
-    exports: [OtpService],
+    providers: [SmsService],
+    exports: [SmsService],
 })
-export class OtpModule {}
+export class SmsModule {}

@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FunctionName } from '@prisma/client';
-import { PrismaService } from 'helpers/entity/prisma.service';
+import { PrismaService } from 'services/prisma/prisma.service';
 export const PERMISSION_KEY = 'permission';
 export const FunctionPermission = (permission: FunctionName) => SetMetadata(PERMISSION_KEY, permission);
 

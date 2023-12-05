@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AdminCompanyController } from 'domain/company/admin-company.controller';
-import { CompanyRepository } from 'domain/company/company.repository';
-import { CompanyUseCase } from 'domain/company/company.usecase';
-import { ExcelService } from 'services/excel/excel.service';
-import { PrismaModule } from '../../helpers/entity/prisma.module';
-import { CompanyRepositoryImpl } from './company.repository.impl';
-import { CompanyUseCaseImpl } from './company.usecase.impl';
+import { AdminCompanyController } from 'domain/company/admin/company-admin.controller';
+import { ExcelModule } from 'services/excel/excel.module';
+import { PrismaModule } from '../../services/prisma/prisma.module';
+import { AdminCompanyService } from './admin/company-admin.service';
+import { CompanyCompanyController } from './company/company-company.controller';
+import { CompanyCompanyService } from './company/company-company.service';
+import { MemberCompanyService } from './member/company-member.service';
 @Module({
-    imports: [PrismaModule],
-    controllers: [AdminCompanyController],
-    providers: [
-        {
-            provide: CompanyUseCase,
-            useClass: CompanyUseCaseImpl,
-        },
-        {
-            provide: CompanyRepository,
-            useClass: CompanyRepositoryImpl,
-        },
-        ExcelService,
-    ],
-    exports: [CompanyRepository, CompanyUseCase],
+    imports: [PrismaModule, ExcelModule],
+    controllers: [AdminCompanyController, CompanyCompanyController],
+    providers: [AdminCompanyService, CompanyCompanyService, MemberCompanyService],
 })
 export class CompanyModule {}
