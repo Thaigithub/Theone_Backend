@@ -210,19 +210,19 @@ model File {
 }
 
 model Permission {
-  id         Int      @id @default(autoincrement())
   adminId    Int      @map("admin_id")
   admin      Admin    @relation(fields: [adminId], references: [id])
-  functionId Int      @unique @map("function_id")
+  functionId Int      @map("function_id")
   function   Function @relation(fields: [functionId], references: [id])
 
+  @@id([adminId, functionId])
   @@map("permissions")
 }
 
 model Function {
   id         Int          @id @default(autoincrement())
   name       FunctionName
-  permission Permission?
+  permission Permission[]
   createdAt  DateTime     @default(now()) @map("created_at")
   updatedAt  DateTime     @updatedAt @map("updated_at")
 
