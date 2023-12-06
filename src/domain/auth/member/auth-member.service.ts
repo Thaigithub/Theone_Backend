@@ -36,6 +36,10 @@ export class AuthMemberService {
             where: {
                 name: request.name,
                 contact: request.phoneNumber,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             include: isPassword ? { account: true } : undefined,
         };
@@ -57,6 +61,10 @@ export class AuthMemberService {
             where: {
                 name: request.name,
                 contact: request.phoneNumber,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             include: isPassword ? { account: true } : undefined,
         };
@@ -91,6 +99,14 @@ export class AuthMemberService {
             throw new UnauthorizedException('Invalid username or password');
         }
 
+        await this.prismaService.account.update({
+            where: {
+                username: loginData.username,
+            },
+            data: {
+                lastAccessAt: new Date(),
+            },
+        });
         const uid = this.fakeUidAccount(account.id);
         const type = account.type;
         const payload: AuthJwtFakePayloadData = {
@@ -143,6 +159,10 @@ export class AuthMemberService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -167,6 +187,10 @@ export class AuthMemberService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -193,6 +217,10 @@ export class AuthMemberService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -219,6 +247,10 @@ export class AuthMemberService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    type: AccountType.MEMBER,
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -236,6 +268,14 @@ export class AuthMemberService {
     }
 
     async loginSignupSocialFlow(profile: AccountDTO): Promise<AuthMemberLoginResponse> {
+        await this.prismaService.account.update({
+            where: {
+                id: profile.id,
+            },
+            data: {
+                lastAccessAt: new Date(),
+            },
+        });
         const uid = this.fakeUidAccount(profile.id);
         const type = profile.type;
         const payload: AuthJwtFakePayloadData = {
