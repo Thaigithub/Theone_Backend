@@ -51,6 +51,7 @@ export class AdminCompanyService {
                     contains: request.id,
                 },
                 status: request.status,
+                isActive: true,
             },
             phone: request.phone,
             name: request.name,
@@ -60,7 +61,9 @@ export class AdminCompanyService {
         return await this.prismaService.company.findUnique({
             where: {
                 id: CompanyId,
-                isActive: true,
+                account: {
+                    isActive: true,
+                },
             },
             include: {
                 account: true,
@@ -87,6 +90,9 @@ export class AdminCompanyService {
             where: {
                 id: {
                     in: list,
+                },
+                account: {
+                    isActive: true,
                 },
             },
             select: {

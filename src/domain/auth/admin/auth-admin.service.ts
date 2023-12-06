@@ -2,7 +2,6 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType } from '@prisma/client';
 import { compare } from 'bcrypt';
-import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
 import { UID } from 'utils/uid';
@@ -16,7 +15,6 @@ export class AuthAdminService {
     constructor(
         private prismaService: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly otpService: OtpService,
     ) {}
     async login(loginData: AuthAdminLoginRequest): Promise<AuthAdminLoginResponse> {
         this.logger.log('Login account');
@@ -24,6 +22,7 @@ export class AuthAdminService {
             where: {
                 username: loginData.username,
                 type: AccountType.ADMIN,
+                isActive: true,
             },
         });
 
@@ -36,7 +35,14 @@ export class AuthAdminService {
         if (!passwordMatch) {
             throw new UnauthorizedException('Invalid username or password');
         }
-
+        await this.prismaService.account.update({
+            where: {
+                username: loginData.username,
+            },
+            data: {
+                lastAccessAt: new Date(),
+            },
+        });
         const uid = this.fakeUidAccount(account.id);
         const type = account.type;
         const payload: AuthJwtFakePayloadData = {
@@ -57,6 +63,7 @@ export class AuthAdminService {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
+                isActive: true,
             },
         });
 

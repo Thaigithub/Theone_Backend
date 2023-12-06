@@ -46,7 +46,14 @@ export class AuthCompanyService {
         if (!passwordMatch) {
             throw new UnauthorizedException('Invalid username or password');
         }
-
+        await this.prismaService.account.update({
+            where: {
+                username: loginData.username,
+            },
+            data: {
+                lastAccessAt: new Date(),
+            },
+        });
         const uid = this.fakeUidAccount(account.id);
         const type = account.type;
         const payload: AuthJwtFakePayloadData = {
@@ -67,6 +74,7 @@ export class AuthCompanyService {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
+                isActive: true,
             },
         });
 
@@ -99,6 +107,9 @@ export class AuthCompanyService {
         const profile = await this.prismaService.company.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -123,6 +134,9 @@ export class AuthCompanyService {
         const profile = await this.prismaService.company.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -149,6 +163,9 @@ export class AuthCompanyService {
         const profile = await this.prismaService.company.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -175,6 +192,9 @@ export class AuthCompanyService {
         const profile = await this.prismaService.company.findUnique({
             where: {
                 email: payload.email,
+                account: {
+                    isActive: true,
+                },
             },
             select: {
                 account: {
@@ -192,6 +212,14 @@ export class AuthCompanyService {
     }
 
     async loginSignupSocialFlow(profile: AccountDTO): Promise<AuthCompanyLoginResponse> {
+        await this.prismaService.account.update({
+            where: {
+                id: profile.id,
+            },
+            data: {
+                lastAccessAt: new Date(),
+            },
+        });
         const uid = this.fakeUidAccount(profile.id);
         const type = profile.type;
         const payload: AuthJwtFakePayloadData = {
