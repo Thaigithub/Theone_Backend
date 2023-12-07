@@ -8,6 +8,7 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 @Module({
     imports: [
         PrismaModule,
@@ -19,6 +20,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         TeamModule,
         CareerModule,
         AdminModule,
+        EvaluationModule,
     ],
 })
 export class AppModule {}
