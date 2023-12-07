@@ -1,14 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
-
-export class OtpVerificationRequest {
+export class AuthCompanyUserIdRequest {
     @Expose()
     @IsString()
-    @ApiProperty({ example: '012345' })
-    public code: string;
+    @ApiProperty({ example: 'The One' })
+    public name: string;
     @Expose()
+    @ApiProperty({ example: 'theone@gmail.com' })
     @IsString()
-    @ApiProperty({ example: '0862877320' })
-    public phoneNumber: string;
+    public email: string;
 }

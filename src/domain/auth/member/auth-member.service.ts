@@ -14,8 +14,10 @@ import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy
 import { AccountDTO } from './dto/auth-company-account.dto';
 import { AuthMemberLoginRequest } from './request/auth-member-login-normal.request';
 import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social.request';
-import { PasswordSmsCheckValidRequest, PasswordSmsRequest } from './request/auth-member-sms-password.request';
-import { UserIdSmsCheckValidRequest, UserIdSmsRequest } from './request/auth-member-sms-username.request';
+import { AuthMemberPasswordRequest } from './request/auth-member-sms-password.request';
+import { AuthMemberUserIdRequest } from './request/auth-member-sms-username.request';
+import { AuthMemberPasswordSmsCheckValidRequest } from './request/auth-member-verify-sms-password.request';
+import { AuthMemberUserIdSmsCheckValidRequest } from './request/auth-member-verify-sms-username.request';
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
@@ -24,15 +26,15 @@ const appleClient = new JwksClient({
 });
 
 @Injectable()
-export class AuthMemberService {
-    private readonly logger = new Logger(AuthMemberService.name);
+export class MemberAuthService {
+    private readonly logger = new Logger(MemberAuthService.name);
     constructor(
         private prismaService: PrismaService,
         private readonly jwtService: JwtService,
         private readonly otpService: OtpService,
     ) {}
-    async sendSmsOtp(request: UserIdSmsRequest | PasswordSmsRequest, isPassword: boolean): Promise<void> {
-        const memberQuery: any = {
+    async sendOtp(request: AuthMemberUserIdRequest | AuthMemberPasswordRequest, isPassword: boolean): Promise<void> {
+        const memberQuery = {
             where: {
                 name: request.name,
                 contact: request.phoneNumber,
@@ -45,10 +47,8 @@ export class AuthMemberService {
         };
 
         if (isPassword) {
-            const passwordRequest = request as PasswordSmsRequest;
-            memberQuery.where.account = {
-                username: passwordRequest.username,
-            };
+            const passwordRequest = request as AuthMemberPasswordRequest;
+            memberQuery.where.account['username'] = passwordRequest.username;
         }
         const member = await this.prismaService.member.findFirst(memberQuery);
         if (!member) {
@@ -56,7 +56,10 @@ export class AuthMemberService {
         }
         await this.otpService.sendOtp({ accountId: member.accountId, type: OtpType.PHONE });
     }
-    async vertifySmsOtp(request: UserIdSmsCheckValidRequest | PasswordSmsCheckValidRequest, isPassword: boolean) {
+    async verifySmsOtp(
+        request: AuthMemberUserIdSmsCheckValidRequest | AuthMemberPasswordSmsCheckValidRequest,
+        isPassword: boolean,
+    ): Promise<boolean> {
         const memberQuery: any = {
             where: {
                 name: request.name,
@@ -69,7 +72,7 @@ export class AuthMemberService {
             include: isPassword ? { account: true } : undefined,
         };
         if (isPassword) {
-            const passwordRequest = request as PasswordSmsCheckValidRequest;
+            const passwordRequest = request as AuthMemberPasswordSmsCheckValidRequest;
             memberQuery.where.account = {
                 username: passwordRequest.username,
             };

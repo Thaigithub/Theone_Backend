@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 export class MemberAccountSignupRequest {
     @Expose()
@@ -13,6 +13,7 @@ export class MemberAccountSignupRequest {
         type: String,
         example: 'usernamesss',
     })
+    @MaxLength(20)
     username: string;
 
     @Expose()

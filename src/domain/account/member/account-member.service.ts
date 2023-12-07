@@ -37,4 +37,22 @@ export class AccountMemberService {
             },
         });
     }
+    async accountMemberCheck(username: string): Promise<boolean> {
+        const accountNum = await this.prismaService.account.count({
+            where: {
+                username: username,
+            },
+        });
+        if (accountNum === 0) return true;
+        return false;
+    }
+    async accountRecommenderCheck(username: string): Promise<boolean> {
+        const accountNum = await this.prismaService.account.count({
+            where: {
+                username: username,
+            },
+        });
+        if (accountNum !== 0) return true;
+        return false;
+    }
 }

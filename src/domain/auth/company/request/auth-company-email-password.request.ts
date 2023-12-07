@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
-import { AuthMemberUserIdRequest } from './auth-member-sms-username.request';
+import { AuthCompanyUserIdRequest } from './auth-company-email-username.request';
 
-export class AuthMemberPasswordRequest extends AuthMemberUserIdRequest {
+export class AuthCompanyPasswordRequest extends AuthCompanyUserIdRequest {
     @Expose()
     @IsString()
     @ApiProperty({ example: 'user1' })

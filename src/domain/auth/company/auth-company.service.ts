@@ -1,6 +1,6 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AccountType } from '@prisma/client';
+import { AccountType, OtpType } from '@prisma/client';
 import { APPLE_OAUTH_RESTAPI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_VERIFY_URL, NAVER_VERIFY_URL } from 'app.config';
 import Axios from 'axios';
 import { compare } from 'bcrypt';
@@ -12,8 +12,12 @@ import { DbType } from 'utils/constants/account.constant';
 import { UID } from 'utils/uid';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AccountDTO } from './dto/auth-company-account.dto';
+import { AuthCompanyPasswordRequest } from './request/auth-company-email-password.request';
+import { AuthCompanyUserIdRequest } from './request/auth-company-email-username.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyLoginSocialRequest } from './request/auth-company-login-social.request';
+import { AuthCompanyPasswordEmailCheckValidRequest } from './request/auth-company-verify-email-password.request';
+import { AuthCompanyUserIdEmailCheckValidRequest } from './request/auth-company-verify-email-username.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 const appleClient = new JwksClient({
@@ -21,13 +25,64 @@ const appleClient = new JwksClient({
 });
 
 @Injectable()
-export class AuthCompanyService {
-    private readonly logger = new Logger(AuthCompanyService.name);
+export class CompanyAuthService {
+    private readonly logger = new Logger(CompanyAuthService.name);
     constructor(
         private prismaService: PrismaService,
         private readonly jwtService: JwtService,
         private readonly otpService: OtpService,
     ) {}
+
+    async sendEmailOtp(request: AuthCompanyUserIdRequest | AuthCompanyPasswordRequest, isPassword: boolean): Promise<void> {
+        const companyQuery = {
+            where: {
+                name: request.name,
+                email: request.email,
+                account: {
+                    type: AccountType.COMPANY,
+                    isActive: true,
+                },
+            },
+            include: isPassword ? { account: true } : undefined,
+        };
+        if (isPassword) {
+            const passwordRequest = request as AuthCompanyPasswordRequest;
+            companyQuery.where.account['username'] = passwordRequest.username;
+        }
+        const company = await this.prismaService.company.findFirst(companyQuery);
+        if (!company) {
+            throw new NotFoundException(`Company with name ${request.name} and email ${request.email} not found `);
+        }
+        await this.otpService.sendOtp({ accountId: company.accountId, type: OtpType.EMAIL });
+    }
+
+    async verifyEmailOtp(
+        request: AuthCompanyUserIdEmailCheckValidRequest | AuthCompanyPasswordEmailCheckValidRequest,
+        isPassword: boolean,
+    ): Promise<boolean> {
+        const companyQuery: any = {
+            where: {
+                name: request.name,
+                contact: request.email,
+                account: {
+                    type: AccountType.COMPANY,
+                    isActive: true,
+                },
+            },
+            include: isPassword ? { account: true } : undefined,
+        };
+        if (isPassword) {
+            const passwordRequest = request as AuthCompanyPasswordEmailCheckValidRequest;
+            companyQuery.where.account = {
+                username: passwordRequest.username,
+            };
+        }
+        const company = await this.prismaService.company.findFirst(companyQuery);
+        if (!company) {
+            throw new NotFoundException(`Company with name ${request.name} and email ${request.email} not found `);
+        }
+        return await this.otpService.checkValidOtp({ accountId: company.accountId, type: OtpType.EMAIL, code: request.code });
+    }
     async login(loginData: AuthCompanyLoginRequest): Promise<AuthCompanyLoginResponse> {
         this.logger.log('Login account');
         const account = await this.prismaService.account.findUnique({
