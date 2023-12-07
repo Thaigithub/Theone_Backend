@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
@@ -13,7 +13,7 @@ export class AccountMemberController {
 
     @Post('signup')
     @ApiOperation({
-        summary: 'Signup',
+        summary: 'Member Signup',
         description: 'This endpoint to member signup normally.',
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'User signed up successfully' })
@@ -21,5 +21,27 @@ export class AccountMemberController {
     async signup(@Body() request: MemberAccountSignupRequest): Promise<BaseResponse<null>> {
         await this.accountMemberService.signup(request);
         return BaseResponse.ok();
+    }
+
+    @Get(':username/check')
+    @ApiOperation({
+        summary: 'Member check',
+        description: 'This endpoint to member check username.',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'User result' })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid information' })
+    async accountMemberCheck(@Param('username') username: string): Promise<BaseResponse<boolean>> {
+        return BaseResponse.of(await this.accountMemberService.accountMemberCheck(username));
+    }
+
+    @Get('/recommender/:username/check')
+    @ApiOperation({
+        summary: 'Member check',
+        description: 'This endpoint to member signup normally.',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'User result' })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid information' })
+    async accountRecommenderCheck(@Param('username') username: string): Promise<BaseResponse<boolean>> {
+        return BaseResponse.of(await this.accountMemberService.accountRecommenderCheck(username));
     }
 }

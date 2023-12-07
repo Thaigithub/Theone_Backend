@@ -82,25 +82,49 @@ model Member {
 }
 
 model Company {
-  id                 Int         @id @default(autoincrement())
-  accountId          Int         @unique @map("account_id")
-  account            Account     @relation(fields: [accountId], references: [id])
+  id                 Int          @id @default(autoincrement())
+  accountId          Int          @unique @map("account_id")
+  account            Account      @relation(fields: [accountId], references: [id])
   name               String
   address            String
-  estDate            DateTime    @map("est_date")
-  businessRegNumber  String      @unique @map("buss_reg_number")
-  corporateRegNumber String      @unique @map("corp_reg_number")
+  longitude           Float
+  latitude           Float
+  estDate            DateTime     @map("est_date")
+  businessRegNumber  String       @unique @map("buss_reg_number")
+  corporateRegNumber String       @unique @map("corp_reg_number")
   type               CompanyType
-  email              String      @unique
+  email              String       @unique
   phone              String
-  presentativeName   String      @map("pres_name")
-  contactPhone       String      @map("contact_phone")
-  contactName        String      @map("contact_name")
-  isActive           Boolean     @default(true) @map("is_active")
-  createdAt          DateTime    @default(now()) @map("created_at")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
+  presentativeName   String       @map("pres_name")
+  contactPhone       String       @map("contact_phone")
+  contactName        String       @map("contact_name")
+  isActive           Boolean      @default(true) @map("is_active")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  logo               Logo?
+  contactCard        ContactCard?
 
   @@map("companies")
+}
+
+model Logo {
+  id        Int     @id @default(autoincrement())
+  companyId Int     @unique
+  company   Company @relation(fields: [companyId], references: [id])
+  fileId    Int     @unique
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("logos")
+}
+
+model ContactCard {
+  id        Int     @id @default(autoincrement())
+  companyId Int     @unique
+  company   Company @relation(fields: [companyId], references: [id])
+  fileId    Int     @unique
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("contact_cards")
 }
 
 model Team {
@@ -205,6 +229,8 @@ model File {
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Certificate                  Certificate?
+  Logo                         Logo?
+  ContactCard                  ContactCard?
 
   @@map("files")
 }

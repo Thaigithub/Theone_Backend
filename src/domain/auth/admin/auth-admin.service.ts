@@ -10,8 +10,8 @@ import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request
 import { AuthAdminLoginResponse } from './response/auth-admin-login.response';
 
 @Injectable()
-export class AuthAdminService {
-    private readonly logger = new Logger(AuthAdminService.name);
+export class AdminAuthService {
+    private readonly logger = new Logger(AdminAuthService.name);
     constructor(
         private prismaService: PrismaService,
         private readonly jwtService: JwtService,

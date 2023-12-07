@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString, MaxLength } from 'class-validator';
-export class UserIdSmsRequest {
+import { IsString } from 'class-validator';
+export class AuthMemberUserIdRequest {
     @Expose()
     @IsString()
     @ApiProperty({ example: 'name' })
@@ -10,12 +10,4 @@ export class UserIdSmsRequest {
     @ApiProperty({ example: 'phone number' })
     @IsString()
     public phoneNumber: string;
-}
-
-export class UserIdSmsCheckValidRequest extends UserIdSmsRequest {
-    @Expose()
-    @ApiProperty({ example: '123456' })
-    @IsString()
-    @MaxLength(6)
-    public code: string;
 }
