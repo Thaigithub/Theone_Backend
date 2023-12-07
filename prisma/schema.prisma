@@ -88,7 +88,7 @@ model Company {
   account            Account      @relation(fields: [accountId], references: [id])
   name               String
   address            String
-  longitude           Float
+  longitude          Float
   latitude           Float
   estDate            DateTime     @map("est_date")
   businessRegNumber  String       @unique @map("buss_reg_number")
@@ -290,6 +290,18 @@ model Career {
   member        Member     @relation(fields: [memberId], references: [id])
 
   @@map("careers")
+}
+
+model Code {
+  id        Int      @id @default(autoincrement())
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  code      String   @unique
+  codeName  String   @map("code_name")
+  codeType  CodeType @map("code_type")
+
+  @@map("codes")
 }
 
 model Site {
@@ -508,6 +520,11 @@ enum CareerType {
 enum OtpType {
   EMAIL
   PHONE
+}
+
+enum CodeType {
+  SPECIAL_NOTE
+  JOB
 }
 
 enum ContractStatus {
