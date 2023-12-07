@@ -6,6 +6,7 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { AdminCompanyDownloadListRequest, AdminCompanyDownloadRequest } from './request/company-admin-download-list.request';
 import { AdminCompanyGetListRequest } from './request/company-admin-get-list.request';
+import { AdminCompanyUpdateEmailRequest } from './request/company-admin-update-email.request';
 import { AdminCompanyUpdateStatusRequest } from './request/company-admin-update-status.request';
 import { AdminCompanyGetDetailsResponse } from './response/company-admin-get-detail.response';
 import { AdminCompanyGetListResponse } from './response/company-admin-get-list.response';
@@ -77,6 +78,21 @@ export class AdminCompanyService {
                 isActive: true,
             },
             data: { status: request.status },
+        });
+    }
+    async changeEmail(CompanyId: number, request: AdminCompanyUpdateEmailRequest): Promise<void> {
+        await this.prismaService.account.update({
+            where: {
+                id: CompanyId,
+                isActive: true,
+            },
+            data: {
+                company: {
+                    update: {
+                        email: request.email,
+                    },
+                },
+            },
         });
     }
     async download(request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest, response: Response): Promise<void> {
