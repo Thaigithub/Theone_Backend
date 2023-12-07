@@ -9,6 +9,7 @@ import { AdminCompanyGetListRequest } from './request/company-admin-get-list.req
 import { AdminCompanyUpdateStatusRequest } from './request/company-admin-update-status.request';
 import { AdminCompanyGetDetailsResponse } from './response/company-admin-get-detail.response';
 import { AdminCompanyGetListResponse } from './response/company-admin-get-list.response';
+import { AdminCompanyUpdateEmailRequest } from './request/company-admin-update-email.request';
 @ApiTags('[ADMIN] Company Management')
 @Controller('/admin/companies')
 @ApiProduces('application/json')
@@ -40,6 +41,19 @@ export class AdminCompanyController {
         @Body() body: AdminCompanyUpdateStatusRequest,
     ): Promise<BaseResponse<null>> {
         await this.adminCompanyService.changeStatus(id, body);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:id/email')
+    @UseGuards(AuthJwtGuard)
+    @ApiOperation({
+        summary: 'Change company email',
+        description: 'This endpoint chaneg company status in the system.',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async changeEmail(@Param('id', ParseIntPipe) id, @Body() body: AdminCompanyUpdateEmailRequest): Promise<BaseResponse<null>> {
+        await this.adminCompanyService.changeEmail(id, body);
         return BaseResponse.ok();
     }
 
