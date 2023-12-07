@@ -20,7 +20,7 @@ export class EvaluationAdminController {
         @Query() query: GetListSiteEvaluationRequest,
     ): Promise<BaseResponse<GetListSiteEvaluationResponse>> {
         const list = await this.evaluationAdminService.getListSiteEvaluation(query);
-        const total = await this.evaluationAdminService.getTotalSiteEvaluation();
+        const total = await this.evaluationAdminService.getTotalSiteEvaluation(query);
         return BaseResponse.of(new GetListSiteEvaluationResponse(list, total));
     }
 }

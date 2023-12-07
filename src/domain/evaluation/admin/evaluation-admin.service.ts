@@ -8,6 +8,18 @@ import { Prisma } from '@prisma/client';
 export class EvaluationAdminService {
     constructor(private readonly prismaService: PrismaService) {}
 
+    private parseConditionsFromQuery(query: GetListSiteEvaluationRequest) {
+        return {
+            isActive: true,
+            Site: {
+                name: query.keywordBySiteName && { contains: query.keywordBySiteName },
+                Company: {
+                    name: query.keywordByCompanyName && { contains: query.keywordByCompanyName },
+                },
+            },
+        };
+    }
+
     async getListSiteEvaluation(@Query() query: GetListSiteEvaluationRequest): Promise<SiteEvaluationResponse[]> {
         let orderBy: Prisma.SiteEvaluationOrderByWithRelationInput;
         switch (query.isHighestRating) {
@@ -37,6 +49,7 @@ export class EvaluationAdminService {
                     },
                 },
             },
+            where: this.parseConditionsFromQuery(query),
             orderBy,
             skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
             take: query.pageNumber && query.pageSize && query.pageSize,
@@ -53,7 +66,9 @@ export class EvaluationAdminService {
         });
     }
 
-    async getTotalSiteEvaluation(): Promise<number> {
-        return await this.prismaService.siteEvaluation.count({});
+    async getTotalSiteEvaluation(@Query() query: GetListSiteEvaluationRequest): Promise<number> {
+        return await this.prismaService.siteEvaluation.count({
+            where: this.parseConditionsFromQuery(query),
+        });
     }
 }
