@@ -1,7 +1,7 @@
 import { Injectable, Query } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { GetListSiteEvaluationRequest } from './request/evaluation-admin.request';
-import { SiteEvaluationResponse } from './response/evaluation-admin.response';
+import { GetSiteEvaluationDetailResponse, SiteEvaluationResponse } from './response/evaluation-admin.response';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -70,5 +70,66 @@ export class EvaluationAdminService {
         return await this.prismaService.siteEvaluation.count({
             where: this.parseConditionsFromQuery(query),
         });
+    }
+
+    async getSiteEvaluationDetail(id: number): Promise<GetSiteEvaluationDetailResponse> {
+        const siteEvaluation = await this.prismaService.siteEvaluation.findUnique({
+            select: {
+                totalEvaluator: true,
+                averageScore: true,
+                Site: {
+                    select: {
+                        name: true,
+                        personInCharge: true,
+                        address: true,
+                        contact: true,
+                        Company: {
+                            select: {
+                                name: true,
+                            }
+                        }
+                    },
+                },
+                SiteEvaluationByMember: {
+                    select: {
+                        score: true,
+                        Member: {
+                            select: {
+                                name: true,
+                                contact: true,
+                                account: {
+                                    select: {
+                                        username: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        const listOfEvaluators = siteEvaluation.SiteEvaluationByMember.map((item) => {
+            const evaluator = {
+                name: item.Member.name,
+                username: item.Member.account.username,
+                contact: item.Member.contact,
+                score: item.score,
+            };
+            return evaluator;
+        });
+        return {
+            companyName: siteEvaluation.Site.Company.name,
+            siteName: siteEvaluation.Site.name,
+            address: siteEvaluation.Site.address,
+            contact: siteEvaluation.Site.contact,
+            personInCharge: siteEvaluation.Site.personInCharge,
+            totalEvaluators: siteEvaluation.totalEvaluator,
+            averageScore: siteEvaluation.averageScore,
+            listOfEvaluators,
+        }
     }
 }
