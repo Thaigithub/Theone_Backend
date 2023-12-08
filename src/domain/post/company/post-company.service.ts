@@ -104,8 +104,28 @@ export class PostCompanyService {
     }
 
     async getPostDetails(id: number): Promise<PostCompanyDetailResponse> {
-        //TODO: Get Detail a post
-        return {} as PostCompanyDetailResponse;
+        return await this.prismaService.post.findUnique({
+            where: {
+                id,
+                isActive: true,
+            },
+            include: {
+                specialNote: {
+                    select: {
+                        code: true,
+                        codeName: true,
+                        codeType: true,
+                    },
+                },
+                occupation: {
+                    select: {
+                        code: true,
+                        codeName: true,
+                        codeType: true,
+                    },
+                },
+            },
+        });
     }
 
     async changePostInfo(id: number, payload: PostCompanyCreateRequest) {
