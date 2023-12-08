@@ -62,33 +62,8 @@ export class PostCompanyService {
             throw new BadRequestException('Site ID does not exist.');
         }
 
-        if (request.specialNoteId) {
-            const currentSpecialNote = await this.prismaService.code.findUnique({
-                where: {
-                    id: request.specialNoteId,
-                    isActive: true,
-                    codeType: CodeType.SPECIAL_NOTE,
-                },
-            });
-
-            if (!currentSpecialNote) {
-                throw new BadRequestException('Special note ID does not exist.');
-            }
-        }
-
-        if (request.occupationId) {
-            const currentOccupation = await this.prismaService.code.findUnique({
-                where: {
-                    id: request.occupationId,
-                    isActive: true,
-                    codeType: CodeType.JOB,
-                },
-            });
-
-            if (!currentOccupation) {
-                throw new BadRequestException('Occupation ID does not exist.');
-            }
-        }
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
+        await this.checkCodeType(request.occupationId, CodeType.JOB);
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -151,12 +126,67 @@ export class PostCompanyService {
         });
     }
 
-    async changePostInfo(id: number, payload: PostCompanyCreateRequest) {
-        //TODO: Update a Post
-        return {} as PostCompanyCreateRequest;
+    async changePostInfo(id: number, request: PostCompanyCreateRequest) {
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
+        await this.checkCodeType(request.occupationId, CodeType.JOB);
+
+        //Modified Time to timestampz
+        const FAKE_STAMP = '2023-12-31T';
+        request.startWorkTime = FAKE_STAMP + request.startWorkTime;
+        request.endWorkTime = FAKE_STAMP + request.endWorkTime;
+
+        console.log('HELLO', request);
+
+        await this.prismaService.post.update({
+            where: {
+                isActive: true,
+                id,
+            },
+            data: {
+                type: request.type,
+                category: request.category,
+                status: request.status,
+                name: request.name,
+                startDate: request.startDate,
+                endDate: request.endDate,
+                experienceType: request.experienceType,
+                numberOfPeople: request.numberOfPeople,
+                specialNoteId: request.specialNoteId || null,
+                occupationId: request.occupationId || null,
+                otherInformation: request.otherInformation,
+                salaryType: request.salaryType,
+                salaryAmount: request.salaryAmount,
+                startWorkDate: request.startWorkDate,
+                endWorkDate: request.endWorkDate,
+                workday: request.workday,
+                startWorkTime: request.startWorkTime,
+                endWorkTime: request.endWorkTime,
+                siteName: request.siteName,
+                siteContact: request.siteContact,
+                sitePersonInCharge: request.sitePersonInCharge,
+                originalBuilding: request.originalBuilding,
+                siteAddress: request.siteAddress,
+                siteId: request.siteId,
+                postEditor: request.postEditor,
+            },
+        });
     }
 
     async deletePost(id: number) {
         //TODO: Soft Delete a Post
+    }
+
+    async checkCodeType(id: number, codeType: CodeType) {
+        if (id) {
+            const code = await this.prismaService.code.findUnique({
+                where: {
+                    isActive: true,
+                    id,
+                    codeType: codeType,
+                },
+            });
+
+            if (!code) throw new BadRequestException(`Code ID of type ${codeType} does not exist`);
+        }
     }
 }
