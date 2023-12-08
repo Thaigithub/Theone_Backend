@@ -4,11 +4,11 @@ import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from './admin/dto/team-search';
-import { TeamSearchRequest } from './admin/request/team.request';
-import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './admin/response/admin-team.response';
+import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from './dto/team-search';
+import { TeamSearchRequest } from './request/team.request';
+import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './response/admin-team.response';
 @Injectable()
-export class TeamService {
+export class AdminTeamService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly excelService: ExcelService,
