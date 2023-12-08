@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CodeType, PostStatus, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostCompanyPostStatusFilter, PostCompanyPostTypeFilter } from './dto/post-company-filter';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
@@ -12,17 +13,39 @@ export class PostCompanyService {
     constructor(private prismaService: PrismaService) {}
 
     async getList(query: PostCompanyGetListRequest): Promise<PostCompanyGetListResponse> {
-        //TODO: Get list posts
-        return {} as PostCompanyGetListResponse;
-    }
-
-    private parseConditionsFromQuery(query: PostCompanyGetListRequest): Prisma.PostWhereInput {
-        return {
+        const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
             ...(query.type !== PostCompanyPostTypeFilter.ALL && { type: PostType[query.type] }),
             ...(query.status !== PostCompanyPostStatusFilter.ALL && { status: PostStatus[query.status] }),
             name: { contains: query.name, mode: 'insensitive' },
         };
+
+        const postList = await this.prismaService.post.findMany({
+            select: {
+                id: true,
+                name: true,
+                siteName: true,
+                startDate: true,
+                endDate: true,
+                view: true,
+                type: true,
+                status: true,
+            },
+            where: queryFilter,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
+        });
+
+        const postListCount = await this.prismaService.post.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        return new PostCompanyGetListResponse(postList, postListCount);
     }
 
     async create(request: PostCompanyCreateRequest) {
