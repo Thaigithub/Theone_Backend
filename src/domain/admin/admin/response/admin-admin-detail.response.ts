@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Account } from '@prisma/client';
-import { AdminResponse } from './admin-admin.response';
+import { AccountAdminCreateAdminDTO } from 'domain/account/dto/account-admin-create-admin.dto';
+import { PermissionDTO } from '../dto/admin-admin-permission.dto';
+import { AdminAdminResponse } from './admin-admin.response';
 
-export class AdminDetailResponse extends AdminResponse {
-    @ApiProperty({ type: 'string' })
-    username: Account['username'];
+export class AdminAdminDetailResponse extends AdminAdminResponse {
+    @ApiProperty({ type: AccountAdminCreateAdminDTO })
+    account: AccountAdminCreateAdminDTO;
 
-    @ApiProperty({ type: 'string[]' })
-    permissions: string[];
+    @ApiProperty({ type: [PermissionDTO] })
+    permissions: PermissionDTO[];
 }

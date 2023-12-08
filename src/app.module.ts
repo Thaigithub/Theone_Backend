@@ -3,6 +3,7 @@ import { CertificateModule } from 'domain/certificate/certificate.module';
 import { CodeModule } from 'domain/code/code.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { MemberModule } from 'domain/member/member.module';
+import { PostModule } from 'domain/post/post.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -23,6 +24,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         AdminModule,
         EvaluationModule,
         CodeModule,
+        PostModule,
     ],
 })
 export class AppModule {}
