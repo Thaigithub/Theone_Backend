@@ -13,5 +13,5 @@ export class PostCompanyCodeDTO {
         enum: CodeType,
         example: CodeType.JOB,
     })
-    public codetype: CodeType;
+    public codeType: CodeType;
 }

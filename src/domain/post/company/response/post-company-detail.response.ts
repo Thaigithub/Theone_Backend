@@ -92,9 +92,6 @@ export class PostCompanyDetailResponse {
     public siteName: string;
 
     @ApiProperty({ example: 'string' })
-    public localInformation: string;
-
-    @ApiProperty({ example: 'string' })
     public siteContact: string;
 
     @ApiProperty({ example: 'string' })
