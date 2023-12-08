@@ -15,14 +15,14 @@ import { GetAdminTeamResponse, GetTeamDetailsResponse } from 'domain/team/admin/
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { TeamService } from '../team.service';
+import { AdminTeamService } from './admin-team.service';
 import { DownloadTeamsRequest, TeamSearchRequest } from './request/team.request';
 @ApiTags('[Admin] Team Management')
 @Controller('admin/teams')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminTeamController {
-    constructor(@Inject(TeamService) private readonly teamService: TeamService) {}
+    constructor(@Inject(AdminTeamService) private readonly teamService: AdminTeamService) {}
 
     @Get()
     @ApiOperation({

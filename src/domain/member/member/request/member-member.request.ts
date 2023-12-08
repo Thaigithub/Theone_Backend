@@ -146,4 +146,4 @@ class UpsertBankAccountRequest {
     public bankName: string;
 }
 
-export { UpsertDisabilityRequest, UpsertHSTCertificateRequest, UpsertForeignWorkerRequest, UpsertBankAccountRequest }
+export { UpsertDisabilityRequest, UpsertHSTCertificateRequest, UpsertForeignWorkerRequest, UpsertBankAccountRequest };
