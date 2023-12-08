@@ -79,6 +79,8 @@ model Member {
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Career                       Career[]
   SiteEvaluationByMember       SiteEvaluationByMember?
+  InterestSites                Interest[]
+  ApplyPosts                   Application[]
   MemberEvaluation             MemberEvaluation?
 
   @@map("members")
@@ -132,23 +134,24 @@ model ContactCard {
 }
 
 model Team {
-  id                   Int              @id @default(autoincrement())
-  code                 String?
-  name                 String
-  introduction         String?
-  leaderId             Int              @map("leader_id")
-  isActive             Boolean          @default(true) @map("is_active")
-  createdAt            DateTime         @default(now()) @map("created_at")
-  updatedAt            DateTime         @updatedAt @map("updated_at")
-  status               TeamStatus       @default(GENERAL)
-  members              MembersOnTeams[]
-  totalMembers         Int              @default(0) @map("total_members")
-  leader               Member           @relation(fields: [leaderId], references: [id])
-  fileId               Int              @unique @map("file_id")
-  file                 File             @relation(fields: [fileId], references: [id])
-  exposureStatus       Boolean          @default(false) @map("exposure_status")
-  numberOfRecruitments Int              @default(0) @map("number_of_recruitments")
-  TeamEvaluation       TeamEvaluation?
+  id                  Int              @id @default(autoincrement())
+  code                String?
+  name                String
+  introduction        String?
+  leaderId            Int              @map("leader_id")
+  isActive            Boolean          @default(true) @map("is_active")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  status              TeamStatus       @default(GENERAL)
+  members             MembersOnTeams[]
+  totalMembers        Int              @default(0) @map("total_members")
+  leader              Member           @relation(fields: [leaderId], references: [id])
+  fileId              Int              @unique @map("file_id")
+  file                File             @relation(fields: [fileId], references: [id])
+  exposureStatus      Boolean          @default(false) @map("exposure_status")
+  numberOfRecruiments Int              @default(0) @map("number_of_recruiments")
+  TeamEvaluation      TeamEvaluation?
+  posts               Application[]
 
   @@map("teams")
 }
@@ -438,6 +441,7 @@ model Site {
   TeamEvaluationByCompany   TeamEvaluationByCompany?
   MemberEvaluationByCompany MemberEvaluationByCompany?
   SiteBanner                SiteBanner[]
+  InterestMember            Interest[]
 
   @@map("sites")
 }
@@ -479,6 +483,8 @@ model Post {
   postEditor         String         @map("post_editor")
   view               Int            @default(0)
   PostBanner         PostBanner[]
+  interested         Interest[]
+  applicants         Application[]
 
   @@map("posts")
 }
@@ -510,6 +516,37 @@ model SiteEvaluationByMember {
   Member           Member         @relation(fields: [memberId], references: [id])
 
   @@map("site_evaluation_by_member")
+}
+
+model Interest {
+  id         Int      @id @default(autoincrement())
+  member     Member   @relation(fields: [memberId], references: [id])
+  memberId   Int
+  site       Site?    @relation(fields: [siteId], references: [id])
+  siteId     Int?
+  post       Post?    @relation(fields: [postId], references: [id])
+  postId     Int?
+  assignedAt DateTime @default(now())
+
+  @@unique([memberId, postId])
+  @@unique([memberId, siteId])
+  @@map("interest")
+}
+
+model Application {
+  id         Int                   @id @default(autoincrement())
+  member     Member?               @relation(fields: [memberId], references: [id])
+  memberId   Int?
+  team       Team?                 @relation(fields: [teamId], references: [id])
+  teamId     Int?
+  post       Post                  @relation(fields: [postId], references: [id])
+  postId     Int
+  status     PostApplicationStatus @default(APPLY)
+  assignedAt DateTime              @default(now())
+
+  @@unique([memberId, postId])
+  @@unique([teamId, postId])
+  @@map("application")
 }
 
 model TeamEvaluation {
@@ -740,20 +777,6 @@ enum ExperienceType {
   REGARDLESS // Any type of experience
 }
 
-// Sample items ONLY - Must be filled in future
-enum SpecialNote {
-  ONE
-  TWO
-  THREE
-}
-
-// Sample type ONLY - Must be filled in future
-enum Occupation {
-  ONE
-  TWO
-  THREE
-}
-
 enum SalaryType {
   HOURLY
   FIRST_CLASS
@@ -769,4 +792,15 @@ enum Workday {
   SATURDAY
   SUNDAY
   AGREEMENT
+}
+
+enum PostApplicationStatus {
+  APPLY
+  REJECT_BY_COMPANY
+  PROPOSAL_INTERVIEW
+  PASS_INTERVIEW
+  FAIL_INTERVIEW
+  REJECT_BY_MEMBER
+  APPROVE_BY_MEMBER
+  APPROVE_BY_COMPANY
 }

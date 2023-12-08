@@ -3,6 +3,7 @@ import { $Enums, AccountStatus, AccountType, AdminLevel, Prisma } from '@prisma/
 import { hash } from 'bcrypt';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AdminLevelRequest, AdminSearchCategories } from './dto/admin-admin-search';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';
@@ -21,7 +22,7 @@ export class AdminAdminService {
         const list = await this.findByQuery(query);
 
         const total = await this.countByQuery(query);
-        return new AdminAdminGetListResponse(list, total);
+        return new PaginationResponse(list, new PageInfo(total));
     }
 
     async create(request: AdminAdminUpsertRequest): Promise<void> {

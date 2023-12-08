@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Post,
     Put,
+    Req,
     Request,
     UseGuards,
 } from '@nestjs/common';
@@ -20,10 +21,13 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { GetTeamDetailsResponse } from '../admin/response/admin-team.response';
 import { MemberTeamService } from './member-team.service';
 import { MemberCreateTeamRequest, MemberUpdateTeamRequest } from './request/member-upsert-team.request';
+import { TeamMemberApplyPost } from './request/team-member-apply-post.request';
 import { MemberTeamsResponse } from './response/member-teams.response';
 
 @ApiTags('[Member] Team Management')
 @Controller('member/teams')
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@Roles(AccountType.MEMBER)
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberTeamController {
@@ -81,5 +85,16 @@ export class MemberTeamController {
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'update failed' })
     async updateTeam(@Request() req, @Body() request: MemberUpdateTeamRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.memberTeamService.update(req.user.accountId, request));
+    }
+
+    @Post('apply-post')
+    @ApiOperation({
+        summary: 'Apply a post',
+        description: "This endpoint add a post to request's team apply list in the system.",
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async addApplyPost(@Req() request: any, @Body() payload: TeamMemberApplyPost): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.memberTeamService.addApplyPost(request.user.accountId, payload));
     }
 }
