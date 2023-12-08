@@ -1,42 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { AdminLevelRequest, AdminSearchCategories } from '../dto/admin-admin-search';
+import { PostCompanyPostStatusFilter, PostCompanyPostTypeFilter } from '../dto/post-company-filter';
 
-export class AdminAdminGetListRequest {
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminLevelRequest,
-        required: false,
-    })
-    @Expose()
-    @IsEnum(AdminLevelRequest)
-    @IsOptional()
-    public level: AdminLevelRequest;
-
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminSearchCategories,
-        required: false,
-    })
-    @Expose()
-    @IsEnum(AdminSearchCategories)
-    @IsOptional()
-    public searchCategory: AdminSearchCategories;
-
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
+export class PostCompanyGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    public name: string;
 
+    @Expose()
+    @IsEnum(PostCompanyPostTypeFilter)
+    @IsOptional()
     @ApiProperty({
-        type: 'number',
-        required: false,
+        type: 'enum',
+        enum: PostCompanyPostTypeFilter,
     })
+    public type: PostCompanyPostTypeFilter;
+
+    @Expose()
+    @IsEnum(PostCompanyPostStatusFilter)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: PostCompanyPostStatusFilter,
+    })
+    public status: PostCompanyPostStatusFilter;
+
     @Expose()
     @IsNumber()
     @IsOptional()

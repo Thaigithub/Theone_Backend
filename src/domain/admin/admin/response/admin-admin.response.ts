@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Admin, AdminLevel } from '@prisma/client';
 
-export class AdminResponse {
+export class AdminAdminResponse {
     @ApiProperty({ type: 'string' })
     id: Admin['id'];
 
@@ -10,7 +10,7 @@ export class AdminResponse {
 
     @ApiProperty({
         type: 'string',
-        example: [...Object.values(AdminLevel)],
+        example: AdminLevel.GENERAL,
     })
     level: Admin['level'];
 }
