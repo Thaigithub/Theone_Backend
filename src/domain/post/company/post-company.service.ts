@@ -173,7 +173,15 @@ export class PostCompanyService {
     }
 
     async deletePost(id: number) {
-        //TODO: Soft Delete a Post
+        await this.prismaService.post.update({
+            where: {
+                id,
+                isActive: true,
+            },
+            data: {
+                isActive: false,
+            },
+        });
     }
 
     async checkCodeType(id: number, codeType: CodeType) {
