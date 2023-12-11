@@ -19,4 +19,4 @@ export class SiteEvaluationResponse {
     averageScore: SiteEvaluation['averageScore'];
 }
 
-export class AdminGetListSiteEvaluationResponse extends PaginationResponse<SiteEvaluationResponse> {}
+export class SiteEvaluationAdminGetListResponse extends PaginationResponse<SiteEvaluationResponse> {}

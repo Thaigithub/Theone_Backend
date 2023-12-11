@@ -1,24 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CareerType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { CareerResponse } from './response/career-member.response';
-import { CreateCareerRequest, GetCareersListRequest } from './request/career-member.request';
+import { CareerMemberCreateRequest } from './request/career-member-create.request';
+import { CareerMemberGetListRequest } from './request/career-member-get-list-request';
+import { CareerResponse } from './response/career-member-get-list.response';
 
 @Injectable()
 export class CareerMemberService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    private parseConditionsFromQuery(query: GetCareersListRequest, request: any) {
+    private async getMemberId(accountId: number): Promise<number> {
+        const member = await this.prismaService.member.findUnique({
+            select: {
+                id: true,
+            },
+            where: {
+                accountId,
+            },
+        });
+        return member.id;
+    }
+
+    private parseConditionsFromQuery(query: CareerMemberGetListRequest, memberId: number) {
         return {
             isActive: true,
             type: query.type,
-            member: {
-                accountId: request.user.accountId,
-            },
+            memberId,
         };
     }
 
-    async getList(query: GetCareersListRequest, request: any): Promise<CareerResponse[]> {
+    async getList(query: CareerMemberGetListRequest, accountId: number): Promise<CareerResponse[]> {
+        const memberId = await this.getMemberId(accountId);
         return await this.prismaService.career.findMany({
             select: {
                 id: true,
@@ -30,17 +42,19 @@ export class CareerMemberService {
                 occupation: true,
                 isExperienced: true,
             },
-            where: this.parseConditionsFromQuery(query, request),
+            where: this.parseConditionsFromQuery(query, memberId),
         });
     }
 
-    async getTotal(query: GetCareersListRequest, request: any): Promise<number> {
+    async getTotal(query: CareerMemberGetListRequest, accountId: number): Promise<number> {
+        const memberId = await this.getMemberId(accountId);
         return await this.prismaService.career.count({
-            where: this.parseConditionsFromQuery(query, request),
+            where: this.parseConditionsFromQuery(query, memberId),
         });
     }
 
-    async createCareer(body: CreateCareerRequest, memberId: number): Promise<void> {
+    async createCareer(body: CareerMemberCreateRequest, accountId: number): Promise<void> {
+        const memberId = await this.getMemberId(accountId);
         await this.prismaService.career.create({
             data: {
                 ...body,
@@ -50,7 +64,8 @@ export class CareerMemberService {
         });
     }
 
-    async deleteCareer(careerId: number, memberId: number): Promise<void> {
+    async deleteCareer(careerId: number, accountId: number): Promise<void> {
+        const memberId = await this.getMemberId(accountId);
         await this.prismaService.career.update({
             where: {
                 id: careerId,

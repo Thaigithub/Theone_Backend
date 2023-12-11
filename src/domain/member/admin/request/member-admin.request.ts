@@ -88,13 +88,13 @@ class DownloadMembersRequest {
     @IsArray({ message: 'memberIds must be an array' })
     @ArrayNotEmpty({ message: 'The array must not be empty' })
     @IsNumberString({}, { each: true, message: 'Each element of the array must be a number' })
-    public memberIds: string[];
+    public memberId: string[];
 }
 
 class DownloadSingleMemberRequest {
     @Expose()
     @IsNumberString({}, { message: 'Each element of the array must be a number' })
-    public memberIds: string;
+    public memberId: string;
 }
 
 export { GetMembersListRequest, ChangeMemberRequest, DownloadSingleMemberRequest, DownloadMembersRequest };

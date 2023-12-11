@@ -12,6 +12,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
+import { SiteModule } from 'domain/site/site.module';
 @Module({
     imports: [
         PrismaModule,
@@ -27,6 +28,7 @@ import { SpecialLicenseModule } from 'domain/special-license/special-license.mod
         EvaluationModule,
         CodeModule,
         PostModule,
+        SiteModule,
     ],
 })
 export class AppModule {}
