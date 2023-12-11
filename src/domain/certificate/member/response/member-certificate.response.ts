@@ -6,7 +6,6 @@ export class GetMemberCertificateResponse {
     acquisitionDate: Certificate['acquisitionDate'];
     certificateNumber: Certificate['certificateNumber'];
     file: CertificateFileResponse;
-    isSpecial: boolean;
 }
 export class CertificateFileResponse {
     type: File['type'];

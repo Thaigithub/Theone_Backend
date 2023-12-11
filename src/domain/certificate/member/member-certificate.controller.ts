@@ -7,7 +7,6 @@ import {
     HttpStatus,
     Inject,
     Param,
-    ParseBoolPipe,
     ParseIntPipe,
     Post,
     Query,
@@ -42,7 +41,6 @@ export class MemberCertificateController {
     @ApiResponse({ status: HttpStatus.OK, description: 'Create certificate successfully' })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Create certificate  failed' })
     async saveCertificate(@Body() request: UpSertMemberCertificateRequest, @Request() req): Promise<BaseResponse<void>> {
-        console.log(req.user.accountId);
         await this.certificateService.saveCertificate(req.user.accountId, request);
         return BaseResponse.ok();
     }
@@ -60,14 +58,12 @@ export class MemberCertificateController {
     async getMemberCertificates(
         @Query('page', ParseIntPipe) page: number, // Use @Query for query parameters
         @Query('size', ParseIntPipe) size: number,
-        @Query('isSpecial', ParseBoolPipe) isSpecial: boolean,
         @Request() req,
     ): Promise<BaseResponse<PaginationResponse<GetMemberCertificateResponse>>> {
         const result = await this.certificateService.getPaginatedCertificates({
-            memberId: req.user.accountId,
+            accountId: req.user.accountId,
             page: page,
             size: size,
-            isSpecial: isSpecial,
         });
         return BaseResponse.of(result);
     }

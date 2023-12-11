@@ -52,7 +52,6 @@ export class CertificateService {
                 memberId: member.id,
                 fileId: newFile.id,
                 status: CertificateStatus.REQUESTING,
-                isSpecial: request.isSpecial,
             },
         });
     }
@@ -71,7 +70,6 @@ export class CertificateService {
             status: result.status,
             acquisitionDate: result.acquisitionDate,
             certificateNumber: result.certificateNumber,
-            isSpecial: result.isSpecial,
             file: {
                 fileName: result.file.fileName,
                 key: result.file.key,
@@ -84,11 +82,17 @@ export class CertificateService {
         request: GetMemberCertificateRequest,
         hasOrder = true,
     ): Promise<PaginationResponse<GetMemberCertificateResponse>> {
-        // const memberId = await this.memberRepository.findIdByAccountId(request.memberId);
+        const member = await this.prismaService.member.findFirst({
+            where: {
+                accountId: request.accountId,
+            },
+        });
+        if (!member) {
+            throw new NotFoundException('Member not found');
+        }
         const result = await this.prismaService.certificate.findMany({
             where: {
-                memberId: request.memberId,
-                isSpecial: request.isSpecial,
+                memberId: member.id,
             },
             orderBy: hasOrder ? { createdAt: 'desc' } : undefined,
             skip: (request.page - 1) * request.size,
@@ -106,7 +110,6 @@ export class CertificateService {
                     status: item.status,
                     certificateNumber: item.certificateNumber,
                     acquisitionDate: item.acquisitionDate,
-                    isSpecial: item.isSpecial,
                     file: {
                         fileName: item.file.fileName,
                         key: item.file.key,
@@ -117,7 +120,7 @@ export class CertificateService {
         );
         const condition: any = {
             where: {
-                memberId: 1,
+                memberId: member.id,
             },
         };
         const total = await this.prismaService.certificate.count(condition);

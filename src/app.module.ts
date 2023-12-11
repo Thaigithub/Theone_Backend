@@ -11,6 +11,7 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
 @Module({
     imports: [
         PrismaModule,
@@ -19,6 +20,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         CompanyModule,
         MemberModule,
         CertificateModule,
+        SpecialLicenseModule,
         TeamModule,
         CareerModule,
         AdminModule,

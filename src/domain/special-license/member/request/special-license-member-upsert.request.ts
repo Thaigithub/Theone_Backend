@@ -1,35 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FileType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsISO8601, IsNumber, IsString } from 'class-validator';
 
-export class GetMemberCertificateRequest {
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    public accountId: number;
-
-    @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 1 })
-    public page: number;
-
-    @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 20 })
-    public size: number;
-}
-
-export class UpSertMemberCertificateRequest {
+export class SpecialLicenseMemberUpsertRequest {
     @Expose()
     @IsString()
-    @ApiProperty({ example: 'Certificate 1' })
+    @ApiProperty({ example: 'special license 1' })
     public name: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: '000-111-222' })
-    public certificateNumber: string;
+    public licenseNumber: string;
 
     @Expose()
     @IsISO8601()
@@ -60,3 +43,4 @@ export class UpSertMemberCertificateRequest {
     @ApiProperty({ example: 100 })
     public fileSize: number;
 }
+

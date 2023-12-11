@@ -86,8 +86,8 @@ export class EvaluationAdminService {
                         Company: {
                             select: {
                                 name: true,
-                            }
-                        }
+                            },
+                        },
                     },
                 },
                 SiteEvaluationByMember: {
@@ -130,6 +130,6 @@ export class EvaluationAdminService {
             totalEvaluators: siteEvaluation.totalEvaluator,
             averageScore: siteEvaluation.averageScore,
             listOfEvaluators,
-        }
+        };
     }
 }
