@@ -54,7 +54,6 @@ export class MemberTeamService {
                 leaderId: member.id,
             },
             include: {
-                members: true,
                 leader: true,
             },
         });
@@ -67,9 +66,9 @@ export class MemberTeamService {
                     code: team.code,
                     exposureStatus: team.exposureStatus,
                     isActive: team.isActive,
-                    numberOfRecruitments: team.numberOfRecruiments,
+                    numberOfRecruitments: team.numberOfRecruitments,
                     leaderName: team.leader.name,
-                    members: team.members.length,
+                    members: team.totalMembers,
                     createdAt: team.createdAt,
                 }) as MemberTeamsResponse,
         );

@@ -2,16 +2,15 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { IsBooleanString, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class GetListSiteEvaluationRequest {
+export class AdminGetListTeamEvaluationRequest {
+    @ApiProperty({
+        type: 'boolean',
+        required: false,
+    })
     @Expose()
     @IsBooleanString()
     @IsOptional()
     public isHighestRating: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    public keywordByCompanyName: string;
 
     @ApiProperty({
         type: 'string',
@@ -20,7 +19,16 @@ export class GetListSiteEvaluationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keywordBySiteName: string;
+    public keywordByTeamName: string;
+
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
+    @Expose()
+    @IsString()
+    @IsOptional()
+    public keywordByLeaderName: string;
 
     @ApiProperty({
         type: 'number',

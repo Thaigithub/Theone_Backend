@@ -79,6 +79,7 @@ model Member {
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Career                       Career[]
   SiteEvaluationByMember       SiteEvaluationByMember?
+  MemberEvaluation             MemberEvaluation?
 
   @@map("members")
 }
@@ -131,21 +132,23 @@ model ContactCard {
 }
 
 model Team {
-  id        Int              @id @default(autoincrement())
-  code      String?
-  name      String
-  introduction String?
-  leaderId  Int              @map("leader_id")
-  isActive  Boolean          @default(true) @map("is_active")
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  status    TeamStatus       @default(GENERAL)
-  members   MembersOnTeams[]
-  leader    Member           @relation(fields: [leaderId], references: [id])
-  fileId    Int              @unique @map("file_id")
-  file      File             @relation(fields: [fileId], references: [id])
-  exposureStatus Boolean     @default(false) @map("exposure_status") 
-  numberOfRecruiments   Int  @default(0) @map("number_of_recruiments")
+  id                   Int              @id @default(autoincrement())
+  code                 String?
+  name                 String
+  introduction         String?
+  leaderId             Int              @map("leader_id")
+  isActive             Boolean          @default(true) @map("is_active")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  status               TeamStatus       @default(GENERAL)
+  members              MembersOnTeams[]
+  totalMembers         Int              @default(0) @map("total_members")
+  leader               Member           @relation(fields: [leaderId], references: [id])
+  fileId               Int              @unique @map("file_id")
+  file                 File             @relation(fields: [fileId], references: [id])
+  exposureStatus       Boolean          @default(false) @map("exposure_status")
+  numberOfRecruitments Int              @default(0) @map("number_of_recruitments")
+  TeamEvaluation       TeamEvaluation?
 
   @@map("teams")
 }
@@ -197,7 +200,7 @@ model BankAccount {
 model Disability {
   id           Int           @id @default(autoincrement())
   disableType  DisabledType  @map("disable_type")
-  disableLevel DisabledLevel @map("disable_level")
+  disableLevel DisabledLevel
   memberId     Int           @unique @map("member_id")
   member       Member        @relation(fields: [memberId], references: [id])
   fileId       Int           @unique @map("file_id")
@@ -237,7 +240,7 @@ model File {
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Certificate                  Certificate?
-  specialLicense               SpecialLicense?               
+  specialLicense               SpecialLicense?
   team                         Team?
   Logo                         Logo?
   ContactCard                  ContactCard?
@@ -277,22 +280,23 @@ model Certificate {
   member            Member            @relation(fields: [memberId], references: [id])
   fileId            Int               @unique @map("file_id")
   file              File              @relation(fields: [fileId], references: [id])
+  isSpecial         Boolean           @default(false)
 
   @@map("certificates")
 }
 
 model SpecialLicense {
-  id                Int               @id @default(autoincrement())
-  name              String
-  status            CertificateStatus @default(REQUESTING)
-  licenseNumber     String            @map("license_number")
-  acquisitionDate   DateTime          @map("acquisition_date")
-  createdAt         DateTime          @default(now()) @map("created_at")
-  updatedAt         DateTime          @updatedAt @map("updated_at")
-  memberId          Int               @map("member_id")
-  member            Member            @relation(fields: [memberId], references: [id])
-  fileId            Int               @unique @map("file_id")
-  file              File              @relation(fields: [fileId], references: [id])
+  id              Int               @id @default(autoincrement())
+  name            String
+  status          CertificateStatus @default(REQUESTING)
+  licenseNumber   String            @map("license_number")
+  acquisitionDate DateTime          @map("acquisition_date")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  memberId        Int               @map("member_id")
+  member          Member            @relation(fields: [memberId], references: [id])
+  fileId          Int               @unique @map("file_id")
+  file            File              @relation(fields: [fileId], references: [id])
 
   @@map("specialLicense")
 }
@@ -330,28 +334,29 @@ model Code {
 }
 
 model Site {
-  id                    Int             @id @default(autoincrement())
-  isActive              Boolean         @default(true) @map("is_active")
-  createdAt             DateTime        @default(now()) @map("created_at")
-  updatedAt             DateTime        @updatedAt @map("updated_at")
-  name                  String
-  address               String
-  longitude             Float
-  latitude              Float
-  contact               String
-  personInCharge        String          @map("person_in_charge")
-  personInChargeContact String          @map("person_in_charge_contact")
-  contractorName        String          @map("contractor_name")
-  email                 String
-  taxInvoiceEmail       String          @map("tax_invoice_email")
-  siteManagementNumber  String          @map("site_management_number")
-  contractStatus        ContractStatus  @map("contract_status")
-  startDate             DateTime        @map("start_date")
-  endDate               DateTime        @map("end_date")
-  companyId             Int             @map("company_id")
-  Company               Company         @relation(fields: [companyId], references: [id])
-  Post                  Post[]
-  SiteEvaluation        SiteEvaluation?
+  id                        Int                        @id @default(autoincrement())
+  isActive                  Boolean                    @default(true) @map("is_active")
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
+  name                      String
+  address                   String
+  longitude                 Float
+  latitude                  Float
+  contact                   String
+  personInCharge            String                     @map("person_in_charge")
+  personInChargeContact     String                     @map("person_in_charge_contact")
+  email                     String
+  taxInvoiceEmail           String                     @map("tax_invoice_email")
+  siteManagementNumber      String                     @map("site_management_number")
+  contractStatus            ContractStatus             @map("contract_status")
+  startDate                 DateTime                   @map("start_date")
+  endDate                   DateTime                   @map("end_date")
+  companyId                 Int                        @map("company_id")
+  Company                   Company                    @relation(fields: [companyId], references: [id])
+  Post                      Post[]
+  SiteEvaluation            SiteEvaluation?
+  TeamEvaluationByCompany   TeamEvaluationByCompany?
+  MemberEvaluationByCompany MemberEvaluationByCompany?
 
   @@map("sites")
 }
@@ -401,8 +406,9 @@ model SiteEvaluation {
   isActive               Boolean                  @default(true) @map("is_active")
   createdAt              DateTime                 @default(now()) @map("created_at")
   updatedAt              DateTime                 @updatedAt @map("updated_at")
-  totalEvaluator         Int                      @map("total_evaluator")
-  averageScore           Float                    @map("average_score") @db.Real
+  totalEvaluators        Int                      @default(0) @map("total_evaluator")
+  totalScore             Int?                     @map("total_score")
+  averageScore           Float?                   @map("average_score") @db.Real
   siteId                 Int                      @unique @map("site_id")
   Site                   Site                     @relation(fields: [siteId], references: [id])
   SiteEvaluationByMember SiteEvaluationByMember[]
@@ -415,13 +421,71 @@ model SiteEvaluationByMember {
   isActive         Boolean        @default(true) @map("is_active")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
-  score            Int            @db.SmallInt
+  score            Int?           @db.SmallInt
   SiteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
   siteEvaluationId Int            @map("site_evaluation_id")
   memberId         Int            @unique @map("member_id")
   Member           Member         @relation(fields: [memberId], references: [id])
 
   @@map("site_evaluation_by_member")
+}
+
+model TeamEvaluation {
+  id                      Int                       @id @default(autoincrement())
+  isActive                Boolean                   @default(true) @map("is_active")
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  totalEvaluators         Int                       @default(0) @map("total_evaluator")
+  totalScore              Int?                      @map("total_score")
+  averageScore            Float?                    @map("average_score") @db.Real
+  teamId                  Int                       @unique @map("team_id")
+  Team                    Team                      @relation(fields: [teamId], references: [id])
+  TeamEvaluationByCompany TeamEvaluationByCompany[]
+
+  @@map("team_evaluation")
+}
+
+model TeamEvaluationByCompany {
+  id               Int            @id @default(autoincrement())
+  isActive         Boolean        @default(true) @map("is_active")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  score            Int?           @db.SmallInt
+  TeamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
+  teamEvaluationId Int            @map("team_evaluation_id")
+  siteId           Int            @unique @map("site_id")
+  Site             Site           @relation(fields: [siteId], references: [id])
+
+  @@map("team_evaluation_by_company")
+}
+
+model MemberEvaluation {
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  totalEvaluators           Int                         @default(0) @map("total_evaluator")
+  totalScore                Int?                        @map("total_score")
+  averageScore              Float?                      @map("average_score") @db.Real
+  memberId                  Int                         @unique @map("member_id")
+  Member                    Member                      @relation(fields: [memberId], references: [id])
+  MemberEvaluationByCompany MemberEvaluationByCompany[]
+
+  @@map("member_evaluation")
+}
+
+model MemberEvaluationByCompany {
+  id                 Int              @id @default(autoincrement())
+  isActive           Boolean          @default(true) @map("is_active")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  score              Int?             @db.SmallInt
+  MemberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
+  memberEvaluationId Int              @map("member_evaluation_id")
+  siteId             Int              @unique @map("site_id")
+  Site               Site             @relation(fields: [siteId], references: [id])
+
+  @@map("member_evaluation_by_company")
 }
 
 enum FunctionName {
@@ -570,7 +634,9 @@ enum ContractStatus {
 
 enum PostType {
   COMMON
-  PREMIUM
+  GENERAL
+  MATCHING
+  HEADHUNTING
 }
 
 enum PostCategory {

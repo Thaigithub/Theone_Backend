@@ -22,7 +22,6 @@ export class AdminTeamService {
             },
             include: {
                 leader: true,
-                members: true,
             },
         });
         if (!teams) {
@@ -36,7 +35,7 @@ export class AdminTeamService {
                     name: team.name,
                     leaderName: team.leader.name,
                     leaderContact: team.leader.contact,
-                    members: team.members.length,
+                    members: team.totalMembers,
                     status: team.status,
                     isActive: team.isActive,
                 }) as GetAdminTeamResponse,
@@ -134,7 +133,6 @@ export class AdminTeamService {
             where,
             orderBy,
             include: {
-                members: true,
                 leader: true,
             },
             skip: (Number(request.pageNumber) - 1) * Number(request.pageSize),
@@ -155,7 +153,7 @@ export class AdminTeamService {
                         status: team.status,
                         leaderContact: team.leader.contact,
                         leaderName: team.leader.name,
-                        members: team.members.length,
+                        members: team.totalMembers,
                     }) as GetAdminTeamResponse,
             ),
             pageInfo: {

@@ -9,6 +9,6 @@ export class MemberTeamsResponse {
     status: Team['status'];
     exposureStatus: Team['exposureStatus'];
     createdAt: Team['createdAt'];
-    numberOfRecruitments: Team['numberOfRecruiments'];
+    numberOfRecruitments: Team['numberOfRecruitments'];
     members: number;
 }
