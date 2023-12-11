@@ -1,16 +1,16 @@
 import { Injectable, Query } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { AdminGetListMemberEvaluationRequest } from './request/evaluation-admin-get-list-member.request';
-import { AdminGetListSiteEvaluationRequest } from './request/evaluation-admin-get-list-site.request';
-import { AdminGetListTeamEvaluationRequest } from './request/evaluation-admin-get-list-team.request';
-import { SiteEvaluationResponse } from './response/evaluation-admin-get-list-site.response';
-import { TeamEvaluationResponse } from './response/evaluation-admin-get-list-team.response';
-import { MemberEvaluationResponse } from './response/evaluation-admin-get-list-member.response';
-import { AdminGetSiteEvaluationDetailResponse } from './response/evaluation-admin-get-site-detail.response';
-import { AdminGetTeamEvaluationDetailResponse } from './response/evaluation-admin-get-team-detail.response';
-import { AdminGetMemberEvaluationDetailResponse } from './response/evaluation-admin-get-member-detail.response';
 import { EvaluationType } from './dto/evaluation-admin.dto';
+import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
+import { SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
+import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
+import { TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
+import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
+import { MemberEvaluationResponse } from './response/member-evaluation-admin-get-list.response';
+import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
 
 @Injectable()
 export class EvaluationAdminService {
@@ -18,12 +18,12 @@ export class EvaluationAdminService {
 
     private parseConditionsFromQuery(
         evaluationType: EvaluationType,
-        query: AdminGetListSiteEvaluationRequest | AdminGetListTeamEvaluationRequest | AdminGetListMemberEvaluationRequest,
+        query: SiteEvaluationAdminGetListRequest | TeamEvaluationAdminGetListRequest | MemberEvaluationAdminGetListRequest,
     ) {
         let whereConditions = {};
         switch (evaluationType) {
             case EvaluationType.SITE:
-                const siteQuery = query as AdminGetListSiteEvaluationRequest;
+                const siteQuery = query as SiteEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
                     Site: {
@@ -35,7 +35,7 @@ export class EvaluationAdminService {
                 };
                 break;
             case EvaluationType.TEAM:
-                const teamQuery = query as AdminGetListTeamEvaluationRequest;
+                const teamQuery = query as TeamEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
                     Team: {
@@ -47,7 +47,7 @@ export class EvaluationAdminService {
                 };
                 break;
             case EvaluationType.MEMBER:
-                const memberQuery = query as AdminGetListMemberEvaluationRequest;
+                const memberQuery = query as MemberEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
                     Member: {
@@ -77,7 +77,7 @@ export class EvaluationAdminService {
 
     async getTotal(
         evaluationType: EvaluationType,
-        query: AdminGetListSiteEvaluationRequest | AdminGetListTeamEvaluationRequest | AdminGetListMemberEvaluationRequest,
+        query: SiteEvaluationAdminGetListRequest | TeamEvaluationAdminGetListRequest | MemberEvaluationAdminGetListRequest,
     ) {
         let count: number;
         switch (evaluationType) {
@@ -100,7 +100,7 @@ export class EvaluationAdminService {
         return count;
     }
 
-    async getListSiteEvaluation(@Query() query: AdminGetListSiteEvaluationRequest): Promise<SiteEvaluationResponse[]> {
+    async getListSiteEvaluation(@Query() query: SiteEvaluationAdminGetListRequest): Promise<SiteEvaluationResponse[]> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
         const siteEvaluations = await this.prismaService.siteEvaluation.findMany({
             select: {
@@ -134,7 +134,7 @@ export class EvaluationAdminService {
         });
     }
 
-    async getSiteEvaluationDetail(id: number): Promise<AdminGetSiteEvaluationDetailResponse> {
+    async getSiteEvaluationDetail(id: number): Promise<SiteEvaluationAdminGetDetailResponse> {
         const siteEvaluation = await this.prismaService.siteEvaluation.findUnique({
             select: {
                 totalEvaluators: true,
@@ -194,7 +194,7 @@ export class EvaluationAdminService {
         };
     }
 
-    async getListTeamEvaluation(@Query() query: AdminGetListTeamEvaluationRequest): Promise<TeamEvaluationResponse[]> {
+    async getListTeamEvaluation(@Query() query: TeamEvaluationAdminGetListRequest): Promise<TeamEvaluationResponse[]> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
         const teamEvaluations = await this.prismaService.teamEvaluation.findMany({
             select: {
@@ -230,7 +230,7 @@ export class EvaluationAdminService {
         });
     }
 
-    async getTeamEvaluationDetail(id: number): Promise<AdminGetTeamEvaluationDetailResponse> {
+    async getTeamEvaluationDetail(id: number): Promise<TeamEvaluationAdminGetDetailResponse> {
         const teamEvaluation = await this.prismaService.teamEvaluation.findUnique({
             select: {
                 totalEvaluators: true,
@@ -288,7 +288,7 @@ export class EvaluationAdminService {
         };
     }
 
-    async getListMemberEvaluation(@Query() query: AdminGetListMemberEvaluationRequest): Promise<MemberEvaluationResponse[]> {
+    async getListMemberEvaluation(@Query() query: MemberEvaluationAdminGetListRequest): Promise<MemberEvaluationResponse[]> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
         const memberEvaluations = this.prismaService.memberEvaluation.findMany({
             select: {
@@ -318,7 +318,7 @@ export class EvaluationAdminService {
         });
     }
 
-    async getMemberEvaluationDetail(id: number): Promise<AdminGetMemberEvaluationDetailResponse> {
+    async getMemberEvaluationDetail(id: number): Promise<MemberEvaluationAdminGetDetailResponse> {
         const memberEvaluation = await this.prismaService.memberEvaluation.findUnique({
             select: {
                 totalEvaluators: true,

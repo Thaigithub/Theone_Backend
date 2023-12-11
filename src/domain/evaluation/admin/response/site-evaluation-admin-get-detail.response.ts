@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Account, Company, Member, Site, SiteEvaluation, SiteEvaluationByMember } from '@prisma/client';
 
-class ListOfSiteEvaluators {
+class ListOfEvaluators {
     @ApiProperty({ type: 'string' })
     name: Member['name'];
 
@@ -15,7 +15,7 @@ class ListOfSiteEvaluators {
     score: SiteEvaluationByMember['score'];
 }
 
-export class AdminGetSiteEvaluationDetailResponse {
+export class SiteEvaluationAdminGetDetailResponse {
     @ApiProperty({ type: 'string' })
     companyName: Company['name'];
 
@@ -37,6 +37,6 @@ export class AdminGetSiteEvaluationDetailResponse {
     @ApiProperty({ type: 'number' })
     averageScore: SiteEvaluation['averageScore'];
 
-    @ApiProperty({ type: () => [ListOfSiteEvaluators] })
-    listOfEvaluators: ListOfSiteEvaluators[];
+    @ApiProperty({ type: () => [ListOfEvaluators] })
+    listOfEvaluators: ListOfEvaluators[];
 }

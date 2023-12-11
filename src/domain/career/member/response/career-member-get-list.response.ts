@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Career, CareerType } from '@prisma/client';
+import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
-class CareerResponse {
+export class CareerResponse {
     @ApiProperty({ type: 'string' })
     id: Career['id'];
 
@@ -30,20 +31,4 @@ class CareerResponse {
     isExperienced: Career['isExperienced'];
 }
 
-class GetCareersListResponse {
-    @ApiProperty({ type: () => [CareerResponse] })
-    list: CareerResponse[];
-
-    @ApiProperty({
-        type: 'number',
-        examples: [0, 1, 2],
-    })
-    total: number;
-
-    constructor(list: CareerResponse[], total: number) {
-        this.list = list;
-        this.total = total;
-    }
-}
-
-export { CareerResponse, GetCareersListResponse };
+export class CareerMemberGetListResponse extends PaginationResponse<CareerResponse> {}

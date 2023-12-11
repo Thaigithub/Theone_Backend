@@ -1,5 +1,5 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MemberAdminService } from './member-admin.service';
@@ -46,14 +46,20 @@ export class MemberAdminController {
     @ApiResponse({
         status: HttpStatus.OK,
     })
+    @ApiQuery({
+        name: 'memberId',
+        isArray: true,
+        type: 'number',
+        example: [1, 2, 3],
+    })
     async download(
         @Query() query: DownloadSingleMemberRequest | DownloadMembersRequest,
         @Res() response: Response,
     ): Promise<BaseResponse<null>> {
         let memberIds = [];
-        if (Array.isArray(query.memberIds)) {
-            memberIds = query.memberIds.map((item) => parseInt(item));
-        } else if (typeof query.memberIds === 'string') memberIds = [parseInt(query.memberIds)];
+        if (Array.isArray(query.memberId)) {
+            memberIds = query.memberId.map((item) => parseInt(item));
+        } else if (typeof query.memberId === 'string') memberIds = [parseInt(query.memberId)];
         await this.memberAdminService.download(memberIds, response);
         return BaseResponse.ok();
     }

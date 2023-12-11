@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Company, Member, Site, TeamEvaluation, TeamEvaluationByCompany } from '@prisma/client';
+import { Company, Member, Site, Team, TeamEvaluation, TeamEvaluationByCompany } from '@prisma/client';
 
-class ListOfMemberEvaluators {
+class ListOfEvaluators {
     @ApiProperty({ type: 'string' })
     companyName: Company['name'];
 
@@ -18,12 +18,15 @@ class ListOfMemberEvaluators {
     score: TeamEvaluationByCompany['score'];
 }
 
-export class AdminGetMemberEvaluationDetailResponse {
+export class TeamEvaluationAdminGetDetailResponse {
     @ApiProperty({ type: 'string' })
-    name: Member['name'];
+    teamName: Team['name'];
 
     @ApiProperty({ type: 'string' })
-    contact: Member['contact'];
+    leaderName: Member['name'];
+
+    @ApiProperty({ type: 'string' })
+    totalMembers: Team['totalMembers'];
 
     @ApiProperty({ type: 'number' })
     totalEvaluators: TeamEvaluation['totalEvaluators'];
@@ -31,6 +34,6 @@ export class AdminGetMemberEvaluationDetailResponse {
     @ApiProperty({ type: 'number' })
     averageScore: TeamEvaluation['averageScore'];
 
-    @ApiProperty({ type: () => [ListOfMemberEvaluators] })
-    listOfEvaluators: ListOfMemberEvaluators[];
+    @ApiProperty({ type: () => [ListOfEvaluators] })
+    listOfEvaluators: ListOfEvaluators[];
 }

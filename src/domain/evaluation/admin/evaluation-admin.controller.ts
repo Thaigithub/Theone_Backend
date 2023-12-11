@@ -5,17 +5,17 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
-import { EvaluationAdminService } from './evaluation-admin.service';
-import { AdminGetListMemberEvaluationRequest } from './request/evaluation-admin-get-list-member.request';
-import { AdminGetListSiteEvaluationRequest } from './request/evaluation-admin-get-list-site.request';
-import { AdminGetListTeamEvaluationRequest } from './request/evaluation-admin-get-list-team.request';
-import { AdminGetListSiteEvaluationResponse } from './response/evaluation-admin-get-list-site.response';
-import { AdminGetListTeamEvaluationResponse } from './response/evaluation-admin-get-list-team.response';
-import { AdminGetListMemberEvaluationResponse } from './response/evaluation-admin-get-list-member.response';
-import { AdminGetSiteEvaluationDetailResponse } from './response/evaluation-admin-get-site-detail.response';
-import { AdminGetTeamEvaluationDetailResponse } from './response/evaluation-admin-get-team-detail.response';
-import { AdminGetMemberEvaluationDetailResponse } from './response/evaluation-admin-get-member-detail.response';
 import { EvaluationType } from './dto/evaluation-admin.dto';
+import { EvaluationAdminService } from './evaluation-admin.service';
+import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
+import { SiteEvaluationAdminGetListResponse } from './response/site-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
+import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
+import { TeamEvaluationAdminGetListResponse } from './response/team-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
+import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
+import { MemberEvaluationAdminGetListResponse } from './response/member-evaluation-admin-get-list.response';
+import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -26,8 +26,8 @@ export class EvaluationAdminController {
 
     @Get('sites')
     async getListSiteEvaluation(
-        @Query() query: AdminGetListSiteEvaluationRequest,
-    ): Promise<BaseResponse<AdminGetListSiteEvaluationResponse>> {
+        @Query() query: SiteEvaluationAdminGetListRequest,
+    ): Promise<BaseResponse<SiteEvaluationAdminGetListResponse>> {
         const list = await this.evaluationAdminService.getListSiteEvaluation(query);
         const total = await this.evaluationAdminService.getTotal(EvaluationType.SITE, query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
@@ -37,14 +37,14 @@ export class EvaluationAdminController {
     @Get('sites/:id')
     async getSiteEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<AdminGetSiteEvaluationDetailResponse>> {
+    ): Promise<BaseResponse<SiteEvaluationAdminGetDetailResponse>> {
         return BaseResponse.of(await this.evaluationAdminService.getSiteEvaluationDetail(param));
     }
 
     @Get('teams')
     async getListTeamEvaluation(
-        @Query() query: AdminGetListTeamEvaluationRequest,
-    ): Promise<BaseResponse<AdminGetListTeamEvaluationResponse>> {
+        @Query() query: TeamEvaluationAdminGetListRequest,
+    ): Promise<BaseResponse<TeamEvaluationAdminGetListResponse>> {
         const list = await this.evaluationAdminService.getListTeamEvaluation(query);
         const total = await this.evaluationAdminService.getTotal(EvaluationType.TEAM, query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
@@ -54,14 +54,14 @@ export class EvaluationAdminController {
     @Get('teams/:id')
     async getTeamEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<AdminGetTeamEvaluationDetailResponse>> {
+    ): Promise<BaseResponse<TeamEvaluationAdminGetDetailResponse>> {
         return BaseResponse.of(await this.evaluationAdminService.getTeamEvaluationDetail(param));
     }
 
     @Get('members')
     async getListMemberEvaluation(
-        @Query() query: AdminGetListMemberEvaluationRequest,
-    ): Promise<BaseResponse<AdminGetListMemberEvaluationResponse>> {
+        @Query() query: MemberEvaluationAdminGetListRequest,
+    ): Promise<BaseResponse<MemberEvaluationAdminGetListResponse>> {
         const list = await this.evaluationAdminService.getListMemberEvaluation(query);
         const total = await this.evaluationAdminService.getTotal(EvaluationType.MEMBER, query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
@@ -71,7 +71,7 @@ export class EvaluationAdminController {
     @Get('members/:id')
     async getMemberEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<AdminGetMemberEvaluationDetailResponse>> {
+    ): Promise<BaseResponse<MemberEvaluationAdminGetDetailResponse>> {
         return BaseResponse.of(await this.evaluationAdminService.getMemberEvaluationDetail(param));
     }
 }

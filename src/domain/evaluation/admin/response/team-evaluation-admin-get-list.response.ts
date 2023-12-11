@@ -22,4 +22,4 @@ export class TeamEvaluationResponse {
     averageScore: TeamEvaluation['averageScore'];
 }
 
-export class AdminGetListTeamEvaluationResponse extends PaginationResponse<TeamEvaluationResponse> {}
+export class TeamEvaluationAdminGetListResponse extends PaginationResponse<TeamEvaluationResponse> {}
