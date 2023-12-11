@@ -69,6 +69,7 @@ model Member {
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
   authenticationDate           DateTime?                     @map("authentication_date") @db.Date
   certificates                 Certificate[]
+  specialLicenses              SpecialLicense[]
   account                      Account                       @relation(fields: [accountId], references: [id])
   teams                        MembersOnTeams[]
   leader                       Team[]
@@ -236,6 +237,7 @@ model File {
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Certificate                  Certificate?
+  specialLicense               SpecialLicense?               
   team                         Team?
   Logo                         Logo?
   ContactCard                  ContactCard?
@@ -275,9 +277,24 @@ model Certificate {
   member            Member            @relation(fields: [memberId], references: [id])
   fileId            Int               @unique @map("file_id")
   file              File              @relation(fields: [fileId], references: [id])
-  isSpecial         Boolean           @default(false) @map("is_special")
 
   @@map("certificates")
+}
+
+model SpecialLicense {
+  id                Int               @id @default(autoincrement())
+  name              String
+  status            CertificateStatus @default(REQUESTING)
+  licenseNumber     String            @map("license_number")
+  acquisitionDate   DateTime          @map("acquisition_date")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  memberId          Int               @map("member_id")
+  member            Member            @relation(fields: [memberId], references: [id])
+  fileId            Int               @unique @map("file_id")
+  file              File              @relation(fields: [fileId], references: [id])
+
+  @@map("specialLicense")
 }
 
 model Career {
