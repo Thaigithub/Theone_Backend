@@ -134,24 +134,24 @@ model ContactCard {
 }
 
 model Team {
-  id                  Int              @id @default(autoincrement())
-  code                String?
-  name                String
-  introduction        String?
-  leaderId            Int              @map("leader_id")
-  isActive            Boolean          @default(true) @map("is_active")
-  createdAt           DateTime         @default(now()) @map("created_at")
-  updatedAt           DateTime         @updatedAt @map("updated_at")
-  status              TeamStatus       @default(GENERAL)
-  members             MembersOnTeams[]
-  totalMembers        Int              @default(0) @map("total_members")
-  leader              Member           @relation(fields: [leaderId], references: [id])
-  fileId              Int              @unique @map("file_id")
-  file                File             @relation(fields: [fileId], references: [id])
-  exposureStatus      Boolean          @default(false) @map("exposure_status")
-  numberOfRecruiments Int              @default(0) @map("number_of_recruiments")
-  TeamEvaluation      TeamEvaluation?
-  posts               Application[]
+  id                   Int              @id @default(autoincrement())
+  code                 String?
+  name                 String
+  introduction         String?
+  leaderId             Int              @map("leader_id")
+  isActive             Boolean          @default(true) @map("is_active")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  status               TeamStatus       @default(GENERAL)
+  members              MembersOnTeams[]
+  totalMembers         Int              @default(0) @map("total_members")
+  leader               Member           @relation(fields: [leaderId], references: [id])
+  fileId               Int              @unique @map("file_id")
+  file                 File             @relation(fields: [fileId], references: [id])
+  exposureStatus       Boolean          @default(false) @map("exposure_status")
+  numberOfRecruitments Int              @default(0) @map("number_of_recruiments")
+  TeamEvaluation       TeamEvaluation?
+  posts                Application[]
 
   @@map("teams")
 }
@@ -358,13 +358,14 @@ model PostBanner {
 }
 
 model CompanyPostBanner {
-  id               Int        @unique
-  postBanner       PostBanner @relation(fields: [id], references: [id])
-  requestDate      DateTime   @map("request_date") @db.Date
-  acceptDate       DateTime?  @map("accept_date") @db.Date
-  desiredStartDate DateTime   @map("desired_start_date") @db.Date
-  desiredEndDate   DateTime   @map("desired_end_date") @db.Date
+  id               Int                 @unique
+  postBanner       PostBanner          @relation(fields: [id], references: [id])
+  requestDate      DateTime            @map("request_date") @db.Date
+  acceptDate       DateTime?           @map("accept_date") @db.Date
+  desiredStartDate DateTime            @map("desired_start_date") @db.Date
+  desiredEndDate   DateTime            @map("desired_end_date") @db.Date
   priority         Int?
+  status           RequestBannerStatus
 }
 
 model AdminPostBanner {
@@ -378,21 +379,26 @@ model AdminPostBanner {
 }
 
 model SiteBanner {
-  id               Int       @unique
-  banner           Banner    @relation(fields: [id], references: [id])
+  id               Int                 @unique
+  banner           Banner              @relation(fields: [id], references: [id])
   siteId           Int
-  site             Site      @relation(fields: [siteId], references: [id])
+  site             Site                @relation(fields: [siteId], references: [id])
   title            String
-  requestDate      DateTime  @map("request_date") @db.Date
-  acceptDate       DateTime? @map("accept_date") @db.Date
-  desiredStartDate DateTime  @map("desired_start_date") @db.Date
-  desiredEndDate   DateTime  @map("desired_end_date") @db.Date
-  priority         Int?      @unique
+  requestDate      DateTime            @map("request_date") @db.Date
+  acceptDate       DateTime?           @map("accept_date") @db.Date
+  desiredStartDate DateTime            @map("desired_start_date") @db.Date
+  desiredEndDate   DateTime            @map("desired_end_date") @db.Date
+  priority         Int?                @unique
+  status           RequestBannerStatus
 }
 
 enum BannerStatus {
   HIDE
   EXPOSE
+}
+
+enum RequestBannerStatus {
+  PENDING
   DENY
   APPROVED
 }
@@ -753,9 +759,7 @@ enum ContractStatus {
 
 enum PostType {
   COMMON
-  GENERAL
-  MATCHING
-  HEADHUNTING
+  PREMIUM
 }
 
 enum PostCategory {

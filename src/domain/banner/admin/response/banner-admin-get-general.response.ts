@@ -6,7 +6,7 @@ class FileClass {
     type: File['type'];
     size: File['size'];
 }
-class GeneralBannerResponse {
+export class GeneralBannerResponse {
     id: Banner['id'];
     title: GeneralBanner['title'];
     urlLink: GeneralBanner['urlLink'];
