@@ -79,7 +79,7 @@ export class AdminCompanyService {
                 };
             }
         }
-        const total = await this.prismaService.company.count(search['where']);
+        const total = await this.prismaService.company.count({ where: search['where'] });
         return new PaginationResponse(
             (await this.prismaService.company.findMany(search)).map((item) => {
                 return {
