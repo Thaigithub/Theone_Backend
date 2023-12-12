@@ -1,7 +1,8 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { AccountStatus, MemberLevel } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { searchCategory } from '../dto/member-admin-search-category.request.dto';
 
 class GetMembersListRequest {
     @ApiProperty({
@@ -25,13 +26,14 @@ class GetMembersListRequest {
     public level: MemberLevel;
 
     @ApiProperty({
-        type: 'string',
+        type: 'enum',
+        enum: searchCategory,
         required: false,
     })
     @Expose()
-    @IsString()
+    @IsEnum(searchCategory)
     @IsOptional()
-    public keywordByUsername: string;
+    public searchCategory: searchCategory;
 
     @ApiProperty({
         type: 'string',
@@ -40,7 +42,7 @@ class GetMembersListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keywordByName: string;
+    public searchKeyword: string;
 
     @ApiProperty({
         type: 'number',
@@ -97,4 +99,4 @@ class DownloadSingleMemberRequest {
     public memberId: string;
 }
 
-export { GetMembersListRequest, ChangeMemberRequest, DownloadSingleMemberRequest, DownloadMembersRequest };
+export { ChangeMemberRequest, DownloadMembersRequest, DownloadSingleMemberRequest, GetMembersListRequest };

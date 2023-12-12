@@ -5,6 +5,7 @@ import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberDetailResponse, MemberResponse } from './response/member-admin.response';
+import { searchCategory } from './dto/member-admin-search-category.request.dto';
 
 @Injectable()
 export class MemberAdminService {
@@ -14,15 +15,23 @@ export class MemberAdminService {
     ) {}
 
     private parseConditionsFromQuery(query: GetMembersListRequest) {
-        return {
-            isActive: true,
-            name: query.keywordByName && { contains: query.keywordByName },
+        const search = {
             level: query.level,
             account: {
-                username: query.keywordByUsername && { contains: query.keywordByUsername },
                 status: query.status,
+                isActive: true,
             },
         };
+        switch (query.searchCategory) {
+            case searchCategory.NAME: {
+                search['name'] = query.searchKeyword;
+                break;
+            }
+            case searchCategory.USERNAME: {
+                search.account['username'] = query.searchKeyword;
+            }
+        }
+        return search;
     }
 
     private async findByIds(memberIds: number[]): Promise<MemberPrisma[]> {
