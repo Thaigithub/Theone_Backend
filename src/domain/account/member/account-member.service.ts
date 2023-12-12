@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, MemberLevel, SignupMethodType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -20,7 +20,7 @@ export class AccountMemberService {
                 username: request.username,
             },
         });
-        if (numAccount !== 0) throw new BadRequestException('UserId has been used');
+        if (numAccount !== 0) throw new ConflictException('UserId has been used');
         await this.prismaService.account.create({
             data: {
                 username: request.username,

@@ -5,6 +5,6 @@ import { IsString } from 'class-validator';
 export class AdminCompanyUpdateEmailRequest {
     @Expose()
     @IsString()
-    @ApiProperty({ example: 'theone@gmail.com' })
+    @ApiProperty({ description: 'Company new email', example: 'theone@gmail.com' })
     public email: string;
 }

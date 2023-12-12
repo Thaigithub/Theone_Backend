@@ -3,7 +3,6 @@ import {
     Controller,
     Delete,
     Get,
-    HttpCode,
     HttpStatus,
     Inject,
     Param,
@@ -24,37 +23,32 @@ import { PaginationResponse } from 'utils/generics/pageInfo.response';
 import { CertificateService } from '../certificate.service';
 
 @ApiTags('[MEMBER] Certificate Management')
-@Controller('member/certificates')
+@Controller('/member/certificates')
+@Roles(AccountType.MEMBER)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberCertificateController {
     constructor(@Inject(CertificateService) private readonly certificateService: CertificateService) {}
 
-    @Post('save')
-    @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Post('/save')
     @ApiOperation({
         summary: 'Save a new certificate',
         description: 'This endpoint is provided for use to upload new certificate',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Create certificate successfully' })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Create certificate  failed' })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Create certificate successfully' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Member not found' })
     async saveCertificate(@Body() request: UpSertMemberCertificateRequest, @Request() req): Promise<BaseResponse<void>> {
-        await this.certificateService.saveCertificate(req.user.accountId, request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.certificateService.saveCertificate(req.user.accountId, request));
     }
 
-    @Get('get-member-certificates')
-    @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Get()
     @ApiOperation({
         summary: 'Get all certificates',
         description: 'This endpoint get all certificates that users currently have',
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'Result of certificates' })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Get certificates failed' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Member not found' })
     async getMemberCertificates(
         @Query('page', ParseIntPipe) page: number, // Use @Query for query parameters
         @Query('size', ParseIntPipe) size: number,
@@ -68,10 +62,7 @@ export class MemberCertificateController {
         return BaseResponse.of(result);
     }
 
-    @Get(':id')
-    @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Get('/:id')
     @ApiOperation({
         summary: 'Get certificate details',
         description: 'This endpoint get certificate details',
@@ -83,10 +74,7 @@ export class MemberCertificateController {
         return BaseResponse.of(result);
     }
 
-    @Delete('delete/:id')
-    @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Delete('/:id')
     @ApiOperation({
         summary: 'Delete a certificate',
         description: 'This endpoint is provided for use to delete certificate',

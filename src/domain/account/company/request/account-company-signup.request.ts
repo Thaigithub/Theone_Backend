@@ -23,6 +23,8 @@ class File {
     @Expose()
     @IsEnum(FileType)
     @ApiProperty({
+        type: 'enum',
+        enum: FileType,
         description: 'File type',
         example: 'PDF',
     })
@@ -37,7 +39,7 @@ class File {
     readonly size: number;
 }
 
-export class CompanyAccountSignupRequest {
+export class AccountCompanySignupRequest {
     @Expose()
     @IsString()
     @Matches(/^[a-z0-9]+$/, {
@@ -45,7 +47,7 @@ export class CompanyAccountSignupRequest {
     })
     @ApiProperty({
         description: 'The "ID" field must contain only lowercase letters or lowercase letters with numbers.',
-        example: 'usernamesss',
+        example: 'username',
     })
     @MaxLength(20)
     username: string;
@@ -79,7 +81,6 @@ export class CompanyAccountSignupRequest {
     @ApiProperty({
         description: 'Establishment date',
         example: '2023-05-10',
-        required: false,
     })
     readonly estDate: string;
 
@@ -167,7 +168,7 @@ export class CompanyAccountSignupRequest {
 
     @Expose()
     @ApiProperty({
-        description: 'Contact person phone',
+        description: 'Company phone',
         example: '82000000000',
     })
     @IsNumberString()

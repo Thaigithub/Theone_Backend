@@ -10,30 +10,30 @@ export class AdminCompanyGetListRequest {
     @Expose()
     @IsOptional()
     @IsString()
-    @ApiProperty({ example: 'TheOne' })
+    @ApiProperty({ description: 'Company name', example: 'TheOne' })
     public name: string;
 
     @Expose()
     @IsOptional()
     @IsString()
-    @ApiProperty({ example: '0123456789' })
+    @ApiProperty({ description: 'Company phone', example: '0123456789' })
     public phone: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({ description: 'Company id', example: '1' })
     public id: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({ description: 'Page number', example: '1' })
     public pageNumber: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({ description: 'Page size', example: '1' })
     public pageSize: string;
 }

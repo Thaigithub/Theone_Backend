@@ -5,10 +5,11 @@ import {
     AccountStatus,
     BankAccount,
     BasicHealthSafetyCertificate,
+    File,
     ForeignWorker,
     Member,
     MemberLevel,
-    File,
+    SignupMethodType,
 } from '@prisma/client';
 
 class MemberResponse {
@@ -60,47 +61,73 @@ class GetMembersListResponse {
         this.total = total;
     }
 }
-
+class BankAccountType {
+    @ApiProperty({ type: String })
+    accountHolder: BankAccount['accountHolder'];
+    @ApiProperty({ type: String })
+    accountNumber: BankAccount['accountNumber'];
+    @ApiProperty({ type: String })
+    bankName: BankAccount['bankName'];
+}
+class FileType {
+    @ApiProperty({ type: String })
+    key: File['key'];
+    @ApiProperty({ type: String })
+    fileName: File['fileName'];
+    @ApiProperty({ type: Number })
+    size: File['size'];
+    @ApiProperty({ type: 'enum', enum: $Enums.FileType })
+    type: File['type'];
+}
+class ForeignWorkerType {
+    @ApiProperty({ type: String })
+    englishName: ForeignWorker['englishName'];
+    @ApiProperty({ type: String })
+    registrationNumber: ForeignWorker['registrationNumber'];
+    @ApiProperty({ type: String })
+    serialNumber: ForeignWorker['serialNumber'];
+    @ApiProperty({ type: String })
+    dateOfIssue: ForeignWorker['dateOfIssue'];
+    @ApiProperty({ type: FileType })
+    file: FileType;
+}
+class DisabilityType {
+    @ApiProperty({ type: 'enum', enum: $Enums.DisabledType })
+    disableType: $Enums.DisabledType;
+    @ApiProperty({ type: 'enum', enum: $Enums.DisabledLevel })
+    disableLevel: $Enums.DisabledLevel;
+    @ApiProperty({ type: FileType })
+    file: FileType;
+}
+class BasicHealthSafetyCertificateType {
+    @ApiProperty({ type: String })
+    registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
+    @ApiProperty({ type: String })
+    dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
+    @ApiProperty({ type: FileType })
+    file: FileType;
+}
 class MemberDetailResponse {
+    @ApiProperty({ type: String })
     name: Member['name'];
+    @ApiProperty({ type: String })
     contact: Member['contact'];
+    @ApiProperty({ type: String })
     email: Member['email'];
+    @ApiProperty({ type: String })
     desiredOccupation: Member['desiredOccupation'];
+    @ApiProperty({ type: 'enum', enum: MemberLevel })
     level: Member['level'];
+    @ApiProperty({ type: 'enum', enum: SignupMethodType })
     signupMethod: Member['signupMethod'];
-    bankAccount: {
-        accountHolder: BankAccount['accountHolder'];
-        accountNumber: BankAccount['accountNumber'];
-        bankName: BankAccount['bankName'];
-    };
-    foreignWorker: {
-        englishName: ForeignWorker['englishName'];
-        registrationNumber: ForeignWorker['registrationNumber'];
-        serialNumber: ForeignWorker['serialNumber'];
-        dateOfIssue: ForeignWorker['dateOfIssue'];
-        file: {
-            key: File['key'];
-            fileName: File['fileName'];
-            size: File['size'];
-        };
-    };
-    disability: {
-        disableType: $Enums.DisabledType;
-        file: {
-            key: File['key'];
-            fileName: File['fileName'];
-            size: File['size'];
-        };
-    };
-    basicHealthSafetyCertificate: {
-        registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
-        dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
-        file: {
-            key: File['key'];
-            fileName: File['fileName'];
-            size: File['size'];
-        };
-    };
+    @ApiProperty({ type: BankAccountType })
+    bankAccount: BankAccountType;
+    @ApiProperty({ type: ForeignWorkerType })
+    foreignWorker: ForeignWorkerType;
+    @ApiProperty({ type: DisabilityType })
+    disability: DisabilityType;
+    @ApiProperty({ type: BasicHealthSafetyCertificateType })
+    basicHealthSafetyCertificate: BasicHealthSafetyCertificateType;
 }
 
-export { MemberResponse, GetMembersListResponse, MemberDetailResponse };
+export { GetMembersListResponse, MemberDetailResponse, MemberResponse };

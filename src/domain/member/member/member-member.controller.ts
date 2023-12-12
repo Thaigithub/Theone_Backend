@@ -14,10 +14,10 @@ import { MemberAdminService } from '../admin/member-admin.service';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountType } from '@prisma/client';
 
-@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiTags('[MEMBER] Member Management')
 @Roles(AccountType.MEMBER)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Controller('member/members')
-@ApiTags('[MEMBER] Members Management')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberMemberController {
@@ -31,14 +31,13 @@ export class MemberMemberController {
         summary: 'Find member detail',
         description: 'This endpoint retrieves member details in the system.',
     })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.OK, type: MemberDetailResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getMemberDetails(@Req() request: any): Promise<BaseResponse<MemberDetailResponse>> {
-        console.log(request.user);
         return BaseResponse.of(await this.memberAdminService.getDetail(request.user.accountId));
     }
 
-    @Put('bank-account')
+    @Put('/bank-account')
     @ApiOperation({
         summary: 'Upsert bank account',
         description: 'This endpoint upsert bank account in the system.',
@@ -50,7 +49,7 @@ export class MemberMemberController {
         return BaseResponse.ok();
     }
 
-    @Put('hst-certificate')
+    @Put('/hst-certificate')
     @ApiOperation({
         summary: 'Upsert Health and Safety Training Certificate',
         description: 'This endpoint upsert health and safety training certificate in the system.',
@@ -65,7 +64,7 @@ export class MemberMemberController {
         return BaseResponse.ok();
     }
 
-    @Put('foreign-worker')
+    @Put('/foreign-worker')
     @ApiOperation({
         summary: 'Upsert foreign worker detail',
         description: 'This endpoint upsert foreign worker in the system.',
@@ -80,7 +79,7 @@ export class MemberMemberController {
         return BaseResponse.ok();
     }
 
-    @Put('disability')
+    @Put('/disability')
     @ApiOperation({
         summary: 'Upsert disability detail',
         description: 'This endpoint upsert disability in the system.',

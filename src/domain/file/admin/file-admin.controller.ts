@@ -8,7 +8,9 @@ import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.r
 import { DomainType, StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 
-@ApiTags('[ADMIN] File')
+@ApiTags('[ADMIN] File Management')
+@Roles(AccountType.ADMIN)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 @Controller('/admin/files')
@@ -16,8 +18,6 @@ export class FileAdminController {
     constructor(private readonly storageService: StorageService) {}
 
     @Get('/get-signed-url-to-upload')
-    @Roles(AccountType.ADMIN)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async generateSignedUrlToUploadForAdmin(@Query() query: FileUploadRequest): Promise<BaseResponse<GetSignedUrlResponse>> {
         try {
             return BaseResponse.of(
