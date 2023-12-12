@@ -5,6 +5,7 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
+import { PageInfo } from 'utils/generics/pageInfo.response';
 import { MemberAdminService } from './member-admin.service';
 import {
     ChangeMemberRequest,
@@ -35,7 +36,7 @@ export class MemberAdminController {
     async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<GetMembersListResponse>> {
         const membersList = await this.memberAdminService.getList(query);
         const membersTotal = await this.memberAdminService.getTotal(query);
-        const getMemberListResponse = new GetMembersListResponse(membersList, membersTotal);
+        const getMemberListResponse = new GetMembersListResponse(membersList, new PageInfo(membersTotal));
         return BaseResponse.of(getMemberListResponse);
     }
 
