@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PostStatus, PostType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PostCompanyPostStatusFilter, PostCompanyPostTypeFilter } from '../dto/post-company-filter';
 
 export class PostCompanyGetListRequest {
     @Expose()
@@ -10,24 +10,28 @@ export class PostCompanyGetListRequest {
     public name: string;
 
     @Expose()
-    @IsEnum(PostCompanyPostTypeFilter)
+    @IsEnum(PostType)
     @IsOptional()
     @ApiProperty({
         type: 'enum',
-        enum: PostCompanyPostTypeFilter,
+        enum: PostType,
     })
-    public type: PostCompanyPostTypeFilter;
+    public type: PostType;
 
     @Expose()
-    @IsEnum(PostCompanyPostStatusFilter)
+    @IsEnum(PostStatus)
     @IsOptional()
     @ApiProperty({
         type: 'enum',
-        enum: PostCompanyPostStatusFilter,
+        enum: PostStatus,
     })
-    public status: PostCompanyPostStatusFilter;
+    public status: PostStatus;
 
     @Expose()
+    @ApiProperty({
+        type: 'number',
+        required: false,
+    })
     @IsNumber()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
