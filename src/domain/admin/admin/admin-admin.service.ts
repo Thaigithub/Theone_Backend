@@ -5,7 +5,7 @@ import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { AdminLevelRequest, AdminSearchCategories } from './dto/admin-admin-search';
+import { AdminSearchCategories } from './dto/admin-admin-search';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';
 import { AdminAdminUpsertRequest } from './request/admin-admin-upsert.request';
 import { AdminAdminDetailResponse } from './response/admin-admin-detail.response';
@@ -44,22 +44,12 @@ export class AdminAdminService {
     private parseConditionsFromQuery(query: AdminAdminGetListRequest): Prisma.AdminWhereInput {
         return {
             isActive: true,
-            ...(query.level !== AdminLevelRequest.ALL && { level: AdminLevel[query.level] }),
+            ...(query.level && { level: AdminLevel[query.level] }),
             ...(query.searchCategory === AdminSearchCategories.ID && {
                 account: { username: { contains: query.keyword, mode: 'insensitive' } },
             }),
             ...(query.searchCategory === AdminSearchCategories.ADMIN_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
-            }),
-            ...(query.searchCategory === AdminSearchCategories.ALL && {
-                OR: [
-                    {
-                        account: { username: { contains: query.keyword, mode: 'insensitive' } },
-                    },
-                    {
-                        name: { contains: query.keyword, mode: 'insensitive' },
-                    },
-                ],
             }),
         };
     }

@@ -46,9 +46,9 @@ export class AdminAdminController {
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({ name: 'level', type: String, required: false, description: 'Filter by level,: ALL, GENERAL, SUPERADMIN' })
+    @ApiQuery({ name: 'level', type: String, required: false, description: 'Filter by level,: GENERAL, SUPERADMIN' })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for search' })
-    @ApiQuery({ name: 'searchCategory', type: String, required: false, description: 'Category for search: ALL, ID, ADMIN_NAME' })
+    @ApiQuery({ name: 'searchCategory', type: String, required: false, description: 'Category for search: ID, ADMIN_NAME' })
     async getList(@Query() query: AdminAdminGetListRequest): Promise<BaseResponse<AdminAdminGetListResponse>> {
         const admins = await this.adminService.getList(query);
         return BaseResponse.of(admins);

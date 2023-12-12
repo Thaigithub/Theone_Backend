@@ -1,45 +1,49 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AdminLevel } from '@prisma/client';
+import { PostType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { AdminSearchCategories } from '../dto/admin-admin-search';
+import { PostCompanyPostCategoryFilter } from '../dto/post-company-filter';
 
-export class AdminAdminGetListRequest {
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminLevel,
-        required: false,
-    })
+export class PostCompanyGetListApplicantSiteRequest {
     @Expose()
-    @IsEnum(AdminLevel)
+    @IsString()
     @IsOptional()
-    public level: AdminLevel;
+    public startDate: string;
 
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminSearchCategories,
-        required: false,
-    })
     @Expose()
-    @IsEnum(AdminSearchCategories)
+    @IsString()
     @IsOptional()
-    public searchCategory: AdminSearchCategories;
+    public endDate: string;
 
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     @Expose()
     @IsString()
     @IsOptional()
     public keyword: string;
 
+    @Expose()
+    @IsEnum(PostCompanyPostCategoryFilter)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: PostCompanyPostCategoryFilter,
+    })
+    public category: PostCompanyPostCategoryFilter;
+
+    @Expose()
+    @IsEnum(PostType)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: PostType,
+    })
+    public type: PostType;
+
+    @Expose()
+    @IsNumber()
     @ApiProperty({
         type: 'number',
         required: false,
     })
-    @Expose()
-    @IsNumber()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
     public pageSize: number;

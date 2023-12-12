@@ -1,12 +1,4 @@
-export enum PostCompanyPostTypeFilter {
-    COMMON = 'COMMON',
-    PREMIUM = 'PREMIUM',
-    ALL = 'ALL',
-}
-
-export enum PostCompanyPostStatusFilter {
-    ALL = 'ALL',
-    PREPARE = 'PREPARE',
-    RECRUITING = 'RECRUITING',
-    DEADLINE = 'DEADLINE',
+export enum PostCompanyPostCategoryFilter {
+    POST_NAME = 'POST_NAME',
+    SITE_NAME = 'SITE_NAME',
 }
