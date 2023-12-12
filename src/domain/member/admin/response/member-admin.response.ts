@@ -11,6 +11,7 @@ import {
     MemberLevel,
     SignupMethodType,
 } from '@prisma/client';
+import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
 class MemberResponse {
     @ApiProperty({ type: 'string' })
@@ -46,21 +47,7 @@ class MemberResponse {
     };
 }
 
-class GetMembersListResponse {
-    @ApiProperty({ type: () => [MemberResponse] })
-    list: MemberResponse[];
-
-    @ApiProperty({
-        type: 'number',
-        examples: [0, 1, 2],
-    })
-    total: number;
-
-    constructor(list: MemberResponse[], total: number) {
-        this.list = list;
-        this.total = total;
-    }
-}
+class GetMembersListResponse extends PaginationResponse<MemberResponse> {}
 class BankAccountType {
     @ApiProperty({ type: String })
     accountHolder: BankAccount['accountHolder'];
