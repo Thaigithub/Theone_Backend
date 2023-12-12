@@ -1,18 +1,20 @@
-import { Body, Controller, Get, HttpStatus, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { BaseResponse } from 'utils/generics/base.response';
+import { MemberAdminService } from '../admin/member-admin.service';
+import { MemberMemberService } from './member-member.service';
+import { MemberMemberAddSiteOrPost } from './request/member-member-add-site.request';
 import {
     UpsertBankAccountRequest,
     UpsertDisabilityRequest,
     UpsertForeignWorkerRequest,
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
-import { BaseResponse } from 'utils/generics/base.response';
+import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
 import { MemberDetailResponse } from './response/member-member.response';
-import { MemberMemberService } from './member-member.service';
-import { MemberAdminService } from '../admin/member-admin.service';
-import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountType } from '@prisma/client';
 
 @ApiTags('[MEMBER] Member Management')
 @Roles(AccountType.MEMBER)
@@ -88,5 +90,44 @@ export class MemberMemberController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async upsertDisability(@Req() request: any, @Body() disability: UpsertDisabilityRequest): Promise<void> {
         await this.memberMemberService.upsertDisability(request.user.accountId, disability);
+    }
+
+    @Post('interest-site')
+    @ApiOperation({
+        summary: 'Add interest site',
+        description: "This endpoint add a site to request's member interest list in the system.",
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: MemberMemebrUpdateInterestResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async addInterestSite(
+        @Req() request: any,
+        @Body() payload: MemberMemberAddSiteOrPost,
+    ): Promise<BaseResponse<MemberMemebrUpdateInterestResponse>> {
+        return BaseResponse.of(await this.memberMemberService.updateInterestSite(request.user.accountId, payload));
+    }
+
+    @Post('interest-post')
+    @ApiOperation({
+        summary: 'Add interest post',
+        description: "This endpoint add a post to request's member interest list in the system.",
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: MemberMemebrUpdateInterestResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async addInterestPost(
+        @Req() request: any,
+        @Body() payload: MemberMemberAddSiteOrPost,
+    ): Promise<BaseResponse<MemberMemebrUpdateInterestResponse>> {
+        return BaseResponse.of(await this.memberMemberService.updateInterestPost(request.user.accountId, payload));
+    }
+
+    @Post('apply-post')
+    @ApiOperation({
+        summary: 'Apply a post',
+        description: "This endpoint add a post to request's member apply list in the system.",
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async addApplyPost(@Req() request: any, @Body() payload: MemberMemberAddSiteOrPost): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.memberMemberService.addApplyPost(request.user.accountId, payload));
     }
 }

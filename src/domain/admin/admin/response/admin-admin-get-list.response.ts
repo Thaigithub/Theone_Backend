@@ -1,18 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { PaginationResponse } from 'utils/generics/pageInfo.response';
 import { AdminAdminResponse } from './admin-admin.response';
 
-export class AdminAdminGetListResponse {
-    @ApiProperty({ type: () => [AdminAdminResponse] })
-    list: AdminAdminResponse[];
-
-    @ApiProperty({
-        type: 'number',
-        examples: [0, 1, 2],
-    })
-    total: number;
-
-    constructor(list: AdminAdminResponse[], total: number) {
-        this.list = list;
-        this.total = total;
-    }
-}
+export class AdminAdminGetListResponse extends PaginationResponse<AdminAdminResponse> {}

@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { MemberMemberAddSiteOrPost } from './request/member-member-add-site.request';
 import {
     UpsertBankAccountRequest,
     UpsertDisabilityRequest,
     UpsertForeignWorkerRequest,
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
-import { PrismaService } from 'services/prisma/prisma.service';
+import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
 
 @Injectable()
 export class MemberMemberService {
@@ -153,6 +155,160 @@ export class MemberMemberService {
                         },
                     },
                 },
+            },
+        });
+    }
+
+    async updateInterestSite(accountId: number, payload: MemberMemberAddSiteOrPost): Promise<MemberMemebrUpdateInterestResponse> {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                member: true,
+            },
+        });
+
+        const site = await this.prismaService.site.findUnique({
+            where: {
+                id: payload.id,
+                isActive: true,
+            },
+        });
+
+        if (!site) {
+            throw new BadRequestException('Site does not exist');
+        }
+
+        //Check exist member - site
+        //If exist, remove that record
+        //Else, add that record
+        const application = await this.prismaService.interest.findUnique({
+            where: {
+                memberId_siteId: {
+                    memberId: account.member.id,
+                    siteId: site.id,
+                },
+            },
+        });
+
+        if (application) {
+            await this.prismaService.interest.delete({
+                where: {
+                    memberId_siteId: {
+                        memberId: account.member.id,
+                        siteId: site.id,
+                    },
+                },
+            });
+
+            return { isInterested: false };
+        } else {
+            await this.prismaService.interest.create({
+                data: {
+                    member: { connect: { id: account.member.id } },
+                    site: { connect: { id: site.id } },
+                },
+            });
+
+            return { isInterested: true };
+        }
+    }
+
+    async updateInterestPost(accountId: number, payload: MemberMemberAddSiteOrPost): Promise<MemberMemebrUpdateInterestResponse> {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                member: true,
+            },
+        });
+
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                id: payload.id,
+                isActive: true,
+            },
+        });
+
+        if (!post) {
+            throw new BadRequestException('Post does not exist');
+        }
+
+        //Check exist member - post
+        //If exist, remove that record
+        //Else, add that record
+        const application = await this.prismaService.interest.findUnique({
+            where: {
+                memberId_postId: {
+                    memberId: account.member.id,
+                    postId: post.id,
+                },
+            },
+        });
+
+        if (application) {
+            await this.prismaService.interest.delete({
+                where: {
+                    memberId_postId: {
+                        memberId: account.member.id,
+                        postId: post.id,
+                    },
+                },
+            });
+            return { isInterested: false };
+        } else {
+            await this.prismaService.interest.create({
+                data: {
+                    member: { connect: { id: account.member.id } },
+                    post: { connect: { id: post.id } },
+                },
+            });
+            return { isInterested: true };
+        }
+    }
+
+    async addApplyPost(accountId: number, payload: MemberMemberAddSiteOrPost) {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                member: true,
+            },
+        });
+
+        // Check exist post
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                id: payload.id,
+                isActive: true,
+            },
+        });
+        if (!post) {
+            throw new BadRequestException('Post does not exist');
+        }
+
+        //Check exist member - post
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                memberId_postId: {
+                    memberId: account.member.id,
+                    postId: post.id,
+                },
+            },
+        });
+        if (application) {
+            throw new BadRequestException('This job post is already applied');
+        }
+        await this.prismaService.application.create({
+            data: {
+                member: { connect: { id: account.member.id } },
+                post: { connect: { id: payload.id } },
             },
         });
     }
