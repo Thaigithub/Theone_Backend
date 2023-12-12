@@ -16,103 +16,103 @@ import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 export class MemberAuthController {
     constructor(private readonly memberAuthService: MemberAuthService) {}
     // GOOGLE
-    @Post('login/google')
+    @Post('/login/google')
     @ApiOperation({
         summary: 'Google Account Login',
         description: 'This endpoint login with Google acount',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Google Account logged in successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Google Account logged in successfully', type: AuthMemberLoginResponse })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async googlelogin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
         return BaseResponse.of(await this.memberAuthService.googleLogin(authUserDto));
     }
     // APPLE
-    @Post('login/apple')
+    @Post('/login/apple')
     @ApiOperation({
         summary: 'Apple Account Login',
         description: 'This endpoint login with Apple acount',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Apple Account logged in successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Apple Account logged in successfully', type: AuthMemberLoginResponse })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async applelogin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
         return BaseResponse.of(await this.memberAuthService.appleLogin(authUserDto));
     }
     // KAKAO
-    @Post('login/kakao')
+    @Post('/login/kakao')
     @ApiOperation({
         summary: 'Kakao Account Login',
         description: 'This endpoint login with Kakao acount',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Kakao Account logged in successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Kakao Account logged in successfully', type: AuthMemberLoginResponse })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async kakaologin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
         return BaseResponse.of(await this.memberAuthService.kakaoLogin(authUserDto));
     }
     // NAVER
-    @Post('login/naver')
+    @Post('/login/naver')
     @ApiOperation({
         summary: 'Naver Account Login',
         description: 'This endpoint login with Naver acount',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Naver Account logged in successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Naver Account logged in successfully', type: AuthMemberLoginResponse })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async naverlogin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
         return BaseResponse.of(await this.memberAuthService.kakaoLogin(authUserDto));
     }
     // Normal
-    @Post('login')
+    @Post('/login')
     @ApiOperation({
         summary: 'Login',
         description: 'This endpoint to login normally.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully', type: AuthMemberLoginResponse })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async login(@Body() authUserDto: AuthMemberLoginRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
         // console.log(await hash(authUserDto.password, 10));
         return BaseResponse.of(await this.memberAuthService.login(authUserDto));
     }
 
-    @Post('sms/send-otp-request-to-get-userID')
+    @Post('/sms/send-otp-request-to-get-userID')
     @ApiOperation({
         summary: 'Send Phone verification to get UserName',
         description: 'This endpoint send sms message to provided phone number to verify the user account to get current UserID.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully' })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number not found' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully', type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number not found', type: BaseResponse })
     async sendOTPToGetUserId(@Body() body: AuthMemberUserIdRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.memberAuthService.sendOtp(body, false));
     }
 
-    @Post('sms/send-otp-request-to-get-password')
+    @Post('/sms/send-otp-request-to-get-password')
     @ApiOperation({
         summary: 'Send Phone verification to get Password',
         description:
             'This endpoint send sms message to provided phone number to verify the user account to get current password.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully' })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number or userName not found' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Send OTP verification successfully', type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Name or phone number or userName not found', type: BaseResponse })
     async sendOTPToGetPassword(@Body() body: AuthMemberPasswordRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.memberAuthService.sendOtp(body, true));
     }
 
-    @Post('sms/verify-otp-to-get-userId')
+    @Post('/sms/verify-otp-to-get-userId')
     @ApiOperation({
         summary: 'Verify OTP code',
         description: 'This endpoint will verify the given OTP code from user to get userName.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully' })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully', type: Boolean })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed', type: BaseResponse })
     async verifyOTPToGetUserID(@Body() body: AuthMemberUserIdSmsCheckValidRequest): Promise<BaseResponse<boolean>> {
         return BaseResponse.of(await this.memberAuthService.verifySmsOtp(body, false));
     }
 
-    @Post('sms/verify-otp-to-get-password')
+    @Post('/sms/verify-otp-to-get-password')
     @ApiOperation({
         summary: 'Verify OTP code',
         description: 'This endpoint will verify the given OTP code from user to get password.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully' })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Verify OTP successfully', type: Boolean })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Verify OTP failed', type: BaseResponse })
     async verifyOTPToGetPassword(@Body() body: AuthMemberPasswordSmsCheckValidRequest): Promise<BaseResponse<boolean>> {
         return BaseResponse.of(await this.memberAuthService.verifySmsOtp(body, true));
     }

@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { CompanyAccountSignupRequest } from './request/account-company-signup.request';
+import { AccountCompanySignupRequest } from './request/account-company-signup.request';
 @Injectable()
 export class AccountCompanyService {
     constructor(private prismaService: PrismaService) {}
@@ -24,19 +24,19 @@ export class AccountCompanyService {
         if (accountNum === 0) return true;
         return false;
     }
-    async signup(request: CompanyAccountSignupRequest): Promise<void> {
+    async signup(request: AccountCompanySignupRequest): Promise<void> {
         const userIdcount = await this.prismaService.account.count({
             where: {
                 username: request.username,
             },
         });
-        if (userIdcount !== 0) throw new BadRequestException('UserId has been used');
+        if (userIdcount !== 0) throw new ConflictException('UserId has been used');
         const bussinessRegNumcount = await this.prismaService.company.count({
             where: {
                 businessRegNumber: request.businessRegNum,
             },
         });
-        if (bussinessRegNumcount !== 0) throw new BadRequestException('UserId has been used');
+        if (bussinessRegNumcount !== 0) throw new ConflictException('Business registration number has been used');
         await this.prismaService.account.create({
             data: {
                 username: request.username,

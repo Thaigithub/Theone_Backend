@@ -1,5 +1,8 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MemberAdminService } from './member-admin.service';
@@ -10,14 +13,13 @@ import {
     GetMembersListRequest,
 } from './request/member-admin.request';
 import { GetMembersListResponse, MemberDetailResponse } from './response/member-admin.response';
-import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
-import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountType } from '@prisma/client';
 
-@UseGuards(AuthJwtGuard, AuthRoleGuard)
-@Roles(AccountType.ADMIN)
-@Controller('admin/members')
 @ApiTags('[ADMIN] Member Management')
+@Roles(AccountType.ADMIN)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiProduces('application/json')
+@ApiConsumes('application/json')
+@Controller('/admin/members')
 export class MemberAdminController {
     constructor(private readonly memberAdminService: MemberAdminService) {}
 
@@ -38,7 +40,7 @@ export class MemberAdminController {
     }
 
     // Download member list in excel file
-    @Get('download')
+    @Get('/download')
     @ApiOperation({
         summary: 'Download member in excel file',
         description: 'Admin can retrieve an excel file contains information of selected members',
@@ -65,7 +67,7 @@ export class MemberAdminController {
     }
 
     // Get member detail
-    @Get(':id')
+    @Get('/:id')
     @ApiOperation({
         summary: 'Get member detail',
         description: 'Retrieve member information detail',
@@ -78,7 +80,7 @@ export class MemberAdminController {
     }
 
     // Change member information
-    @Patch(':id')
+    @Patch('/:id')
     @ApiOperation({
         summary: 'Change member information',
         description: 'Admin can change account_status of member or membership_level',

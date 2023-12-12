@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AccountAdminCreateAdminDTO } from 'domain/account/dto/account-admin-create-admin.dto';
+import { AccountAdminCreateAdminDTO } from 'domain/account/admin/dto/account-admin-create-admin.dto';
 import { PermissionDTO } from '../dto/admin-admin-permission.dto';
 import { AdminAdminResponse } from './admin-admin.response';
 

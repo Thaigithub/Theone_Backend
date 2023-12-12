@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
@@ -17,28 +17,38 @@ export class AdminCompanyService {
         private excelService: ExcelService,
     ) {}
     async getCompanies(request: AdminCompanyGetListRequest): Promise<AdminCompanyGetListResponse> {
-        const search = await this.prismaService.company.findMany({
-            select: {
-                name: true,
-                account: {
-                    select: {
-                        username: true,
-                        status: true,
+        const search = (
+            await this.prismaService.company.findMany({
+                select: {
+                    name: true,
+                    account: {
+                        select: {
+                            username: true,
+                            status: true,
+                        },
                     },
+                    address: true,
+                    businessRegNumber: true,
+                    corporateRegNumber: true,
+                    type: true,
+                    email: true,
+                    phone: true,
+                    presentativeName: true,
+                    contactName: true,
+                    contactPhone: true,
                 },
-                address: true,
-                businessRegNumber: true,
-                corporateRegNumber: true,
-                type: true,
-                email: true,
-                phone: true,
-                presentativeName: true,
-                contactName: true,
-                contactPhone: true,
-            },
-            where: this.queryFormat(request),
-            take: request.pageSize && parseInt(request.pageSize),
-            skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
+                where: this.queryFormat(request),
+                take: request.pageSize && parseInt(request.pageSize),
+                skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
+            })
+        ).map((item) => {
+            return {
+                name: item.name,
+                username: item.account.username,
+                type: item.type,
+                contactName: item.contactName,
+                contactPhone: item.contactPhone,
+            };
         });
         const total = await this.prismaService.company.count({
             where: this.queryFormat(request),
@@ -59,7 +69,7 @@ export class AdminCompanyService {
         } as Prisma.CompanyWhereInput;
     }
     async getDetails(CompanyId: number): Promise<AdminCompanyGetDetailsResponse> {
-        return await this.prismaService.company.findUnique({
+        const company = await this.prismaService.company.findUnique({
             where: {
                 id: CompanyId,
                 account: {
@@ -70,6 +80,8 @@ export class AdminCompanyService {
                 account: true,
             },
         });
+        if (!company) throw new NotFoundException('Company id not found');
+        else return company;
     }
     async changeStatus(CompanyId: number, request: AdminCompanyUpdateStatusRequest): Promise<void> {
         await this.prismaService.account.update({

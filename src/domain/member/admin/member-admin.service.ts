@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Member as MemberPrisma } from '@prisma/client';
-import { GetMembersListRequest, ChangeMemberRequest } from './request/member-admin.request';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { MemberResponse, MemberDetailResponse } from './response/member-admin.response';
+import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
+import { MemberDetailResponse, MemberResponse } from './response/member-admin.response';
 
 @Injectable()
 export class MemberAdminService {
@@ -101,6 +101,7 @@ export class MemberAdminService {
                                 key: true,
                                 fileName: true,
                                 size: true,
+                                type: true,
                             },
                         },
                     },
@@ -108,11 +109,13 @@ export class MemberAdminService {
                 disability: {
                     select: {
                         disableType: true,
+                        disableLevel: true,
                         file: {
                             select: {
                                 key: true,
                                 fileName: true,
                                 size: true,
+                                type: true,
                             },
                         },
                     },
@@ -126,6 +129,7 @@ export class MemberAdminService {
                                 key: true,
                                 fileName: true,
                                 size: true,
+                                type: true,
                             },
                         },
                     },

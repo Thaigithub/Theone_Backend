@@ -25,8 +25,8 @@ import { AdminAdminUpsertRequest } from './request/admin-admin-upsert.request';
 import { AdminAdminDetailResponse } from './response/admin-admin-detail.response';
 import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
 
-@ApiTags('[ADMIN] Administrator Management')
-@Controller('admin/admins')
+@ApiTags('[ADMIN] Admin Management')
+@Controller('/admin/admins')
 @Roles(AccountType.ADMIN)
 @AdminLevelPermissions(AdminLevel.SUPERADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard, AuthAdminLevelGuard)
@@ -62,12 +62,11 @@ export class AdminAdminController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async create(@Body() request: AdminAdminUpsertRequest): Promise<BaseResponse<void>> {
-        await this.adminService.create(request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.adminService.create(request));
     }
 
     // Get admin detail
-    @Get(':id')
+    @Get('/:id')
     @ApiOperation({
         summary: 'Get admin detail',
         description: 'Retrieve admin information detail',
@@ -81,7 +80,7 @@ export class AdminAdminController {
     }
 
     // Change admin information
-    @Patch(':id')
+    @Patch('/:id')
     @ApiOperation({
         summary: 'Change admin information',
         description: 'Admin can change admin information',
@@ -95,7 +94,7 @@ export class AdminAdminController {
         return BaseResponse.ok();
     }
 
-    @Delete(':id')
+    @Delete('/:id')
     @ApiOperation({
         summary: 'Delete admin',
         description: 'Admin can delete a admin account',

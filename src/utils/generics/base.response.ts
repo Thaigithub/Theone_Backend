@@ -1,5 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class BaseResponse<T> {
+    @ApiProperty()
     data: Nullable<T | null>;
+    @ApiProperty()
     error: any;
 
     private constructor(data: Nullable<T>, error: any) {

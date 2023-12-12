@@ -240,6 +240,7 @@ model File {
   ForeignWorker                ForeignWorker?
   BasicHealthSafetyCertificate BasicHealthSafetyCertificate?
   Certificate                  Certificate?
+  Banner                       Banner?
   specialLicense               SpecialLicense?
   team                         Team?
   Logo                         Logo?
@@ -319,6 +320,85 @@ model Career {
   @@map("careers")
 }
 
+model Banner {
+  id            Int            @id @default(autoincrement())
+  generalBanner GeneralBanner?
+  postBanner    PostBanner?
+  siteBanner    SiteBanner?
+  status        BannerStatus   @default(value: EXPOSE)
+  fileId        Int            @unique
+  file          File           @relation(fields: [fileId], references: [id])
+  isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+}
+
+model GeneralBanner {
+  id        Int      @unique
+  banner    Banner   @relation(fields: [id], references: [id])
+  urlLink   String
+  title     String
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  regDate   DateTime @default(now()) @map("register_date") @db.Date
+  priority  Int?
+}
+
+model PostBanner {
+  id                Int                @unique
+  banner            Banner             @relation(fields: [id], references: [id])
+  postId            Int
+  post              Post               @relation(fields: [postId], references: [id])
+  type              PostBannerType
+  companyPostBanner CompanyPostBanner?
+  adminPostBanner   AdminPostBanner?
+}
+
+model CompanyPostBanner {
+  id               Int        @unique
+  postBanner       PostBanner @relation(fields: [id], references: [id])
+  requestDate      DateTime   @map("request_date") @db.Date
+  acceptDate       DateTime?  @map("accept_date") @db.Date
+  desiredStartDate DateTime   @map("desired_start_date") @db.Date
+  desiredEndDate   DateTime   @map("desired_end_date") @db.Date
+  priority         Int?
+}
+
+model AdminPostBanner {
+  id         Int        @unique
+  postBanner PostBanner @relation(fields: [id], references: [id])
+  urlLink    String
+  startDate  DateTime   @map("start_date") @db.Date
+  endDate    DateTime   @map("end_date") @db.Date
+  regDate    DateTime   @map("register_date") @db.Date
+  priority   Int?       @unique
+}
+
+model SiteBanner {
+  id               Int       @unique
+  banner           Banner    @relation(fields: [id], references: [id])
+  siteId           Int
+  site             Site      @relation(fields: [siteId], references: [id])
+  title            String
+  requestDate      DateTime  @map("request_date") @db.Date
+  acceptDate       DateTime? @map("accept_date") @db.Date
+  desiredStartDate DateTime  @map("desired_start_date") @db.Date
+  desiredEndDate   DateTime  @map("desired_end_date") @db.Date
+  priority         Int?      @unique
+}
+
+enum BannerStatus {
+  HIDE
+  EXPOSE
+  DENY
+  APPROVED
+}
+
+enum PostBannerType {
+  ADMIN
+  COMPANY
+}
+
 model Code {
   id        Int      @id @default(autoincrement())
   isActive  Boolean  @default(true) @map("is_active")
@@ -357,6 +437,7 @@ model Site {
   SiteEvaluation            SiteEvaluation?
   TeamEvaluationByCompany   TeamEvaluationByCompany?
   MemberEvaluationByCompany MemberEvaluationByCompany?
+  SiteBanner                SiteBanner[]
 
   @@map("sites")
 }
@@ -397,6 +478,7 @@ model Post {
   siteId             Int            @map("site_id")
   postEditor         String         @map("post_editor")
   view               Int            @default(0)
+  PostBanner         PostBanner[]
 
   @@map("posts")
 }
@@ -545,14 +627,6 @@ enum AdminLevel {
   GENERAL
 }
 
-enum AuthenticationProviderType {
-  KAKAO
-  NAVER
-  GOOGLE
-  APPLE
-  FACEBOOK
-}
-
 enum MemberLevel {
   PLATINUM
   GOLD
@@ -589,6 +663,14 @@ enum TeamStatus {
 enum DisabledType {
   BURN
   NONE
+  VISION_IMPAIRMENT
+  VISUAL_FIELD_EFFECT
+  HEARING_IMPAIRMENT
+  BALANCE_DYSFUNCTION
+  SPEECH_IMPEDIMENT
+  ABSTRACTION_OF_FACTIAL_AREA
+  DEPRESSION
+  DISORDERS_CAUSE_BY_DEFORMITIES
 }
 
 enum DisabledLevel {
