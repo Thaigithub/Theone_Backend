@@ -75,9 +75,14 @@ model Member {
   isActive                     Boolean                       @default(true) @map("is_active")
   createdAt                    DateTime                      @default(now()) @map("created_at")
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  region                       String?
+  longitude                    String?
+  latitude                     String?
   contact                      String?
   email                        String?                       @unique
   desiredOccupation            String?                       @map("desired_occupation")
+  desiredSalary                String?                       @map("desired_salary")
+  totalExperience              String?                       @map("total_experience")
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
@@ -319,19 +324,22 @@ model SpecialLicense {
 }
 
 model Career {
-  id            Int        @id @default(autoincrement())
-  companyName   String     @map("company_name")
-  siteName      String     @map("site_name")
-  startDate     DateTime   @map("start_date")
-  endDate       DateTime   @map("end_date")
-  type          CareerType
-  isExperienced Boolean    @map("is_experienced")
-  occupation    String
-  isActive      Boolean    @default(true) @map("is_active")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  memberId      Int        @map("member_id")
-  member        Member     @relation(fields: [memberId], references: [id])
+  id                Int        @id @default(autoincrement())
+  companyName       String     @map("company_name")
+  siteName          String     @map("site_name")
+  startDate         DateTime   @map("start_date")
+  endDate           DateTime   @map("end_date")
+  type              CareerType
+  isExperienced     Boolean    @map("is_experienced")
+  experiencedYears  Int        @default(0)
+  experiencedMonths Int        @default(0)
+  occupation        Code?      @relation(fields: [occupationId], references: [id])
+  occupationId      Int?
+  isActive          Boolean    @default(true) @map("is_active")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  memberId          Int        @map("member_id")
+  member            Member     @relation(fields: [memberId], references: [id])
 
   @@map("careers")
 }
@@ -444,6 +452,7 @@ model Code {
   codeType  CodeType @map("code_type")
   asSpecial Post[]   @relation(name: "post_special")
   asJob     Post[]   @relation(name: "post_occupation")
+  career    Career[]
 
   @@map("codes")
 }

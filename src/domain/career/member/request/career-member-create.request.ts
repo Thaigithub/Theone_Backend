@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDateString, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
 
 export class CareerMemberCreateRequest {
     @ApiProperty({
@@ -45,8 +45,8 @@ export class CareerMemberCreateRequest {
         type: 'string',
     })
     @Expose()
-    @IsString()
-    public occupation: string;
+    @IsNumber()
+    public occupationId: number;
 
     @ApiProperty({
         type: 'boolean',
