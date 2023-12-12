@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { SearchCategory } from './dto/company-admin-search-category.dto.request.dto';
 import { AdminCompanyDownloadListRequest, AdminCompanyDownloadRequest } from './request/company-admin-download-list.request';
 import { AdminCompanyGetListRequest } from './request/company-admin-get-list.request';
 import { AdminCompanyUpdateEmailRequest } from './request/company-admin-update-email.request';
@@ -17,57 +17,83 @@ export class AdminCompanyService {
         private excelService: ExcelService,
     ) {}
     async getCompanies(request: AdminCompanyGetListRequest): Promise<AdminCompanyGetListResponse> {
-        const search = (
-            await this.prismaService.company.findMany({
-                select: {
-                    name: true,
-                    account: {
-                        select: {
-                            username: true,
-                            status: true,
-                        },
+        const search = {
+            select: {
+                name: true,
+                account: {
+                    select: {
+                        username: true,
+                        status: true,
                     },
-                    address: true,
-                    businessRegNumber: true,
-                    corporateRegNumber: true,
-                    type: true,
-                    email: true,
-                    phone: true,
-                    presentativeName: true,
-                    contactName: true,
-                    contactPhone: true,
                 },
-                where: this.queryFormat(request),
-                take: request.pageSize && parseInt(request.pageSize),
-                skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
-            })
-        ).map((item) => {
-            return {
-                name: item.name,
-                username: item.account.username,
-                type: item.type,
-                contactName: item.contactName,
-                contactPhone: item.contactPhone,
-            };
-        });
-        const total = await this.prismaService.company.count({
-            where: this.queryFormat(request),
-        });
-        return new PaginationResponse(search, new PageInfo(total));
-    }
-    queryFormat(request: AdminCompanyGetListRequest): Prisma.CompanyWhereInput {
-        return {
-            account: {
-                username: {
-                    contains: request.id,
-                },
-                status: request.status,
-                isActive: true,
+                address: true,
+                businessRegNumber: true,
+                corporateRegNumber: true,
+                type: true,
+                email: true,
+                phone: true,
+                presentativeName: true,
+                contactName: true,
+                contactPhone: true,
             },
-            phone: request.phone,
-            name: request.name,
-        } as Prisma.CompanyWhereInput;
+            take: request.pageSize && parseInt(request.pageSize),
+            skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
+        };
+        switch (request.searchCategory) {
+            case SearchCategory.NAME: {
+                search['where'] = {
+                    name: { contains: request.searchKeyword },
+                    account: {
+                        isActive: true,
+                    },
+                };
+                break;
+            }
+            case SearchCategory.USERNAME: {
+                search['where'] = {
+                    account: {
+                        username: {
+                            contains: request.searchKeyword,
+                        },
+                        isActive: true,
+                    },
+                };
+                break;
+            }
+            case SearchCategory.PHONE: {
+                search['where'] = {
+                    phone: {
+                        contains: request.searchKeyword,
+                    },
+                    account: {
+                        isActive: true,
+                    },
+                };
+                break;
+            }
+            default: {
+                search['where'] = {
+                    account: {
+                        isActive: true,
+                    },
+                };
+            }
+        }
+        const total = await this.prismaService.company.count(search['where']);
+        return new PaginationResponse(
+            (await this.prismaService.company.findMany(search)).map((item) => {
+                return {
+                    name: item.name,
+                    username: item.account.username,
+                    type: item.type,
+                    contactName: item.contactName,
+                    contactPhone: item.contactPhone,
+                };
+            }),
+            new PageInfo(total),
+        );
     }
+
     async getDetails(CompanyId: number): Promise<AdminCompanyGetDetailsResponse> {
         const company = await this.prismaService.company.findUnique({
             where: {
