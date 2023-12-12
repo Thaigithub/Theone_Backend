@@ -43,4 +43,3 @@ export class SpecialLicenseMemberUpsertRequest {
     @ApiProperty({ example: 100 })
     public fileSize: number;
 }
-

@@ -64,6 +64,11 @@ export class AdminBannerService {
         const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const search = (
             await this.prismaService.generalBanner.findMany({
+                where: {
+                    banner: {
+                        isActive: true,
+                    },
+                },
                 skip: skip,
                 take: take,
                 select: {
@@ -156,6 +161,13 @@ export class AdminBannerService {
         const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const search = (
             await this.prismaService.adminPostBanner.findMany({
+                where: {
+                    postBanner: {
+                        banner: {
+                            isActive: true,
+                        },
+                    },
+                },
                 skip: skip,
                 take: take,
                 select: {
@@ -254,6 +266,9 @@ export class AdminBannerService {
                                     },
                                 },
                             },
+                            banner: {
+                                isActive: true,
+                            },
                         },
                     };
                     break;
@@ -265,6 +280,9 @@ export class AdminBannerService {
                                 name: {
                                     contains: query.keyword,
                                 },
+                            },
+                            banner: {
+                                isActive: true,
                             },
                         },
                     };
@@ -280,12 +298,21 @@ export class AdminBannerService {
                                     },
                                 },
                             },
+                            banner: {
+                                isActive: true,
+                            },
                         },
                     };
                     break;
                 }
                 default: {
-                    break;
+                    querySearch['where'] = {
+                        postbanner: {
+                            banner: {
+                                isActive: true,
+                            },
+                        },
+                    };
                 }
             }
         }
@@ -325,6 +352,11 @@ export class AdminBannerService {
         const take = query.pageSize === undefined ? undefined : parseInt(query.pageSize);
         const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const querySearch = {
+            where: {
+                banner: {
+                    isActive: true,
+                },
+            },
             skip: skip,
             take: take,
             select: {
@@ -412,5 +444,16 @@ export class AdminBannerService {
         });
         const total = await this.prismaService.siteBanner.count();
         return new PaginationResponse(search, new PageInfo(total));
+    }
+
+    async deleteBanner(id: number): Promise<void> {
+        await this.prismaService.banner.update({
+            where: {
+                id: id,
+            },
+            data: {
+                isActive: false,
+            },
+        });
     }
 }

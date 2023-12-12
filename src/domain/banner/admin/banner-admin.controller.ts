@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AdminBannerService } from './banner-admin.service';
@@ -8,7 +8,10 @@ import { AdminBannerGetAdminJobPostRequest } from './request/banner-admin-get-ad
 import { AdminBannerGetCompanyJobPostRequest } from './request/banner-admin-get-company-jobpost.request';
 import { AdminBannerGetGeneralRequest } from './request/banner-admin-get-general.request';
 import { AdminBannerGetSiteRequest } from './request/banner-admin-get-site.request';
-import { AdminBannerGetAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost.response';
+import {
+    AdminBannerGetAdminJobPostResponse,
+    AdminJobPostBannerResponse,
+} from './response/banner-admin-get-admin-jobpost.response';
 import { AdminBannerGetCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost.response';
 import { AdminBannerGetGeneralResponse } from './response/banner-admin-get-general.response';
 import { AdminBannerGetSiteResponse } from './response/banner-admin-get-site.response';
@@ -35,8 +38,7 @@ export class AdminBannerController {
         summary: 'General Banner get',
         description: 'This endpoint get general banners',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'General Banner get successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Fail to get general banner' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'General Banner get successfully', type: AdminBannerGetGeneralResponse })
     async getGeneralBanner(@Query() query: AdminBannerGetGeneralRequest): Promise<BaseResponse<AdminBannerGetGeneralResponse>> {
         return BaseResponse.of(await this.adminBannerService.getGeneralBanner(query));
     }
@@ -47,8 +49,11 @@ export class AdminBannerController {
         summary: 'Post Banner create',
         description: 'This endpoint create post banner',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Post Banner create successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Fail to create post banner' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Post Banner create successfully',
+        type: BaseResponse,
+    })
     async createAdminPostBanner(@Body() body: AdminBannerCreateJobPostRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.adminBannerService.createAdminPostBanner(body));
     }
@@ -57,8 +62,11 @@ export class AdminBannerController {
         summary: 'Admin Job Post Banner get',
         description: 'This endpoint get admin job post banners',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Admin Job Post Banner get successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Fail to get admin job post banner' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin Job Post Banner get successfully',
+        type: AdminJobPostBannerResponse,
+    })
     async getAdminPostBanner(
         @Query() query: AdminBannerGetAdminJobPostRequest,
     ): Promise<BaseResponse<AdminBannerGetAdminJobPostResponse>> {
@@ -70,8 +78,11 @@ export class AdminBannerController {
         summary: 'Company Job Post Banner get',
         description: 'This endpoint get company job post banners',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Company Job Post Banner get successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Fail to get company job post banner' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Company Job Post Banner get successfully',
+        type: AdminBannerGetCompanyJobPostResponse,
+    })
     async getCompanyPostBanner(
         @Query() query: AdminBannerGetCompanyJobPostRequest,
     ): Promise<BaseResponse<AdminBannerGetCompanyJobPostResponse>> {
@@ -84,9 +95,19 @@ export class AdminBannerController {
         summary: 'Site Banner get',
         description: 'This endpoint get site banners',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Site Banner get successfully' })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Fail to get site banner' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Site Banner get successfully', type: AdminBannerGetSiteResponse })
     async getSiteBanner(@Query() query: AdminBannerGetSiteRequest): Promise<BaseResponse<AdminBannerGetSiteResponse>> {
         return BaseResponse.of(await this.adminBannerService.getSiteBanner(query));
+    }
+
+    // COMMON ACTION
+    @Delete('/:id')
+    @ApiOperation({
+        summary: 'Banner delete',
+        description: 'This endpoint delete banners',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Banner delete successfully', type: BaseResponse })
+    async deleteBanner(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.adminBannerService.deleteBanner(id));
     }
 }
