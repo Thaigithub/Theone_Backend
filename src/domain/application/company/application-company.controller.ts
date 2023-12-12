@@ -1,0 +1,42 @@
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { BaseResponse } from 'utils/generics/base.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { ApplicationCompanyService } from './application-company.service';
+import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
+import {
+    ApplicationCompanyGetListApplicantsItemResponse,
+    ApplicationCompanyGetListApplicantsResponse,
+} from './response/application-company-get-list-applicants.response';
+
+@ApiTags('[COMPANY] Application Management')
+@Controller('/company/applications')
+@Roles(AccountType.COMPANY)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiProduces('application/json')
+@ApiConsumes('application/json')
+export class ApplicationCompanyController {
+    constructor(private applicationCompanyService: ApplicationCompanyService) {}
+
+    @Get()
+    @ApiOperation({
+        summary: 'Listing post applicants',
+        description: 'Company can search/filter post applicants',
+    })
+    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
+    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
+    @ApiQuery({ name: 'applicationDate', type: Date, required: false, description: 'Application date' })
+    // @ApiQuery({ name: 'category', type: String, required: false, description: 'Search by category' })
+    // @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
+    @ApiOkResponsePaginated(ApplicationCompanyGetListApplicantsItemResponse)
+    async getListApplicantSite(
+        @Req() request: any,
+        @Query() query: ApplicationCompanyGetListApplicantsRequest,
+    ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
+        const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query);
+        return BaseResponse.of(posts);
+    }
+}

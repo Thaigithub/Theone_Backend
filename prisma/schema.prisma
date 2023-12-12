@@ -150,8 +150,8 @@ model Team {
   file                 File             @relation(fields: [fileId], references: [id])
   exposureStatus       Boolean          @default(false) @map("exposure_status")
   numberOfRecruitments Int              @default(0) @map("number_of_recruiments")
-  posts                Application[]
   TeamEvaluation       TeamEvaluation?
+  posts                Application[]
 
   @@map("teams")
 }

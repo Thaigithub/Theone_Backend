@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ApplicationModule } from 'domain/application/application.module';
 import { BannerModule } from 'domain/banner/banner.module';
 import { CertificateModule } from 'domain/certificate/certificate.module';
 import { CodeModule } from 'domain/code/code.module';
@@ -31,6 +32,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         CodeModule,
         PostModule,
         FileModule,
+        ApplicationModule,
     ],
 })
 export class AppModule {}
