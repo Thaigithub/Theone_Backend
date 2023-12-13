@@ -67,7 +67,8 @@ class GetMembersListRequest {
 
 class ChangeMemberRequest {
     @ApiProperty({
-        type: MemberLevel,
+        type: 'enum',
+        enum: MemberLevel,
         required: false,
     })
     @Expose()
@@ -76,13 +77,23 @@ class ChangeMemberRequest {
     public level: MemberLevel;
 
     @ApiProperty({
-        type: AccountStatus,
+        type: 'enum',
+        enum: AccountStatus,
         required: false,
     })
     @Expose()
     @IsOptional()
     @IsEnum(AccountStatus)
     public status: AccountStatus;
+
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
+    @Expose()
+    @IsOptional()
+    @IsString()
+    public message: string;
 }
 
 class DownloadMembersRequest {
