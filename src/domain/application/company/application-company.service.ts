@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -81,5 +81,31 @@ export class ApplicationCompanyService {
         });
 
         return new PaginationResponse(applicationList, new PageInfo(applicationListCount));
+    }
+
+    async updateApplicationStatus(accountId: any, applicationId: number, status: PostApplicationStatus) {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                company: true,
+            },
+        });
+
+        await this.prismaService.application.update({
+            where: {
+                id: applicationId,
+                post: {
+                    site: {
+                        companyId: account.company.id,
+                    },
+                },
+            },
+            data: {
+                status: status,
+            },
+        });
     }
 }

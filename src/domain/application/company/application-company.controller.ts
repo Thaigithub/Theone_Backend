@@ -1,6 +1,6 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AccountType } from '@prisma/client';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType, PostApplicationStatus } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -37,6 +37,38 @@ export class ApplicationCompanyController {
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
         const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query);
+        return BaseResponse.of(posts);
+    }
+
+    @Put('/propose/:id')
+    @ApiOperation({
+        summary: 'Propose a job interview',
+        description: 'Company can propose a job interview',
+    })
+    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async proposeInteview(@Req() request: any, @Param('id', ParseIntPipe) applicationId: number): Promise<BaseResponse<void>> {
+        const posts = await this.applicationCompanyService.updateApplicationStatus(
+            request.user.accountId,
+            applicationId,
+            PostApplicationStatus.PROPOSAL_INTERVIEW,
+        );
+        return BaseResponse.of(posts);
+    }
+
+    @Put('/reject/:id')
+    @ApiOperation({
+        summary: 'Reject a post application',
+        description: 'Company can reject a post application',
+    })
+    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async reject(@Req() request: any, @Param('id', ParseIntPipe) applicationId: number): Promise<BaseResponse<void>> {
+        const posts = await this.applicationCompanyService.updateApplicationStatus(
+            request.user.accountId,
+            applicationId,
+            PostApplicationStatus.REJECT_BY_COMPANY,
+        );
         return BaseResponse.of(posts);
     }
 }
