@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from './dto/team-search';
+import { SearchCategoryForSearch } from './dto/team-search';
 import { TeamSearchRequest } from './request/team.request';
 import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './response/admin-team.response';
 @Injectable()
@@ -88,55 +88,43 @@ export class AdminTeamService {
         };
     }
     async searchTeamFilter(request: TeamSearchRequest): Promise<PaginationResponse<GetAdminTeamResponse>> {
-        const { keyWord, searchCategory, sortOptions, teamStatus } = request;
+        const { searchKeyword, searchCategory, teamStatus } = request;
         const where: Prisma.TeamWhereInput = {};
-        if (teamStatus !== TeamStatusForSearch.DEFAULT) {
+        if (teamStatus !== undefined) {
             where.status = teamStatus as TeamStatus;
         }
-        if (keyWord) {
-            const unifiedKeyword = keyWord.toLowerCase();
-            if (searchCategory !== SearchCategoryForSearch.DEFAULT) {
+        if (searchKeyword) {
+            const unifiedsearchKeyword = searchKeyword.toLowerCase();
+            if (searchCategory !== undefined) {
                 switch (searchCategory) {
                     case SearchCategoryForSearch.TEAM_CODE:
-                        where.code = { contains: unifiedKeyword };
+                        where.code = { contains: unifiedsearchKeyword };
                         break;
                     case SearchCategoryForSearch.TEAM_NAME:
-                        where.name = { contains: unifiedKeyword };
+                        where.name = { contains: unifiedsearchKeyword };
                         break;
                     case SearchCategoryForSearch.TEAM_LEADER:
-                        where.leader = { name: { contains: unifiedKeyword } };
+                        where.leader = { name: { contains: unifiedsearchKeyword } };
                         break;
                     default:
                         break;
                 }
             } else {
                 where.OR = [
-                    { code: { contains: unifiedKeyword } },
-                    { name: { contains: unifiedKeyword } },
-                    { leader: { name: { contains: unifiedKeyword } } },
+                    { code: { contains: unifiedsearchKeyword } },
+                    { name: { contains: unifiedsearchKeyword } },
+                    { leader: { name: { contains: unifiedsearchKeyword } } },
                 ];
             }
         }
-        let orderBy: Prisma.TeamOrderByWithRelationInput;
-        switch (sortOptions) {
-            case SortOptionForSearch.HIGHTEST_TEAM_MEMBERS:
-                orderBy = { members: { _count: 'desc' } };
-                break;
-            case SortOptionForSearch.LOWEST_TEAM_MEMBERS:
-                orderBy = { members: { _count: 'asc' } };
-                break;
-            default:
-                orderBy = { createdAt: 'asc' };
-                break;
-        }
+
         const teams = await this.prismaService.team.findMany({
             where,
-            orderBy,
             include: {
                 leader: true,
             },
-            skip: (Number(request.pageNumber) - 1) * Number(request.pageSize),
-            take: Number(request.pageSize),
+            skip: request.pageNumber && (Number(request.pageNumber) - 1) * Number(request.pageSize),
+            take: request.pageSize && Number(request.pageSize),
         });
         const total = await this.prismaService.team.count({
             where,

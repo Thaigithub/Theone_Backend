@@ -5,7 +5,6 @@ export enum SortOptionForSearch {
 }
 
 export enum TeamStatusForSearch {
-    DEFAULT = 'ALL',
     GENERAL = 'GENERAL',
     STOPPED = 'STOPPED',
     NOT_EXPOSED = 'NOT_EXPOSED',
@@ -14,7 +13,6 @@ export enum TeamStatusForSearch {
 }
 
 export enum SearchCategoryForSearch {
-    DEFAULT = 'ALL',
     TEAM_CODE = 'TEAM_CODE',
     TEAM_NAME = 'TEAM_NAME',
     TEAM_LEADER = 'TEAM_LEADER',

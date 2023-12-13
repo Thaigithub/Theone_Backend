@@ -1,22 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { SearchCategoryForSearch, SortOptionForSearch, TeamStatusForSearch } from '../dto/team-search';
+import { SearchCategoryForSearch, TeamStatusForSearch } from '../dto/team-search';
 
 export class TeamSearchRequest {
-    @ApiProperty({
-        type: 'enum',
-        enum: SortOptionForSearch,
-        required: true,
-    })
-    @IsEnum(SortOptionForSearch)
-    @Expose()
-    sortOptions: SortOptionForSearch = SortOptionForSearch.DEFAULT;
-
+    @IsOptional()
     @ApiProperty({
         type: 'enum',
         enum: TeamStatusForSearch,
-        required: true,
+        required: false,
     })
     @IsEnum(TeamStatusForSearch)
     @Expose()
@@ -25,23 +17,25 @@ export class TeamSearchRequest {
     @ApiProperty({
         type: 'enum',
         enum: SearchCategoryForSearch,
-        required: true,
+        required: false,
     })
     @IsEnum(SearchCategoryForSearch)
     @Expose()
+    @IsOptional()
     searchCategory: SearchCategoryForSearch;
 
     @ApiProperty({ example: 'Team A', required: false })
     @Expose()
     @IsString()
     @IsOptional()
-    keyWord: string;
+    searchKeyword: string;
 
     @ApiProperty({
         type: 'number',
         example: 1,
     })
     @Expose()
+    @IsOptional()
     pageNumber: number;
 
     @ApiProperty({
@@ -49,6 +43,7 @@ export class TeamSearchRequest {
         example: 10,
     })
     @Expose()
+    @IsOptional()
     pageSize: number;
 }
 
