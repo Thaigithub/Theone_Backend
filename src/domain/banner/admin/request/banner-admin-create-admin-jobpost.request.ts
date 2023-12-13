@@ -8,6 +8,7 @@ class AdminPostBanner {
     @Expose()
     @IsString()
     @ApiProperty({
+        required: true,
         description: 'URL link',
         example: 'https://google.com',
     })
@@ -18,6 +19,7 @@ class AdminPostBanner {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: true,
         description: 'Start date',
         example: '2023-05-10',
     })
@@ -28,6 +30,7 @@ class AdminPostBanner {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: true,
         description: 'End date',
         example: '2023-05-10',
     })

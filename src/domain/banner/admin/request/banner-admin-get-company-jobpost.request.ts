@@ -7,26 +7,39 @@ export class AdminBannerGetCompanyJobPostRequest {
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageNumber: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageSize: string;
 
     @Expose()
     @IsOptional()
     @IsEnum(PostSearchCaterory)
-    @ApiProperty({ type: PostSearchCaterory, example: PostSearchCaterory.COMPANY })
-    public search: PostSearchCaterory;
+    @ApiProperty({
+        required: false,
+        type: PostSearchCaterory,
+        example: PostSearchCaterory.COMPANY,
+    })
+    public searchCategory: PostSearchCaterory;
 
     @Expose()
     @IsOptional()
     @IsString()
-    @ApiProperty({ example: 'The one' })
-    public keyword: string;
+    @ApiProperty({
+        required: false,
+        example: 'The one',
+    })
+    public searchKeyword: string;
 
     @Expose()
     @IsOptional()
@@ -35,6 +48,7 @@ export class AdminBannerGetCompanyJobPostRequest {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: false,
         description: 'Request start date',
         example: '2023-05-10',
     })
@@ -47,6 +61,7 @@ export class AdminBannerGetCompanyJobPostRequest {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: false,
         description: 'Request End date',
         example: '2023-05-10',
     })

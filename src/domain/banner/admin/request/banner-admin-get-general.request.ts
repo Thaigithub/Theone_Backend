@@ -6,13 +6,19 @@ export class AdminBannerGetGeneralRequest {
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageNumber: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageSize: string;
 
     @Expose()
@@ -22,6 +28,7 @@ export class AdminBannerGetGeneralRequest {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: false,
         description: 'Request from date',
         example: '2023-05-10',
     })
@@ -34,6 +41,7 @@ export class AdminBannerGetGeneralRequest {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: false,
         description: 'Request end date',
         example: '2023-05-20',
     })
