@@ -7,6 +7,7 @@ class GeneralBanner {
     @Expose()
     @IsString()
     @ApiProperty({
+        required: true,
         description: 'URL link',
         example: 'https://google.com',
     })
@@ -16,6 +17,7 @@ class GeneralBanner {
     @IsString()
     @MaxLength(100)
     @ApiProperty({
+        required: true,
         description: 'Banner title',
         example: 'This is banner title',
     })
@@ -27,6 +29,7 @@ class GeneralBanner {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: true,
         description: 'Start date',
         example: '2023-05-10',
     })
@@ -38,6 +41,7 @@ class GeneralBanner {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     @ApiProperty({
+        required: true,
         description: 'End date',
         example: '2023-05-10',
     })

@@ -6,12 +6,18 @@ export class AdminBannerGetAdminJobPostRequest {
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageNumber: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
-    @ApiProperty({ example: '1' })
+    @ApiProperty({
+        required: false,
+        example: '1',
+    })
     public pageSize: string;
 }

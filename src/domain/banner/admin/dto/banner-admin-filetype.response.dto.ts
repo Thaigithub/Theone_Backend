@@ -1,12 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { File, FileType } from '@prisma/client';
 export class FileClass {
-    @ApiProperty({ type: String })
+    @ApiProperty({
+        required: true,
+        type: String,
+    })
     key: File['key'];
-    @ApiProperty({ type: String })
+    @ApiProperty({
+        required: true,
+        type: String,
+    })
     fileName: File['fileName'];
-    @ApiProperty({ type: 'enum', enum: FileType })
+    @ApiProperty({
+        required: true,
+        type: 'enum',
+        enum: FileType,
+    })
     type: File['type'];
-    @ApiProperty({ type: String })
+    @ApiProperty({
+        required: true,
+        type: String,
+    })
     size: File['size'];
 }
