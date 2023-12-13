@@ -79,7 +79,7 @@ export class AdminCompanyController {
     @ApiParam({ name: 'companyIds', type: AdminCompanyDownloadRequest })
     @ApiResponse({ status: HttpStatus.OK, description: 'Successfully dơnload the companies', type: BaseResponse })
     async download(
-        @Param() request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest,
+        @Query('companyIds') request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest,
         @Res() response: Response,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.adminCompanyService.download(request, response));
