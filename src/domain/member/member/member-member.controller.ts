@@ -14,7 +14,7 @@ import {
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
 import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
-import { MemberDetailResponse } from './response/member-member.response';
+import { MemberDetailResponse } from './response/member-admin.response';
 
 @ApiTags('[MEMBER] Member Management')
 @Roles(AccountType.MEMBER)

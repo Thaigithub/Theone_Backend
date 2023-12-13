@@ -1,11 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, TeamStatus } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 import { SearchCategoryForSearch } from './dto/team-search';
-import { TeamSearchRequest } from './request/team.request';
+import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
+import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
 import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './response/admin-team.response';
 @Injectable()
 export class AdminTeamService {
@@ -87,7 +88,7 @@ export class AdminTeamService {
             ),
         };
     }
-    async searchTeamFilter(request: TeamSearchRequest): Promise<PaginationResponse<GetAdminTeamResponse>> {
+    async searchTeamFilter(request: AdminTeamGetListRequest): Promise<PaginationResponse<GetAdminTeamResponse>> {
         const { searchKeyword, searchCategory, teamStatus } = request;
         const where: Prisma.TeamWhereInput = {};
         if (teamStatus !== undefined) {
@@ -157,11 +158,15 @@ export class AdminTeamService {
         response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
         excelStream.pipe(response);
     }
-    async download(teamIds: number[], response: Response): Promise<void> {
-        const teams = await this.getTeamWithIds(teamIds);
-        if (teams.length === 0) {
-            throw new NotFoundException('No team founded');
+    async download(query: AdminTeamDownloadListRequest | AdminTeamDownloadRequest, response: Response): Promise<void> {
+        const list = [];
+        if (Array.isArray(query)) {
+            list.push(...query.map((item) => parseInt(item)));
+        } else if (typeof query === 'string') {
+            list.push(parseInt(query));
         }
+        if (list.length === 0) throw new BadRequestException('Missing teamIds');
+        const teams = await this.getTeamWithIds(list);
         const excelData: Omit<GetAdminTeamResponse, 'id' | 'isActive'>[] = teams.map(({ id, isActive, ...rest }) => rest);
         const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

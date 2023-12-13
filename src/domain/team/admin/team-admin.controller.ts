@@ -1,22 +1,12 @@
-import {
-    BadRequestException,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Inject,
-    Param,
-    ParseIntPipe,
-    Query,
-    Res,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Res } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetAdminTeamResponse, GetTeamDetailsResponse } from 'domain/team/admin/response/admin-team.response';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { AdminTeamService } from './admin-team.service';
-import { DownloadTeamsRequest, TeamSearchRequest } from './request/team.request';
+import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
+import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
+import { AdminTeamService } from './team-admin.service';
 @ApiTags('[Admin] Team Management')
 @Controller('admin/teams')
 @ApiProduces('application/json')
@@ -31,7 +21,9 @@ export class AdminTeamController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams returned' })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
-    async searchTeamFilter(@Query() query: TeamSearchRequest): Promise<BaseResponse<PaginationResponse<GetAdminTeamResponse>>> {
+    async searchTeamFilter(
+        @Query() query: AdminTeamGetListRequest,
+    ): Promise<BaseResponse<PaginationResponse<GetAdminTeamResponse>>> {
         return BaseResponse.of(await this.teamService.searchTeamFilter(query));
     }
 
@@ -44,16 +36,11 @@ export class AdminTeamController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'download teams excel file successfully' })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'download teams excel file failed' })
-    async download(@Query() query: DownloadTeamsRequest, @Res() response: Response): Promise<BaseResponse<void>> {
-        const parsedTeamIds: number[] = query.teamIds
-            .slice(1, -1)
-            .split(',')
-            .map((id) => parseInt(id.trim(), 10));
-        if (parsedTeamIds.some(isNaN)) {
-            throw new BadRequestException('Invalid teamIds provided');
-        }
-        await this.teamService.download(parsedTeamIds, response);
-        return BaseResponse.ok();
+    async download(
+        @Query('teamIds') query: AdminTeamDownloadListRequest | AdminTeamDownloadRequest,
+        @Res() response: Response,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.teamService.download(query, response));
     }
 
     @Get('download-team-details')
