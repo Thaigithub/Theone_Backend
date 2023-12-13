@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -32,6 +32,7 @@ export class MemberAdminController {
     })
     @ApiResponse({
         type: GetMembersListResponse,
+        status: HttpStatus.OK,
     })
     async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<GetMembersListResponse>> {
         const membersList = await this.memberAdminService.getList(query);
@@ -75,6 +76,7 @@ export class MemberAdminController {
     })
     @ApiResponse({
         type: GetMembersListResponse,
+        status: HttpStatus.OK,
     })
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberDetailResponse>> {
         return BaseResponse.of(await this.memberAdminService.getDetail(id));
@@ -87,13 +89,14 @@ export class MemberAdminController {
         description: 'Admin can change account_status of member or membership_level',
     })
     @ApiResponse({
+        type: BaseResponse,
         status: HttpStatus.OK,
     })
     async changeMemberInfo(
         @Param('id', ParseIntPipe) id: number,
-        @Query() payload: ChangeMemberRequest,
-    ): Promise<BaseResponse<null>> {
-        await this.memberAdminService.updateMember(id, payload);
+        @Body() body: ChangeMemberRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.memberAdminService.updateMember(id, body);
         return BaseResponse.ok();
     }
 }

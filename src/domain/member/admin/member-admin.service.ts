@@ -147,19 +147,36 @@ export class MemberAdminService {
         });
     }
 
-    async updateMember(id: number, payload: ChangeMemberRequest): Promise<void> {
+    async updateMember(id: number, body: ChangeMemberRequest): Promise<void> {
+        const account = await this.prismaService.member.findUnique({
+            select: {
+                accountId: true,
+            },
+            where: {
+                id,
+            },
+        });
+
         await this.prismaService.member.update({
             where: {
                 isActive: true,
                 id,
             },
             data: {
-                level: payload.level,
+                level: body.level,
                 account: {
                     update: {
-                        status: payload.status,
+                        status: body.status,
                     },
                 },
+            },
+        });
+
+        await this.prismaService.accountStatusHistory.create({
+            data: {
+                status: body.status,
+                message: body.message,
+                accountId: account.accountId,
             },
         });
     }
