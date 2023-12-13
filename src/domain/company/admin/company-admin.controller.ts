@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiParam, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -76,7 +76,7 @@ export class AdminCompanyController {
         summary: 'Find companies list',
         description: 'This endpoint retrieves comapnies list in the system.',
     })
-    @ApiParam({ name: 'companyIds', type: AdminCompanyDownloadRequest })
+    @ApiQuery({ name: 'companyIds', type: AdminCompanyDownloadRequest })
     @ApiResponse({ status: HttpStatus.OK, description: 'Successfully dơnload the companies', type: BaseResponse })
     async download(
         @Query('companyIds') request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest,

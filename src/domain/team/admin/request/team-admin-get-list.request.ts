@@ -3,7 +3,7 @@ import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { SearchCategoryForSearch, TeamStatusForSearch } from '../dto/team-search';
 
-export class TeamSearchRequest {
+export class AdminTeamGetListRequest {
     @IsOptional()
     @ApiProperty({
         type: 'enum',
@@ -45,15 +45,4 @@ export class TeamSearchRequest {
     @Expose()
     @IsOptional()
     pageSize: number;
-}
-
-export class DownloadTeamsRequest {
-    @Expose()
-    @ApiProperty({
-        type: 'string',
-        example: '[1,2,3]',
-        required: true,
-    })
-    @IsString()
-    public teamIds: string;
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -138,12 +138,14 @@ export class AdminCompanyService {
         });
     }
     async download(request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest, response: Response): Promise<void> {
-        let list = [];
+        const list = [];
         if (Array.isArray(request)) {
-            list = request.map((item) => parseInt(item));
+            list.push(...request.map((item) => parseInt(item)));
         } else if (typeof request === 'string') {
             list.push(parseInt(request));
         }
+        if (list.length === 0) throw new BadRequestException('Missing teamIds');
+
         const companies = await this.prismaService.company.findMany({
             where: {
                 id: {
