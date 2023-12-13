@@ -564,6 +564,7 @@ model Application {
   postId     Int
   status     PostApplicationStatus @default(APPLY)
   assignedAt DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt @map("updated_at")
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])

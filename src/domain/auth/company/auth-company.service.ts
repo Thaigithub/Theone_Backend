@@ -1,28 +1,18 @@
 import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType } from '@prisma/client';
-import { APPLE_OAUTH_RESTAPI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_VERIFY_URL, NAVER_VERIFY_URL } from 'app.config';
-import Axios from 'axios';
 import { compare } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
-import { OAuth2Client } from 'google-auth-library';
-import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
 import { UID } from 'utils/uid';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
-import { AccountDTO } from './dto/auth-company-account.dto';
 import { AuthCompanyPasswordRequest } from './request/auth-company-email-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-email-username.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
-import { AuthCompanyLoginSocialRequest } from './request/auth-company-login-social.request';
 import { AuthCompanyPasswordEmailCheckValidRequest } from './request/auth-company-verify-email-password.request';
 import { AuthCompanyUserIdEmailCheckValidRequest } from './request/auth-company-verify-email-username.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
-const appleClient = new JwksClient({
-    jwksUri: APPLE_OAUTH_RESTAPI,
-});
 
 @Injectable()
 export class CompanyAuthService {
@@ -150,140 +140,5 @@ export class CompanyAuthService {
             sub: payloadData,
         };
         return this.jwtService.sign(payload);
-    }
-
-    async googleLogin(request: AuthCompanyLoginSocialRequest): Promise<AuthCompanyLoginResponse> {
-        const payload = (
-            await googleClient.verifyIdToken({
-                idToken: request.idToken,
-                audience: GOOGLE_CLIENT_ID,
-            })
-        ).getPayload();
-        const profile = await this.prismaService.company.findUnique({
-            where: {
-                email: payload.email,
-                account: {
-                    isActive: true,
-                },
-            },
-            select: {
-                account: {
-                    select: {
-                        id: true,
-                        type: true,
-                    },
-                },
-            },
-        });
-        return this.loginSignupSocialFlow({
-            id: profile.account.id,
-            type: profile.account.type,
-        });
-    }
-
-    async appleLogin(request: AuthCompanyLoginSocialRequest): Promise<AuthCompanyLoginResponse> {
-        const json = this.jwtService.decode(request.idToken, { complete: true });
-        const kid = json.header.kid;
-        const applekey = (await appleClient.getSigningKey(kid)).getPublicKey();
-        const payload = await this.jwtService.verify(applekey, json);
-        const profile = await this.prismaService.company.findUnique({
-            where: {
-                email: payload.email,
-                account: {
-                    isActive: true,
-                },
-            },
-            select: {
-                account: {
-                    select: {
-                        id: true,
-                        type: true,
-                    },
-                },
-            },
-        });
-        return this.loginSignupSocialFlow({
-            id: profile.account.id,
-            type: profile.account.type,
-        });
-    }
-
-    async kakaoLogin(request: AuthCompanyLoginSocialRequest): Promise<AuthCompanyLoginResponse> {
-        const payload = await Axios.post(KAKAO_VERIFY_URL, {
-            headers: {
-                Authorization: `Bearer ${request.idToken}`,
-                'Content-Type': 'application/json; charset=utf-8',
-            },
-        }).then((response) => response.data)['kakao_account'];
-        const profile = await this.prismaService.company.findUnique({
-            where: {
-                email: payload.email,
-                account: {
-                    isActive: true,
-                },
-            },
-            select: {
-                account: {
-                    select: {
-                        id: true,
-                        type: true,
-                    },
-                },
-            },
-        });
-        return this.loginSignupSocialFlow({
-            id: profile.account.id,
-            type: profile.account.type,
-        });
-    }
-
-    async naverLogin(request: AuthCompanyLoginSocialRequest): Promise<AuthCompanyLoginResponse> {
-        const payload = await Axios.post(NAVER_VERIFY_URL, {
-            headers: {
-                Authorization: `Bearer ${request.idToken}`,
-                'Content-Type': 'application/json; charset=utf-8',
-            },
-        }).then((response) => response.data)['reponse'];
-        const profile = await this.prismaService.company.findUnique({
-            where: {
-                email: payload.email,
-                account: {
-                    isActive: true,
-                },
-            },
-            select: {
-                account: {
-                    select: {
-                        id: true,
-                        type: true,
-                    },
-                },
-            },
-        });
-        return this.loginSignupSocialFlow({
-            id: profile.account.id,
-            type: profile.account.type,
-        });
-    }
-
-    async loginSignupSocialFlow(profile: AccountDTO): Promise<AuthCompanyLoginResponse> {
-        await this.prismaService.account.update({
-            where: {
-                id: profile.id,
-            },
-            data: {
-                lastAccessAt: new Date(),
-            },
-        });
-        const uid = this.fakeUidAccount(profile.id);
-        const type = profile.type;
-        const payload: AuthJwtFakePayloadData = {
-            accountId: uid,
-            type: type,
-        };
-
-        const token = this.signToken(payload);
-
-        return { token, uid, type };
     }
 }
