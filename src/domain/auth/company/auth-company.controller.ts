@@ -5,7 +5,6 @@ import { CompanyAuthService } from './auth-company.service';
 import { AuthCompanyPasswordRequest } from './request/auth-company-email-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-email-username.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
-import { AuthCompanyLoginSocialRequest } from './request/auth-company-login-social.request';
 import { AuthCompanyPasswordEmailCheckValidRequest } from './request/auth-company-verify-email-password.request';
 import { AuthCompanyUserIdEmailCheckValidRequest } from './request/auth-company-verify-email-username.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
@@ -15,51 +14,6 @@ import { AuthCompanyLoginResponse } from './response/auth-company-login.response
 @ApiConsumes('application/json')
 export class CompanyAuthController {
     constructor(private readonly companyAuthService: CompanyAuthService) {}
-
-    // GOOGLE
-    @Post('/login/google')
-    @ApiOperation({
-        summary: 'Google Account Login',
-        description: 'This endpoint login with Google acount',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Google Account logged in successfully', type: AuthCompanyLoginResponse })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
-    async googlelogin(@Body() authUserDto: AuthCompanyLoginSocialRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {
-        return BaseResponse.of(await this.companyAuthService.googleLogin(authUserDto));
-    }
-    // APPLE
-    @Post('/login/apple')
-    @ApiOperation({
-        summary: 'Apple Account Login',
-        description: 'This endpoint login with Apple acount',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Apple Account logged in successfully', type: AuthCompanyLoginResponse })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
-    async applelogin(@Body() authUserDto: AuthCompanyLoginSocialRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {
-        return BaseResponse.of(await this.companyAuthService.appleLogin(authUserDto));
-    }
-    // KAKAO
-    @Post('/login/kakao')
-    @ApiOperation({
-        summary: 'Kakao Account Login',
-        description: 'This endpoint login with Kakao acount',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Kakao Account logged in successfully', type: AuthCompanyLoginResponse })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
-    async kakaologin(@Body() authUserDto: AuthCompanyLoginSocialRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {
-        return BaseResponse.of(await this.companyAuthService.kakaoLogin(authUserDto));
-    }
-    // NAVER
-    @Post('/login/naver')
-    @ApiOperation({
-        summary: 'Naver Account Login',
-        description: 'This endpoint login with Naver acount',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Naver Account logged in successfully', type: AuthCompanyLoginResponse })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
-    async naverlogin(@Body() authUserDto: AuthCompanyLoginSocialRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {
-        return BaseResponse.of(await this.companyAuthService.kakaoLogin(authUserDto));
-    }
     // Normal
     @Post('/login')
     @ApiOperation({
