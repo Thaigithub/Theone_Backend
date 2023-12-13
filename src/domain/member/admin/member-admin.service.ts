@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Member as MemberPrisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { searchCategory } from './dto/member-admin-search-category.request.dto';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberDetailResponse, MemberResponse } from './response/member-admin.response';
-import { searchCategory } from './dto/member-admin-search-category.request.dto';
 
 @Injectable()
 export class MemberAdminService {
@@ -171,14 +171,17 @@ export class MemberAdminService {
                 },
             },
         });
-
-        await this.prismaService.accountStatusHistory.create({
-            data: {
-                status: body.status,
-                message: body.message,
-                accountId: account.accountId,
-            },
-        });
+        if (body.status !== undefined) {
+            if (body.message !== undefined) {
+                await this.prismaService.accountStatusHistory.create({
+                    data: {
+                        status: body.status,
+                        message: body.message,
+                        accountId: account.accountId,
+                    },
+                });
+            } else throw new BadRequestException('Missing message');
+        }
     }
 
     async download(memberIds: number[], response: Response): Promise<void> {
