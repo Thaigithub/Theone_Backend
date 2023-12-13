@@ -19,11 +19,13 @@ export class AdminCompanyService {
     async getCompanies(request: AdminCompanyGetListRequest): Promise<AdminCompanyGetListResponse> {
         const search = {
             select: {
+                id: true,
                 name: true,
                 account: {
                     select: {
                         username: true,
                         status: true,
+                        createdAt: true,
                     },
                 },
                 address: true,
@@ -83,6 +85,8 @@ export class AdminCompanyService {
         return new PaginationResponse(
             (await this.prismaService.company.findMany(search)).map((item) => {
                 return {
+                    id: item.id,
+                    regDate: item.account.createdAt,
                     name: item.name,
                     username: item.account.username,
                     type: item.type,
