@@ -37,6 +37,18 @@ export class AccountCompanyService {
             },
         });
         if (bussinessRegNumcount !== 0) throw new ConflictException('Business registration number has been used');
+        const corporateRegNumcount = await this.prismaService.company.count({
+            where: {
+                corporateRegNumber: request.corporateRegNum,
+            },
+        });
+        if (corporateRegNumcount !== 0) throw new ConflictException('Corporate registration number has been used');
+        const email = await this.prismaService.company.count({
+            where: {
+                email: request.email,
+            },
+        });
+        if (email !== 0) throw new ConflictException('Email has been used');
         await this.prismaService.account.create({
             data: {
                 username: request.username,
