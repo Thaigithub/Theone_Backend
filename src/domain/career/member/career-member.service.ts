@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CareerType, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
@@ -78,12 +78,19 @@ export class CareerMemberService {
         });
     }
 
-    async deleteCareer(careerId: number, accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
+    async deleteCareer(id: number): Promise<void> {
+        const careerExist = await this.prismaService.career.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!careerExist) throw new NotFoundException('Evaluation does not exist');
+
         await this.prismaService.career.update({
             where: {
-                id: careerId,
-                memberId,
+                isActive: true,
+                id,
             },
             data: {
                 isActive: false,

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -27,6 +27,8 @@ export class CareerMemberController {
     })
     @ApiResponse({
         type: CareerMemberGetListResponse,
+        description: 'Get list career successfully',
+        status: HttpStatus.OK,
     })
     async getList(
         @Query() query: CareerMemberGetListRequest,
@@ -44,6 +46,11 @@ export class CareerMemberController {
         summary: 'Create career',
         description: 'Members can register a new GENERAL career',
     })
+    @ApiResponse({
+        type: BaseResponse,
+        description: 'Create career successfully',
+        status: HttpStatus.OK,
+    })
     async createCareer(
         @Body() body: CareerMemberCreateRequest,
         @Req() request: AccountIdExtensionRequest,
@@ -60,11 +67,17 @@ export class CareerMemberController {
         summary: 'Delete career',
         description: 'Members can delete a registered career',
     })
-    async deleteCareer(
-        @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<null>> {
-        await this.careerMemberService.deleteCareer(id, request.user.accountId);
+    @ApiResponse({
+        type: BaseResponse,
+        description: 'Delete career successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Career does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
+    async deleteCareer(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<null>> {
+        await this.careerMemberService.deleteCareer(id);
         return BaseResponse.ok();
     }
 }

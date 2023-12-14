@@ -19,6 +19,7 @@ import { SiteCompanyService } from './site-company.service';
 export class SiteCompanyController {
     constructor(private readonly siteCompanyService: SiteCompanyService) {}
 
+    @Get()
     @ApiOperation({
         summary: 'Get list of sites',
         description: 'Company can get list for all created sites',
@@ -28,7 +29,6 @@ export class SiteCompanyController {
         description: 'Get site successfully',
         status: HttpStatus.OK,
     })
-    @Get()
     async getList(@Query() query: SiteCompanyGetListRequest): Promise<BaseResponse<SiteCompanyGetListResponse>> {
         const list = await this.siteCompanyService.getList(query);
         const total = await this.siteCompanyService.getTotal();
@@ -36,6 +36,7 @@ export class SiteCompanyController {
         return BaseResponse.of(paginationResponse);
     }
 
+    @Post()
     @ApiOperation({
         summary: 'Create site',
         description: 'Company can create a new site',
@@ -45,7 +46,6 @@ export class SiteCompanyController {
         description: 'Create site successfully',
         status: HttpStatus.OK,
     })
-    @Post()
     async createSite(
         @Body() body: SiteCompanyCreateRequest,
         @Req() request: AccountIdExtensionRequest,
@@ -54,6 +54,7 @@ export class SiteCompanyController {
         return BaseResponse.ok();
     }
 
+    @Delete(':id')
     @ApiOperation({
         summary: 'Delete site',
         description: 'Company can delete an existing site',
@@ -67,7 +68,6 @@ export class SiteCompanyController {
         description: 'Site does not exist',
         status: HttpStatus.NOT_FOUND,
     })
-    @Delete(':id')
     async deleteSite(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         await this.siteCompanyService.deleteSite(id);
         return BaseResponse.ok();

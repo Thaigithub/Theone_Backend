@@ -1,4 +1,4 @@
-import { Injectable, Query } from '@nestjs/common';
+import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { EvaluationType } from './dto/evaluation-admin.dto';
@@ -135,6 +135,14 @@ export class EvaluationAdminService {
     }
 
     async getSiteEvaluationDetail(id: number): Promise<SiteEvaluationAdminGetDetailResponse> {
+        const evaluationExist = await this.prismaService.siteEvaluation.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+
         const siteEvaluation = await this.prismaService.siteEvaluation.findUnique({
             select: {
                 totalEvaluators: true,
@@ -231,6 +239,14 @@ export class EvaluationAdminService {
     }
 
     async getTeamEvaluationDetail(id: number): Promise<TeamEvaluationAdminGetDetailResponse> {
+        const evaluationExist = await this.prismaService.teamEvaluation.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+
         const teamEvaluation = await this.prismaService.teamEvaluation.findUnique({
             select: {
                 totalEvaluators: true,
@@ -319,6 +335,14 @@ export class EvaluationAdminService {
     }
 
     async getMemberEvaluationDetail(id: number): Promise<MemberEvaluationAdminGetDetailResponse> {
+        const evaluationExist = await this.prismaService.memberEvaluation.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+
         const memberEvaluation = await this.prismaService.memberEvaluation.findUnique({
             select: {
                 totalEvaluators: true,
