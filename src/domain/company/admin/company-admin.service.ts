@@ -109,10 +109,33 @@ export class AdminCompanyService {
             },
             include: {
                 account: true,
+                sites: true,
             },
         });
         if (!company) throw new NotFoundException('Company id not found');
-        else return company;
+        else
+            return {
+                name: company.name,
+                account: {
+                    username: company.account.username,
+                    status: company.account.status,
+                },
+                address: company.address,
+                businessRegNumber: company.businessRegNumber,
+                corporateRegNumber: company.corporateRegNumber,
+                type: company.type,
+                email: company.email,
+                phone: company.phone,
+                presentativeName: company.presentativeName,
+                contactName: company.contactName,
+                contactPhone: company.contactPhone,
+                site: company.sites.map((item) => {
+                    return {
+                        id: item.id,
+                        name: item.name,
+                    };
+                }),
+            };
     }
     async changeStatus(CompanyId: number, request: AdminCompanyUpdateStatusRequest): Promise<void> {
         await this.prismaService.company.update({

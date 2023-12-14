@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Account, Company } from '@prisma/client';
+import { Account, Company, CompanyType } from '@prisma/client';
+import { CompanyAdminGetDetailCompanySiteList } from '../dto/company-admin-get-detail-site-list.response.dto';
 
 export class AdminCompanyGetDetailsResponse {
-    @ApiProperty()
+    @ApiProperty({ type: String })
     name: Company['name'];
 
     @ApiProperty()
@@ -11,22 +12,24 @@ export class AdminCompanyGetDetailsResponse {
         status: Account['status'];
     };
 
-    @ApiProperty()
+    @ApiProperty({ type: String })
     address: Company['address'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     businessRegNumber: Company['businessRegNumber'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     corporateRegNumber: Company['corporateRegNumber'];
-    @ApiProperty()
+    @ApiProperty({ type: 'enum', enum: CompanyType })
     type: Company['type'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     email: Company['email'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     phone: Company['phone'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     presentativeName: Company['presentativeName'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     contactName: Company['contactName'];
-    @ApiProperty()
+    @ApiProperty({ type: String })
     contactPhone: Company['contactPhone'];
+    @ApiProperty({ type: Array<CompanyAdminGetDetailCompanySiteList> })
+    site: CompanyAdminGetDetailCompanySiteList[];
 }
