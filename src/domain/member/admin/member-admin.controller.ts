@@ -13,7 +13,8 @@ import {
     DownloadSingleMemberRequest,
     GetMembersListRequest,
 } from './request/member-admin.request';
-import { GetMembersListResponse, MemberDetailResponse } from './response/member-admin.response';
+import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
+import { MemberAdminGetListResponse } from './response/member-admin-get-list.response';
 
 @ApiTags('[ADMIN] Member Management')
 @Roles(AccountType.ADMIN)
@@ -31,13 +32,13 @@ export class MemberAdminController {
         description: 'Admin can search members by id, name, or can filter by membership level, account status',
     })
     @ApiResponse({
-        type: GetMembersListResponse,
+        type: MemberAdminGetListResponse,
         status: HttpStatus.OK,
     })
-    async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<GetMembersListResponse>> {
+    async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<MemberAdminGetListResponse>> {
         const membersList = await this.memberAdminService.getList(query);
         const membersTotal = await this.memberAdminService.getTotal(query);
-        const getMemberListResponse = new GetMembersListResponse(membersList, new PageInfo(membersTotal));
+        const getMemberListResponse = new MemberAdminGetListResponse(membersList, new PageInfo(membersTotal));
         return BaseResponse.of(getMemberListResponse);
     }
 
@@ -75,10 +76,15 @@ export class MemberAdminController {
         description: 'Retrieve member information detail',
     })
     @ApiResponse({
-        type: GetMembersListResponse,
+        type: MemberAdminGetDetailResponse,
+        description: 'Get member detail successfully',
         status: HttpStatus.OK,
     })
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberDetailResponse>> {
+    @ApiResponse({
+        description: 'Member does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberAdminGetDetailResponse>> {
         return BaseResponse.of(await this.memberAdminService.getDetail(id));
     }
 
@@ -90,7 +96,12 @@ export class MemberAdminController {
     })
     @ApiResponse({
         type: BaseResponse,
+        description: 'Update member successfully',
         status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Member does not exist',
+        status: HttpStatus.NOT_FOUND,
     })
     async changeMemberInfo(
         @Param('id', ParseIntPipe) id: number,

@@ -35,7 +35,7 @@ model AccountStatusHistory {
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
   status    AccountStatus
-  message   String
+  message   String        @default("")
   Account   Account       @relation(fields: [accountId], references: [id])
   accountId Int           @map("account_id")
 
@@ -81,7 +81,6 @@ model Member {
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
-  authenticationDate           DateTime?                     @map("authentication_date") @db.Date
   certificates                 Certificate[]
   specialLicenses              SpecialLicense[]
   account                      Account                       @relation(fields: [accountId], references: [id])
@@ -348,6 +347,8 @@ model Banner {
   isActive      Boolean        @default(true) @map("is_active")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@map("banner")
 }
 
 model GeneralBanner {
@@ -359,16 +360,20 @@ model GeneralBanner {
   endDate   DateTime @map("end_date") @db.Date
   regDate   DateTime @default(now()) @map("register_date") @db.Date
   priority  Int?
+
+  @@map("general_banner")
 }
 
 model PostBanner {
   id                Int                @unique
   banner            Banner             @relation(fields: [id], references: [id])
-  postId            Int
+  postId            Int                @map("post_id")
   post              Post               @relation(fields: [postId], references: [id])
   type              PostBannerType
   companyPostBanner CompanyPostBanner?
   adminPostBanner   AdminPostBanner?
+
+  @@map("post_banner")
 }
 
 model CompanyPostBanner {
@@ -380,6 +385,8 @@ model CompanyPostBanner {
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date
   priority         Int?
   status           RequestBannerStatus
+
+  @@map("company_post_banner")
 }
 
 model AdminPostBanner {
@@ -390,12 +397,14 @@ model AdminPostBanner {
   endDate    DateTime   @map("end_date") @db.Date
   regDate    DateTime   @map("register_date") @db.Date
   priority   Int?       @unique
+
+  @@map("admin_post_banner")
 }
 
 model SiteBanner {
   id               Int                 @unique
   banner           Banner              @relation(fields: [id], references: [id])
-  siteId           Int
+  siteId           Int                 @map("site_id")
   site             Site                @relation(fields: [siteId], references: [id])
   title            String
   requestDate      DateTime            @map("request_date") @db.Date
@@ -404,6 +413,8 @@ model SiteBanner {
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date
   priority         Int?                @unique
   status           RequestBannerStatus
+
+  @@map("site_banner")
 }
 
 enum BannerStatus {

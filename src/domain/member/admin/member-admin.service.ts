@@ -1,11 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Member as MemberPrisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { searchCategory } from './dto/member-admin-search-category.request.dto';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
-import { MemberDetailResponse, MemberResponse } from './response/member-admin.response';
+import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
+import { MemberResponse } from './response/member-admin-get-list.response';
 
 @Injectable()
 export class MemberAdminService {
@@ -79,8 +80,16 @@ export class MemberAdminService {
         });
     }
 
-    async getDetail(id: number): Promise<MemberDetailResponse> {
-        return await this.prismaService.member.findUnique({
+    async getDetail(id: number): Promise<MemberAdminGetDetailResponse> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                id,
+            },
+        });
+
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
+        const member = await this.prismaService.member.findUnique({
             where: {
                 isActive: true,
                 id,
@@ -92,11 +101,20 @@ export class MemberAdminService {
                 desiredOccupation: true,
                 level: true,
                 signupMethod: true,
+                createdAt: true,
+                withdrawnDate: true,
+                account: {
+                    select: {
+                        username: true,
+                        status: true,
+                    },
+                },
                 bankAccount: {
                     select: {
                         accountHolder: true,
                         accountNumber: true,
                         bankName: true,
+                        createdAt: true,
                     },
                 },
                 foreignWorker: {
@@ -143,11 +161,65 @@ export class MemberAdminService {
                         },
                     },
                 },
+                teams: {
+                    select: {
+                        team: {
+                            select: {
+                                name: true,
+                                code: true,
+                            },
+                        },
+                    },
+                },
             },
         });
+
+        const teamList = member.teams.map((item) => {
+            return {
+                name: item.team.name,
+                code: item.team.code,
+            };
+        });
+
+        const { account, disability, createdAt, bankAccount, foreignWorker, ...newMember } = member;
+
+        delete newMember.email;
+        delete newMember.desiredOccupation;
+        delete newMember.signupMethod;
+
+        const newBankAccount = {
+            bankName: bankAccount?.bankName,
+            accountNumber: bankAccount?.accountNumber,
+            registrationDate: bankAccount?.createdAt,
+        };
+
+        const newForeignWorker = {
+            registrationNumber: foreignWorker?.registrationNumber,
+            serialNumber: foreignWorker?.serialNumber,
+            dateOfIssue: foreignWorker?.dateOfIssue,
+        };
+
+        return {
+            ...newMember,
+            bankAccount: newBankAccount,
+            foreignWorker: newForeignWorker,
+            joinDate: createdAt,
+            obstacle: disability ? disability.disableType : null,
+            username: account.username,
+            status: account.status,
+            teams: teamList,
+        };
     }
 
     async updateMember(id: number, body: ChangeMemberRequest): Promise<void> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                id,
+            },
+        });
+
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
         const account = await this.prismaService.member.findUnique({
             select: {
                 accountId: true,
