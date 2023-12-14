@@ -13,7 +13,7 @@ import {
     Request,
     UseGuards,
 } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -25,14 +25,15 @@ import { SpecialLicenseService } from './special-license-member.service';
 
 @ApiTags('[MEMBER] Special License Management')
 @Controller('member/special-licenses')
+@ApiBearerAuth()
+@Roles(AccountType.MEMBER)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberSpecialLicenseController {
     constructor(@Inject(SpecialLicenseService) private readonly specialLicenseService: SpecialLicenseService) {}
     @Post('save')
     @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @ApiOperation({
         summary: 'Save a new special license',
         description: 'This endpoint is provided for use to upload new special license',
@@ -46,8 +47,6 @@ export class MemberSpecialLicenseController {
 
     @Get('')
     @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @ApiOperation({
         summary: 'Get all special licenses',
         description: 'This endpoint get all special licenses that users currently have',
@@ -69,8 +68,6 @@ export class MemberSpecialLicenseController {
 
     @Get(':id')
     @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @ApiOperation({
         summary: 'Get special license details',
         description: 'This endpoint get special license details',
@@ -85,8 +82,6 @@ export class MemberSpecialLicenseController {
 
     @Put(':id')
     @HttpCode(200)
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @ApiOperation({
         summary: 'Update special license',
         description: 'This endpoint update special license information',

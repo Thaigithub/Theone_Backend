@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -12,12 +12,13 @@ import {
     UpsertForeignWorkerRequest,
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
-import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
 import { MemberDetailResponse } from './response/member-member-get-detail.response';
+import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
 
 @ApiTags('[MEMBER] Member Management')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
 @Controller('member/members')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')

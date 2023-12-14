@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -11,6 +11,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 @ApiTags('[ADMIN] File Management')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 @Controller('/admin/files')

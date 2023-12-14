@@ -1,5 +1,5 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, PostApplicationStatus } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -17,6 +17,7 @@ import { ApplicationCompanyGetMemberDetail } from './response/application-compan
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class ApplicationCompanyController {

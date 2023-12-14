@@ -1,5 +1,5 @@
 import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -13,6 +13,7 @@ import { PostAdminGetListResponse } from './response/post-admin-get-list.respons
 @Controller('/admin/posts')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
 @ApiProduces('application/json')
 export class PostAdminController {
     constructor(private postAdminService: PostAdminService) {}

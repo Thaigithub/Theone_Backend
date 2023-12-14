@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -14,6 +14,7 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
+@ApiBearerAuth()
 export class ApplicationMemberController {
     constructor(private applicationMemberService: ApplicationMemberService) {}
 

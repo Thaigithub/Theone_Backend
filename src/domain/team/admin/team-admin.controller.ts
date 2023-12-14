@@ -1,5 +1,8 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Res } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { GetAdminTeamResponse, GetTeamDetailsResponse } from 'domain/team/admin/response/admin-team.response';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -9,6 +12,9 @@ import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
 import { AdminTeamService } from './team-admin.service';
 @ApiTags('[Admin] Team Management')
 @Controller('admin/teams')
+@Roles(AccountType.ADMIN)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminTeamController {

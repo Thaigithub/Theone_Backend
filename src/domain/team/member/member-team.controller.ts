@@ -13,7 +13,7 @@ import {
     Request,
     UseGuards,
 } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -28,6 +28,7 @@ import { MemberTeamsResponse } from './response/member-teams.response';
 @Controller('member/teams')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
+@ApiBearerAuth()
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberTeamController {

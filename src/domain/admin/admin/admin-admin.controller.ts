@@ -12,7 +12,7 @@ import {
     Query,
     UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, AdminLevel } from '@prisma/client';
 import { AdminLevelPermissions, AuthAdminLevelGuard } from 'domain/auth/auth-admin-level.guard';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -30,6 +30,7 @@ import { AdminAdminGetListResponse } from './response/admin-admin-get-list.respo
 @Roles(AccountType.ADMIN)
 @AdminLevelPermissions(AdminLevel.SUPERADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard, AuthAdminLevelGuard)
+@ApiBearerAuth()
 export class AdminAdminController {
     constructor(@Inject(AdminAdminService) private readonly adminService: AdminAdminService) {}
 
