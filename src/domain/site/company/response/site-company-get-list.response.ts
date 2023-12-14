@@ -3,7 +3,7 @@ import { Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
 export class SiteResponse {
-    @ApiProperty({ type: 'string' })
+    @ApiProperty({ type: 'number' })
     id: Site['id'];
 
     @ApiProperty({ type: 'string' })

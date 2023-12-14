@@ -3,7 +3,7 @@ import { Career, CareerType, Code } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
 export class CareerResponse {
-    @ApiProperty({ type: 'string' })
+    @ApiProperty({ type: 'number' })
     id: Career['id'];
 
     @ApiProperty({

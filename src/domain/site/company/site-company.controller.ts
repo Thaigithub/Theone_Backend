@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -9,6 +22,8 @@ import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
+import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
+import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
 import { SiteCompanyService } from './site-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -34,6 +49,24 @@ export class SiteCompanyController {
         const total = await this.siteCompanyService.getTotal();
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
+    }
+
+    @Get(':id')
+    @ApiOperation({
+        summary: 'Get site detail',
+        description: 'Company retrieve information of a site',
+    })
+    @ApiResponse({
+        type: SiteCompanyGetDetailResponse,
+        description: 'Get site information successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Site does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteCompanyGetDetailResponse>> {
+        return BaseResponse.of(await this.siteCompanyService.getDetail(id));
     }
 
     @Post()
@@ -70,6 +103,25 @@ export class SiteCompanyController {
     })
     async deleteSite(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         await this.siteCompanyService.deleteSite(id);
+        return BaseResponse.ok();
+    }
+
+    @Patch(':id')
+    @ApiOperation({
+        summary: 'Update site',
+        description: 'Company change information of a site',
+    })
+    @ApiResponse({
+        type: BaseResponse,
+        description: 'Get site information successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Site does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
+    async updateSite(@Param('id', ParseIntPipe) id: number, @Body() body: SiteCompanyUpdateRequest): Promise<BaseResponse<void>> {
+        await this.siteCompanyService.updateSite(id, body);
         return BaseResponse.ok();
     }
 }
