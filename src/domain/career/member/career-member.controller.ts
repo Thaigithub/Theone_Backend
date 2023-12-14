@@ -47,8 +47,8 @@ export class CareerMemberController {
         @Body() body: CareerMemberCreateRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<null>> {
-        body.startDate = `${body.startDate}T00:00:00Z`;
-        body.endDate = `${body.endDate}T00:00:00Z`;
+        body.startDate = new Date(body.startDate).toISOString();
+        body.endDate = new Date(body.endDate).toISOString();
         await this.careerMemberService.createCareer(body, request.user.accountId);
         return BaseResponse.ok();
     }

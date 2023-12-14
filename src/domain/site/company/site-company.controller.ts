@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpStatus, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -7,6 +7,9 @@ import { SiteCompanyService } from './site-company.service';
 import { BaseResponse } from 'utils/generics/base.response';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -14,6 +17,23 @@ import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request
 @Controller('company/sites')
 export class SiteCompanyController {
     constructor(private readonly siteCompanyService: SiteCompanyService) {}
+
+    @ApiOperation({
+        summary: 'Get list of sites',
+        description: 'Company can get list for all created sites',
+    })
+    @ApiResponse({
+        type: SiteCompanyGetListResponse,
+        description: 'Get site successfully',
+        status: HttpStatus.OK,
+    })
+    @Get()
+    async getList(@Query() query: SiteCompanyGetListRequest): Promise<BaseResponse<SiteCompanyGetListResponse>> {
+        const list = await this.siteCompanyService.getList(query);
+        const total = await this.siteCompanyService.getTotal();
+        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
+        return BaseResponse.of(paginationResponse);
+    }
 
     @ApiOperation({
         summary: 'Create site',
@@ -29,8 +49,6 @@ export class SiteCompanyController {
         @Body() body: SiteCompanyCreateRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        body.startDate = `${body.startDate}T00:00:00Z`;
-        body.endDate = `${body.endDate}T00:00:00Z`;
         await this.siteCompanyService.createSite(body, request.user.accountId);
         return BaseResponse.ok();
     }

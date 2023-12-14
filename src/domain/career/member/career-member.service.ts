@@ -43,6 +43,11 @@ export class CareerMemberService {
                 isExperienced: true,
             },
             where: this.parseConditionsFromQuery(query, memberId),
+
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
+            take: query.pageNumber && query.pageSize && query.pageSize,
         });
     }
 

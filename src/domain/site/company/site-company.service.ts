@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
+import { SiteResponse } from './response/site-company-get-list.response';
+import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 
 @Injectable()
 export class SiteCompanyService {
@@ -18,8 +20,30 @@ export class SiteCompanyService {
         return company.id;
     }
 
+    async getTotal(): Promise<number> {
+        return await this.prismaService.site.count({});
+    }
+
+    async getList(query: SiteCompanyGetListRequest): Promise<SiteResponse[]> {
+        return await this.prismaService.site.findMany({
+            select: {
+                id: true,
+                name: true,
+                personInCharge: true,
+                startDate: true,
+                endDate: true,
+            },
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
+            take: query.pageNumber && query.pageSize && query.pageSize,
+        });
+    }
+
     async createSite(body: SiteCompanyCreateRequest, accountId: number) {
         const companyId = await this.getCompanyId(accountId);
+        body.startDate = new Date(body.startDate).toISOString();
+        body.endDate = new Date(body.endDate).toISOString();
         await this.prismaService.site.create({
             data: {
                 ...body,
