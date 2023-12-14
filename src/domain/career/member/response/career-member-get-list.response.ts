@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Career, CareerType } from '@prisma/client';
+import { Career, CareerType, Code } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
 export class CareerResponse {
@@ -25,7 +25,7 @@ export class CareerResponse {
     endDate: Career['endDate'];
 
     @ApiProperty({ type: 'string' })
-    occupation: Career['occupation'];
+    occupation: Code;
 
     @ApiProperty({ type: 'boolean' })
     isExperienced: Career['isExperienced'];

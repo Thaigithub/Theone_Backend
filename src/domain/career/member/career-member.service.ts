@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CareerType } from '@prisma/client';
+import { CareerType, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list-request';
@@ -60,11 +60,20 @@ export class CareerMemberService {
 
     async createCareer(body: CareerMemberCreateRequest, accountId: number): Promise<void> {
         const memberId = await this.getMemberId(accountId);
+
+        const occupation = await this.prismaService.code.findUnique({
+            where: {
+                id: body.occupationId,
+                codeType: CodeType.JOB,
+            },
+        });
+
         await this.prismaService.career.create({
             data: {
                 ...body,
                 memberId,
                 type: CareerType.GENERAL,
+                occupationId: occupation.id,
             },
         });
     }
