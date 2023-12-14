@@ -11,7 +11,6 @@ import {
     ApplicationCompanyGetListApplicantsItemResponse,
     ApplicationCompanyGetListApplicantsResponse,
 } from './response/application-company-get-list-applicants.response';
-import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
 
 @ApiTags('[COMPANY] Application Management')
 @Controller('/company/applications')
@@ -40,23 +39,6 @@ export class ApplicationCompanyController {
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
         const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query);
         return BaseResponse.of(posts);
-    }
-
-    @Get('/member/:id')
-    @ApiOperation({
-        summary: 'Post detail',
-        description: 'Retrieve post information detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: ApplicationCompanyGetMemberDetail,
-    })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getMemberDetail(
-        @Req() request: any,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
-        return BaseResponse.of(await this.applicationCompanyService.getMemberDetail(request.user.accountId, id));
     }
 
     @Put('/propose/:id')
