@@ -1,18 +1,19 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { SiteCompanyService } from './site-company.service';
 import { BaseResponse } from 'utils/generics/base.response';
-import { SiteCompanyCreateRequest } from './request/site-company-create.request';
-import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
-import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { SiteCompanyCreateRequest } from './request/site-company-create.request';
+import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
+import { SiteCompanyService } from './site-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
+@ApiBearerAuth()
 @ApiTags('[COMPANY] Site management')
 @Controller('company/sites')
 export class SiteCompanyController {

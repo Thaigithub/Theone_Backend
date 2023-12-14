@@ -54,6 +54,7 @@ async function bootstrap() {
             .setTitle('TheOne API')
             .setDescription('The One API description')
             .setVersion('1.0.0')
+            .addBearerAuth()
             .build();
 
         const document = SwaggerModule.createDocument(app, options);

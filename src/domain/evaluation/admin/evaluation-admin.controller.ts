@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -7,18 +7,19 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { EvaluationType } from './dto/evaluation-admin.dto';
 import { EvaluationAdminService } from './evaluation-admin.service';
-import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
-import { SiteEvaluationAdminGetListResponse } from './response/site-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
-import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
-import { TeamEvaluationAdminGetListResponse } from './response/team-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
 import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
-import { MemberEvaluationAdminGetListResponse } from './response/member-evaluation-admin-get-list.response';
+import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
+import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
 import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
+import { MemberEvaluationAdminGetListResponse } from './response/member-evaluation-admin-get-list.response';
+import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
+import { SiteEvaluationAdminGetListResponse } from './response/site-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
+import { TeamEvaluationAdminGetListResponse } from './response/team-evaluation-admin-get-list.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
+@ApiBearerAuth()
 @ApiTags('[ADMIN] Evaluation Management')
 @Controller('admin/evaluation')
 export class EvaluationAdminController {

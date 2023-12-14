@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { FileUploadRequest } from 'domain/file/file-upload.request';
 import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.response';
@@ -8,6 +8,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 
 @ApiTags('[USER] File Management')
 @UseGuards(AuthJwtGuard)
+@ApiBearerAuth()
 @Controller('files')
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
