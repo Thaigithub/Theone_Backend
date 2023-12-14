@@ -5,7 +5,7 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { MemberAdminService } from './member-admin.service';
 import {
     ChangeMemberRequest,
@@ -38,8 +38,8 @@ export class MemberAdminController {
     async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<MemberAdminGetListResponse>> {
         const membersList = await this.memberAdminService.getList(query);
         const membersTotal = await this.memberAdminService.getTotal(query);
-        const getMemberListResponse = new MemberAdminGetListResponse(membersList, new PageInfo(membersTotal));
-        return BaseResponse.of(getMemberListResponse);
+        const paginationResponse = new PaginationResponse(membersList, new PageInfo(membersTotal));
+        return BaseResponse.of(paginationResponse);
     }
 
     // Download member list in excel file
