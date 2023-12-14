@@ -47,6 +47,7 @@ export class AdminTeamService {
         const team = await this.prismaService.team.findUniqueOrThrow({
             where: {
                 id,
+                isActive: true,
             },
             select: {
                 name: true,
@@ -130,7 +131,6 @@ export class AdminTeamService {
         const total = await this.prismaService.team.count({
             where,
         });
-        console.log(total);
         return {
             data: teams.map(
                 (team) =>
@@ -152,6 +152,7 @@ export class AdminTeamService {
     }
     async downloadTeamDetails(teamId: number, response: Response): Promise<void> {
         const teamDetails = await this.getTeamDetail(teamId);
+        if (teamDetails.members.length === 0) throw new NotFoundException('No members found');
         const excelData: Omit<GetTeamMemberDetails, 'id'>[] = teamDetails.members.map(({ id, ...rest }) => rest);
         const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
