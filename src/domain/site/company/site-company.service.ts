@@ -21,7 +21,11 @@ export class SiteCompanyService {
     }
 
     async getTotal(): Promise<number> {
-        return await this.prismaService.site.count({});
+        return await this.prismaService.site.count({
+            where: {
+                isActive: true,
+            },
+        });
     }
 
     async getList(query: SiteCompanyGetListRequest): Promise<SiteResponse[]> {
@@ -32,6 +36,10 @@ export class SiteCompanyService {
                 personInCharge: true,
                 startDate: true,
                 endDate: true,
+            },
+            where: {
+                isActive: true,
+                status: query.status,
             },
             // Pagination
             // If both pageNumber and pageSize is provided then handle the pagination
@@ -55,6 +63,7 @@ export class SiteCompanyService {
     async deleteSite(id: number) {
         const siteExist = await this.prismaService.site.count({
             where: {
+                isActive: true,
                 id,
             },
         });

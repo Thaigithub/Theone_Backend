@@ -1,5 +1,5 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -26,6 +26,15 @@ export class EvaluationAdminController {
     constructor(private readonly evaluationAdminService: EvaluationAdminService) {}
 
     @Get('sites')
+    @ApiOperation({
+        summary: 'Get list of site evaluation',
+        description: 'Admin can retrieve evaluation of all sites',
+    })
+    @ApiResponse({
+        type: SiteEvaluationAdminGetListResponse,
+        description: 'Get site evaluation successfully',
+        status: HttpStatus.OK,
+    })
     async getListSiteEvaluation(
         @Query() query: SiteEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<SiteEvaluationAdminGetListResponse>> {
@@ -36,6 +45,19 @@ export class EvaluationAdminController {
     }
 
     @Get('sites/:id')
+    @ApiOperation({
+        summary: 'Get site evaluation detail',
+        description: 'Admin can retrieve detail of a site evaluation',
+    })
+    @ApiResponse({
+        type: SiteEvaluationAdminGetDetailResponse,
+        description: 'Get site evaluation successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Evaluation does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
     async getSiteEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
     ): Promise<BaseResponse<SiteEvaluationAdminGetDetailResponse>> {
@@ -43,6 +65,15 @@ export class EvaluationAdminController {
     }
 
     @Get('teams')
+    @ApiOperation({
+        summary: 'Get list of team evaluation',
+        description: 'Admin can retrieve evaluation of all teams',
+    })
+    @ApiResponse({
+        type: TeamEvaluationAdminGetListResponse,
+        description: 'Get team evaluation successfully',
+        status: HttpStatus.OK,
+    })
     async getListTeamEvaluation(
         @Query() query: TeamEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<TeamEvaluationAdminGetListResponse>> {
@@ -53,6 +84,19 @@ export class EvaluationAdminController {
     }
 
     @Get('teams/:id')
+    @ApiOperation({
+        summary: 'Get team evaluation detail',
+        description: 'Admin can retrieve detail of a team evaluation',
+    })
+    @ApiResponse({
+        type: TeamEvaluationAdminGetDetailResponse,
+        description: 'Get team evaluation successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Evaluation does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
     async getTeamEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
     ): Promise<BaseResponse<TeamEvaluationAdminGetDetailResponse>> {
@@ -60,6 +104,15 @@ export class EvaluationAdminController {
     }
 
     @Get('members')
+    @ApiOperation({
+        summary: 'Get list of member evaluation',
+        description: 'Admin can retrieve evaluation of all members',
+    })
+    @ApiResponse({
+        type: MemberEvaluationAdminGetListResponse,
+        description: 'Get member evaluation successfully',
+        status: HttpStatus.OK,
+    })
     async getListMemberEvaluation(
         @Query() query: MemberEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<MemberEvaluationAdminGetListResponse>> {
@@ -70,6 +123,19 @@ export class EvaluationAdminController {
     }
 
     @Get('members/:id')
+    @ApiOperation({
+        summary: 'Get member evaluation detail',
+        description: 'Admin can retrieve detail of a member evaluation',
+    })
+    @ApiResponse({
+        type: MemberEvaluationAdminGetDetailResponse,
+        description: 'Get member evaluation successfully',
+        status: HttpStatus.OK,
+    })
+    @ApiResponse({
+        description: 'Evaluation does not exist',
+        status: HttpStatus.NOT_FOUND,
+    })
     async getMemberEvaluationDetail(
         @Param('id', ParseIntPipe) param: number,
     ): Promise<BaseResponse<MemberEvaluationAdminGetDetailResponse>> {

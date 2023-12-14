@@ -1,8 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { SiteStatus } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class SiteCompanyGetListRequest {
+    @ApiProperty({
+        type: 'enum',
+        enum: SiteStatus,
+    })
+    @Expose()
+    @IsEnum(SiteStatus)
+    @IsOptional()
+    status: SiteStatus;
+
     @ApiProperty({
         type: 'number',
         required: false,
