@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
-import { CompanyStatus } from '../dto/company-admin-company-status.dto.request.dto';
 import { SearchCategory } from '../dto/company-admin-search-category.dto.request.dto';
 export class AdminCompanyGetListRequest {
     @Expose()
-    @ApiProperty({ description: 'Company status', example: 'GENERAL', type: 'enum', enum: CompanyStatus })
-    @IsEnum(CompanyStatus)
+    @ApiProperty({ description: 'Company type', example: CompanyType.CORPORATION, type: 'enum', enum: CompanyType })
+    @IsEnum(CompanyType)
     @IsOptional()
-    public status: CompanyStatus;
+    public type: CompanyType;
 
     @Expose()
     @IsOptional()
