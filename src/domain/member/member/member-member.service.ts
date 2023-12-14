@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { MemberMemberAddSiteOrPost } from './request/member-member-add-site.request';
 import {
@@ -8,6 +8,7 @@ import {
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
 import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
+import { MemberDetailResponse } from './response/member-member-get-detail.response';
 
 @Injectable()
 export class MemberMemberService {
@@ -23,6 +24,101 @@ export class MemberMemberService {
             },
         });
         return result.id;
+    }
+
+    async getDetail(id: number): Promise<MemberDetailResponse> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                id,
+            },
+        });
+
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
+        return await this.prismaService.member.findUnique({
+            where: {
+                isActive: true,
+                id,
+            },
+            select: {
+                name: true,
+                contact: true,
+                email: true,
+                desiredOccupation: true,
+                level: true,
+                signupMethod: true,
+                createdAt: true,
+                withdrawnDate: true,
+                account: {
+                    select: {
+                        username: true,
+                        status: true,
+                    },
+                },
+                bankAccount: {
+                    select: {
+                        accountHolder: true,
+                        accountNumber: true,
+                        bankName: true,
+                        createdAt: true,
+                    },
+                },
+                foreignWorker: {
+                    select: {
+                        englishName: true,
+                        registrationNumber: true,
+                        serialNumber: true,
+                        dateOfIssue: true,
+                        file: {
+                            select: {
+                                key: true,
+                                fileName: true,
+                                size: true,
+                                type: true,
+                            },
+                        },
+                    },
+                },
+                disability: {
+                    select: {
+                        disableType: true,
+                        disableLevel: true,
+                        file: {
+                            select: {
+                                key: true,
+                                fileName: true,
+                                size: true,
+                                type: true,
+                            },
+                        },
+                    },
+                },
+                basicHealthSafetyCertificate: {
+                    select: {
+                        registrationNumber: true,
+                        dateOfCompletion: true,
+                        file: {
+                            select: {
+                                key: true,
+                                fileName: true,
+                                size: true,
+                                type: true,
+                            },
+                        },
+                    },
+                },
+                teams: {
+                    select: {
+                        team: {
+                            select: {
+                                name: true,
+                                code: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
     }
 
     async upsertBankAccount(id: number, request: UpsertBankAccountRequest): Promise<void> {

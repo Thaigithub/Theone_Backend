@@ -15,6 +15,7 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { SiteModule } from 'domain/site/site.module';
 @Module({
     imports: [
         PrismaModule,
@@ -33,6 +34,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         PostModule,
         FileModule,
         ApplicationModule,
+        SiteModule,
     ],
 })
 export class AppModule {}

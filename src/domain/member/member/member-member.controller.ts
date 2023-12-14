@@ -4,7 +4,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { MemberAdminService } from '../admin/member-admin.service';
 import { MemberMemberService } from './member-member.service';
 import { MemberMemberAddSiteOrPost } from './request/member-member-add-site.request';
 import {
@@ -14,7 +13,7 @@ import {
     UpsertHSTCertificateRequest,
 } from './request/member-member.request';
 import { MemberMemebrUpdateInterestResponse } from './response/member-member-update-interest.response';
-import { MemberDetailResponse } from './response/member-admin.response';
+import { MemberDetailResponse } from './response/member-member-get-detail.response';
 
 @ApiTags('[MEMBER] Member Management')
 @Roles(AccountType.MEMBER)
@@ -23,10 +22,7 @@ import { MemberDetailResponse } from './response/member-admin.response';
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberMemberController {
-    constructor(
-        private readonly memberMemberService: MemberMemberService,
-        private readonly memberAdminService: MemberAdminService,
-    ) {}
+    constructor(private readonly memberMemberService: MemberMemberService) {}
 
     @Get('/details')
     @ApiOperation({
@@ -36,7 +32,7 @@ export class MemberMemberController {
     @ApiResponse({ status: HttpStatus.OK, type: MemberDetailResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getMemberDetails(@Req() request: any): Promise<BaseResponse<MemberDetailResponse>> {
-        return BaseResponse.of(await this.memberAdminService.getDetail(request.user.accountId));
+        return BaseResponse.of(await this.memberMemberService.getDetail(request.user.accountId));
     }
 
     @Put('/bank-account')

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 
@@ -24,6 +24,23 @@ export class SiteCompanyService {
             data: {
                 ...body,
                 companyId,
+            },
+        });
+    }
+
+    async deleteSite(id: number) {
+        const siteExist = await this.prismaService.site.count({
+            where: {
+                id,
+            },
+        });
+        if (!siteExist) throw new NotFoundException('Site does not exist');
+        await this.prismaService.site.update({
+            where: {
+                id,
+            },
+            data: {
+                isActive: false,
             },
         });
     }
