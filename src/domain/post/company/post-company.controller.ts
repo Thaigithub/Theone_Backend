@@ -18,12 +18,19 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyService } from './post-company.service';
+import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
 import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-get-list-applicant-site.request';
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
+import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
+import {
+    PostCompanyGetItemHeadhuntingRequestResponse,
+    PostCompanyGetListHeadhuntingRequestResponse,
+} from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
 @ApiTags('[COMPANY] Posts Management')
@@ -36,10 +43,33 @@ import { PostCompanyGetListResponse } from './response/post-company-get-list.res
 export class PostCompanyController {
     constructor(private postCompanyService: PostCompanyService) {}
 
+    @Get('/headhunting-request')
+    @ApiOperation({
+        summary: 'Listing headhunting for request post',
+        description: 'Company can list/filter/search all headhunting posts for request to admin',
+    })
+    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
+    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
+    @ApiQuery({
+        name: 'category',
+        type: String,
+        required: false,
+        description: 'Search by category:' + Object.values(PostCompanyHeadhuntingRequestFilter),
+    })
+    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for category search' })
+    @ApiOkResponsePaginated(PostCompanyGetItemHeadhuntingRequestResponse)
+    async getListHeadhuntingRequest(
+        @Req() request: any,
+        @Query() query: PostCompanyHeadhuntingRequestRequest,
+    ): Promise<BaseResponse<PostCompanyGetListHeadhuntingRequestResponse>> {
+        const posts = await this.postCompanyService.getListHeadhuntingRequest(request.user.accountId, query);
+        return BaseResponse.of(posts);
+    }
+
     @Get('/applicant-site')
     @ApiOperation({
-        summary: 'Listing post applicants general',
-        description: 'Company can search/filter post applicants general',
+        summary: 'Listing post to show applicants',
+        description: 'Company can search/filter post to show applicants',
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
@@ -139,5 +169,20 @@ export class PostCompanyController {
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async deletePost(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postCompanyService.deletePost(request.user.accountId, id));
+    }
+
+    @Post('/headhunting-request')
+    @ApiOperation({
+        summary: 'Create a request of Headhunting post',
+        description: 'This endpoint creates a request of a Headhunting post in the system',
+    })
+    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async createHeadhuntingRequest(
+        @Req() request: any,
+        @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.createHeadhuntingRequest(request.user.accountId, body);
+        return BaseResponse.ok();
     }
 }
