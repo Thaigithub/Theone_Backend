@@ -81,6 +81,7 @@ export class AdminCompanyService {
                 };
             }
         }
+        search['where']['type'] = request.type;
         const total = await this.prismaService.company.count({ where: search['where'] });
         return new PaginationResponse(
             (await this.prismaService.company.findMany(search)).map((item) => {
@@ -114,26 +115,32 @@ export class AdminCompanyService {
         else return company;
     }
     async changeStatus(CompanyId: number, request: AdminCompanyUpdateStatusRequest): Promise<void> {
-        await this.prismaService.account.update({
+        await this.prismaService.company.update({
             where: {
                 id: CompanyId,
-                isActive: true,
+                account: {
+                    isActive: true,
+                },
             },
-            data: { status: request.status },
+            data: {
+                account: {
+                    update: {
+                        status: request.status,
+                    },
+                },
+            },
         });
     }
     async changeEmail(CompanyId: number, request: AdminCompanyUpdateEmailRequest): Promise<void> {
-        await this.prismaService.account.update({
+        await this.prismaService.company.update({
             where: {
                 id: CompanyId,
-                isActive: true,
+                account: {
+                    isActive: true,
+                },
             },
             data: {
-                company: {
-                    update: {
-                        email: request.email,
-                    },
-                },
+                email: request.email,
             },
         });
     }
