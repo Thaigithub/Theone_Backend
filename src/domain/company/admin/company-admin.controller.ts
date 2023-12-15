@@ -22,7 +22,7 @@ import { AdminCompanyGetListResponse, CompanyResponse } from './response/company
 @ApiConsumes('application/json')
 export class AdminCompanyController {
     constructor(private readonly adminCompanyService: AdminCompanyService) {}
-    @Get('/:id/details/')
+    @Get('/:id')
     @ApiOperation({
         summary: 'Find company detail',
         description: 'This endpoint retrieves company details in the system.',
