@@ -44,8 +44,11 @@ export class SiteCompanyController {
         description: 'Get site successfully',
         status: HttpStatus.OK,
     })
-    async getList(@Query() query: SiteCompanyGetListRequest): Promise<BaseResponse<SiteCompanyGetListResponse>> {
-        const list = await this.siteCompanyService.getList(query);
+    async getList(
+        @Query() query: SiteCompanyGetListRequest,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<SiteCompanyGetListResponse>> {
+        const list = await this.siteCompanyService.getList(query, request.user.accountId);
         const total = await this.siteCompanyService.getTotal();
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
@@ -65,8 +68,11 @@ export class SiteCompanyController {
         description: 'Site does not exist',
         status: HttpStatus.NOT_FOUND,
     })
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteCompanyGetDetailResponse>> {
-        return BaseResponse.of(await this.siteCompanyService.getDetail(id));
+    async getDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<SiteCompanyGetDetailResponse>> {
+        return BaseResponse.of(await this.siteCompanyService.getDetail(id, request.user.accountId));
     }
 
     @Post()
@@ -101,8 +107,11 @@ export class SiteCompanyController {
         description: 'Site does not exist',
         status: HttpStatus.NOT_FOUND,
     })
-    async deleteSite(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.deleteSite(id);
+    async deleteSite(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.siteCompanyService.deleteSite(id, request.user.accountId);
         return BaseResponse.ok();
     }
 
@@ -120,8 +129,12 @@ export class SiteCompanyController {
         description: 'Site does not exist',
         status: HttpStatus.NOT_FOUND,
     })
-    async updateSite(@Param('id', ParseIntPipe) id: number, @Body() body: SiteCompanyUpdateRequest): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.updateSite(id, body);
+    async updateSite(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: SiteCompanyUpdateRequest,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.siteCompanyService.updateSite(id, body, request.user.accountId);
         return BaseResponse.ok();
     }
 }

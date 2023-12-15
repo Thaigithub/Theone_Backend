@@ -78,11 +78,14 @@ export class CareerMemberService {
         });
     }
 
-    async deleteCareer(id: number): Promise<void> {
+    async deleteCareer(id: number, accountId: number): Promise<void> {
+        const memberId = await this.getMemberId(accountId);
+
         const careerExist = await this.prismaService.career.count({
             where: {
                 isActive: true,
                 id,
+                memberId,
             },
         });
         if (!careerExist) throw new NotFoundException('Evaluation does not exist');
@@ -91,6 +94,7 @@ export class CareerMemberService {
             where: {
                 isActive: true,
                 id,
+                memberId,
             },
             data: {
                 isActive: false,

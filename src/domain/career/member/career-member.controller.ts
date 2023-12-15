@@ -76,8 +76,11 @@ export class CareerMemberController {
         description: 'Career does not exist',
         status: HttpStatus.NOT_FOUND,
     })
-    async deleteCareer(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<null>> {
-        await this.careerMemberService.deleteCareer(id);
+    async deleteCareer(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<null>> {
+        await this.careerMemberService.deleteCareer(id, request.user.accountId);
         return BaseResponse.ok();
     }
 }
