@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @Injectable()
@@ -61,5 +62,34 @@ export class PostAdminService {
             where: queryFilter,
         });
         return new PaginationResponse(postList, new PageInfo(postListCount));
+    }
+
+    async getPostDetails(id: number): Promise<PostAdminDetailResponse> {
+        const infor = await this.prismaService.post.findUnique({
+            where: {
+                id,
+                isActive: true,
+            },
+            include: {
+                specialNote: {
+                    select: {
+                        code: true,
+                        codeName: true,
+                        codeType: true,
+                    },
+                },
+                occupation: {
+                    select: {
+                        code: true,
+                        codeName: true,
+                        codeType: true,
+                    },
+                },
+            },
+        });
+        if (!infor) {
+            throw new NotFoundException(`The Post Id does not exist`);
+        }
+        return infor;
     }
 }
