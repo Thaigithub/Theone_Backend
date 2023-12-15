@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { PostAdminPostStatusFilter, PostAdminPostTypeFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
 import { PostAdminService } from './post-admin.service';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @ApiTags('[ADMIN] Posts Management')
@@ -69,5 +70,19 @@ export class PostAdminController {
     async getList(@Query() query: PostAdminGetListRequest): Promise<BaseResponse<PostAdminGetListResponse>> {
         const posts = await this.postAdminService.getList(query);
         return BaseResponse.of(posts);
+    }
+
+    @Get('/:id')
+    @ApiOperation({
+        summary: 'Post detail',
+        description: 'Retrieve detail information',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: PostAdminDetailResponse,
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetail(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<PostAdminDetailResponse>> {
+        return BaseResponse.of(await this.postAdminService.getPostDetails(id));
     }
 }
