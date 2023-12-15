@@ -22,6 +22,21 @@ import { AdminCompanyGetListResponse, CompanyResponse } from './response/company
 @ApiConsumes('application/json')
 export class AdminCompanyController {
     constructor(private readonly adminCompanyService: AdminCompanyService) {}
+
+    @Get('/download')
+    @ApiOperation({
+        summary: 'Find companies list',
+        description: 'This endpoint retrieves comapnies list in the system.',
+    })
+    @ApiQuery({ name: 'companyIds', type: AdminCompanyDownloadRequest })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Successfully dơnload the companies', type: BaseResponse })
+    async download(
+        @Query('companyIds') request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest,
+        @Res() response: Response,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.adminCompanyService.download(request, response));
+    }
+
     @Get('/:id')
     @ApiOperation({
         summary: 'Find company detail',
@@ -62,19 +77,6 @@ export class AdminCompanyController {
         return BaseResponse.of(await this.adminCompanyService.changeEmail(id, body));
     }
 
-    @Get('/download')
-    @ApiOperation({
-        summary: 'Find companies list',
-        description: 'This endpoint retrieves comapnies list in the system.',
-    })
-    @ApiQuery({ name: 'companyIds', type: AdminCompanyDownloadRequest })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Successfully dơnload the companies', type: BaseResponse })
-    async download(
-        @Query('companyIds') request: AdminCompanyDownloadListRequest | AdminCompanyDownloadRequest,
-        @Res() response: Response,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.adminCompanyService.download(request, response));
-    }
     @Get()
     @ApiOperation({
         summary: 'Find companies list',
