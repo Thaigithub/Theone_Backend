@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Inject, Param, ParseIntPipe, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -34,8 +34,6 @@ export class AdminTeamController {
     }
 
     @Get('download')
-    @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    @ApiConsumes('application/json')
     @ApiOperation({
         summary: 'Download teams in excel file',
         description: 'Admin can retrieve an excel file contains information of selected teams',
@@ -50,8 +48,6 @@ export class AdminTeamController {
     }
 
     @Get('download-team-details')
-    @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    @ApiConsumes('application/json')
     @ApiOperation({
         summary: 'Download team Details in excel file',
         description: 'Admin can retrieve an excel file contains information of team Details',
@@ -60,14 +56,13 @@ export class AdminTeamController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'download team details excel file failed' })
     async downloadTeamDetails(
         @Query('teamId', ParseIntPipe) teamId: number,
+        @Query('memberIds') memberIds: string | string[],
         @Res() response: Response,
     ): Promise<BaseResponse<void>> {
-        await this.teamService.downloadTeamDetails(teamId, response);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.teamService.downloadTeamDetails(teamId, response, memberIds));
     }
 
     @Get(':id')
-    @HttpCode(200)
     @ApiOperation({
         summary: 'Get team details',
         description: 'This endpoint get team details',
