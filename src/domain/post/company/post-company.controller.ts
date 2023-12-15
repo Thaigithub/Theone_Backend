@@ -26,7 +26,8 @@ import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-g
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
-import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
+import { PostCompanyGetItemApplicantsResponse } from './response/post-company-get-item-applicants.response';
+import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
 import {
     PostCompanyGetItemHeadhuntingRequestResponse,
     PostCompanyGetListHeadhuntingRequestResponse,
@@ -93,11 +94,11 @@ export class PostCompanyController {
     @ApiQuery({ name: 'category', type: String, required: false, description: 'Search by category: POST_NAME, SITE_NAME' })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
-    @ApiOkResponsePaginated(PostCompanyGetItemListResponse)
+    @ApiOkResponsePaginated(PostCompanyGetItemApplicantsResponse)
     async getListApplicantSite(
         @Req() request: any,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
-    ): Promise<BaseResponse<PostCompanyGetListResponse>> {
+    ): Promise<BaseResponse<PostCompanyGetListApplicantsResponse>> {
         const posts = await this.postCompanyService.getListApplicantSite(request.user.accountId, query);
         return BaseResponse.of(posts);
     }

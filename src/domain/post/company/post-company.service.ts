@@ -11,6 +11,7 @@ import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-g
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
+import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
@@ -298,7 +299,7 @@ export class PostCompanyService {
     async getListApplicantSite(
         accountId: number,
         query: PostCompanyGetListApplicantSiteRequest,
-    ): Promise<PostCompanyGetListResponse> {
+    ): Promise<PostCompanyGetListApplicantsResponse> {
         const account = await this.getRequestAccount(accountId);
 
         const queryFilter: Prisma.PostWhereInput = {
@@ -331,7 +332,12 @@ export class PostCompanyService {
                 view: true,
                 type: true,
                 status: true,
-                applicants: true,
+                applicants: {
+                    select: {
+                        team: true,
+                        member: true,
+                    },
+                },
             },
             where: queryFilter,
             orderBy: {
@@ -347,7 +353,16 @@ export class PostCompanyService {
             where: queryFilter,
         });
 
-        return new PaginationResponse(postLists, new PageInfo(postListCount));
+        const postListsResponse = postLists.map((post) => {
+            const { applicants, ...rest } = post;
+            return {
+                ...rest,
+                teamCount: applicants.filter((item) => item.team != null).length,
+                memberCount: applicants.filter((item) => item.member != null).length,
+            };
+        });
+
+        return new PaginationResponse(postListsResponse, new PageInfo(postListCount));
     }
 
     async getListHeadhuntingRequest(
