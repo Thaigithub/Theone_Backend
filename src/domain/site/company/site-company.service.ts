@@ -31,7 +31,9 @@ export class SiteCompanyService {
         });
     }
 
-    async getList(query: SiteCompanyGetListRequest): Promise<SiteResponse[]> {
+    async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteResponse[]> {
+        const companyId = await this.getCompanyId(accountId);
+
         return await this.prismaService.site.findMany({
             select: {
                 id: true,
@@ -43,6 +45,7 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 status: query.status,
+                companyId,
             },
             // Pagination
             // If both pageNumber and pageSize is provided then handle the pagination
@@ -51,14 +54,18 @@ export class SiteCompanyService {
         });
     }
 
-    async getDetail(id: number): Promise<SiteCompanyGetDetailResponse> {
+    async getDetail(id: number, accountId: number): Promise<SiteCompanyGetDetailResponse> {
+        const companyId = await this.getCompanyId(accountId);
+
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
+
         return await this.prismaService.site.findUnique({
             select: {
                 id: true,
@@ -77,6 +84,7 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
         });
     }
@@ -93,11 +101,14 @@ export class SiteCompanyService {
         });
     }
 
-    async updateSite(id: number, body: SiteCompanyUpdateRequest): Promise<void> {
+    async updateSite(id: number, body: SiteCompanyUpdateRequest, accountId: number): Promise<void> {
+        const companyId = await this.getCompanyId(accountId);
+
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
@@ -108,6 +119,7 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
             data: {
                 ...body,
@@ -115,18 +127,23 @@ export class SiteCompanyService {
         });
     }
 
-    async deleteSite(id: number): Promise<void> {
+    async deleteSite(id: number, accountId: number): Promise<void> {
+        const companyId = await this.getCompanyId(accountId);
+
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
+
         await this.prismaService.site.update({
             where: {
                 isActive: true,
                 id,
+                companyId,
             },
             data: {
                 isActive: false,
