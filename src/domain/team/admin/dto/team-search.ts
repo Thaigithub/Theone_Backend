@@ -17,3 +17,7 @@ export enum SearchCategoryForSearch {
     TEAM_NAME = 'TEAM_NAME',
     TEAM_LEADER = 'TEAM_LEADER',
 }
+export enum SearchSortForSearch {
+    LARGEST = 'LARGEST',
+    SMALLEST = 'SMALLEST',
+}
