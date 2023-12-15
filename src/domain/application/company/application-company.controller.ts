@@ -6,6 +6,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { ApplicationCompanyService } from './application-company.service';
+import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import {
     ApplicationCompanyGetListApplicantsItemResponse,
@@ -22,7 +23,7 @@ import {
 export class ApplicationCompanyController {
     constructor(private applicationCompanyService: ApplicationCompanyService) {}
 
-    @Get()
+    @Get('/:postId')
     @ApiOperation({
         summary: 'Listing post applicants',
         description: 'Company can search/filter post applicants',
@@ -30,18 +31,24 @@ export class ApplicationCompanyController {
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
     @ApiQuery({ name: 'applicationDate', type: Date, required: false, description: 'Application date' })
-    // @ApiQuery({ name: 'category', type: String, required: false, description: 'Search by category' })
-    // @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
+    @ApiQuery({
+        name: 'searchCategory',
+        type: String,
+        required: false,
+        description: 'Search by category: ' + Object.values(ApplicationCompanyApplicantsSearch),
+    })
+    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiOkResponsePaginated(ApplicationCompanyGetListApplicantsItemResponse)
     async getListApplicantSite(
+        @Param('postId', ParseIntPipe) postId: number,
         @Req() request: any,
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
-        const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query);
+        const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query, postId);
         return BaseResponse.of(posts);
     }
 
-    @Put('/propose/:id')
+    @Put('/:id/propose')
     @ApiOperation({
         summary: 'Propose a job interview',
         description: 'Company can propose a job interview',
@@ -57,7 +64,7 @@ export class ApplicationCompanyController {
         return BaseResponse.of(posts);
     }
 
-    @Put('/reject/:id')
+    @Put('/:id/reject')
     @ApiOperation({
         summary: 'Reject a post application',
         description: 'Company can reject a post application',

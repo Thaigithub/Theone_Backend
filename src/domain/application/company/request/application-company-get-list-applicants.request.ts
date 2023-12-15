@@ -1,8 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApplicationCompanyApplicantsSearch } from '../dto/applicants/application-company-applicants-search.enum';
 
 export class ApplicationCompanyGetListApplicantsRequest {
+    @ApiProperty({
+        type: 'enum',
+        enum: ApplicationCompanyApplicantsSearch,
+        required: false,
+    })
+    @Expose()
+    @IsEnum(ApplicationCompanyApplicantsSearch)
+    @IsOptional()
+    public searchCategory: ApplicationCompanyApplicantsSearch;
+
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
+    @Expose()
+    @IsString()
+    @IsOptional()
+    public keyword: string;
+
     @ApiProperty({
         type: 'number',
         required: false,
