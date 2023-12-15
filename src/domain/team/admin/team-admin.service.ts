@@ -50,6 +50,7 @@ export class AdminTeamService {
                 isActive: true,
             },
             select: {
+                leaderId: true,
                 name: true,
             },
         });
@@ -79,6 +80,7 @@ export class AdminTeamService {
             members: members.map(
                 (memberInfo) =>
                     ({
+                        rank: memberInfo.member.id === team.leaderId ? 'TEAM LEADER' : 'TEAM MEMBER',
                         id: memberInfo.member.id,
                         userName: memberInfo.member.account.username,
                         name: memberInfo.member.name,
