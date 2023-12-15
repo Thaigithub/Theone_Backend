@@ -3,6 +3,7 @@ import { PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
 
@@ -13,6 +14,7 @@ export class ApplicationCompanyService {
     async getListApplicant(
         accountId: number,
         query: ApplicationCompanyGetListApplicantsRequest,
+        postId: number,
     ): Promise<ApplicationCompanyGetListApplicantsResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
@@ -29,8 +31,23 @@ export class ApplicationCompanyService {
                 site: {
                     companyId: account.company.id,
                 },
+                id: postId,
             },
             ...(query.applicationDate && { assignedAt: query.applicationDate }),
+            ...(query.searchCategory == ApplicationCompanyApplicantsSearch.NAME && {
+                OR: [
+                    {
+                        member: {
+                            name: { contains: query.keyword, mode: 'insensitive' },
+                        },
+                    },
+                    {
+                        team: {
+                            name: { contains: query.keyword, mode: 'insensitive' },
+                        },
+                    },
+                ],
+            }),
         };
 
         const applicationList = await this.prismaService.application.findMany({
@@ -38,6 +55,7 @@ export class ApplicationCompanyService {
                 assignedAt: true,
                 post: {
                     select: {
+                        id: true,
                         siteContact: true,
                         occupation: {
                             select: {
@@ -56,12 +74,14 @@ export class ApplicationCompanyService {
                 },
                 member: {
                     select: {
+                        id: true,
                         name: true,
                         Career: true,
                     },
                 },
                 team: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
