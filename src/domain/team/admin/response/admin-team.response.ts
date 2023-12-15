@@ -1,4 +1,4 @@
-import { Member, Team, Account } from '@prisma/client';
+import { Account, Member, Team } from '@prisma/client';
 export class GetAdminTeamResponse {
     id: Team['id'];
     code: Team['code'];
@@ -21,4 +21,5 @@ export class GetTeamMemberDetails {
 export class GetTeamDetailsResponse {
     members: GetTeamMemberDetails[];
     teamName: Team['name'];
+    teamCode: Team['code'];
 }

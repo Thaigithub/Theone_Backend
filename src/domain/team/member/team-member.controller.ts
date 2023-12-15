@@ -19,10 +19,10 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { GetTeamDetailsResponse } from '../admin/response/admin-team.response';
-import { MemberTeamService } from './member-team.service';
 import { MemberCreateTeamRequest, MemberUpdateTeamRequest } from './request/member-upsert-team.request';
 import { TeamMemberApplyPost } from './request/team-member-apply-post.request';
 import { MemberTeamsResponse } from './response/member-teams.response';
+import { MemberTeamService } from './team-member.service';
 
 @ApiTags('[Member] Team Management')
 @Controller('member/teams')

@@ -52,6 +52,7 @@ export class AdminTeamService {
             select: {
                 leaderId: true,
                 name: true,
+                code: true,
             },
         });
         const members = await this.prismaService.membersOnTeams.findMany({
@@ -77,6 +78,7 @@ export class AdminTeamService {
         });
         return {
             teamName: team.name,
+            teamCode: team.code,
             members: members.map(
                 (memberInfo) =>
                     ({
