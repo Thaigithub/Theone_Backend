@@ -8,8 +8,8 @@ import { AdminTeamService } from './admin/team-admin.service';
 import { CompanyTeamController } from './company/member-company.controller';
 import { CompanyTeamService } from './company/member-company.service';
 
-import { MemberTeamController } from './member/member-team.controller';
-import { MemberTeamService } from './member/member-team.service';
+import { MemberTeamController } from './member/team-member.controller';
+import { MemberTeamService } from './member/team-member.service';
 
 @Module({
     imports: [PrismaModule, ExcelModule],

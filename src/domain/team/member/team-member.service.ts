@@ -81,6 +81,7 @@ export class MemberTeamService {
                 id,
             },
             select: {
+                code: true,
                 name: true,
             },
         });
@@ -110,6 +111,7 @@ export class MemberTeamService {
         });
         return {
             teamName: team.name,
+            teamCode: team.code,
             members: members.map(
                 (memberInfo) =>
                     ({
