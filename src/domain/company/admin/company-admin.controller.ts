@@ -62,16 +62,6 @@ export class AdminCompanyController {
         return BaseResponse.of(await this.adminCompanyService.changeEmail(id, body));
     }
 
-    @Get()
-    @ApiOperation({
-        summary: 'Find companies list',
-        description: 'This endpoint retrieves comapnies list in the system.',
-    })
-    @ApiOkResponsePaginated(CompanyResponse)
-    async getCompanies(@Query() request: AdminCompanyGetListRequest): Promise<BaseResponse<AdminCompanyGetListResponse>> {
-        return BaseResponse.of(await this.adminCompanyService.getCompanies(request));
-    }
-
     @Get('/download')
     @ApiOperation({
         summary: 'Find companies list',
@@ -84,5 +74,14 @@ export class AdminCompanyController {
         @Res() response: Response,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.adminCompanyService.download(request, response));
+    }
+    @Get()
+    @ApiOperation({
+        summary: 'Find companies list',
+        description: 'This endpoint retrieves comapnies list in the system.',
+    })
+    @ApiOkResponsePaginated(CompanyResponse)
+    async getCompanies(@Query() request: AdminCompanyGetListRequest): Promise<BaseResponse<AdminCompanyGetListResponse>> {
+        return BaseResponse.of(await this.adminCompanyService.getCompanies(request));
     }
 }
