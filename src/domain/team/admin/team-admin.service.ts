@@ -160,10 +160,18 @@ export class AdminTeamService {
             },
         };
     }
-    async downloadTeamDetails(teamId: number, response: Response): Promise<void> {
+    async downloadTeamDetails(teamId: number, response: Response, memberIds: string | string[]): Promise<void> {
+        const memberlist = [];
+        if (Array.isArray(memberIds)) {
+            memberlist.push(...memberIds.map((item) => parseInt(item)));
+        } else if (typeof memberIds === 'string') {
+            memberlist.push(parseInt(memberIds));
+        } else throw new BadRequestException('MemberIds required');
         const teamDetails = await this.getTeamDetail(teamId);
         if (teamDetails.members.length === 0) throw new NotFoundException('No members found');
-        const excelData: Omit<GetTeamMemberDetails, 'id'>[] = teamDetails.members.map(({ id, ...rest }) => rest);
+        const excelData: Omit<GetTeamMemberDetails, 'id'>[] = teamDetails.members
+            .filter((item) => memberlist.includes(item.id))
+            .map(({ id, ...rest }) => rest);
         const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
