@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { ApplicationMemberGetListRequest } from './request/application-member-get-list.request';
+import { ApplicationMemberGetDetailResponse } from './response/application-member-get-detail.response';
 import { ApplicationMemberGetListResponse } from './response/application-member-get-list.response';
 
 @Injectable()
@@ -82,5 +83,81 @@ export class ApplicationMemberService {
         });
         const total = await this.prismaService.application.count({ where: search.where });
         return new PaginationResponse(application, new PageInfo(total));
+    }
+    async getDetailApplication(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
+        const count = await this.prismaService.application.count({
+            where: {
+                id,
+                member: {
+                    accountId,
+                },
+            },
+        });
+        if (count === 0) throw new NotFoundException('Application not found');
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                id,
+                member: {
+                    accountId,
+                },
+            },
+            select: {
+                assignedAt: true,
+                status: true,
+                post: {
+                    select: {
+                        id: true,
+                        name: true,
+                        startDate: true,
+                        endDate: true,
+                        status: true,
+                        site: {
+                            select: {
+                                id: true,
+                                name: true,
+                                address: true,
+                                startDate: true,
+                                endDate: true,
+                                Company: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        logo: {
+                                            select: {
+                                                file: {
+                                                    select: {
+                                                        key: true,
+                                                        fileName: true,
+                                                        type: true,
+                                                        size: true,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        return {
+            companyLogo: application.post.site.Company.logo.file,
+            companyName: application.post.site.Company.name,
+            companyId: application.post.site.Company.id,
+            postId: application.post.id,
+            postName: application.post.name,
+            postStatus: application.post.status,
+            siteId: application.post.site.id,
+            siteAddress: application.post.site.address,
+            siteStartDate: application.post.site.startDate,
+            siteEndDate: application.post.site.endDate,
+            siteName: application.post.site.name,
+            postEndDate: application.post.startDate,
+            postStartDate: application.post.endDate,
+            status: application.status,
+            appliedDate: application.assignedAt,
+        };
     }
 }
