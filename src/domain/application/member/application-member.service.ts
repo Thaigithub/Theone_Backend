@@ -30,31 +30,26 @@ export class ApplicationMemberService {
                         name: true,
                         endDate: true,
                         status: true,
+                        siteName: true,
+                        siteAddress: true,
                         occupation: {
                             select: {
                                 codeName: true,
                                 id: true,
                             },
                         },
-                        site: {
+                        company: {
                             select: {
                                 id: true,
                                 name: true,
-                                address: true,
-                                Company: {
+                                logo: {
                                     select: {
-                                        id: true,
-                                        name: true,
-                                        logo: {
+                                        file: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        key: true,
-                                                        type: true,
-                                                        size: true,
-                                                    },
-                                                },
+                                                fileName: true,
+                                                key: true,
+                                                type: true,
+                                                size: true,
                                             },
                                         },
                                     },
@@ -67,13 +62,13 @@ export class ApplicationMemberService {
         };
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
-                companyLogo: item.post.site.Company.logo.file,
+                companyLogo: item.post.company.logo.file,
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
-                siteId: item.post.site.id,
-                siteAddress: item.post.site.address,
-                siteName: item.post.site.name,
+                // siteId: item.post.site.id,
+                siteAddress: item.post.siteAddress,
+                siteName: item.post.siteName,
                 occupationId: item.post.occupation.id,
                 occupationName: item.post.occupation.codeName,
                 endDate: item.post.endDate,
@@ -110,28 +105,21 @@ export class ApplicationMemberService {
                         name: true,
                         startDate: true,
                         endDate: true,
+                        siteAddress: true,
+                        siteName: true,
                         status: true,
-                        site: {
+                        company: {
                             select: {
                                 id: true,
                                 name: true,
-                                address: true,
-                                startDate: true,
-                                endDate: true,
-                                Company: {
+                                logo: {
                                     select: {
-                                        id: true,
-                                        name: true,
-                                        logo: {
+                                        file: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        key: true,
-                                                        fileName: true,
-                                                        type: true,
-                                                        size: true,
-                                                    },
-                                                },
+                                                key: true,
+                                                fileName: true,
+                                                type: true,
+                                                size: true,
                                             },
                                         },
                                     },
@@ -143,17 +131,16 @@ export class ApplicationMemberService {
             },
         });
         return {
-            companyLogo: application.post.site.Company.logo.file,
-            companyName: application.post.site.Company.name,
-            companyId: application.post.site.Company.id,
+            companyLogo: application.post.company.logo.file,
+            companyName: application.post.company.name,
+            companyId: application.post.company.id,
             postId: application.post.id,
             postName: application.post.name,
             postStatus: application.post.status,
-            siteId: application.post.site.id,
-            siteAddress: application.post.site.address,
-            siteStartDate: application.post.site.startDate,
-            siteEndDate: application.post.site.endDate,
-            siteName: application.post.site.name,
+            siteAddress: application.post.siteAddress,
+            // siteStartDate: application.post.site.startDate,
+            // siteEndDate: application.post.site.endDate,
+            siteName: application.post.siteName,
             postEndDate: application.post.startDate,
             postStartDate: application.post.endDate,
             status: application.status,

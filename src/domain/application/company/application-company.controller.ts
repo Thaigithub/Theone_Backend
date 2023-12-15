@@ -1,6 +1,6 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AccountType, PostApplicationStatus } from '@prisma/client';
+import { AccountType, PostApplicationStatus, SupportCategory } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -56,10 +56,10 @@ export class ApplicationCompanyController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async proposeInteview(@Req() request: any, @Param('id', ParseIntPipe) applicationId: number): Promise<BaseResponse<void>> {
-        const posts = await this.applicationCompanyService.updateApplicationStatus(
+        const posts = await this.applicationCompanyService.proposeInterview(
             request.user.accountId,
             applicationId,
-            PostApplicationStatus.PROPOSAL_INTERVIEW,
+            SupportCategory.MANPOWER,
         );
         return BaseResponse.of(posts);
     }

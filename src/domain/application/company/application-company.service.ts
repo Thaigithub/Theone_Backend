@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PostApplicationStatus, Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InterviewStatus, PostApplicationStatus, Prisma, SupportCategory } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -28,9 +28,7 @@ export class ApplicationCompanyService {
 
         const queryFilter: Prisma.ApplicationWhereInput = {
             post: {
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
                 id: postId,
             },
             ...(query.applicationDate && { assignedAt: query.applicationDate }),
@@ -52,37 +50,33 @@ export class ApplicationCompanyService {
 
         const applicationList = await this.prismaService.application.findMany({
             select: {
+                id: true,
                 assignedAt: true,
-                post: {
-                    select: {
-                        id: true,
-                        siteContact: true,
-                        occupation: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        specialNote: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        salaryAmount: true,
-                        salaryType: true,
-                        siteAddress: true,
-                    },
-                },
                 member: {
                     select: {
                         id: true,
                         name: true,
-                        Career: true,
+                        contact: true,
+                        totalExperienceMonths: true,
+                        totalExperienceYears: true,
+                        specialLicenses: true,
+                        desiredSalary: true,
+                        region: true,
                     },
                 },
                 team: {
                     select: {
                         id: true,
                         name: true,
+                        leader: {
+                            select: {
+                                contact: true,
+                                totalExperienceMonths: true,
+                                totalExperienceYears: true,
+                                desiredSalary: true,
+                            },
+                        },
+                        region: true,
                     },
                 },
             },
@@ -114,18 +108,59 @@ export class ApplicationCompanyService {
             },
         });
 
-        await this.prismaService.application.update({
-            where: {
-                id: applicationId,
-                post: {
-                    site: {
+        try {
+            await this.prismaService.application.update({
+                where: {
+                    id: applicationId,
+                    post: {
                         companyId: account.company.id,
                     },
                 },
+                data: {
+                    status: status,
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException('No application found');
+        }
+    }
+
+    async proposeInterview(accountId: any, applicationId: number, supportCategory: SupportCategory) {
+        const account = await this.prismaService.account.findUniqueOrThrow({
+            where: {
+                id: accountId,
+                isActive: true,
             },
-            data: {
-                status: status,
+            include: {
+                company: true,
             },
         });
+
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                id: applicationId,
+                post: {
+                    companyId: account.company.id,
+                },
+            },
+        });
+
+        if (!application) throw new BadRequestException('No application found');
+
+        try {
+            await this.prismaService.$transaction(async (tx) => {
+                await tx.interview.create({
+                    data: {
+                        interviewStatus: InterviewStatus.INTERVIEWING,
+                        supportCategory: supportCategory,
+                        applicationId,
+                    },
+                });
+
+                await this.updateApplicationStatus(accountId, applicationId, PostApplicationStatus.PROPOSAL_INTERVIEW);
+            });
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
     }
 }

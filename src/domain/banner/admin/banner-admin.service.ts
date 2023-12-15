@@ -328,11 +328,7 @@ export class AdminBannerService {
                         post: {
                             select: {
                                 name: true,
-                                site: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
+                                siteName: true,
                             },
                         },
                         banner: {
@@ -424,7 +420,7 @@ export class AdminBannerService {
                 id: item.id,
                 postName: item.postBanner.post.name,
                 postId: item.postBanner.postId,
-                siteName: item.postBanner.post.site.name,
+                siteName: item.postBanner.post.siteName,
                 bannerFile: {
                     key: item.postBanner.banner.file.key,
                     fileName: item.postBanner.banner.file.fileName,
@@ -449,17 +445,12 @@ export class AdminBannerService {
                 post: {
                     select: {
                         name: true,
-                        siteId: true,
-                        site: {
+                        siteName: true,
+                        companyId: true,
+                        company: {
                             select: {
                                 name: true,
-                                companyId: true,
-                                Company: {
-                                    select: {
-                                        name: true,
-                                        presentativeName: true,
-                                    },
-                                },
+                                presentativeName: true,
                             },
                         },
                     },
@@ -494,11 +485,10 @@ export class AdminBannerService {
             status: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
-            siteId: banner.post.siteId,
-            siteName: banner.post.site.name,
-            companyId: banner.post.site.companyId,
-            companyName: banner.post.site.Company.name,
-            presentativeName: banner.post.site.Company.presentativeName,
+            siteName: banner.post.siteName,
+            companyId: banner.post.companyId,
+            companyName: banner.post.company.name,
+            presentativeName: banner.post.company.presentativeName,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,

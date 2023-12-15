@@ -128,6 +128,7 @@ model Company {
   sites              Site[]
   logo               Logo?
   contactCard        ContactCard?
+  posts              Post[]
 
   @@map("companies")
 }
@@ -480,7 +481,6 @@ model Site {
   endDate                   DateTime                   @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
   Company                   Company                    @relation(fields: [companyId], references: [id])
-  Post                      Post[]
   SiteEvaluation            SiteEvaluation?
   TeamEvaluationByCompany   TeamEvaluationByCompany?
   MemberEvaluationByCompany MemberEvaluationByCompany?
@@ -522,8 +522,8 @@ model Post {
   sitePersonInCharge String               @map("site_person_in_charge")
   siteContact        String               @map("site_contact")
   originalBuilding   String               @map("original_building")
-  site               Site                 @relation(fields: [siteId], references: [id])
-  siteId             Int                  @map("site_id")
+  company            Company              @relation(fields: [companyId], references: [id])
+  companyId          Int
   postEditor         String               @map("post_editor")
   view               Int                  @default(0)
   PostBanner         PostBanner[]
@@ -589,6 +589,7 @@ model Application {
   status     PostApplicationStatus @default(APPLY)
   assignedAt DateTime              @default(now())
   updatedAt  DateTime              @updatedAt @map("updated_at")
+  interview  Interview[]
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -666,6 +667,20 @@ model HeadhuntingRequest {
   detail    String        @default("")
 
   @@map("headhunting_request")
+}
+
+model Interview {
+  id                   Int             @id @default(autoincrement())
+  isActive             Boolean         @default(true) @map("is_active")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  supportCategory      SupportCategory @map("interview_category")
+  application          Application     @relation(fields: [applicationId], references: [id])
+  applicationId        Int
+  interviewStatus      InterviewStatus @map("interview_status")
+  interviewRequestDate DateTime        @default(now()) @map("interview_request_date") @db.Date
+
+  @@map("interview")
 }
 
 enum FunctionName {
@@ -857,8 +872,6 @@ enum PostApplicationStatus {
   APPLY
   REJECT_BY_COMPANY
   PROPOSAL_INTERVIEW
-  PASS_INTERVIEW
-  FAIL_INTERVIEW
   REJECT_BY_MEMBER
   APPROVE_BY_MEMBER
   APPROVE_BY_COMPANY
@@ -880,4 +893,17 @@ enum RequestStatus {
 enum RequestObject {
   INDIVIDUAL
   TEAM
+}
+
+enum SupportCategory {
+  NORMAL //Member apply and conduct interview
+  MATCHING
+  HEADHUNTING
+  MANPOWER
+}
+
+enum InterviewStatus {
+  INTERVIEWING
+  PASS
+  FAIL
 }
