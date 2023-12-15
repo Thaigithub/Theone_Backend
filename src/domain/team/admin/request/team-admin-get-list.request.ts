@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { SearchCategoryForSearch, TeamStatusForSearch } from '../dto/team-search';
+import { SearchCategoryForSearch, SearchSortForSearch, TeamStatusForSearch } from '../dto/team-search';
 
 export class AdminTeamGetListRequest {
     @IsOptional()
@@ -23,6 +23,16 @@ export class AdminTeamGetListRequest {
     @Expose()
     @IsOptional()
     searchCategory: SearchCategoryForSearch;
+
+    @ApiProperty({
+        type: 'enum',
+        enum: SearchSortForSearch,
+        required: false,
+    })
+    @IsEnum(SearchSortForSearch)
+    @Expose()
+    @IsOptional()
+    searchSort: SearchSortForSearch;
 
     @ApiProperty({ example: 'Team A', required: false })
     @Expose()

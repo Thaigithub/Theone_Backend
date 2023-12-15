@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { SearchCategoryForSearch } from './dto/team-search';
+import { SearchCategoryForSearch, SearchSortForSearch } from './dto/team-search';
 import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
 import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
 import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './response/admin-team.response';
@@ -92,6 +92,14 @@ export class AdminTeamService {
     async searchTeamFilter(request: AdminTeamGetListRequest): Promise<PaginationResponse<GetAdminTeamResponse>> {
         const { searchKeyword, searchCategory, teamStatus } = request;
         const where: Prisma.TeamWhereInput = {};
+        const orderBy = {};
+        if (request.searchSort !== undefined) {
+            if (request.searchSort === SearchSortForSearch.LARGEST) {
+                orderBy['totalMembers'] = 'desc';
+            } else {
+                orderBy['totalMembers'] = 'asc';
+            }
+        }
         if (teamStatus !== undefined) {
             where.status = teamStatus as TeamStatus;
         }
@@ -119,12 +127,12 @@ export class AdminTeamService {
                 ];
             }
         }
-
         const teams = await this.prismaService.team.findMany({
             where,
             include: {
                 leader: true,
             },
+            orderBy,
             skip: request.pageNumber && (Number(request.pageNumber) - 1) * Number(request.pageSize),
             take: request.pageSize && Number(request.pageSize),
         });
