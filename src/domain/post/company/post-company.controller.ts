@@ -33,6 +33,7 @@ import {
     PostCompanyGetListHeadhuntingRequestResponse,
 } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
+import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 
 @ApiTags('[COMPANY] Posts Management')
 @Controller('/company/posts')
