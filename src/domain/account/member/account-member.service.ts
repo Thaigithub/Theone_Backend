@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { AccountStatus, AccountType, MemberLevel, SignupMethodType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { AccountMemberCheckUsernameExistenceResponse } from './response/account-member-check-exist-accountId.response';
 import { MemberAccountSignupRequest } from './resquest/account-member-signup.request';
 @Injectable()
 export class AccountMemberService {
@@ -37,22 +38,33 @@ export class AccountMemberService {
             },
         });
     }
-    async accountMemberCheck(username: string): Promise<boolean> {
+    async accountMemberCheck(username: string): Promise<AccountMemberCheckUsernameExistenceResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
                 username: username,
             },
         });
-        if (accountNum === 0) return true;
-        return false;
+        if (accountNum === 0)
+            return {
+                isExist: false,
+            };
+        return {
+            isExist: true,
+        };
     }
-    async accountRecommenderCheck(username: string): Promise<boolean> {
+    async accountRecommenderCheck(username: string): Promise<AccountMemberCheckUsernameExistenceResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
                 username: username,
+                type: AccountType.MEMBER,
             },
         });
-        if (accountNum !== 0) return true;
-        return false;
+        if (accountNum === 0)
+            return {
+                isExist: false,
+            };
+        return {
+            isExist: true,
+        };
     }
 }
