@@ -408,12 +408,12 @@ export class PostCompanyService {
         return new PaginationResponse(postLists, new PageInfo(postListCount));
     }
 
-    async createHeadhuntingRequest(accountId: any, body: PostCompanyCreateHeadhuntingRequestRequest) {
+    async createHeadhuntingRequest(accountId: any, body: PostCompanyCreateHeadhuntingRequestRequest, id: number) {
         const account = await this.getRequestAccount(accountId);
 
         const post = await this.prismaService.post.findUnique({
             where: {
-                id: body.postId,
+                id,
                 site: {
                     companyId: account.company.id,
                 },
@@ -430,7 +430,7 @@ export class PostCompanyService {
                 detail: body.detail,
                 object: body.object,
                 status: RequestStatus.WAITING_FOR_APPROVAL,
-                postId: body.postId,
+                postId: id,
             },
         });
     }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MemberMemebrUpdateInterestResponse {
+export class SiteMemberUpdateInterestResponse {
     @ApiProperty({ example: 'true' })
     public isInterested: boolean;
 }

@@ -43,6 +43,21 @@ import { PostCompanyGetListResponse } from './response/post-company-get-list.res
 export class PostCompanyController {
     constructor(private postCompanyService: PostCompanyService) {}
 
+    @Post('/:id/headhunting-request')
+    @ApiOperation({
+        summary: 'Create a request of Headhunting post',
+        description: 'This endpoint creates a request of a Headhunting post in the system',
+    })
+    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async createHeadhuntingRequest(
+        @Req() request: any,
+        @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.createHeadhuntingRequest(request.user.accountId, body, id);
+        return BaseResponse.ok();
+    }
     @Get('/headhunting-request')
     @ApiOperation({
         summary: 'Listing headhunting for request post',
@@ -87,6 +102,61 @@ export class PostCompanyController {
         return BaseResponse.of(posts);
     }
 
+    @Post('/create')
+    @ApiOperation({
+        summary: 'Create post',
+        description: 'This endpoint creates a post of a company in the system',
+    })
+    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async create(@Req() userRequest: any, @Body() request: PostCompanyCreateRequest): Promise<BaseResponse<void>> {
+        await this.postCompanyService.create(userRequest.user.accountId, request);
+        return BaseResponse.ok();
+    }
+
+    @Get('/:id')
+    @ApiOperation({
+        summary: 'Post detail',
+        description: 'Retrieve post information detail',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: PostCompanyDetailResponse,
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetail(
+        @Req() request: any,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<PostCompanyDetailResponse>> {
+        return BaseResponse.of(await this.postCompanyService.getPostDetails(request.user.accountId, id));
+    }
+
+    // Change admin information
+    @Patch('/:id')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Company change post information',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePageInfo(
+        @Req() request: any,
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: PostCompanyCreateRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.changePostInfo(request.user.accountId, id, payload);
+        return BaseResponse.ok();
+    }
+
+    @Delete('/:id')
+    @ApiOperation({
+        summary: 'Delete post',
+        description: 'Company can delete a job post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async deletePost(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.postCompanyService.deletePost(request.user.accountId, id));
+    }
+
     @Get()
     @ApiOperation({
         summary: 'Listing post',
@@ -109,75 +179,5 @@ export class PostCompanyController {
     ): Promise<BaseResponse<PostCompanyGetListResponse>> {
         const posts = await this.postCompanyService.getList(request.user.accountId, query);
         return BaseResponse.of(posts);
-    }
-
-    @Post('/create')
-    @ApiOperation({
-        summary: 'Create post',
-        description: 'This endpoint creates a post of a company in the system',
-    })
-    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async create(@Req() userRequest: any, @Body() request: PostCompanyCreateRequest): Promise<BaseResponse<void>> {
-        await this.postCompanyService.create(userRequest.user.accountId, request);
-        return BaseResponse.ok();
-    }
-
-    @Get(':id')
-    @ApiOperation({
-        summary: 'Post detail',
-        description: 'Retrieve post information detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: PostCompanyDetailResponse,
-    })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getDetail(
-        @Req() request: any,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<PostCompanyDetailResponse>> {
-        return BaseResponse.of(await this.postCompanyService.getPostDetails(request.user.accountId, id));
-    }
-
-    // Change admin information
-    @Patch(':id')
-    @ApiOperation({
-        summary: 'Change post information',
-        description: 'Company change post information',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async changePageInfo(
-        @Req() request: any,
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: PostCompanyCreateRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.changePostInfo(request.user.accountId, id, payload);
-        return BaseResponse.ok();
-    }
-
-    @Delete(':id')
-    @ApiOperation({
-        summary: 'Delete post',
-        description: 'Company can delete a job post',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async deletePost(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.postCompanyService.deletePost(request.user.accountId, id));
-    }
-
-    @Post('/headhunting-request')
-    @ApiOperation({
-        summary: 'Create a request of Headhunting post',
-        description: 'This endpoint creates a request of a Headhunting post in the system',
-    })
-    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async createHeadhuntingRequest(
-        @Req() request: any,
-        @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.createHeadhuntingRequest(request.user.accountId, body);
-        return BaseResponse.ok();
     }
 }

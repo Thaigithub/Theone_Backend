@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { RequestObject } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class PostCompanyCreateHeadhuntingRequestRequest {
     @Expose()
@@ -18,9 +18,4 @@ export class PostCompanyCreateHeadhuntingRequestRequest {
     @ApiProperty({ example: 'abc' })
     @IsOptional()
     public detail: string;
-
-    @Expose()
-    @ApiProperty({ type: 'number' })
-    @IsNumber()
-    public postId: number;
 }
