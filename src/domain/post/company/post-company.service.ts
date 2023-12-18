@@ -101,6 +101,7 @@ export class PostCompanyService {
             !request.originalBuilding
         ) {
             this.createPostWithSite(account, request);
+            return;
         }
 
         //Check site
