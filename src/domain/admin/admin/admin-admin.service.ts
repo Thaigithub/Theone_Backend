@@ -174,7 +174,10 @@ export class AdminAdminService {
                     account: {
                         update: {
                             username: payload.username,
-                            password: payload.password !== null ? await hash(payload.password, 10) : existAdmin.account.password,
+                            password:
+                                payload.password !== null && payload.password !== undefined
+                                    ? await hash(payload.password, 10)
+                                    : existAdmin.account.password,
                         },
                     },
                     permissions: {

@@ -8,6 +8,7 @@ import { FileModule } from 'domain/file/file.module';
 import { InterviewModule } from 'domain/interview/interview.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PostModule } from 'domain/post/post.module';
+import { RecommendationModule } from 'domain/recommendation/recommendation.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
 import { AccountModule } from './domain/account/account.module';
@@ -36,6 +37,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         FileModule,
         ApplicationModule,
         SiteModule,
+        RecommendationModule,
         InterviewModule,
     ],
 })
