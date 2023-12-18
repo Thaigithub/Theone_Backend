@@ -26,9 +26,7 @@ export class PostCompanyService {
             ...(query.type && { type: PostType[query.type] }),
             ...(query.status && { status: PostStatus[query.status] }),
             name: { contains: query.name, mode: 'insensitive' },
-            site: {
-                companyId: account.company.id,
-            },
+            companyId: account.company.id,
         };
 
         const postList = await this.prismaService.post.findMany({
@@ -63,19 +61,6 @@ export class PostCompanyService {
     async create(accountId: number, request: PostCompanyCreateRequest) {
         const account = await this.getRequestAccount(accountId);
 
-        // Check Site is belong to current company
-        const currentSite = await this.prismaService.site.findUnique({
-            where: {
-                id: request.siteId,
-                companyId: account.company.id,
-                isActive: true,
-            },
-        });
-
-        if (!currentSite) {
-            throw new BadRequestException('Site ID does not exist.');
-        }
-
         await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
         await this.checkCodeType(request.occupationId, CodeType.JOB);
 
@@ -109,8 +94,8 @@ export class PostCompanyService {
                 sitePersonInCharge: request.sitePersonInCharge || '',
                 originalBuilding: request.originalBuilding || '',
                 siteAddress: request.siteAddress || '',
-                siteId: request.siteId,
                 postEditor: request.postEditor || '',
+                companyId: account.company.id,
             },
         });
     }
@@ -122,9 +107,7 @@ export class PostCompanyService {
             where: {
                 id,
                 isActive: true,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
             include: {
                 specialNote: {
@@ -160,9 +143,7 @@ export class PostCompanyService {
             where: {
                 isActive: true,
                 id,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
             data: {
                 type: request.type,
@@ -188,7 +169,6 @@ export class PostCompanyService {
                 sitePersonInCharge: request.sitePersonInCharge,
                 originalBuilding: request.originalBuilding,
                 siteAddress: request.siteAddress,
-                siteId: request.siteId,
                 postEditor: request.postEditor,
             },
         });
@@ -201,9 +181,7 @@ export class PostCompanyService {
             where: {
                 id,
                 isActive: true,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
             data: {
                 isActive: false,
@@ -233,9 +211,7 @@ export class PostCompanyService {
 
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            site: {
-                companyId: account.company.id,
-            },
+            companyId: account.company.id,
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             ...(query.type && { type: PostType[query.type] }),
@@ -284,9 +260,7 @@ export class PostCompanyService {
 
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            site: {
-                companyId: account.company.id,
-            },
+            companyId: account.company.id,
             category: PostCategory.HEADHUNTING,
             ...(query.category === PostCompanyHeadhuntingRequestFilter.SITE_NAME && {
                 siteName: { contains: query.keyword, mode: 'insensitive' },
@@ -336,9 +310,7 @@ export class PostCompanyService {
         const post = await this.prismaService.post.findUnique({
             where: {
                 id: body.postId,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
                 category: PostCategory.HEADHUNTING,
             },
         });

@@ -122,12 +122,12 @@ export class PostCompanyCreateRequest {
     public workday: Workday[];
 
     @Expose()
-    @ApiProperty({ example: '09:00:00', format: 'time' })
+    @ApiProperty({ example: '09:00:00Z', format: 'time' })
     @IsNotEmpty({ message: 'Start working time is required' })
     public startWorkTime: string;
 
     @Expose()
-    @ApiProperty({ example: '09:00:00', format: 'time' })
+    @ApiProperty({ example: '09:00:00Z', format: 'time' })
     @IsNotEmpty({ message: 'End working time is required' })
     public endWorkTime: string;
 
@@ -161,12 +161,6 @@ export class PostCompanyCreateRequest {
     @ApiProperty({ example: 'abc' })
     @IsOptional()
     public siteAddress: string;
-
-    @Expose()
-    @ApiProperty({ type: 'number' })
-    @IsNumber()
-    @IsOptional()
-    public siteId: number;
 
     @Expose()
     @IsString()

@@ -87,16 +87,10 @@ export class PostCompanyController {
         return BaseResponse.of(posts);
     }
 
-    // Get members list by conditions
     @Get()
     @ApiOperation({
         summary: 'Listing post',
         description: 'Company can search post',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: "The company's post list retrieved successfully",
-        type: PostCompanyGetListResponse,
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
@@ -106,8 +100,9 @@ export class PostCompanyController {
         name: 'status',
         type: String,
         required: false,
-        description: 'Status for search: ALL,PREPARE,RECRUITING,DEADLINE',
+        description: 'Status for search: PREPARE,RECRUITING,DEADLINE',
     })
+    @ApiOkResponsePaginated(PostCompanyGetItemListResponse)
     async getList(
         @Req() request: any,
         @Query() query: PostCompanyGetListRequest,

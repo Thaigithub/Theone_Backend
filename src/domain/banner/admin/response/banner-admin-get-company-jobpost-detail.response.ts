@@ -11,8 +11,6 @@ export class AdminBannerGetDetailCompanyJobPostResponse {
     postId: PostBanner['postId'];
     @ApiProperty({ type: String })
     postName: Post['name'];
-    @ApiProperty({ type: Number })
-    siteId: Site['id'];
     @ApiProperty({ type: String })
     siteName: Site['name'];
     @ApiProperty({ type: Number })

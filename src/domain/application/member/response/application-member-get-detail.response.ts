@@ -15,14 +15,12 @@ export class ApplicationMemberGetDetailResponse {
     postName: Post['name'];
     @ApiProperty({ type: 'enum', enum: PostStatus })
     postStatus: Post['status'];
-    @ApiProperty({ type: Number })
-    siteId: Site['id'];
     @ApiProperty({ type: String })
     siteAddress: Site['address'];
-    @ApiProperty({ type: Date })
-    siteStartDate: Site['startDate'];
-    @ApiProperty({ type: Date })
-    siteEndDate: Site['endDate'];
+    // @ApiProperty({ type: Date })
+    // siteStartDate: Site['startDate'];
+    // @ApiProperty({ type: Date })
+    // siteEndDate: Site['endDate'];
     @ApiProperty({ type: String })
     siteName: Site['name'];
     @ApiProperty({ type: Date })
