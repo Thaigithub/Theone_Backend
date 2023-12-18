@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
 import { IsEnum } from 'class-validator';
 import { PostCompanyCodeDTO } from '../dto/post-company-code.dto';
+import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list.response';
 
 export class PostCompanyDetailResponse {
     @ApiProperty({
@@ -88,20 +89,8 @@ export class PostCompanyDetailResponse {
     @ApiProperty({ example: '09:00:00', format: 'time' })
     public endWorkTime: Date;
 
-    @ApiProperty({ example: 'string' })
-    public siteName: string;
-
-    @ApiProperty({ example: 'string' })
-    public siteContact: string;
-
-    @ApiProperty({ example: 'string' })
-    public sitePersonInCharge: string;
-
-    @ApiProperty({ example: 'string' })
-    public originalBuilding: string;
-
-    @ApiProperty({ example: 'string' })
-    public siteAddress: string;
+    @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
+    public site: PostCompanyGetItemListSiteResponse;
 
     @ApiProperty({ example: 'string' })
     public postEditor: string;

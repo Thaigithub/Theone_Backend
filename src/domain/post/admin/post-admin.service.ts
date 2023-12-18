@@ -21,9 +21,9 @@ export class PostAdminService {
                 ? {
                       OR: [
                           { name: { contains: query.searchTerm, mode: 'insensitive' } },
-                          { siteName: { contains: query.searchTerm, mode: 'insensitive' } },
-                          { sitePersonInCharge: { contains: query.searchTerm, mode: 'insensitive' } },
-                          { siteContact: { contains: query.searchTerm, mode: 'insensitive' } },
+                          { site: { name: { contains: query.searchTerm, mode: 'insensitive' } } },
+                          { site: { personInCharge: { contains: query.searchTerm, mode: 'insensitive' } } },
+                          { site: { contact: { contains: query.searchTerm, mode: 'insensitive' } } },
                       ],
                   }
                 : {}),
@@ -47,9 +47,15 @@ export class PostAdminService {
                 id: true,
                 type: true,
                 name: true,
-                siteName: true,
-                sitePersonInCharge: true,
-                siteContact: true,
+                site: {
+                    select: {
+                        name: true,
+                        contact: true,
+                        address: true,
+                        originalBuilding: true,
+                        personInCharge: true,
+                    },
+                },
                 isHidden: true,
             },
             where: queryFilter,
@@ -83,6 +89,15 @@ export class PostAdminService {
                         code: true,
                         codeName: true,
                         codeType: true,
+                    },
+                },
+                site: {
+                    select: {
+                        name: true,
+                        contact: true,
+                        address: true,
+                        originalBuilding: true,
+                        personInCharge: true,
                     },
                 },
             },

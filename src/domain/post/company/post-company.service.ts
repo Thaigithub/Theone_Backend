@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CodeType, PostCategory, PostStatus, PostType, Prisma, RequestStatus } from '@prisma/client';
+import { CodeType, PostCategory, PostStatus, PostType, Prisma, RequestStatus, SiteType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -26,14 +26,20 @@ export class PostCompanyService {
             ...(query.type && { type: PostType[query.type] }),
             ...(query.status && { status: PostStatus[query.status] }),
             name: { contains: query.name, mode: 'insensitive' },
-            companyId: account.company.id,
+            site: {
+                companyId: account.company.id,
+            },
         };
 
         const postList = await this.prismaService.post.findMany({
             select: {
                 id: true,
                 name: true,
-                siteName: true,
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
                 startDate: true,
                 endDate: true,
                 view: true,
@@ -61,6 +67,22 @@ export class PostCompanyService {
     async create(accountId: number, request: PostCompanyCreateRequest) {
         const account = await this.getRequestAccount(accountId);
 
+        if (
+            !(
+                (!request.siteName &&
+                    !request.siteContact &&
+                    !request.siteAddress &&
+                    !request.sitePersonInCharge &&
+                    !request.originalBuilding) ||
+                (request.siteName &&
+                    request.siteContact &&
+                    request.siteAddress &&
+                    request.sitePersonInCharge &&
+                    request.originalBuilding)
+            )
+        ) {
+            throw new BadRequestException('Site input not correct');
+        }
         await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
         await this.checkCodeType(request.occupationId, CodeType.JOB);
 
@@ -69,33 +91,93 @@ export class PostCompanyService {
         request.startWorkTime = FAKE_STAMP + request.startWorkTime;
         request.endWorkTime = FAKE_STAMP + request.endWorkTime;
 
-        await this.prismaService.post.create({
+        //Any information is null
+        if (
+            !request.siteName ||
+            !request.siteContact ||
+            !request.siteAddress ||
+            !request.sitePersonInCharge ||
+            !request.originalBuilding
+        ) {
+            this.createPostWithSite(account, request);
+        }
+
+        //Check site
+        const site = await this.prismaService.site.findFirst({
+            where: {
+                name: request.siteName,
+                contact: request.siteContact,
+                address: request.siteAddress,
+                personInCharge: request.sitePersonInCharge,
+                originalBuilding: request.originalBuilding,
+            },
+        });
+
+        if (!site) {
+            this.createPostWithSite(account, request);
+        } else {
+            await this.prismaService.post.create({
+                data: {
+                    type: request.type,
+                    category: request.category,
+                    status: request.status,
+                    name: request.name,
+                    startDate: request.startDate,
+                    endDate: request.endDate,
+                    experienceType: request.experienceType,
+                    numberOfPeople: request.numberOfPeople,
+                    ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
+                    ...(request.occupationId && { occupationId: request.occupationId }),
+                    otherInformation: request.otherInformation || '',
+                    salaryType: request.salaryType,
+                    salaryAmount: request.salaryAmount,
+                    startWorkDate: request.startWorkDate,
+                    endWorkDate: request.endWorkDate,
+                    workday: request.workday,
+                    startWorkTime: request.startWorkTime,
+                    endWorkTime: request.endWorkTime,
+                    postEditor: request.postEditor || '',
+                    siteId: site.id,
+                },
+            });
+        }
+    }
+
+    async createPostWithSite(account, request) {
+        await this.prismaService.site.create({
             data: {
-                type: request.type,
-                category: request.category,
-                status: request.status,
-                name: request.name,
-                startDate: request.startDate,
-                endDate: request.endDate,
-                experienceType: request.experienceType,
-                numberOfPeople: request.numberOfPeople,
-                ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
-                ...(request.occupationId && { occupationId: request.occupationId }),
-                otherInformation: request.otherInformation || '',
-                salaryType: request.salaryType,
-                salaryAmount: request.salaryAmount,
-                startWorkDate: request.startWorkDate,
-                endWorkDate: request.endWorkDate,
-                workday: request.workday,
-                startWorkTime: request.startWorkTime,
-                endWorkTime: request.endWorkTime,
-                siteName: request.siteName || '',
-                siteContact: request.siteContact || '',
-                sitePersonInCharge: request.sitePersonInCharge || '',
-                originalBuilding: request.originalBuilding || '',
-                siteAddress: request.siteAddress || '',
-                postEditor: request.postEditor || '',
+                name: request.siteName || null,
+                contact: request.siteContact || null,
+                address: request.siteAddress || null,
+                personInCharge: request.sitePersonInCharge || null,
+                originalBuilding: request.originalBuilding || null,
                 companyId: account.company.id,
+                type: SiteType.UNREGISTERED,
+                Post: {
+                    create: [
+                        {
+                            type: request.type,
+                            category: request.category,
+                            status: request.status,
+                            name: request.name,
+                            startDate: request.startDate,
+                            endDate: request.endDate,
+                            experienceType: request.experienceType,
+                            numberOfPeople: request.numberOfPeople,
+                            ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
+                            ...(request.occupationId && { occupationId: request.occupationId }),
+                            otherInformation: request.otherInformation || '',
+                            salaryType: request.salaryType,
+                            salaryAmount: request.salaryAmount,
+                            startWorkDate: request.startWorkDate,
+                            endWorkDate: request.endWorkDate,
+                            workday: request.workday,
+                            startWorkTime: request.startWorkTime,
+                            endWorkTime: request.endWorkTime,
+                            postEditor: request.postEditor || '',
+                        },
+                    ],
+                },
             },
         });
     }
@@ -107,7 +189,9 @@ export class PostCompanyService {
             where: {
                 id,
                 isActive: true,
-                companyId: account.company.id,
+                site: {
+                    companyId: account.company.id,
+                },
             },
             include: {
                 specialNote: {
@@ -122,6 +206,15 @@ export class PostCompanyService {
                         code: true,
                         codeName: true,
                         codeType: true,
+                    },
+                },
+                site: {
+                    select: {
+                        name: true,
+                        contact: true,
+                        address: true,
+                        originalBuilding: true,
+                        personInCharge: true,
                     },
                 },
             },
@@ -143,7 +236,9 @@ export class PostCompanyService {
             where: {
                 isActive: true,
                 id,
-                companyId: account.company.id,
+                site: {
+                    companyId: account.company.id,
+                },
             },
             data: {
                 type: request.type,
@@ -164,11 +259,6 @@ export class PostCompanyService {
                 workday: request.workday,
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
-                siteName: request.siteName,
-                siteContact: request.siteContact,
-                sitePersonInCharge: request.sitePersonInCharge,
-                originalBuilding: request.originalBuilding,
-                siteAddress: request.siteAddress,
                 postEditor: request.postEditor,
             },
         });
@@ -181,7 +271,9 @@ export class PostCompanyService {
             where: {
                 id,
                 isActive: true,
-                companyId: account.company.id,
+                site: {
+                    companyId: account.company.id,
+                },
             },
             data: {
                 isActive: false,
@@ -211,7 +303,9 @@ export class PostCompanyService {
 
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            companyId: account.company.id,
+            site: {
+                companyId: account.company.id,
+            },
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             ...(query.type && { type: PostType[query.type] }),
@@ -227,7 +321,11 @@ export class PostCompanyService {
             select: {
                 id: true,
                 name: true,
-                siteName: true,
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
                 startDate: true,
                 endDate: true,
                 view: true,
@@ -260,7 +358,9 @@ export class PostCompanyService {
 
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            companyId: account.company.id,
+            site: {
+                companyId: account.company.id,
+            },
             category: PostCategory.HEADHUNTING,
             ...(query.category === PostCompanyHeadhuntingRequestFilter.SITE_NAME && {
                 siteName: { contains: query.keyword, mode: 'insensitive' },
@@ -276,7 +376,11 @@ export class PostCompanyService {
             select: {
                 id: true,
                 name: true,
-                siteName: true,
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
                 startDate: true,
                 endDate: true,
                 status: true,
@@ -310,7 +414,9 @@ export class PostCompanyService {
         const post = await this.prismaService.post.findUnique({
             where: {
                 id: body.postId,
-                companyId: account.company.id,
+                site: {
+                    companyId: account.company.id,
+                },
                 category: PostCategory.HEADHUNTING,
             },
         });

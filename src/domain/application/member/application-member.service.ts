@@ -38,18 +38,28 @@ export class ApplicationMemberService {
                                 id: true,
                             },
                         },
-                        company: {
+
+                        site: {
                             select: {
-                                id: true,
                                 name: true,
-                                logo: {
+                                contact: true,
+                                address: true,
+                                personInCharge: true,
+                                originalBuilding: true,
+                                Company: {
                                     select: {
-                                        file: {
+                                        id: true,
+                                        name: true,
+                                        logo: {
                                             select: {
-                                                fileName: true,
-                                                key: true,
-                                                type: true,
-                                                size: true,
+                                                file: {
+                                                    select: {
+                                                        fileName: true,
+                                                        key: true,
+                                                        type: true,
+                                                        size: true,
+                                                    },
+                                                },
                                             },
                                         },
                                     },
@@ -62,18 +72,17 @@ export class ApplicationMemberService {
         };
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
-                companyLogo: item.post.company.logo.file,
+                companyLogo: item.post.site.Company.logo.file,
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
-                // siteId: item.post.site.id,
-                siteAddress: item.post.siteAddress,
-                siteName: item.post.siteName,
                 occupationId: item.post.occupation.id,
                 occupationName: item.post.occupation.codeName,
                 endDate: item.post.endDate,
                 status: item.status,
                 appliedDate: item.assignedAt,
+                siteName: item.post.site.name,
+                siteAddress: item.post.site.address,
             };
         });
         const total = await this.prismaService.application.count({ where: search.where });
@@ -105,21 +114,27 @@ export class ApplicationMemberService {
                         name: true,
                         startDate: true,
                         endDate: true,
-                        siteAddress: true,
-                        siteName: true,
                         status: true,
-                        company: {
+                        site: {
                             select: {
-                                id: true,
+                                address: true,
                                 name: true,
-                                logo: {
+                                startDate: true,
+                                endDate: true,
+                                Company: {
                                     select: {
-                                        file: {
+                                        id: true,
+                                        name: true,
+                                        logo: {
                                             select: {
-                                                key: true,
-                                                fileName: true,
-                                                type: true,
-                                                size: true,
+                                                file: {
+                                                    select: {
+                                                        key: true,
+                                                        fileName: true,
+                                                        type: true,
+                                                        size: true,
+                                                    },
+                                                },
                                             },
                                         },
                                     },
@@ -131,16 +146,16 @@ export class ApplicationMemberService {
             },
         });
         return {
-            companyLogo: application.post.company.logo.file,
-            companyName: application.post.company.name,
-            companyId: application.post.company.id,
+            companyLogo: application.post.site.Company.logo.file,
+            companyName: application.post.site.Company.name,
+            companyId: application.post.site.Company.id,
             postId: application.post.id,
             postName: application.post.name,
             postStatus: application.post.status,
-            siteAddress: application.post.siteAddress,
-            // siteStartDate: application.post.site.startDate,
-            // siteEndDate: application.post.site.endDate,
-            siteName: application.post.siteName,
+            siteAddress: application.post.site.address,
+            siteStartDate: application.post.site.startDate,
+            siteEndDate: application.post.site.endDate,
+            siteName: application.post.site.name,
             postEndDate: application.post.startDate,
             postStartDate: application.post.endDate,
             status: application.status,

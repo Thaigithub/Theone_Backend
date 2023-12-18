@@ -26,6 +26,14 @@ export class SiteCompanyCreateRequest {
     })
     @IsString()
     @Expose()
+    public originalBuilding: string;
+
+    @ApiProperty({
+        type: 'string',
+        required: true,
+    })
+    @IsString()
+    @Expose()
     public contact: string;
 
     @ApiProperty({

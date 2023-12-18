@@ -128,7 +128,6 @@ model Company {
   sites              Site[]
   logo               Logo?
   contactCard        ContactCard?
-  posts              Post[]
 
   @@map("companies")
 }
@@ -466,19 +465,21 @@ model Site {
   createdAt                 DateTime                   @default(now()) @map("created_at")
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
   status                    SiteStatus                 @default(REVIEWING)
-  name                      String
-  address                   String
-  longitude                 Float
-  latitude                  Float
-  contact                   String
-  personInCharge            String                     @map("person_in_charge")
-  personInChargeContact     String                     @map("person_in_charge_contact")
-  email                     String
-  taxInvoiceEmail           String                     @map("tax_invoice_email")
-  siteManagementNumber      String                     @map("site_management_number")
-  contractStatus            ContractStatus             @map("contract_status")
-  startDate                 DateTime                   @map("start_date") @db.Date
-  endDate                   DateTime                   @map("end_date") @db.Date
+  type                      SiteType                   @default(REGISTERED)
+  name                      String?
+  address                   String?
+  longitude                 Float?
+  latitude                  Float?
+  contact                   String?
+  personInCharge            String?                    @map("person_in_charge")
+  personInChargeContact     String?                    @map("person_in_charge_contact")
+  originalBuilding          String?                    @map("original_building")
+  email                     String?
+  taxInvoiceEmail           String?                    @map("tax_invoice_email")
+  siteManagementNumber      String?                    @map("site_management_number")
+  contractStatus            ContractStatus?            @map("contract_status")
+  startDate                 DateTime?                  @map("start_date") @db.Date
+  endDate                   DateTime?                  @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
   Company                   Company                    @relation(fields: [companyId], references: [id])
   SiteEvaluation            SiteEvaluation?
@@ -486,6 +487,7 @@ model Site {
   MemberEvaluationByCompany MemberEvaluationByCompany?
   SiteBanner                SiteBanner[]
   InterestMember            Interest[]
+  Post                      Post[]
 
   @@map("sites")
 }
@@ -517,13 +519,8 @@ model Post {
   workday            Workday[]
   startWorkTime      DateTime             @map("start_work_time") @db.Time()
   endWorkTime        DateTime             @map("end_work_time") @db.Time()
-  siteName           String               @map("site_name")
-  siteAddress        String               @map("site_address")
-  sitePersonInCharge String               @map("site_person_in_charge")
-  siteContact        String               @map("site_contact")
-  originalBuilding   String               @map("original_building")
-  company            Company              @relation(fields: [companyId], references: [id])
-  companyId          Int
+  site               Site                 @relation(fields: [siteId], references: [id])
+  siteId             Int
   postEditor         String               @map("post_editor")
   view               Int                  @default(0)
   PostBanner         PostBanner[]
@@ -906,4 +903,9 @@ enum InterviewStatus {
   INTERVIEWING
   PASS
   FAIL
+}
+
+enum SiteType {
+  REGISTERED
+  UNREGISTERED
 }

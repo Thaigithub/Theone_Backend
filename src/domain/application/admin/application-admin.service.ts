@@ -28,7 +28,7 @@ export class ApplicationAdminService {
                 ? {
                       OR: [
                           { name: { contains: query.searchTerm, mode: 'insensitive' } },
-                          { siteName: { contains: query.searchTerm, mode: 'insensitive' } },
+                          { site: { name: { contains: query.searchTerm, mode: 'insensitive' } } },
                       ],
                   }
                 : {}),
@@ -55,11 +55,15 @@ export class ApplicationAdminService {
         const tempList = await this.prismaService.post.findMany({
             select: {
                 id: true,
-                siteName: true,
                 name: true,
                 applicants: true,
                 startDate: true,
                 status: true,
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
             where: queryFilter,
             orderBy: sortStrategy,
