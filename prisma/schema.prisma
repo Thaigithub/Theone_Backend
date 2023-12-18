@@ -512,16 +512,16 @@ model Post {
   occupation         Code?                @relation(name: "post_occupation", fields: [occupationId], references: [id])
   occupationId       Int?
   otherInformation   String               @map("other_information")
-  salaryType         SalaryType           @map("salary_type")
-  salaryAmount       Int                  @map("salary_amount")
-  startWorkDate      DateTime             @map("start_work_date")
-  endWorkDate        DateTime             @map("end_work_date")
+  salaryType         SalaryType?          @map("salary_type")
+  salaryAmount       Int?                 @map("salary_amount")
+  startWorkDate      DateTime?            @map("start_work_date") @db.Date()
+  endWorkDate        DateTime?            @map("end_work_date") @db.Date()
   workday            Workday[]
-  startWorkTime      DateTime             @map("start_work_time") @db.Time()
-  endWorkTime        DateTime             @map("end_work_time") @db.Time()
+  startWorkTime      DateTime?            @map("start_work_time") @db.Time()
+  endWorkTime        DateTime?            @map("end_work_time") @db.Time()
   site               Site                 @relation(fields: [siteId], references: [id])
   siteId             Int
-  postEditor         String               @map("post_editor")
+  postEditor         String?              @map("post_editor")
   view               Int                  @default(0)
   PostBanner         PostBanner[]
   interested         Interest[]
@@ -586,7 +586,7 @@ model Application {
   status     PostApplicationStatus @default(APPLY)
   assignedAt DateTime              @default(now())
   updatedAt  DateTime              @updatedAt @map("updated_at")
-  interview  Interview[]
+  interview  Interview?
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -673,7 +673,7 @@ model Interview {
   updatedAt            DateTime        @updatedAt @map("updated_at")
   supportCategory      SupportCategory @map("interview_category")
   application          Application     @relation(fields: [applicationId], references: [id])
-  applicationId        Int
+  applicationId        Int             @unique
   interviewStatus      InterviewStatus @map("interview_status")
   interviewRequestDate DateTime        @default(now()) @map("interview_request_date") @db.Date
 

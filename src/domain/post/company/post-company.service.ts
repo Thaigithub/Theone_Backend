@@ -89,8 +89,8 @@ export class PostCompanyService {
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
-        request.startWorkTime = FAKE_STAMP + request.startWorkTime;
-        request.endWorkTime = FAKE_STAMP + request.endWorkTime;
+        request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
+        request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
 
         //Any information is null
         if (
@@ -123,8 +123,8 @@ export class PostCompanyService {
                     category: request.category,
                     status: request.status,
                     name: request.name,
-                    startDate: request.startDate,
-                    endDate: request.endDate,
+                    startDate: new Date(request.startDate),
+                    endDate: new Date(request.endDate),
                     experienceType: request.experienceType,
                     numberOfPeople: request.numberOfPeople,
                     ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
@@ -132,8 +132,8 @@ export class PostCompanyService {
                     otherInformation: request.otherInformation || '',
                     salaryType: request.salaryType,
                     salaryAmount: request.salaryAmount,
-                    startWorkDate: request.startWorkDate,
-                    endWorkDate: request.endWorkDate,
+                    startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
+                    endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
                     workday: request.workday,
                     startWorkTime: request.startWorkTime,
                     endWorkTime: request.endWorkTime,
@@ -161,8 +161,8 @@ export class PostCompanyService {
                             category: request.category,
                             status: request.status,
                             name: request.name,
-                            startDate: request.startDate,
-                            endDate: request.endDate,
+                            startDate: new Date(request.startDate),
+                            endDate: new Date(request.endDate),
                             experienceType: request.experienceType,
                             numberOfPeople: request.numberOfPeople,
                             ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
@@ -170,8 +170,8 @@ export class PostCompanyService {
                             otherInformation: request.otherInformation || '',
                             salaryType: request.salaryType,
                             salaryAmount: request.salaryAmount,
-                            startWorkDate: request.startWorkDate,
-                            endWorkDate: request.endWorkDate,
+                            startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
+                            endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
                             workday: request.workday,
                             startWorkTime: request.startWorkTime,
                             endWorkTime: request.endWorkTime,
