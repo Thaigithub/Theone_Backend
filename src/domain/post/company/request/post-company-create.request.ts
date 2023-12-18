@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 
 export class PostCompanyCreateRequest {
     @Expose()
@@ -39,16 +39,14 @@ export class PostCompanyCreateRequest {
     public name: string;
 
     @Expose()
-    @ApiProperty({ example: '2023-12-31T23:59:59Z' })
-    @IsDateString({ strict: true }, { message: 'Invalid date format' })
+    @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'startDate is required' })
-    public startDate: Date;
+    public startDate: string;
 
     @Expose()
-    @ApiProperty({ example: '2023-12-31T23:59:59Z' })
-    @IsDateString({ strict: true }, { message: 'Invalid date format' })
+    @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'endDate is required' })
-    public endDate: Date;
+    public endDate: string;
 
     @Expose()
     @IsEnum(ExperienceType)
@@ -91,25 +89,27 @@ export class PostCompanyCreateRequest {
         enum: SalaryType,
         example: SalaryType.FIRST_CLASS,
     })
+    @IsOptional()
     public salaryType: SalaryType;
 
     @Expose()
     @ApiProperty({ example: '1000000' })
     @IsNotEmpty({ message: 'Amount of salary is required' })
     @IsNumber()
+    @IsOptional()
     public salaryAmount: number;
 
     @Expose()
-    @ApiProperty({ example: '2023-12-31T23:59:59Z' })
-    @IsDateString({ strict: true }, { message: 'Invalid date format' })
+    @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'Start working date is required' })
-    public startWorkDate: Date;
+    @IsOptional()
+    public startWorkDate: string;
 
     @Expose()
-    @ApiProperty({ example: '2023-12-31T23:59:59Z' })
-    @IsDateString({ strict: true }, { message: 'Invalid date format' })
+    @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'End working date is required' })
-    public endWorkDate: Date;
+    @IsOptional()
+    public endWorkDate: string;
 
     @Expose()
     @ApiProperty({
@@ -119,16 +119,19 @@ export class PostCompanyCreateRequest {
         enum: Workday,
     })
     @IsEnum(Workday, { each: true })
+    @IsOptional()
     public workday: Workday[];
 
     @Expose()
-    @ApiProperty({ example: '09:00:00Z', format: 'time' })
+    @ApiProperty({ example: '09:00:00', format: 'time' })
     @IsNotEmpty({ message: 'Start working time is required' })
+    @IsOptional()
     public startWorkTime: string;
 
     @Expose()
-    @ApiProperty({ example: '09:00:00Z', format: 'time' })
+    @ApiProperty({ example: '09:00:00', format: 'time' })
     @IsNotEmpty({ message: 'End working time is required' })
+    @IsOptional()
     public endWorkTime: string;
 
     @Expose()
