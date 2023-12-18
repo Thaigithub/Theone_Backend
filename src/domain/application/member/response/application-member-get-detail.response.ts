@@ -17,10 +17,10 @@ export class ApplicationMemberGetDetailResponse {
     postStatus: Post['status'];
     @ApiProperty({ type: String })
     siteAddress: Site['address'];
-    // @ApiProperty({ type: Date })
-    // siteStartDate: Site['startDate'];
-    // @ApiProperty({ type: Date })
-    // siteEndDate: Site['endDate'];
+    @ApiProperty({ type: Date })
+    siteStartDate: Site['startDate'];
+    @ApiProperty({ type: Date })
+    siteEndDate: Site['endDate'];
     @ApiProperty({ type: String })
     siteName: Site['name'];
     @ApiProperty({ type: Date })

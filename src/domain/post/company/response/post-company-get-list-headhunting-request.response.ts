@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Post, PostStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 import { PostCompanyGetListHeadhuntingRequestDTO } from '../dto/post-company-get-list-headhunting-request.dto';
+import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list.response';
 
 export class PostCompanyGetItemHeadhuntingRequestResponse {
     @ApiProperty({ example: 'string' })
@@ -26,8 +27,8 @@ export class PostCompanyGetItemHeadhuntingRequestResponse {
     })
     public endDate: Post['endDate'];
 
-    @ApiProperty({ example: 'string' })
-    public siteName: string;
+    @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
+    public site: PostCompanyGetItemListSiteResponse;
 
     @ApiProperty({ type: [PostCompanyGetListHeadhuntingRequestDTO] })
     public HeadhuntingRequest: PostCompanyGetListHeadhuntingRequestDTO[];

@@ -20,7 +20,9 @@ export class CompanyTeamService {
             where: {
                 id,
                 post: {
-                    companyId: account.company.id,
+                    site: {
+                        companyId: account.company.id,
+                    },
                 },
             },
             select: {

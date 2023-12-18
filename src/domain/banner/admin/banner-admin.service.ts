@@ -445,12 +445,16 @@ export class AdminBannerService {
                 post: {
                     select: {
                         name: true,
-                        siteName: true,
-                        companyId: true,
-                        company: {
+                        site: {
                             select: {
                                 name: true,
-                                presentativeName: true,
+                                Company: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        presentativeName: true,
+                                    },
+                                },
                             },
                         },
                     },
@@ -485,10 +489,10 @@ export class AdminBannerService {
             status: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
-            siteName: banner.post.siteName,
-            companyId: banner.post.companyId,
-            companyName: banner.post.company.name,
-            presentativeName: banner.post.company.presentativeName,
+            siteName: banner.post.site.name,
+            companyId: banner.post.site.Company.id,
+            companyName: banner.post.site.Company.name,
+            presentativeName: banner.post.site.Company.presentativeName,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,

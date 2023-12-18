@@ -151,7 +151,9 @@ export class InterviewCompanyService {
                 id,
                 application: {
                     post: {
-                        companyId: account.company.id,
+                        site: {
+                            companyId: account.company.id,
+                        },
                     },
                 },
             },
@@ -178,7 +180,9 @@ export class InterviewCompanyService {
                 id,
                 application: {
                     post: {
-                        companyId: account.company.id,
+                        site: {
+                            companyId: account.company.id,
+                        },
                     },
                 },
             },
@@ -206,7 +210,9 @@ export class InterviewCompanyService {
                     id,
                     application: {
                         post: {
-                            companyId: account.company.id,
+                            site: {
+                                companyId: account.company.id,
+                            },
                         },
                     },
                 },

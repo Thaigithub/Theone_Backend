@@ -3,9 +3,13 @@ import { Post, PostStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 // import { ApplicationAdminStatusFilter } from '../dto/application-admin-filter';
 
-export class ApplicationAdminResponse {
+export class ApplicationAdminSiteResponse {
     @ApiProperty({ type: 'string' })
-    siteName: Post['siteName'];
+    name: string;
+}
+export class ApplicationAdminResponse {
+    @ApiProperty({ type: ApplicationAdminSiteResponse })
+    site: ApplicationAdminSiteResponse;
 
     @ApiProperty({ type: 'string' })
     public name: Post['name'];

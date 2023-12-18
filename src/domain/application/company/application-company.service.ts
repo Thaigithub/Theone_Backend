@@ -28,7 +28,9 @@ export class ApplicationCompanyService {
 
         const queryFilter: Prisma.ApplicationWhereInput = {
             post: {
-                companyId: account.company.id,
+                site: {
+                    companyId: account.company.id,
+                },
                 id: postId,
             },
             ...(query.applicationDate && { assignedAt: query.applicationDate }),
@@ -113,7 +115,9 @@ export class ApplicationCompanyService {
                 where: {
                     id: applicationId,
                     post: {
-                        companyId: account.company.id,
+                        site: {
+                            companyId: account.company.id,
+                        },
                     },
                 },
                 data: {
@@ -140,7 +144,9 @@ export class ApplicationCompanyService {
             where: {
                 id: applicationId,
                 post: {
-                    companyId: account.company.id,
+                    site: {
+                        companyId: account.company.id,
+                    },
                 },
             },
         });

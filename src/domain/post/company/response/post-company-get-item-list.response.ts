@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Post, PostStatus, PostType } from '@prisma/client';
 
+export class PostCompanyGetItemListSiteResponse {
+    @ApiProperty({ example: 'string' })
+    public name: string;
+}
 export class PostCompanyGetItemListResponse {
     @ApiProperty({ example: 'string' })
     public name: string;
@@ -31,8 +35,8 @@ export class PostCompanyGetItemListResponse {
     })
     public endDate: Post['endDate'];
 
-    @ApiProperty({ example: 'string' })
-    public siteName: string;
+    @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
+    public site: PostCompanyGetItemListSiteResponse;
 
     @ApiProperty({ example: 'string' })
     public view: number;

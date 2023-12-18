@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
 import { PostAdminCodeDTO } from '../dto/post-admin-code.dto';
+import { PostAdminSiteResponse } from './post-admin-get-list.response';
 
 export class PostAdminDetailResponse {
     @ApiProperty({
@@ -18,9 +19,6 @@ export class PostAdminDetailResponse {
 
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
     public endDate: Date;
-
-    @ApiProperty({ type: 'string', example: '101-dong, 42 Seolleung-ro 90-gil, Gangnam-gu, Seoul' })
-    public siteAddress: string;
 
     @ApiProperty({ type: 'enum', enum: ExperienceType, example: ExperienceType.MEDIUM })
     public experienceType: ExperienceType;
@@ -96,15 +94,6 @@ export class PostAdminDetailResponse {
     })
     postEditor: string;
 
-    @ApiProperty({ example: 'string' })
-    public siteName: string;
-
-    @ApiProperty({ example: 'string', description: 'Enter on-site contact information' })
-    public siteContact: string;
-
-    @ApiProperty({ example: 'string', description: 'Enter the person in charge' })
-    public sitePersonInCharge: string;
-
-    @ApiProperty({ example: 'string', description: 'Enter the original building' })
-    public originalBuilding: string;
+    @ApiProperty({ type: PostAdminSiteResponse })
+    site: PostAdminSiteResponse;
 }

@@ -21,7 +21,9 @@ export class MemberCompanyService {
             where: {
                 id,
                 post: {
-                    companyId: account.company.id,
+                    site: {
+                        companyId: account.company.id,
+                    },
                 },
             },
             select: {
