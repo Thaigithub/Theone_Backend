@@ -4,10 +4,10 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
-import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
+import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
+import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @Injectable()
 export class PostAdminService {
@@ -32,13 +32,13 @@ export class PostAdminService {
                 name: { contains: query.searchTerm, mode: 'insensitive' },
             }),
             ...(query.searchCategory == PostAdminSearchCategoryFilter.SITE_NAME && {
-                siteName: { contains: query.searchTerm, mode: 'insensitive' },
+                site: { name: { contains: query.searchTerm, mode: 'insensitive' } },
             }),
             ...(query.searchCategory == PostAdminSearchCategoryFilter.REPRESENTATIVE_NAME && {
-                sitePersonInCharge: { contains: query.searchTerm, mode: 'insensitive' },
+                site: { personInCharge: { contains: query.searchTerm, mode: 'insensitive' } },
             }),
             ...(query.searchCategory == PostAdminSearchCategoryFilter.SITE_CONTACT_INFO && {
-                siteContact: { contains: query.searchTerm, mode: 'insensitive' },
+                site: { contact: { contains: query.searchTerm, mode: 'insensitive' } },
             }),
             startDate: { gte: query.startDate ? new Date(query.startDate).toISOString() : undefined },
             endDate: { lte: query.endDate ? new Date(query.endDate).toISOString() : undefined },
