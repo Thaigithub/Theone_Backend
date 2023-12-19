@@ -36,7 +36,7 @@ export class ApplicationAdminService {
                 name: { contains: query.searchTerm, mode: 'insensitive' },
             }),
             ...(query.searchCategory == ApplicationAdminSearchCategoryFilter.SITE_NAME && {
-                siteName: { contains: query.searchTerm, mode: 'insensitive' },
+                site: { name: { contains: query.searchTerm, mode: 'insensitive' } },
             }),
         };
         const sortStrategy: Prisma.PostOrderByWithRelationInput = {
