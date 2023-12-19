@@ -1,13 +1,14 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { PostType, Prisma } from '@prisma/client';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { CodeType, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { PostAdminModifyRequest } from './request/post-admin-modify-request';
+import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 
 @Injectable()
 export class PostAdminService {
@@ -107,6 +108,82 @@ export class PostAdminService {
             throw new NotFoundException(`The Post Id does not exist`);
         }
         return infor;
+    }
+    async checkCodeType(id: number, codeType: CodeType) {
+        if (id) {
+            const code = await this.prismaService.code.findUnique({
+                where: {
+                    isActive: true,
+                    id,
+                    codeType: codeType,
+                },
+            });
+
+            if (!code) throw new BadRequestException(`Code ID of type ${codeType} does not exist`);
+        }
+    }
+
+    async changePostInfo(id: number, request: PostAdminModifyRequest) {
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
+        await this.checkCodeType(request.occupationId, CodeType.JOB);
+
+        //Modified Time to timestampz
+        const FAKE_STAMP = '2023-12-31T';
+        request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime : undefined;
+        request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime : undefined;
+
+        try {
+            await this.prismaService.post.update({
+                where: {
+                    id: id,
+                    isActive: true,
+                },
+                data: {
+                    type: request.type,
+                    category: request.category,
+                    status: request.status,
+                    name: request.name,
+                    startDate: request.startDate,
+                    endDate: request.endDate,
+                    experienceType: request.experienceType,
+                    numberOfPeople: request.numberOfPeople,
+                    specialNoteId: request.specialNoteId || null,
+                    occupationId: request.occupationId || null,
+                    otherInformation: request.otherInformation,
+                    salaryType: request.salaryType,
+                    salaryAmount: request.salaryAmount,
+                    startWorkDate: request.startWorkDate,
+                    endWorkDate: request.endWorkDate,
+                    workday: request.workday,
+                    startWorkTime: request.startWorkTime,
+                    endWorkTime: request.endWorkTime,
+                    siteId: request.siteId,
+                    postEditor: request.postEditor,
+                    deleteReason: request.deleteReason,
+                },
+            });
+            const post_record = await this.prismaService.post.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+            if (post_record.siteId) {
+                await this.prismaService.site.update({
+                    where: {
+                        id: post_record.siteId,
+                    },
+                    data: {
+                        name: request.siteName,
+                        address: request.siteAddress,
+                        contact: request.siteContact,
+                        personInCharge: request.sitePersonInCharge,
+                        originalBuilding: request.originalBuilding,
+                    },
+                });
+            }
+        } catch (err) {
+            throw new HttpException('The Post or Site is not found or has been deleted', HttpStatus.NOT_FOUND);
+        }
     }
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
