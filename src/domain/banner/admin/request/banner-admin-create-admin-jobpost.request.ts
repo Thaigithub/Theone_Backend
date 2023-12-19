@@ -39,9 +39,11 @@ class AdminPostBanner {
 
 class AdPostBanner extends PostBanner {
     @Expose()
+    @ApiProperty({ type: AdminPostBanner })
     adminPostBannner: AdminPostBanner;
 }
 export class AdminBannerCreateJobPostRequest extends Banner {
     @Expose()
+    @ApiProperty({ type: AdPostBanner })
     readonly postBanner: AdPostBanner;
 }

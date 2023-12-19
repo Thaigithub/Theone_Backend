@@ -50,5 +50,6 @@ class GeneralBanner {
 
 export class AdminBannerCreateGeneralRequest extends Banner {
     @Expose()
+    @ApiProperty({ type: GeneralBanner })
     readonly generalBanner: GeneralBanner;
 }
