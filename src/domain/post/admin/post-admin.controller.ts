@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -8,6 +8,7 @@ import { PostAdminPostStatusFilter, PostAdminPostTypeFilter, PostAdminSearchCate
 import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
@@ -85,6 +86,21 @@ export class PostAdminController {
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getDetail(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<PostAdminDetailResponse>> {
         return BaseResponse.of(await this.postAdminService.getPostDetails(id));
+    }
+
+    // Change post information
+    @Patch('/:id')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Company change post information',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePageInfo(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: PostAdminModifyRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postAdminService.changePostInfo(id, payload);
+        return BaseResponse.ok();
     }
 
     @Delete('/:id')
