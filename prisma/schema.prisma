@@ -532,6 +532,7 @@ model Post {
   applicants                Application[]
   HeadhuntingRequest        HeadhuntingRequest[]
   headhuntingRecommendation HeadhuntingRecommendation[]
+  deleteReason              String?
 
   @@map("posts")
 }
