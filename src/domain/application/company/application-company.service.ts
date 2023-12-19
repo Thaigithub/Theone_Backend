@@ -33,7 +33,8 @@ export class ApplicationCompanyService {
                 },
                 id: postId,
             },
-            ...(query.applicationDate && { assignedAt: query.applicationDate }),
+            ...(query.startApplicationDate && { assignedAt: { gte: new Date(query.startApplicationDate) } }),
+            ...(query.endApplicationDate && { assignedAt: { lte: new Date(query.endApplicationDate) } }),
             ...(query.searchCategory == ApplicationCompanyApplicantsSearch.NAME && {
                 OR: [
                     {
