@@ -101,6 +101,7 @@ model Member {
   InterestSites                Interest[]
   ApplyPosts                   Application[]
   MemberEvaluation             MemberEvaluation?
+  headhuntingRecommendation    HeadhuntingRecommendation[]
 
   @@map("members")
 }
@@ -153,25 +154,26 @@ model ContactCard {
 }
 
 model Team {
-  id                   Int              @id @default(autoincrement())
-  code                 String?
-  name                 String
-  introduction         String?
-  region               String?
-  leaderId             Int              @map("leader_id")
-  isActive             Boolean          @default(true) @map("is_active")
-  createdAt            DateTime         @default(now()) @map("created_at")
-  updatedAt            DateTime         @updatedAt @map("updated_at")
-  status               TeamStatus       @default(GENERAL)
-  members              MembersOnTeams[]
-  totalMembers         Int              @default(0) @map("total_members")
-  leader               Member           @relation(fields: [leaderId], references: [id])
-  fileId               Int              @unique @map("file_id")
-  file                 File             @relation(fields: [fileId], references: [id])
-  exposureStatus       Boolean          @default(false) @map("exposure_status")
-  numberOfRecruitments Int              @default(0) @map("number_of_recruitments")
-  TeamEvaluation       TeamEvaluation?
-  posts                Application[]
+  id                        Int                         @id @default(autoincrement())
+  code                      String?
+  name                      String
+  introduction              String?
+  region                    String?
+  leaderId                  Int                         @map("leader_id")
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  status                    TeamStatus                  @default(GENERAL)
+  members                   MembersOnTeams[]
+  totalMembers              Int                         @default(0) @map("total_members")
+  leader                    Member                      @relation(fields: [leaderId], references: [id])
+  fileId                    Int                         @unique @map("file_id")
+  file                      File                        @relation(fields: [fileId], references: [id])
+  exposureStatus            Boolean                     @default(false) @map("exposure_status")
+  numberOfRecruitments      Int                         @default(0) @map("number_of_recruitments")
+  TeamEvaluation            TeamEvaluation?
+  posts                     Application[]
+  headhuntingRecommendation HeadhuntingRecommendation[]
 
   @@map("teams")
 }
@@ -495,40 +497,41 @@ model Site {
 }
 
 model Post {
-  id                 Int                  @id @default(autoincrement())
-  isActive           Boolean              @default(true) @map("is_active")
-  createdAt          DateTime             @default(now()) @map("created_at")
-  updatedAt          DateTime             @updatedAt @map("updated_at")
-  isPulledUp         Boolean              @default(false) @map("is_pulled_up")
-  isHidden           Boolean              @default(false) @map("is_hidden")
-  type               PostType
-  category           PostCategory
-  status             PostStatus
-  name               String
-  startDate          DateTime             @map("start_date") @db.Date
-  endDate            DateTime             @map("end_date") @db.Date
-  experienceType     ExperienceType       @map("experience_type")
-  numberOfPeople     Int                  @map("number_of_people")
-  specialNote        Code?                @relation(name: "post_special", fields: [specialNoteId], references: [id])
-  specialNoteId      Int?
-  occupation         Code?                @relation(name: "post_occupation", fields: [occupationId], references: [id])
-  occupationId       Int?
-  otherInformation   String               @map("other_information")
-  salaryType         SalaryType?          @map("salary_type")
-  salaryAmount       Int?                 @map("salary_amount")
-  startWorkDate      DateTime?            @map("start_work_date") @db.Date()
-  endWorkDate        DateTime?            @map("end_work_date") @db.Date()
-  workday            Workday[]
-  startWorkTime      DateTime?            @map("start_work_time") @db.Time()
-  endWorkTime        DateTime?            @map("end_work_time") @db.Time()
-  site               Site                 @relation(fields: [siteId], references: [id])
-  siteId             Int
-  postEditor         String?              @map("post_editor")
-  view               Int                  @default(0)
-  PostBanner         PostBanner[]
-  interested         Interest[]
-  applicants         Application[]
-  HeadhuntingRequest HeadhuntingRequest[]
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  isPulledUp                Boolean                     @default(false) @map("is_pulled_up")
+  isHidden                  Boolean                     @default(false) @map("is_hidden")
+  type                      PostType
+  category                  PostCategory
+  status                    PostStatus
+  name                      String
+  startDate                 DateTime                    @map("start_date") @db.Date
+  endDate                   DateTime                    @map("end_date") @db.Date
+  experienceType            ExperienceType              @map("experience_type")
+  numberOfPeople            Int                         @map("number_of_people")
+  specialNote               Code?                       @relation(name: "post_special", fields: [specialNoteId], references: [id])
+  specialNoteId             Int?
+  occupation                Code?                       @relation(name: "post_occupation", fields: [occupationId], references: [id])
+  occupationId              Int?
+  otherInformation          String                      @map("other_information")
+  salaryType                SalaryType?                 @map("salary_type")
+  salaryAmount              Int?                        @map("salary_amount")
+  startWorkDate             DateTime?                   @map("start_work_date") @db.Date()
+  endWorkDate               DateTime?                   @map("end_work_date") @db.Date()
+  workday                   Workday[]
+  startWorkTime             DateTime?                   @map("start_work_time") @db.Time()
+  endWorkTime               DateTime?                   @map("end_work_time") @db.Time()
+  site                      Site                        @relation(fields: [siteId], references: [id])
+  siteId                    Int
+  postEditor                String?                     @map("post_editor")
+  view                      Int                         @default(0)
+  PostBanner                PostBanner[]
+  interested                Interest[]
+  applicants                Application[]
+  HeadhuntingRequest        HeadhuntingRequest[]
+  headhuntingRecommendation HeadhuntingRecommendation[]
 
   @@map("posts")
 }
@@ -680,6 +683,22 @@ model Interview {
   interviewRequestDate DateTime        @default(now()) @map("interview_request_date") @db.Date
 
   @@map("interview")
+}
+
+model HeadhuntingRecommendation {
+  id         Int      @id @default(autoincrement())
+  member     Member?  @relation(fields: [memberId], references: [id])
+  memberId   Int?
+  team       Team?    @relation(fields: [teamId], references: [id])
+  teamId     Int?
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int
+  assignedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([memberId, postId])
+  @@unique([teamId, postId])
+  @@map("headhunting_recommendation")
 }
 
 enum FunctionName {

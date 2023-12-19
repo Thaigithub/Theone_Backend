@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InterviewStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
+import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { MemberCompanyService } from 'domain/member/company/member-company.service';
 import { CompanyTeamService } from 'domain/team/company/member-company.service';
@@ -218,6 +218,14 @@ export class InterviewCompanyService {
                 },
                 data: {
                     interviewStatus: result,
+                    application: {
+                        update: {
+                            status:
+                                result === InterviewStatus.PASS
+                                    ? PostApplicationStatus.APPROVE_BY_COMPANY
+                                    : PostApplicationStatus.REJECT_BY_COMPANY,
+                        },
+                    },
                 },
             });
         } catch (error) {
