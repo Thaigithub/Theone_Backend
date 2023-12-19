@@ -17,6 +17,7 @@ export enum ContentType {
     RAR = 'application/vnd.rar',
     ZIP = 'application/zip',
     JPEG = 'image/jpeg',
+    JPG = 'image/jpg',
     PNG = 'image/png',
     CSV = 'text/csv',
     EXCEL = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
