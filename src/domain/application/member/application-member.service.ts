@@ -1,24 +1,56 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InterviewStatus, PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { ChangeApplicationStatus } from './enum/application-member-change-status.enum';
+import { ApplicationMemberGetListOfferFilter } from './enum/application-member-get-list-offer-filter.enum';
+import { OfferType } from './enum/application-member-get-list-offer-type.enum';
+import { ApplicationMemberGetListOfferRequest } from './request/application-member-get-list-offer.request';
 import { ApplicationMemberGetListRequest } from './request/application-member-get-list.request';
 import { ApplicationMemberGetDetailResponse } from './response/application-member-get-detail.response';
+import { ApplicationMemberGetListOfferResponse } from './response/application-member-get-list-offer.response';
 import { ApplicationMemberGetListResponse } from './response/application-member-get-list.response';
 
 @Injectable()
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
     async getApplicationList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
+        const teams = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId: id,
+                },
+                select: {
+                    teams: {
+                        select: {
+                            teamId: true,
+                        },
+                    },
+                },
+            })
+        ).teams.map((item) => item.teamId);
         const search = {
             skip: query.pageNumber && (query.pageNumber - 1) * query.pageSize,
             take: query.pageSize,
             where: {
-                member: {
-                    account: {
-                        id,
+                OR: [
+                    {
+                        member: {
+                            account: {
+                                id,
+                            },
+                        },
+                        status: query.status,
                     },
-                },
-                status: query.status,
+                    {
+                        team: {
+                            id: {
+                                in: teams,
+                            },
+                        },
+                        status: query.status,
+                    },
+                ],
             },
             select: {
                 id: true,
@@ -89,21 +121,40 @@ export class ApplicationMemberService {
         return new PaginationResponse(application, new PageInfo(total));
     }
     async getDetailApplication(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
-        const count = await this.prismaService.application.count({
-            where: {
-                id,
-                member: {
-                    accountId,
+        const teams = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId: accountId,
                 },
-            },
-        });
-        if (count === 0) throw new NotFoundException('Application not found');
-        const application = await this.prismaService.application.findUnique({
-            where: {
-                id,
-                member: {
-                    accountId,
+                select: {
+                    teams: {
+                        select: {
+                            teamId: true,
+                        },
+                    },
                 },
+            })
+        ).teams.map((item) => item.teamId);
+        const application = await this.prismaService.application.findFirst({
+            where: {
+                OR: [
+                    {
+                        member: {
+                            account: {
+                                id: accountId,
+                            },
+                        },
+                        id,
+                    },
+                    {
+                        team: {
+                            id: {
+                                in: teams,
+                            },
+                        },
+                        id,
+                    },
+                ],
             },
             select: {
                 assignedAt: true,
@@ -145,6 +196,7 @@ export class ApplicationMemberService {
                 },
             },
         });
+        if (!application) throw new NotFoundException('Application not found');
         return {
             companyLogo: application.post.site.Company.logo.file,
             companyName: application.post.site.Company.name,
@@ -161,5 +213,326 @@ export class ApplicationMemberService {
             status: application.status,
             appliedDate: application.assignedAt,
         };
+    }
+    async changeApplicationStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
+        const application = await this.prismaService.application.findFirst({
+            where: {
+                OR: [
+                    {
+                        id,
+                        member: {
+                            accountId,
+                        },
+                    },
+                    {
+                        id,
+                        team: {
+                            leaderId: accountId,
+                        },
+                    },
+                ],
+            },
+            select: {
+                status: true,
+                interview: {
+                    select: {
+                        interviewStatus: true,
+                    },
+                },
+            },
+        });
+        if (!application) throw new NotFoundException('Application not found');
+        if (
+            application.status !== PostApplicationStatus.APPROVE_BY_COMPANY ||
+            application.interview.interviewStatus !== InterviewStatus.PASS
+        )
+            throw new BadRequestException('Application is not at the correct status to change');
+        await this.prismaService.application.update({
+            where: {
+                id,
+            },
+            data: {
+                status:
+                    status === ChangeApplicationStatus.ACCEPT
+                        ? PostApplicationStatus.APPROVE_BY_MEMBER
+                        : PostApplicationStatus.REJECT_BY_MEMBER,
+            },
+        });
+    }
+    async getApplicationOfferList(
+        accountId: number,
+        body: ApplicationMemberGetListOfferRequest,
+    ): Promise<ApplicationMemberGetListOfferResponse> {
+        const teams = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId,
+                },
+                select: {
+                    teams: {
+                        select: {
+                            teamId: true,
+                        },
+                    },
+                },
+            })
+        ).teams.map((item) => item.teamId);
+        const query = {
+            where: {},
+            select: {
+                id: true,
+                team: {
+                    select: {
+                        name: true,
+                    },
+                },
+                memberId: true,
+                assignedAt: true,
+                status: true,
+                interview: {
+                    select: {
+                        interviewStatus: true,
+                    },
+                },
+                post: {
+                    select: {
+                        endDate: true,
+                        name: true,
+                        occupation: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        site: {
+                            select: {
+                                address: true,
+                                name: true,
+                                Company: {
+                                    select: {
+                                        logo: {
+                                            select: {
+                                                file: {
+                                                    select: {
+                                                        fileName: true,
+                                                        type: true,
+                                                        size: true,
+                                                        key: true,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            skip: body.pageNumber && (parseInt(body.pageNumber) - 1) * parseInt(body.pageSize),
+            take: body.pageSize && parseInt(body.pageSize),
+        };
+        switch (body.filter) {
+            case ApplicationMemberGetListOfferFilter.ACCEPTED: {
+                query.where['OR'] = [
+                    {
+                        member: {
+                            accountId,
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_MEMBER,
+                    },
+                    {
+                        team: {
+                            leader: {
+                                accountId,
+                            },
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_MEMBER,
+                    },
+                ];
+                break;
+            }
+            case ApplicationMemberGetListOfferFilter.REJECTED: {
+                query.where['OR'] = [
+                    {
+                        member: {
+                            accountId,
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.REJECT_BY_MEMBER,
+                    },
+                    {
+                        team: {
+                            leader: {
+                                accountId,
+                            },
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.REJECT_BY_MEMBER,
+                    },
+                ];
+                break;
+            }
+            case ApplicationMemberGetListOfferFilter.DEADLINE: {
+                query.where['OR'] = [
+                    {
+                        member: {
+                            accountId,
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                            endDate: {
+                                lt: new Date().toISOString(),
+                            },
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                    },
+                    {
+                        team: {
+                            leader: {
+                                accountId,
+                            },
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                            endDate: {
+                                lt: new Date().toISOString(),
+                            },
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                    },
+                ];
+                break;
+            }
+            case ApplicationMemberGetListOfferFilter.TEAM_LEADER_WAITING: {
+                query.where = {
+                    team: {
+                        id: {
+                            in: teams,
+                        },
+                        leaderId: {
+                            not: accountId,
+                        },
+                    },
+                    interview: {
+                        interviewStatus: InterviewStatus.PASS,
+                    },
+                    post: {
+                        name: body.postName,
+                        endDate: {
+                            gt: Date(),
+                        },
+                    },
+                    status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                };
+            }
+            case ApplicationMemberGetListOfferFilter.WAITING: {
+                query.where['OR'] = [
+                    {
+                        member: {
+                            accountId,
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                    },
+                    {
+                        team: {
+                            leader: {
+                                accountId,
+                            },
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                    },
+                ];
+                break;
+            }
+            default: {
+                query.where['OR'] = [
+                    {
+                        member: {
+                            accountId,
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: body.postName,
+                        },
+                    },
+                    {
+                        team: {
+                            id: {
+                                in: teams,
+                            },
+                        },
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                    },
+                ];
+                break;
+            }
+        }
+        const offer = (await this.prismaService.application.findMany(query)).map((item) => {
+            return {
+                type: item.team ? OfferType.TEAM : OfferType.INDIVIDUAL,
+                id: item.id,
+                requestDate: new Date(item.assignedAt).toISOString(),
+                applicationStatus: item.status,
+                teamName: item.team ? item.team.name : '',
+                companyLogo: {
+                    key: item.post.site.Company.logo.file.key,
+                    fileName: item.post.site.Company.logo.file.fileName,
+                    type: item.post.site.Company.logo.file.type,
+                    // size: item.post.site.Company.logo.file.size,
+                },
+                postName: item.post.name,
+                siteName: item.post.site.name,
+                siteAddress: item.post.site.address,
+                occupationName: item.post.occupation ? item.post.occupation.codeName : '',
+            };
+        });
+        const total = await this.prismaService.application.count({
+            where: query.where,
+        });
+        return new PaginationResponse(offer, new PageInfo(total));
     }
 }

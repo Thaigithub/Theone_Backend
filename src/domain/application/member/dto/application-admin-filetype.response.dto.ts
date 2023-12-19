@@ -17,9 +17,9 @@ export class FileClass {
         enum: FileType,
     })
     type: File['type'];
-    @ApiProperty({
-        required: true,
-        type: String,
-    })
-    size: File['size'];
+    // @ApiProperty({
+    //     required: true,
+    //     type: Number,
+    // })
+    // size: number;
 }
