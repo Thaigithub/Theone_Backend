@@ -46,5 +46,15 @@ export class ApplicationCompanyGetListApplicantsRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public applicationDate: string;
+    public startApplicationDate: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @ApiProperty({
+        type: 'string',
+        required: false,
+        example: '2023-12-2',
+    })
+    public endApplicationDate: string;
 }
