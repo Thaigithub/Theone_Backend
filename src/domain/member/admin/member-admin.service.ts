@@ -111,60 +111,28 @@ export class MemberAdminService {
                 },
                 bankAccount: {
                     select: {
-                        accountHolder: true,
-                        accountNumber: true,
                         bankName: true,
+                        accountNumber: true,
                         createdAt: true,
                     },
                 },
                 foreignWorker: {
                     select: {
-                        englishName: true,
                         registrationNumber: true,
                         serialNumber: true,
                         dateOfIssue: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
                     },
                 },
                 disability: {
                     select: {
                         disableType: true,
-                        disableLevel: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
-                    },
-                },
-                basicHealthSafetyCertificate: {
-                    select: {
-                        registrationNumber: true,
-                        dateOfCompletion: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
                     },
                 },
                 teams: {
                     select: {
                         team: {
                             select: {
+                                id: true,
                                 name: true,
                                 code: true,
                             },
@@ -176,6 +144,7 @@ export class MemberAdminService {
 
         const teamList = member.teams.map((item) => {
             return {
+                id: item.team.id,
                 name: item.team.name,
                 code: item.team.code,
             };

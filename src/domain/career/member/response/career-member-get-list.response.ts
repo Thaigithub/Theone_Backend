@@ -18,10 +18,10 @@ export class CareerResponse {
     @ApiProperty({ type: 'string' })
     siteName: Career['siteName'];
 
-    @ApiProperty({ type: 'date' })
+    @ApiProperty({ type: 'string', format: 'date' })
     startDate: Career['startDate'];
 
-    @ApiProperty({ type: 'date' })
+    @ApiProperty({ type: 'string', format: 'date' })
     endDate: Career['endDate'];
 
     @ApiProperty({ type: 'string' })
