@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
+import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 
 @Injectable()
 export class PostAdminService {
@@ -106,5 +107,22 @@ export class PostAdminService {
             throw new NotFoundException(`The Post Id does not exist`);
         }
         return infor;
+    }
+
+    async deletePost(id: number, query: PostAdminDeleteRequest) {
+        try {
+            await this.prismaService.post.update({
+                where: {
+                    id,
+                    isActive: true,
+                },
+                data: {
+                    isActive: false,
+                    deleteReason: query.deleteReason,
+                },
+            });
+        } catch (err) {
+            throw new HttpException('The Post Id with positive status not found!', HttpStatus.NOT_FOUND);
+        }
     }
 }
