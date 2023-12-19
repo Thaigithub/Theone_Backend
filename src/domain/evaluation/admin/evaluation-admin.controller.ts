@@ -11,11 +11,15 @@ import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation
 import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
 import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
 import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
-import { MemberEvaluationAdminGetListResponse } from './response/member-evaluation-admin-get-list.response';
+import {
+    MemberEvaluationAdminGetListResponse,
+    MemberEvaluationResponse,
+} from './response/member-evaluation-admin-get-list.response';
 import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
-import { SiteEvaluationAdminGetListResponse } from './response/site-evaluation-admin-get-list.response';
+import { SiteEvaluationAdminGetListResponse, SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
 import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
-import { TeamEvaluationAdminGetListResponse } from './response/team-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetListResponse, TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -30,11 +34,7 @@ export class EvaluationAdminController {
         summary: 'Get list of site evaluation',
         description: 'Admin can retrieve evaluation of all sites',
     })
-    @ApiResponse({
-        type: SiteEvaluationAdminGetListResponse,
-        description: 'Get site evaluation successfully',
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(SiteEvaluationResponse)
     async getListSiteEvaluation(
         @Query() query: SiteEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<SiteEvaluationAdminGetListResponse>> {
@@ -69,11 +69,7 @@ export class EvaluationAdminController {
         summary: 'Get list of team evaluation',
         description: 'Admin can retrieve evaluation of all teams',
     })
-    @ApiResponse({
-        type: TeamEvaluationAdminGetListResponse,
-        description: 'Get team evaluation successfully',
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(TeamEvaluationResponse)
     async getListTeamEvaluation(
         @Query() query: TeamEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<TeamEvaluationAdminGetListResponse>> {
@@ -108,11 +104,7 @@ export class EvaluationAdminController {
         summary: 'Get list of member evaluation',
         description: 'Admin can retrieve evaluation of all members',
     })
-    @ApiResponse({
-        type: MemberEvaluationAdminGetListResponse,
-        description: 'Get member evaluation successfully',
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(MemberEvaluationResponse)
     async getListMemberEvaluation(
         @Query() query: MemberEvaluationAdminGetListRequest,
     ): Promise<BaseResponse<MemberEvaluationAdminGetListResponse>> {

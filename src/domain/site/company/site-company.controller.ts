@@ -21,10 +21,11 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
-import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
+import { SiteCompanyGetListResponse, SiteResponse } from './response/site-company-get-list.response';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
 import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
 import { SiteCompanyService } from './site-company.service';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -39,11 +40,7 @@ export class SiteCompanyController {
         summary: 'Get list of sites',
         description: 'Company can get list for all created sites',
     })
-    @ApiResponse({
-        type: SiteCompanyGetListResponse,
-        description: 'Get site successfully',
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(SiteResponse)
     async getList(
         @Query() query: SiteCompanyGetListRequest,
         @Req() request: AccountIdExtensionRequest,

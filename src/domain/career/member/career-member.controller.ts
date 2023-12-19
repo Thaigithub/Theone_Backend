@@ -9,7 +9,8 @@ import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request
 import { CareerMemberService } from './career-member.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list-request';
-import { CareerMemberGetListResponse } from './response/career-member-get-list.response';
+import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
@@ -25,11 +26,7 @@ export class CareerMemberController {
         summary: 'Get list of careers of a member',
         description: 'Members can retrieve all of their careers',
     })
-    @ApiResponse({
-        type: CareerMemberGetListResponse,
-        description: 'Get list career successfully',
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(CareerResponse)
     async getList(
         @Query() query: CareerMemberGetListRequest,
         @Req() request: AccountIdExtensionRequest,

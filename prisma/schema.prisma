@@ -468,6 +468,8 @@ model Site {
   type                      SiteType                   @default(REGISTERED)
   name                      String?
   address                   String?
+  addressCity               String?
+  addressDistrict           String?
   longitude                 Float?
   latitude                  Float?
   contact                   String?

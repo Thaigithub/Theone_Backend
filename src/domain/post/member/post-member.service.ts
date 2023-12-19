@@ -1,10 +1,63 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { PostMemberGetListRequest } from './request/post-member-get-list.request';
+import { PostResponse } from './response/post-member-get-list.response';
 
 @Injectable()
 export class PostMemberService {
     constructor(private prismaService: PrismaService) {}
+
+    async getList(query: PostMemberGetListRequest): Promise<PostResponse[]> {
+        const posts = await this.prismaService.post.findMany({
+            select: {
+                id: true,
+                name: true,
+                occupation: {
+                    select: {
+                        codeName: true,
+                    },
+                },
+                site: {
+                    select: {
+                        name: true,
+                        address: true,
+                        addressCity: true,
+                        addressDistrict: true,
+                    },
+                },
+                endDate: true,
+            },
+            where: {
+                isActive: true,
+            },
+            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
+            take: query.pageNumber && query.pageSize && query.pageSize,
+        });
+        return posts.map((item) => {
+            const occupation = item.occupation?.codeName;
+            const site = item.site;
+            delete item.occupation;
+            delete item.site;
+            return {
+                ...item,
+                occupation,
+                siteName: site.name,
+                siteAddress: site.address,
+                siteAddressCity: site.addressCity,
+                siteAddressDistrict: site.addressDistrict,
+            };
+        });
+    }
+
+    async getTotal(): Promise<number> {
+        return await this.prismaService.post.count({
+            where: {
+                isActive: true,
+            },
+        });
+    }
+
     async addApplyPost(accountId: number, id: number) {
         const account = await this.prismaService.account.findUnique({
             where: {
@@ -45,6 +98,7 @@ export class PostMemberService {
             },
         });
     }
+
     async updateInterestPost(accountId: number, id: number): Promise<PostMemberUpdateInterestResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {

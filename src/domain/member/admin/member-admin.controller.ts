@@ -14,7 +14,8 @@ import {
     GetMembersListRequest,
 } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
-import { MemberAdminGetListResponse } from './response/member-admin-get-list.response';
+import { MemberAdminGetListResponse, MemberResponse } from './response/member-admin-get-list.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 
 @ApiTags('[ADMIN] Member Management')
 @Roles(AccountType.ADMIN)
@@ -32,10 +33,7 @@ export class MemberAdminController {
         summary: 'Listing members',
         description: 'Admin can search members by id, name, or can filter by membership level, account status',
     })
-    @ApiResponse({
-        type: MemberAdminGetListResponse,
-        status: HttpStatus.OK,
-    })
+    @ApiOkResponsePaginated(MemberResponse)
     async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<MemberAdminGetListResponse>> {
         const membersList = await this.memberAdminService.getList(query);
         const membersTotal = await this.memberAdminService.getTotal(query);

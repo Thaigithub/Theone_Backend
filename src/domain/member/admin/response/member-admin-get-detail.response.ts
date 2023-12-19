@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Account, BankAccount, Disability, DisabledType, ForeignWorker, Member, MemberLevel, Team } from '@prisma/client';
+import {
+    Account,
+    AccountStatus,
+    BankAccount,
+    Disability,
+    DisabledType,
+    ForeignWorker,
+    Member,
+    MemberLevel,
+    Team,
+} from '@prisma/client';
 
 export class MemberAdminGetDetailResponse {
     @ApiProperty({ type: String })
@@ -8,11 +18,11 @@ export class MemberAdminGetDetailResponse {
     contact: Member['contact'];
     @ApiProperty({ type: String })
     username: Account['username'];
-    @ApiProperty({ type: String })
+    @ApiProperty({ type: 'enum', enum: AccountStatus })
     status: Account['status'];
     @ApiProperty({ type: 'enum', enum: DisabledType })
     obstacle: Disability['disableType'];
-    @ApiProperty({ type: String })
+    @ApiProperty({ type: Date })
     joinDate: Member['createdAt'];
     @ApiProperty({ type: 'enum', enum: MemberLevel })
     level: Member['level'];
@@ -27,6 +37,7 @@ export class MemberAdminGetDetailResponse {
             },
             registrationDate: {
                 type: 'string',
+                format: 'date',
             },
         },
     })
@@ -46,6 +57,7 @@ export class MemberAdminGetDetailResponse {
             },
             dateOfIssue: {
                 type: 'string',
+                format: 'date',
             },
         },
     })
@@ -59,6 +71,9 @@ export class MemberAdminGetDetailResponse {
         items: {
             type: 'object',
             properties: {
+                id: {
+                    type: 'number',
+                },
                 name: {
                     type: 'string',
                 },
@@ -69,6 +84,7 @@ export class MemberAdminGetDetailResponse {
         },
     })
     teams: {
+        id: Team['id'];
         name: Team['name'];
         code: Team['code'];
     }[];
