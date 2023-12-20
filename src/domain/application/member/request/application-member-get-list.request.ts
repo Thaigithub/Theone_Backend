@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PostApplicationStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumber, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
 
 export class ApplicationMemberGetListRequest {
     @ApiProperty({
@@ -18,7 +18,7 @@ export class ApplicationMemberGetListRequest {
         required: false,
     })
     @Expose()
-    @IsNumber()
+    @IsNumberString()
     @IsOptional()
     public pageNumber: string;
 
