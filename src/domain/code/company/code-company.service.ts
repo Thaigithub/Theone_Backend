@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CodeAdminFilter } from '../admin/dto/code-admin-filter.enum';
 import { CodeAdminGetListRequest } from '../admin/request/code-admin-get-list.request';
@@ -38,7 +39,7 @@ export class CodeCompanyService {
                 where: queryFilter,
             });
 
-            return new CodeAdminGetListResponse(codeList, codeListCount);
+            return new PaginationResponse(codeList, new PageInfo(codeListCount));
         } catch (error) {
             throw new InternalServerErrorException(error);
         }

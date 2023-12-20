@@ -4,7 +4,9 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { CodeAdminService } from './code-admin.service';
+import { CodeAdminDeleteRequest } from './request/code-admin-delete.request';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
 import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
@@ -18,7 +20,6 @@ import { CodeAdminGetListResponse } from './response/code-admin-get-list.respons
 export class CodeAdminController {
     constructor(private readonly codeAdminService: CodeAdminService) {}
 
-    // Get members list by conditions
     @Get()
     @ApiOperation({
         summary: 'Listing code',
@@ -35,6 +36,7 @@ export class CodeAdminController {
         required: false,
         description: 'Code type for filter: ALL, SPECIAL_NOTE, JOB',
     })
+    @ApiOkResponsePaginated(CodeAdminGetItemResponse)
     async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeAdminGetListResponse>> {
         const code = await this.codeAdminService.getList(query);
         return BaseResponse.of(code);
@@ -80,13 +82,13 @@ export class CodeAdminController {
         return BaseResponse.ok();
     }
 
-    @Delete(':id')
+    @Delete()
     @ApiOperation({
         summary: 'Delete code',
         description: 'Admin can delete a code',
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async deleteCode(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.codeAdminService.deleteCode(id));
+    async deleteCode(@Query() query: CodeAdminDeleteRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.codeAdminService.deleteCode(query));
     }
 }
