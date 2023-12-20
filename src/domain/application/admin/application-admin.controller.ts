@@ -4,14 +4,14 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
+import { ApplicationAdminService } from './application-admin.service';
 import {
     ApplicationAdminSearchCategoryFilter,
     ApplicationAdminSortFilter,
     ApplicationAdminStatusFilter,
 } from './dto/application-admin-filter';
-import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
-import { ApplicationAdminService } from './application-admin.service';
-import { ApplicationAdminGetListResponse } from './response/application-admin-get-list.response';
+import { ApplicationAdminGetPostListRequest } from './request/application-admin-get-list-post.request';
+import { ApplicationAdminGetPostListResponse } from './response/application-admin-get-list-post.response';
 
 @ApiTags('[ADMIN] Application Management')
 @Controller('/admin/applications')
@@ -29,7 +29,7 @@ export class ApplicationAdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'The announcement lists retrieved successfully',
-        type: ApplicationAdminGetListRequest,
+        type: ApplicationAdminGetPostListRequest,
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
@@ -57,8 +57,10 @@ export class ApplicationAdminController {
         required: false,
         description: 'Any text to search, for example: "The One"',
     })
-    async getList(@Query() query: ApplicationAdminGetListRequest): Promise<BaseResponse<ApplicationAdminGetListResponse>> {
-        const applications = await this.applicationAdminService.getList(query);
-        return BaseResponse.of(applications);
+    async getAnnouncementList(
+        @Query() query: ApplicationAdminGetPostListRequest,
+    ): Promise<BaseResponse<ApplicationAdminGetPostListResponse>> {
+        const postList = await this.applicationAdminService.getPostList(query);
+        return BaseResponse.of(postList);
     }
 }

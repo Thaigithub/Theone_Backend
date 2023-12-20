@@ -8,13 +8,13 @@ import {
     ApplicationAdminSortFilter,
     ApplicationAdminStatusFilter,
 } from './dto/application-admin-filter';
-import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
-import { ApplicationAdminGetListResponse } from './response/application-admin-get-list.response';
+import { ApplicationAdminGetPostListRequest } from './request/application-admin-get-list-post.request';
+import { ApplicationAdminGetPostListResponse } from './response/application-admin-get-list-post.response';
 
 @Injectable()
 export class ApplicationAdminService {
     constructor(private prismaService: PrismaService) {}
-    async getList(query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetListResponse> {
+    async getPostList(query: ApplicationAdminGetPostListRequest): Promise<ApplicationAdminGetPostListResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             ...(query.status == ApplicationAdminStatusFilter.STOPPED && { isActive: false }),
             ...(query.status == ApplicationAdminStatusFilter.HIDDEN && { isHidden: true }),
@@ -69,7 +69,7 @@ export class ApplicationAdminService {
             orderBy: sortStrategy,
             ...QueryPagingHelper.queryPaging(query),
         });
-        const applicationList = tempList.map((application) => ({
+        const postList = tempList.map((application) => ({
             ...application,
             countApplication: application.applicants.length,
             applicants: undefined, // Remove the 'applicants' attribute if desired
@@ -77,6 +77,6 @@ export class ApplicationAdminService {
         const applicationListCount = await this.prismaService.post.count({
             where: queryFilter,
         });
-        return new PaginationResponse(applicationList, new PageInfo(applicationListCount));
+        return new PaginationResponse(postList, new PageInfo(applicationListCount));
     }
 }

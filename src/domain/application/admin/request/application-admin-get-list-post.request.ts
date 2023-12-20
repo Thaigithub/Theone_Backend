@@ -7,7 +7,7 @@ import {
     ApplicationAdminStatusFilter,
 } from '../dto/application-admin-filter';
 
-export class ApplicationAdminGetListRequest {
+export class ApplicationAdminGetPostListRequest {
     @Expose()
     @IsEnum(ApplicationAdminStatusFilter)
     @IsOptional()
