@@ -161,8 +161,35 @@ export class ApplicationMemberService {
             select: {
                 assignedAt: true,
                 status: true,
+                team: {
+                    select: {
+                        name: true,
+                        members: {
+                            select: {
+                                member: {
+                                    select: {
+                                        name: true,
+                                        contact: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
                 post: {
                     select: {
+                        interested: {
+                            where: {
+                                member: {
+                                    accountId,
+                                },
+                            },
+                        },
+                        occupation: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
                         id: true,
                         name: true,
                         startDate: true,
@@ -198,6 +225,7 @@ export class ApplicationMemberService {
                 },
             },
         });
+        console.log(application);
         if (!application) throw new NotFoundException('Application not found');
         return {
             companyLogo: application.post.site.Company.logo.file,
@@ -214,6 +242,14 @@ export class ApplicationMemberService {
             postStartDate: application.post.endDate,
             status: application.status,
             appliedDate: application.assignedAt,
+            occupationName: application.post.occupation ? application.post.occupation.codeName : null,
+            isInterested: application.post.interested.length !== 0 ? true : false,
+            team: application.team && {
+                name: application.team.name,
+                members: application.team.members.map((item) => {
+                    return { name: item.member.name, contact: item.member.contact };
+                }),
+            },
         };
     }
     async changeApplicationStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
