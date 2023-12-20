@@ -30,8 +30,8 @@ export class ApplicationMemberService {
             })
         ).teams.map((item) => item.teamId);
         const search = {
-            skip: query.pageNumber && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageSize,
+            skip: query.pageNumber && (parseInt(query.pageNumber) - 1) * parseInt(query.pageSize),
+            take: query.pageSize && parseInt(query.pageSize),
             where: {
                 OR: [
                     {
@@ -41,6 +41,10 @@ export class ApplicationMemberService {
                             },
                         },
                         status: query.status,
+                        assignedAt: {
+                            gt: query.startDate && new Date(query.startDate),
+                            lt: query.endDate && new Date(query.endDate),
+                        },
                     },
                     {
                         team: {
@@ -62,8 +66,6 @@ export class ApplicationMemberService {
                         name: true,
                         endDate: true,
                         status: true,
-                        siteName: true,
-                        siteAddress: true,
                         occupation: {
                             select: {
                                 codeName: true,
@@ -89,7 +91,6 @@ export class ApplicationMemberService {
                                                         fileName: true,
                                                         key: true,
                                                         type: true,
-                                                        size: true,
                                                     },
                                                 },
                                             },
@@ -108,8 +109,8 @@ export class ApplicationMemberService {
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
-                occupationId: item.post.occupation.id,
-                occupationName: item.post.occupation.codeName,
+                occupationId: item.post.occupation ? item.post.occupation.id : null,
+                occupationName: item.post.occupation ? item.post.occupation.codeName : null,
                 endDate: item.post.endDate,
                 status: item.status,
                 appliedDate: item.assignedAt,

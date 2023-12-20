@@ -1,28 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PostApplicationStatus } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumber, IsNumberString, IsOptional, Matches } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsNumber, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
 
 export class ApplicationMemberGetListRequest {
     @ApiProperty({
-        type: 'number',
+        type: 'string',
         required: false,
     })
     @Expose()
     @IsNumberString()
     @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
+    public pageSize: string;
 
     @ApiProperty({
-        type: 'number',
+        type: 'string',
         required: false,
     })
     @Expose()
     @IsNumber()
     @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
+    public pageNumber: string;
 
     @Expose()
     @IsEnum(PostApplicationStatus)
@@ -34,7 +32,8 @@ export class ApplicationMemberGetListRequest {
     public status: PostApplicationStatus;
 
     @Expose()
-    @IsDateString()
+    @IsString()
+    @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
@@ -42,11 +41,10 @@ export class ApplicationMemberGetListRequest {
         description: 'Start date',
         example: '2023-05-10',
     })
-    @Transform(({ value }) => value && new Date(value))
-    public startDate: Date;
+    public startDate: string;
 
     @Expose()
-    @IsDateString()
+    @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
@@ -54,6 +52,5 @@ export class ApplicationMemberGetListRequest {
         description: 'End date',
         example: '2023-05-10',
     })
-    @Transform(({ value }) => value && new Date(value))
-    public endDate: Date;
+    public endDate: string;
 }

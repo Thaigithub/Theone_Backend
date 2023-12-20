@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Application, Company, Post, PostApplicationStatus, PostStatus, Site } from '@prisma/client';
-import { FileClass } from '../dto/application-admin-filetype.response.dto';
+import { FileClass } from '../dto/application-member-filetype.response.dto';
 
 export class ApplicationMemberGetDetailResponse {
     @ApiProperty({ type: String })
