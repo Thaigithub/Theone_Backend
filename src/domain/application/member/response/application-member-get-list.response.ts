@@ -26,6 +26,8 @@ class ApplicationMemberGetResponse {
     status: Application['status'];
     @ApiProperty({ type: Date })
     appliedDate: Application['assignedAt'];
+    @ApiProperty({ type: Number })
+    applicationId: Application['id'];
 }
 
 export class ApplicationMemberGetListResponse extends PaginationResponse<ApplicationMemberGetResponse> {}

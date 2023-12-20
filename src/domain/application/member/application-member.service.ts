@@ -105,6 +105,7 @@ export class ApplicationMemberService {
         };
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
+                applicationId: item.id,
                 companyLogo: item.post.site.Company.logo.file,
                 postId: item.post.id,
                 postName: item.post.name,
@@ -184,7 +185,7 @@ export class ApplicationMemberService {
                                                         key: true,
                                                         fileName: true,
                                                         type: true,
-                                                        size: true,
+                                                        // size: true,
                                                     },
                                                 },
                                             },
