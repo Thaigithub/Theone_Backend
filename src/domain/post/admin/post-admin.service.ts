@@ -6,9 +6,9 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 import { PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
+import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @Injectable()
 export class PostAdminService {
@@ -200,6 +200,27 @@ export class PostAdminService {
             });
         } catch (err) {
             throw new HttpException('The Post Id with positive status not found!', HttpStatus.NOT_FOUND);
+        }
+    }
+    async changeHiddenStatus(id: number, request: PostAdminModifyRequest) {
+        try {
+            const post_record = await this.prismaService.post.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+            if (post_record.isHidden != request.isHidden) {
+                await this.prismaService.post.update({
+                    where: {
+                        id: id,
+                    },
+                    data: {
+                        isHidden: request.isHidden,
+                    },
+                });
+            }
+        } catch (err) {
+            throw new HttpException('The Post id is not found', HttpStatus.NOT_FOUND);
         }
     }
 }
