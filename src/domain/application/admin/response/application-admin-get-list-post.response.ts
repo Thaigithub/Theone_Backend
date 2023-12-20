@@ -24,4 +24,4 @@ export class ApplicationAdminResponse {
     public status: Post['status'];
 }
 
-export class ApplicationAdminGetListResponse extends PaginationResponse<ApplicationAdminResponse> {}
+export class ApplicationAdminGetPostListResponse extends PaginationResponse<ApplicationAdminResponse> {}
