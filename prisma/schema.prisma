@@ -129,6 +129,7 @@ model Company {
   sites              Site[]
   logo               Logo?
   contactCard        ContactCard?
+  posts              Post[]
 
   @@map("companies")
 }
@@ -523,8 +524,10 @@ model Post {
   workday                   Workday[]
   startWorkTime             DateTime?                   @map("start_work_time") @db.Time()
   endWorkTime               DateTime?                   @map("end_work_time") @db.Time()
-  site                      Site                        @relation(fields: [siteId], references: [id])
-  siteId                    Int
+  site                      Site?                       @relation(fields: [siteId], references: [id])
+  siteId                    Int?
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  companyId                 Int
   postEditor                String?                     @map("post_editor")
   view                      Int                         @default(0)
   PostBanner                PostBanner[]
@@ -533,6 +536,7 @@ model Post {
   HeadhuntingRequest        HeadhuntingRequest[]
   headhuntingRecommendation HeadhuntingRecommendation[]
   deleteReason              String?
+  workLocation              String?                     @map("work_location")
 
   @@map("posts")
 }

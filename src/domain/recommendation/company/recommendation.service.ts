@@ -31,9 +31,7 @@ export class RecommendationCompanyService {
             where: {
                 id: postId,
                 isActive: true,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
         });
 
@@ -111,9 +109,7 @@ export class RecommendationCompanyService {
             where: {
                 id: body.postId,
                 isActive: true,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
         });
 
@@ -184,9 +180,7 @@ export class RecommendationCompanyService {
             where: {
                 id: body.postId,
                 isActive: true,
-                site: {
-                    companyId: account.company.id,
-                },
+                companyId: account.company.id,
             },
         });
 

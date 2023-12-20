@@ -33,19 +33,23 @@ export class InterviewCompanyService {
         const queryFilter: Prisma.InterviewWhereInput = {
             application: {
                 post: {
-                    site: {
-                        companyId: account.company.id,
-                    },
+                    companyId: account.company.id,
                 },
             },
             ...(query.object === RequestObject.INDIVIDUAL && {
                 application: {
                     team: null,
+                    post: {
+                        companyId: account.company.id,
+                    },
                 },
             }),
             ...(query.object === RequestObject.TEAM && {
                 application: {
                     member: null,
+                    post: {
+                        companyId: account.company.id,
+                    },
                 },
             }),
             ...(query.supportCategory && { supportCategory: SupportCategory[query.supportCategory] }),
@@ -112,13 +116,13 @@ export class InterviewCompanyService {
                         post: {
                             select: {
                                 name: true,
+                                companyId: true,
                             },
                         },
                     },
                 },
             },
             where: queryFilter,
-
             orderBy: {
                 createdAt: 'desc',
             },
@@ -151,9 +155,7 @@ export class InterviewCompanyService {
                 id,
                 application: {
                     post: {
-                        site: {
-                            companyId: account.company.id,
-                        },
+                        companyId: account.company.id,
                     },
                 },
             },
@@ -180,9 +182,7 @@ export class InterviewCompanyService {
                 id,
                 application: {
                     post: {
-                        site: {
-                            companyId: account.company.id,
-                        },
+                        companyId: account.company.id,
                     },
                 },
             },
@@ -210,9 +210,7 @@ export class InterviewCompanyService {
                     id,
                     application: {
                         post: {
-                            site: {
-                                companyId: account.company.id,
-                            },
+                            companyId: account.company.id,
                         },
                     },
                 },

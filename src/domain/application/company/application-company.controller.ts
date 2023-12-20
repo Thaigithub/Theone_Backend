@@ -30,7 +30,6 @@ export class ApplicationCompanyController {
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({ name: 'applicationDate', type: Date, required: false, description: 'Application date' })
     @ApiQuery({
         name: 'searchCategory',
         type: String,

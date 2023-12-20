@@ -1,12 +1,11 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AccountType, InterviewStatus, RequestObject, SupportCategory } from '@prisma/client';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType, InterviewStatus } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
 import { BaseResponse } from 'utils/generics/base.response';
-import { InterviewCompanySearchCategories } from './dto/interview-company-search-category.enum';
 
 import { InterviewCompanyService } from './interview-company.service';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
@@ -29,35 +28,6 @@ export class InterviewCompanyController {
         status: HttpStatus.OK,
         description: 'The interviews list retrieved successfully',
         type: InterviewCompanyGetItemResponse,
-    })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({
-        name: 'object',
-        type: String,
-        required: false,
-        description: 'Object for filter: ' + Object.values(RequestObject),
-    })
-    @ApiQuery({
-        name: 'supportCategory',
-        type: String,
-        required: false,
-        description: 'Support Category for filter: ' + Object.values(SupportCategory),
-    })
-    @ApiQuery({
-        name: 'interviewStatus',
-        type: String,
-        required: false,
-        description: 'Interview Status for filter: ' + Object.values(InterviewStatus),
-    })
-    @ApiQuery({ name: 'interviewRequestStartDate', type: String, required: false, description: 'Interview request start date' })
-    @ApiQuery({ name: 'interviewRequestEndDate', type: String, required: false, description: 'Interview request end date' })
-    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for search' })
-    @ApiQuery({
-        name: 'searchCategory',
-        type: String,
-        required: false,
-        description: 'Category for search: ' + Object.values(InterviewCompanySearchCategories),
     })
     async getList(
         @Req() request: any,
