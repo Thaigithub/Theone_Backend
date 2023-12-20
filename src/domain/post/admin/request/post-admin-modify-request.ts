@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 
 export class PostAdminModifyRequest {
     @Expose()
@@ -42,6 +42,12 @@ export class PostAdminModifyRequest {
     @IsNotEmpty({ message: 'Name is required' })
     @IsOptional()
     public name: string;
+
+    @Expose()
+    @IsBoolean()
+    @ApiProperty({ type: Boolean, example: true })
+    @IsOptional()
+    public isHidden: boolean;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })

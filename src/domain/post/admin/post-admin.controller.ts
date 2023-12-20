@@ -103,6 +103,26 @@ export class PostAdminController {
         return BaseResponse.ok();
     }
 
+
+    @Patch('/:id/exposure/')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Company change post information',
+    })
+    @ApiQuery({
+        name: 'isHidden',
+        type: Boolean,
+        required: false,
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changeHiddenStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: PostAdminModifyRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postAdminService.changeHiddenStatus(id, request);
+        return BaseResponse.ok();
+    }
+
     @Delete('/:id')
     @ApiOperation({
         summary: 'Delete post',
