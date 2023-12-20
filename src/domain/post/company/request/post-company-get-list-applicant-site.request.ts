@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PostType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PostCompanyPostCategoryFilter } from '../enum/post-company-filter.enum';
 
 export class PostCompanyGetListApplicantSiteRequest {
     @Expose()
@@ -19,15 +18,6 @@ export class PostCompanyGetListApplicantSiteRequest {
     @IsString()
     @IsOptional()
     public keyword: string;
-
-    @Expose()
-    @IsEnum(PostCompanyPostCategoryFilter)
-    @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: PostCompanyPostCategoryFilter,
-    })
-    public category: PostCompanyPostCategoryFilter;
 
     @Expose()
     @IsEnum(PostType)

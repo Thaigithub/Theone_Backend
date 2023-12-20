@@ -27,13 +27,13 @@ import { PostCompanyGetListRequest } from './request/post-company-get-list.reque
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyGetItemApplicantsResponse } from './response/post-company-get-item-applicants.response';
+import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
 import {
     PostCompanyGetItemHeadhuntingRequestResponse,
     PostCompanyGetListHeadhuntingRequestResponse,
 } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
-import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 
 @ApiTags('[COMPANY] Posts Management')
 @Controller('/company/posts')
@@ -92,7 +92,6 @@ export class PostCompanyController {
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
     @ApiQuery({ name: 'startDate', type: Date, required: false, description: 'Start date period of post' })
     @ApiQuery({ name: 'endDate', type: Date, required: false, description: 'End date period of post' })
-    @ApiQuery({ name: 'category', type: String, required: false, description: 'Search by category: POST_NAME, SITE_NAME' })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
     @ApiOkResponsePaginated(PostCompanyGetItemApplicantsResponse)

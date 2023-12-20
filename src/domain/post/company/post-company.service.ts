@@ -3,7 +3,6 @@ import { CodeType, PostCategory, PostStatus, PostType, Prisma, RequestStatus, Si
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { PostCompanyPostCategoryFilter } from './enum/post-company-filter.enum';
 import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
@@ -231,8 +230,8 @@ export class PostCompanyService {
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
-        request.startWorkTime = FAKE_STAMP + request.startWorkTime;
-        request.endWorkTime = FAKE_STAMP + request.endWorkTime;
+        request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
+        request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
 
         await this.prismaService.post.update({
             where: {
@@ -247,8 +246,8 @@ export class PostCompanyService {
                 category: request.category,
                 status: request.status,
                 name: request.name,
-                startDate: request.startDate,
-                endDate: request.endDate,
+                startDate: new Date(request.startDate),
+                endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeople: request.numberOfPeople,
                 specialNoteId: request.specialNoteId || null,
@@ -256,8 +255,8 @@ export class PostCompanyService {
                 otherInformation: request.otherInformation,
                 salaryType: request.salaryType,
                 salaryAmount: request.salaryAmount,
-                startWorkDate: request.startWorkDate,
-                endWorkDate: request.endWorkDate,
+                startWorkDate: new Date(request.startWorkDate),
+                endWorkDate: new Date(request.endWorkDate),
                 workday: request.workday,
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
@@ -311,11 +310,11 @@ export class PostCompanyService {
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             ...(query.type && { type: PostType[query.type] }),
-            ...(query.category === PostCompanyPostCategoryFilter.POST_NAME && {
-                name: { contains: query.keyword, mode: 'insensitive' },
-            }),
-            ...(query.category === PostCompanyPostCategoryFilter.SITE_NAME && {
-                siteName: { contains: query.keyword, mode: 'insensitive' },
+            ...(query.keyword && {
+                OR: [
+                    { name: { contains: query.keyword, mode: 'insensitive' } },
+                    { site: { name: { contains: query.keyword, mode: 'insensitive' } } },
+                ],
             }),
         };
 
