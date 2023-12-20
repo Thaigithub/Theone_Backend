@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Application, Code, Post, PostApplicationStatus, PostStatus, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
-import { FileClass } from '../dto/application-admin-filetype.response.dto';
+import { FileClass } from '../dto/application-member-filetype.response.dto';
 
 class ApplicationMemberGetResponse {
     @ApiProperty({ type: FileClass })
