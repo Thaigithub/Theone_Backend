@@ -782,11 +782,6 @@ enum PaymentForm {
   FIRST_CLASS
 }
 
-enum ApplicationContractStatus {
-  UNDER_CONTRACT
-  CONTRACT_TERMINATED
-}
-
 enum FunctionName {
   MEMBER_MANAGEMENT
   TEAM_MANAGEMENT
@@ -975,8 +970,7 @@ enum PostApplicationStatus {
 enum SiteStatus {
   REVIEWING
   REJECTED
-  IN_PROGRESS
-  EXPIRED
+  APPROVED
 }
 
 enum RequestStatus {

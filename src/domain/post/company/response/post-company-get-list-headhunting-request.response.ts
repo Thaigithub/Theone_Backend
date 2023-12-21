@@ -30,8 +30,8 @@ export class PostCompanyGetItemHeadhuntingRequestResponse {
     @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
     public site: PostCompanyGetItemListSiteResponse;
 
-    @ApiProperty({ type: [PostCompanyGetListHeadhuntingRequestDTO] })
-    public headhuntingRequest: PostCompanyGetListHeadhuntingRequestDTO[];
+    @ApiProperty({ type: PostCompanyGetListHeadhuntingRequestDTO })
+    public headhuntingRequest: PostCompanyGetListHeadhuntingRequestDTO;
 }
 
 export class PostCompanyGetListHeadhuntingRequestResponse extends PaginationResponse<PostCompanyGetItemHeadhuntingRequestResponse> {}
