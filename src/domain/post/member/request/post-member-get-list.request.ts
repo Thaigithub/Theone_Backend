@@ -1,9 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class PostMemberGetListRequest {
+    @ApiProperty({
+        type: 'string',
+        required: false,
+        example: ['postName', 'siteName'],
+    })
+    @Expose()
+    @IsString()
+    @IsIn(['postName', 'siteName'])
+    @IsOptional()
+    public searchCategory: string;
+
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
+    @Expose()
+    @IsString()
+    @IsOptional()
+    public keyword: string;
+
     @ApiProperty({
         type: 'string',
         required: false,
