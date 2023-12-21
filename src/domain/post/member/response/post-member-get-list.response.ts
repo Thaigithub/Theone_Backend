@@ -2,6 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Code, Post, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
+export class OccupationResponse {
+    @ApiProperty({ type: 'number' })
+    id: Code['id'];
+
+    @ApiProperty({ type: 'string' })
+    codeName: Code['codeName'];
+}
+
+export class ConstructionMachinaryResponse {
+    @ApiProperty({ type: 'number' })
+    id: Code['id'];
+
+    @ApiProperty({ type: 'string' })
+    codeName: Code['codeName'];
+}
+
 export class PostResponse {
     @ApiProperty({ type: 'number' })
     id: Post['id'];
