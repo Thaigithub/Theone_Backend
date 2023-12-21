@@ -1,12 +1,11 @@
 import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, PostApplicationStatus, SupportCategory } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { ApplicationCompanyService } from './application-company.service';
-import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import {
     ApplicationCompanyGetListApplicantsItemResponse,
@@ -28,15 +27,6 @@ export class ApplicationCompanyController {
         summary: 'Listing post applicants',
         description: 'Company can search/filter post applicants',
     })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({
-        name: 'searchCategory',
-        type: String,
-        required: false,
-        description: 'Search by category: ' + Object.values(ApplicationCompanyApplicantsSearch),
-    })
-    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiOkResponsePaginated(ApplicationCompanyGetListApplicantsItemResponse)
     async getListApplicantSite(
         @Param('postId', ParseIntPipe) postId: number,

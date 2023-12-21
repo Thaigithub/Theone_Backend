@@ -1,18 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpStatus, Param, ParseIntPipe, Put, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, SupportCategory } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { RecommendationCompanyService } from './recommendation.service';
 import { RecommendationCompanyInterviewProposeRequest } from './request/recommendaation-company-interview-proposed.request';
-import { RecommendationCompanyGetListHeadhuntingApprovedRequest } from './request/recommendation-company-get-list-headhunting-approved.request';
 import { RecommendationCompanyGetDetailApplicantResponse } from './response/recommendation-company-get-detail-applicants.response';
-import {
-    RecommendationCompanyGetItemHeadhuntingApprovedResponse,
-    RecommendationCompanyGetListHeadhuntingApprovedResponse,
-} from './response/recommendation-company-get-list-headhunting-approved.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -21,23 +15,6 @@ import {
 @ApiTags('[COMPANY] Applicants Recommendation Management')
 export class RecommendationCompanyController {
     constructor(private readonly recommendationCompanyService: RecommendationCompanyService) {}
-
-    @Get(':postId/recommendation')
-    @ApiOperation({
-        summary: 'Listing recommendation applicants',
-        description: 'Company can view list recommendation applicants',
-    })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiOkResponsePaginated(RecommendationCompanyGetItemHeadhuntingApprovedResponse)
-    async getList(
-        @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: any,
-        @Query() query: RecommendationCompanyGetListHeadhuntingApprovedRequest,
-    ): Promise<BaseResponse<RecommendationCompanyGetListHeadhuntingApprovedResponse>> {
-        const recommendationApplicants = await this.recommendationCompanyService.getList(request.user.accountId, postId, query);
-        return BaseResponse.of(recommendationApplicants);
-    }
 
     @Put('/:applicantId/propose')
     @ApiOperation({

@@ -31,7 +31,7 @@ export class AccountMemberService {
                 member: {
                     create: {
                         name: request.name,
-                        level: MemberLevel.THREE,
+                        level: MemberLevel.THIRD,
                         signupMethod: SignupMethodType.GENERAL,
                     },
                 },

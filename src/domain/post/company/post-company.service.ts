@@ -154,8 +154,8 @@ export class PostCompanyService {
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
-        request.startWorkTime = FAKE_STAMP + request.startWorkTime + 'Z';
-        request.endWorkTime = FAKE_STAMP + request.endWorkTime + 'Z';
+        request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
+        request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
 
         await this.prismaService.post.update({
             where: {
@@ -356,14 +356,39 @@ export class PostCompanyService {
             throw new BadRequestException('No Headhunting Post found');
         }
 
-        await this.prismaService.headhuntingRequest.create({
-            data: {
-                detail: body.detail,
-                object: body.object,
-                status: RequestStatus.WAITING_FOR_APPROVAL,
+        const existRequest = await this.prismaService.headhuntingRequest.findUnique({
+            where: {
                 postId: id,
+                isActive: true,
             },
         });
+
+        if (!existRequest) {
+            await this.prismaService.headhuntingRequest.create({
+                data: {
+                    detail: body.detail,
+                    object: body.object,
+                    status: RequestStatus.APPLY,
+                    postId: id,
+                },
+            });
+        } else {
+            if (existRequest.status === RequestStatus.APPLY) {
+                throw new BadRequestException('Headhunting request is already applied');
+            }
+
+            await this.prismaService.headhuntingRequest.update({
+                where: {
+                    postId: id,
+                    isActive: true,
+                },
+                data: {
+                    detail: body.detail,
+                    object: body.object,
+                    status: RequestStatus.RE_APPLY,
+                },
+            });
+        }
     }
 
     async getRequestAccount(accountId: number) {
