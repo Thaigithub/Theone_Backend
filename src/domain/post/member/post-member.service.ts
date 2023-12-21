@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 import { OccupationResponse, PostResponse } from './response/post-member-get-list.response';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { CodeType, ExperienceType } from '@prisma/client';
+import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 
 @Injectable()
 export class PostMemberService {
@@ -35,7 +36,17 @@ export class PostMemberService {
         });
     }
 
-    async getList(query: PostMemberGetListRequest, accountId: number): Promise<PostResponse[]> {
+    async getList(accountId: number, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
+        if (siteId) {
+            const siteExist = await this.prismaService.site.count({
+                where: {
+                    isActive: true,
+                    id: siteId,
+                },
+            });
+            if (!siteExist) throw new NotFoundException('Site does not exist');
+        }
+
         const memberId = await this.getMemberId(accountId);
         const interestPosts = await this.prismaService.interest.findMany({
             select: {
@@ -69,12 +80,17 @@ export class PostMemberService {
             },
             where: {
                 isActive: true,
-                experienceType: { in: query.experienceTypeList as ExperienceType[] },
-                occupationId: { in: query.occupationList as number[] },
-                specialNoteId: { in: query.constructionMachineryList as number[] },
+                name: query?.searchCategory === 'postName' ? { contains: query.keyword } : undefined,
+                site: {
+                    id: siteId,
+                    name: query?.searchCategory === 'siteName' ? { contains: query.keyword } : undefined,
+                },
+                experienceType: { in: query?.experienceTypeList as ExperienceType[] },
+                occupationId: { in: query?.occupationList as number[] },
+                specialNoteId: { in: query?.constructionMachineryList as number[] },
             },
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            skip: query?.pageNumber && query?.pageSize && (query.pageNumber - 1) * query.pageSize,
+            take: query?.pageNumber && query?.pageSize && query.pageSize,
         });
         return posts.map((item) => {
             const site = item.site;
@@ -91,6 +107,133 @@ export class PostMemberService {
                 isInterest: listInterestPostIds.includes(item.id) ? true : false,
             };
         });
+    }
+
+    async getDetail(id: number, accountId: number): Promise<PostMemberGetDetailResponse> {
+        const postExist = await this.prismaService.post.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!postExist) throw new NotFoundException('Post does not exist');
+
+        const memberSpecialLicenseList = await this.prismaService.member.findUnique({
+            select: {
+                specialLicenses: {
+                    select: {
+                        Code: {
+                            select: {
+                                id: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                accountId,
+            },
+        });
+
+        const memberSpecialLicenseIdList = memberSpecialLicenseList.specialLicenses.map((item) => {
+            return item.Code.id;
+        });
+
+        const post = await this.prismaService.post.findUnique({
+            select: {
+                name: true,
+                startDate: true,
+                endDate: true,
+                experienceType: true,
+                numberOfPeople: true,
+                workLocation: true,
+                occupation: {
+                    select: {
+                        codeName: true,
+                    },
+                },
+                specialNote: {
+                    select: {
+                        id: true,
+                        codeName: true,
+                    },
+                },
+                salaryType: true,
+                salaryAmount: true,
+                startWorkDate: true,
+                endWorkDate: true,
+                workday: true,
+                startWorkTime: true,
+                endWorkTime: true,
+                postEditor: true,
+                company: {
+                    select: {
+                        logo: {
+                            select: {
+                                file: {
+                                    select: {
+                                        key: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                site: {
+                    select: {
+                        name: true,
+                        contact: true,
+                        personInCharge: true,
+                        personInChargeContact: true,
+                        address: true,
+                        addressCity: true,
+                        addressDistrict: true,
+                        originalBuilding: true,
+                    },
+                },
+            },
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+
+        return {
+            postInformation: {
+                name: post.name,
+                startDate: post.startDate.toISOString().split('T')[0],
+                endDate: post.endDate.toISOString().split('T')[0],
+                numberOfPeople: post.numberOfPeople,
+                description: post.postEditor,
+            },
+            eligibility: {
+                experienceType: post.experienceType,
+                occupation: post.occupation ? post.occupation.codeName : null,
+                specialNote: post.specialNote ? post.specialNote.codeName : null,
+                isEligibleToApply: memberSpecialLicenseIdList.includes(post.specialNote?.id) ? true : false,
+            },
+            workingCondition: {
+                salaryType: post.salaryType,
+                salaryAmount: post.salaryAmount,
+                startWorkDate: post.startWorkDate.toISOString().split('T')[0],
+                endWorkDate: post.endWorkDate.toISOString().split('T')[0],
+                workday: post.workday,
+                startWorkTime: post.startWorkTime.toISOString().split('T')[1],
+                endWorkTime: post.endWorkTime.toISOString().split('T')[1],
+            },
+            siteInformation: {
+                companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
+                siteName: post.site ? post.site.name : null,
+                siteAddress: post.site ? post.site.address : null,
+                siteAddressCity: post.site ? post.site.addressCity : null,
+                siteAddressDistrict: post.site ? post.site.addressDistrict : null,
+                personInCharge: post.site ? post.site.personInCharge : null,
+                personInChargeContact: post.site ? post.site.personInChargeContact : null,
+                contact: post.site ? post.site.contact : null,
+                originalBuilding: post.site ? post.site.originalBuilding : null,
+            },
+            workLocation: post.workLocation,
+        };
     }
 
     async getTotal(): Promise<number> {

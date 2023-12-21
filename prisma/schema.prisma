@@ -323,6 +323,8 @@ model SpecialLicense {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   memberId        Int               @map("member_id")
   member          Member            @relation(fields: [memberId], references: [id])
+  codeId          Int               @map("code_id")
+  Code            Code              @relation(fields: [codeId], references: [id])
   fileId          Int               @unique @map("file_id")
   file            File              @relation(fields: [fileId], references: [id])
 
@@ -449,16 +451,17 @@ enum PostBannerType {
 }
 
 model Code {
-  id        Int      @id @default(autoincrement())
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  code      String   @unique
-  codeName  String   @map("code_name")
-  codeType  CodeType @map("code_type")
-  asSpecial Post[]   @relation(name: "post_special")
-  asJob     Post[]   @relation(name: "post_occupation")
-  career    Career[]
+  id             Int              @id @default(autoincrement())
+  isActive       Boolean          @default(true) @map("is_active")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  code           String           @unique
+  codeName       String           @map("code_name")
+  codeType       CodeType         @map("code_type")
+  asSpecial      Post[]           @relation(name: "post_special")
+  asJob          Post[]           @relation(name: "post_occupation")
+  career         Career[]
+  SpecialLicense SpecialLicense[]
 
   @@map("codes")
 }

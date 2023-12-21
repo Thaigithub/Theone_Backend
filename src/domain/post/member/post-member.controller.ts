@@ -28,8 +28,9 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 
-@ApiTags('[MEMBER] Posts Management')
+@ApiTags('[MEMBER] Post management')
 @Controller('/member/posts')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -98,10 +99,41 @@ export class PostMemberController {
         query.constructionMachineryList = parsedConstructionMachineryList;
         query.experienceTypeList = parsedExperienceTypeList;
 
-        const list = await this.postMemberService.getList(query, request.user.accountId);
+        const list = await this.postMemberService.getList(request.user.accountId, query, undefined);
         const total = await this.postMemberService.getTotal();
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
+    }
+
+    @Get('sites/:id')
+    @ApiOperation({
+        summary: 'Get list of posts by siteId',
+        description: 'Member can retrieve all posts related to a site',
+    })
+    @ApiOkResponsePaginated(PostResponse)
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async getListPostsBySite(
+        @Param('id', ParseIntPipe) siteId: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<PostMemberGetListResponse>> {
+        const list = await this.postMemberService.getList(request.user.accountId, undefined, siteId);
+        const total = await this.postMemberService.getTotal();
+        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
+        return BaseResponse.of(paginationResponse);
+    }
+
+    @Get(':id')
+    @ApiOperation({
+        summary: 'Get post information detail',
+        description: 'Member can retrieve information detail of certain post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: PostMemberGetDetailResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async getDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<PostMemberGetDetailResponse>> {
+        return BaseResponse.of(await this.postMemberService.getDetail(id, request.user.accountId));
     }
 
     @Post('/:id/apply')
