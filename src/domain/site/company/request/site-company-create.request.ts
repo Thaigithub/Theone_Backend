@@ -26,6 +26,22 @@ export class SiteCompanyCreateRequest {
     })
     @IsString()
     @Expose()
+    public addressCity: string;
+
+    @ApiProperty({
+        type: 'string',
+        required: true,
+    })
+    @IsString()
+    @Expose()
+    public addressDistrict: string;
+
+    @ApiProperty({
+        type: 'string',
+        required: true,
+    })
+    @IsString()
+    @Expose()
     public originalBuilding: string;
 
     @ApiProperty({

@@ -1,18 +1,58 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { OccupationResponse, PostResponse } from './response/post-member-get-list.response';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
-import { PostResponse } from './response/post-member-get-list.response';
+import { CodeType, ExperienceType } from '@prisma/client';
 
 @Injectable()
 export class PostMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: PostMemberGetListRequest): Promise<PostResponse[]> {
+    private async getMemberId(accountId: number) {
+        const member = await this.prismaService.member.findUnique({
+            select: {
+                id: true,
+                isActive: true,
+            },
+            where: {
+                accountId,
+            },
+        });
+        return member.id;
+    }
+
+    async getCodeList(typeOfCode: CodeType): Promise<OccupationResponse[]> {
+        return await this.prismaService.code.findMany({
+            select: {
+                id: true,
+                codeName: true,
+            },
+            where: {
+                isActive: true,
+                codeType: typeOfCode,
+            },
+        });
+    }
+
+    async getList(query: PostMemberGetListRequest, accountId: number): Promise<PostResponse[]> {
+        const memberId = await this.getMemberId(accountId);
+        const interestPosts = await this.prismaService.interest.findMany({
+            select: {
+                postId: true,
+            },
+            where: {
+                memberId,
+            },
+        });
+        const listInterestPostIds = interestPosts.map((item) => {
+            return item.postId;
+        });
         const posts = await this.prismaService.post.findMany({
             select: {
                 id: true,
                 name: true,
+                endDate: true,
                 occupation: {
                     select: {
                         codeName: true,
@@ -26,19 +66,21 @@ export class PostMemberService {
                         addressDistrict: true,
                     },
                 },
-                endDate: true,
             },
             where: {
                 isActive: true,
+                experienceType: { in: query.experienceTypeList as ExperienceType[] },
+                occupationId: { in: query.occupationList as number[] },
+                specialNoteId: { in: query.constructionMachineryList as number[] },
             },
             skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
             take: query.pageNumber && query.pageSize && query.pageSize,
         });
         return posts.map((item) => {
-            const occupation = item.occupation?.codeName;
             const site = item.site;
-            delete item.occupation;
+            const occupation = item.occupation ? item.occupation.codeName : null;
             delete item.site;
+            delete item.occupation;
             return {
                 ...item,
                 occupation,
@@ -46,6 +88,7 @@ export class PostMemberService {
                 siteAddress: site.address,
                 siteAddressCity: site.addressCity,
                 siteAddressDistrict: site.addressDistrict,
+                isInterest: listInterestPostIds.includes(item.id) ? true : false,
             };
         });
     }
