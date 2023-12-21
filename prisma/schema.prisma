@@ -271,6 +271,7 @@ model File {
   team                         Team?
   Logo                         Logo?
   ContactCard                  ContactCard?
+  Contract                     Contract?
 
   @@map("files")
 }
@@ -493,6 +494,7 @@ model Site {
   SiteBanner                SiteBanner[]
   InterestMember            Interest[]
   Post                      Post[]
+  numberOfContract          Int                        @default(0)
 
   @@map("sites")
 }
@@ -597,6 +599,7 @@ model Application {
   assignedAt DateTime              @default(now())
   updatedAt  DateTime              @updatedAt @map("updated_at")
   interview  Interview?
+  Contract   Contract?
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -706,6 +709,28 @@ model HeadhuntingRecommendation {
   @@unique([memberId, postId])
   @@unique([teamId, postId])
   @@map("headhunting_recommendation")
+}
+
+model Contract {
+  id             Int         @id @default(autoincrement())
+  contractNumber String      @unique
+  paymentForm    PaymentForm @default(FIRST_CLASS)
+  ammount        Int         @default(0)
+  startDate      DateTime    @db.Date
+  endDate        DateTime    @db.Date
+  fileId         Int         @unique
+  file           File        @relation(fields: [fileId], references: [id])
+  Application    Application @relation(fields: [applicationId], references: [id])
+  applicationId  Int         @unique
+}
+
+enum PaymentForm {
+  FIRST_CLASS
+}
+
+enum ApplicationContractStatus {
+  UNDER_CONTRACT
+  CONTRACT_TERMINATED
 }
 
 enum FunctionName {
