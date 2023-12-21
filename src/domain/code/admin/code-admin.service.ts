@@ -4,7 +4,6 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CodeAdminFilter } from './dto/code-admin-filter.enum';
-import { CodeAdminDeleteRequest } from './request/code-admin-delete.request';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
 import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
@@ -81,11 +80,11 @@ export class CodeAdminService {
         });
     }
 
-    async deleteCode(query: CodeAdminDeleteRequest) {
+    async deleteCode(ids: number[]) {
         await this.prismaService.code.deleteMany({
             where: {
                 id: {
-                    in: query.ids,
+                    in: ids,
                 },
                 isActive: true,
             },
