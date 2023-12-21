@@ -73,6 +73,11 @@ export class MemberCompanyService {
                         },
                     },
                 },
+                interview: {
+                    select: {
+                        interviewStatus: true,
+                    },
+                },
             },
         });
     }
