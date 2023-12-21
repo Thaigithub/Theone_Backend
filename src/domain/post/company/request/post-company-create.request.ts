@@ -135,35 +135,10 @@ export class PostCompanyCreateRequest {
     public endWorkTime: string;
 
     @Expose()
-    @IsString()
-    @ApiProperty({ example: 'abc' })
+    @IsNumber()
+    @ApiProperty({ example: 1 })
     @IsOptional()
-    public siteName: string;
-
-    @Expose()
-    @IsString()
-    @ApiProperty({ example: 'abc' })
-    @IsOptional()
-    public siteContact: string;
-
-    @Expose()
-    @IsString()
-    @ApiProperty({ example: 'abc' })
-    @IsOptional()
-    public sitePersonInCharge: string;
-
-    @Expose()
-    @IsString()
-    @ApiProperty({ example: 'abc' })
-    @Length(1, 100, { message: 'Original Building name should be maximum 50 characters' })
-    @IsOptional()
-    public originalBuilding: string;
-
-    @Expose()
-    @IsString()
-    @ApiProperty({ example: 'abc' })
-    @IsOptional()
-    public siteAddress: string;
+    public siteId: number;
 
     @Expose()
     @IsString()
@@ -171,4 +146,10 @@ export class PostCompanyCreateRequest {
     @MaxLength(1000, { message: 'Post name should be maximum 1000 characters' })
     @IsOptional()
     public postEditor: string;
+
+    @Expose()
+    @IsString()
+    @ApiProperty({ example: 'abc' })
+    @IsOptional()
+    public workLocation: string;
 }

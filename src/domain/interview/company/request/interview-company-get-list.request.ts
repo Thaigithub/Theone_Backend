@@ -45,11 +45,19 @@ export class InterviewCompantGetListRequest {
     @IsOptional()
     public keyword: string;
 
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
     @Expose()
     @IsString()
     @IsOptional()
     public interviewRequestStartDate: string;
 
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
     @Expose()
     @IsString()
     @IsOptional()
