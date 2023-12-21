@@ -19,6 +19,7 @@ export class PostAdminService {
             ...(query.status == PostAdminPostStatusFilter.CLOSED && { status: 'DEADLINE' }),
             ...(query.status == PostAdminPostStatusFilter.HIDDEN && { isHidden: true }),
             ...(query.status == PostAdminPostStatusFilter.STOPPED && { isActive: false }),
+            isActive: true,
             ...(!query.searchCategory && query.searchTerm
                 ? {
                       OR: [
@@ -143,6 +144,7 @@ export class PostAdminService {
                     category: request.category,
                     status: request.status,
                     name: request.name,
+                    workLocation: request.workLocation,
                     startDate: request.startDate,
                     endDate: request.endDate,
                     experienceType: request.experienceType,
@@ -171,6 +173,7 @@ export class PostAdminService {
                 await this.prismaService.site.update({
                     where: {
                         id: post_record.siteId,
+                        isActive: true,
                     },
                     data: {
                         name: request.siteName,
@@ -202,20 +205,21 @@ export class PostAdminService {
             throw new HttpException('The Post Id with positive status not found!', HttpStatus.NOT_FOUND);
         }
     }
-    async changeHiddenStatus(id: number, request: PostAdminModifyRequest) {
+    async changeHiddenStatus(id: number, payload: PostAdminModifyRequest) {
         try {
             const post_record = await this.prismaService.post.findUnique({
                 where: {
                     id: id,
+                    isActive: true,
                 },
             });
-            if (post_record.isHidden != request.isHidden) {
+            if (post_record.isHidden != payload.isHidden) {
                 await this.prismaService.post.update({
                     where: {
                         id: id,
                     },
                     data: {
-                        isHidden: request.isHidden,
+                        isHidden: payload.isHidden,
                     },
                 });
             }

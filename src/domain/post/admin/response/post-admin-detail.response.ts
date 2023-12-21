@@ -14,6 +14,9 @@ export class PostAdminDetailResponse {
     @ApiProperty({ type: 'string', example: 'string' })
     public name: string;
 
+    @ApiProperty({ type: 'string', example: '101-dong, 42 Seolleung-ro 90-gil, Gangnam-gu, Seoul' })
+    public workLocation: string;
+
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
     public startDate: Date;
 

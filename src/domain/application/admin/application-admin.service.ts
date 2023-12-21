@@ -19,6 +19,7 @@ export class ApplicationAdminService {
             ...(query.status == ApplicationAdminStatusFilter.STOPPED && { isActive: false }),
             ...(query.status == ApplicationAdminStatusFilter.HIDDEN && { isHidden: true }),
             ...(query.status == ApplicationAdminStatusFilter.CLOSED && { status: 'DEADLINE' }),
+            isActive: true,
             ...(query.status == ApplicationAdminStatusFilter.IN_PROGRESS
                 ? {
                       OR: [{ status: 'RECRUITING' }, { status: 'PREPARE' }],
