@@ -1,93 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common/exceptions';
-import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
+import { InterviewStatus, PostApplicationStatus, RequestObject, SupportCategory } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { RecommendationCompanyInterviewProposeRequest } from './request/recommendaation-company-interview-proposed.request';
-import { RecommendationCompanyGetListHeadhuntingApprovedRequest } from './request/recommendation-company-get-list-headhunting-approved.request';
-import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/recommendation-company-get-list-headhunting-approved.response';
 
 @Injectable()
 export class RecommendationCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
-
-    async getList(
-        accountId: number,
-        postId: number,
-        query: RecommendationCompanyGetListHeadhuntingApprovedRequest,
-    ): Promise<RecommendationCompanyGetListHeadhuntingApprovedResponse> {
-        const account = await this.prismaService.account.findUniqueOrThrow({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
-        const post = await this.prismaService.post.findUnique({
-            where: {
-                id: postId,
-                isActive: true,
-                companyId: account.company.id,
-            },
-        });
-
-        if (!post) throw new BadRequestException('No post found');
-
-        const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {
-            postId,
-            ...(query.name && { OR: [{ member: { name: query.name } }, { team: { name: query.name } }] }),
-        };
-
-        const list = await this.prismaService.headhuntingRecommendation.findMany({
-            select: {
-                member: {
-                    select: {
-                        name: true,
-                        contact: true,
-                        totalExperienceMonths: true,
-                        totalExperienceYears: true,
-                        specialLicenses: true,
-                        desiredSalary: true,
-                        region: true,
-                    },
-                },
-                team: {
-                    select: {
-                        name: true,
-                        leader: {
-                            select: {
-                                contact: true,
-                                totalExperienceMonths: true,
-                                totalExperienceYears: true,
-                                specialLicenses: true,
-                                desiredSalary: true,
-                            },
-                        },
-                        region: true,
-                    },
-                },
-            },
-            where: queryFilter,
-
-            orderBy: {
-                assignedAt: 'desc',
-            },
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        const listCount = await this.prismaService.headhuntingRecommendation.count({
-            // Conditions based on request query
-            where: queryFilter,
-        });
-
-        return new PaginationResponse(list, new PageInfo(listCount));
-    }
 
     async proposeInterview(
         accountId: number,

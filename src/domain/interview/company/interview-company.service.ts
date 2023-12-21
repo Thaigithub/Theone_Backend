@@ -109,6 +109,16 @@ export class InterviewCompanyService {
                                 leader: {
                                     select: {
                                         contact: true,
+                                        specialLicenses: {
+                                            select: {
+                                                name: true,
+                                            },
+                                        },
+                                        certificates: {
+                                            select: {
+                                                name: true,
+                                            },
+                                        },
                                     },
                                 },
                             },

@@ -5,6 +5,7 @@ import { CertificateModule } from 'domain/certificate/certificate.module';
 import { CodeModule } from 'domain/code/code.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FileModule } from 'domain/file/file.module';
+import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InterviewModule } from 'domain/interview/interview.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PostModule } from 'domain/post/post.module';
@@ -39,6 +40,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         SiteModule,
         RecommendationModule,
         InterviewModule,
+        HeadhuntingModule,
     ],
 })
 export class AppModule {}

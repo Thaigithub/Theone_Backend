@@ -662,17 +662,19 @@ model MemberEvaluationByCompany {
 }
 
 model HeadhuntingRequest {
-  id        Int           @id @default(autoincrement())
-  isActive  Boolean       @default(true) @map("is_active")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  post      Post          @relation(fields: [postId], references: [id])
-  postId    Int
-  date      DateTime      @default(now())
-  status    RequestStatus
-  object    RequestObject
-  detail    String        @default("")
+  id           Int           @id @default(autoincrement())
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  post         Post          @relation(fields: [postId], references: [id])
+  postId       Int
+  date         DateTime      @default(now()) @db.Date()
+  status       RequestStatus
+  object       RequestObject
+  detail       String        @default("")
+  rejectReason String        @default("") @map("reject_reason")
 
+  @@unique([postId])
   @@map("headhunting_request")
 }
 
@@ -758,8 +760,8 @@ enum MemberLevel {
   PLATINUM
   GOLD
   SILVER
-  TWO
-  THREE
+  SECOND
+  THIRD
 }
 
 enum CompanyType {
@@ -899,9 +901,10 @@ enum SiteStatus {
 }
 
 enum RequestStatus {
-  WAITING_FOR_APPROVAL
+  APPLY
   APPROVED
   REJECTED
+  RE_APPLY
 }
 
 enum RequestObject {
