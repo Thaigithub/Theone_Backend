@@ -7,7 +7,6 @@ import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { InterviewCompanySearchCategories } from './dto/interview-company-search-category.enum';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
 
@@ -60,23 +59,13 @@ export class InterviewCompanyService {
             ...(query.interviewRequestEndDate && {
                 interviewRequestDate: { lte: new Date(query.interviewRequestEndDate) },
             }),
-            ...(query.searchCategory === InterviewCompanySearchCategories.ANNOUNCEMENT_NAME && {
-                application: { post: { name: { contains: query.keyword, mode: 'insensitive' } } },
+            ...(query.keyword && {
+                OR: [
+                    { application: { post: { name: { contains: query.keyword, mode: 'insensitive' } } } },
+                    { application: { member: { name: { contains: query.keyword, mode: 'insensitive' } } } },
+                    { application: { team: { name: { contains: query.keyword, mode: 'insensitive' } } } },
+                ],
             }),
-            ...(query.searchCategory === InterviewCompanySearchCategories.NAME &&
-                (query.object === RequestObject.INDIVIDUAL
-                    ? {
-                          application: { member: { name: { contains: query.keyword, mode: 'insensitive' } } },
-                      }
-                    : { application: { team: { name: { contains: query.keyword, mode: 'insensitive' } } } })),
-            ...(query.searchCategory === InterviewCompanySearchCategories.CONTACT &&
-                (query.object === RequestObject.INDIVIDUAL
-                    ? {
-                          application: { member: { contact: { contains: query.keyword, mode: 'insensitive' } } },
-                      }
-                    : {
-                          application: { team: { leader: { contact: { contains: query.keyword, mode: 'insensitive' } } } },
-                      })),
         };
 
         const list = await this.prismaService.interview.findMany({

@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { InterviewStatus, RequestObject, SupportCategory } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { InterviewCompanySearchCategories } from '../dto/interview-company-search-category.enum';
 
 export class InterviewCompantGetListRequest {
     @ApiProperty({
@@ -25,16 +24,6 @@ export class InterviewCompantGetListRequest {
     @IsEnum(SupportCategory)
     @IsOptional()
     public supportCategory: SupportCategory;
-
-    @ApiProperty({
-        type: 'enum',
-        enum: InterviewCompanySearchCategories,
-        required: false,
-    })
-    @Expose()
-    @IsEnum(InterviewCompanySearchCategories)
-    @IsOptional()
-    public searchCategory: InterviewCompanySearchCategories;
 
     @ApiProperty({
         type: 'string',
