@@ -34,6 +34,8 @@ export class CompanyTeamService {
                                 totalExperienceYears: true,
                                 totalExperienceMonths: true,
                                 desiredSalary: true,
+                                desiredOccupation: true,
+                                name: true,
                             },
                         },
                         members: {
@@ -61,6 +63,11 @@ export class CompanyTeamService {
                                 },
                             ],
                         },
+                    },
+                },
+                interview: {
+                    select: {
+                        interviewStatus: true,
                     },
                 },
             },
