@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    ParseArrayPipe,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -6,7 +19,6 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { CodeAdminService } from './code-admin.service';
-import { CodeAdminDeleteRequest } from './request/code-admin-delete.request';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
 import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
@@ -88,7 +100,10 @@ export class CodeAdminController {
         description: 'Admin can delete a code',
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async deleteCode(@Query() query: CodeAdminDeleteRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.codeAdminService.deleteCode(query));
+    async deleteCode(
+        @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
+        ids: number[],
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.codeAdminService.deleteCode(ids));
     }
 }
