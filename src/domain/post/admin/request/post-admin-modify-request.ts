@@ -37,7 +37,7 @@ export class PostAdminModifyRequest {
 
     @Expose()
     @IsString()
-    @ApiProperty({ example: 'abc' })
+    @ApiProperty({ type: 'string', example: 'abc' })
     @Length(1, 50, { message: 'Post name should be maximum 50 characters' })
     @IsNotEmpty({ message: 'Name is required' })
     @IsOptional()
@@ -45,9 +45,16 @@ export class PostAdminModifyRequest {
 
     @Expose()
     @IsBoolean()
-    @ApiProperty({ type: Boolean, example: true })
+    @ApiProperty({ type: Boolean })
     @IsOptional()
     public isHidden: boolean;
+
+    @Expose()
+    @IsString()
+    @ApiProperty({ type: 'string', example: '101-dong, 42 Seolleung-ro 90-gil, Gangnam-gu, Seoul' })
+    @IsNotEmpty({ message: 'Work Location is required' })
+    @IsOptional()
+    public workLocation: string;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })
