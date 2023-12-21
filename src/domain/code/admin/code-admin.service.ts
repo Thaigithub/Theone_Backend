@@ -1,8 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CodeAdminFilter } from './dto/code-admin-filter.enum';
+import { CodeAdminDeleteRequest } from './request/code-admin-delete.request';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
 import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
@@ -40,7 +42,7 @@ export class CodeAdminService {
                 where: queryFilter,
             });
 
-            return new CodeAdminGetListResponse(codeList, codeListCount);
+            return new PaginationResponse(codeList, new PageInfo(codeListCount));
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
@@ -79,10 +81,12 @@ export class CodeAdminService {
         });
     }
 
-    async deleteCode(id: number) {
-        await this.prismaService.code.delete({
+    async deleteCode(query: CodeAdminDeleteRequest) {
+        await this.prismaService.code.deleteMany({
             where: {
-                id,
+                id: {
+                    in: query.ids,
+                },
                 isActive: true,
             },
         });

@@ -16,7 +16,6 @@ import { CodeCompanyService } from './code-company.service';
 export class CodeCompanyController {
     constructor(private readonly codeCompanyService: CodeCompanyService) {}
 
-    // Get members list by conditions
     @Get()
     @ApiOperation({
         summary: 'Listing code',
