@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
+import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
@@ -61,5 +66,68 @@ export class SiteMemberService {
 
             return { isInterested: true };
         }
+    }
+    async getSiteList(query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
+        const queryFilter: Prisma.SiteWhereInput = {
+            ...(query.name && { name: { contains: query.name, mode: 'insensitive' } }),
+            addressCity: query.addressCity,
+            isActive: true,
+        };
+        const sites = await this.prismaService.site.findMany({
+            select: {
+                id: true,
+                name: true,
+                address: true,
+                startDate: true,
+                endDate: true,
+                personInCharge: true,
+                personInChargeContact: true,
+                contact: true,
+                post: {
+                    where: {
+                        isActive: true,
+                        isHidden: false,
+                    },
+                },
+                company: {
+                    select: {
+                        logo: {
+                            select: {
+                                file: {
+                                    select: {
+                                        fileName: true,
+                                        key: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            where: queryFilter,
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const siteListCount = await this.prismaService.site.count({
+            where: queryFilter,
+        });
+        const siteList = sites.map((site) => {
+            const countPost = site.post.length;
+            const fileName = site.company.logo?.file.fileName;
+            const key = site.company.logo?.file.key;
+            return {
+                id: site.id,
+                name: site.name,
+                address: site.address,
+                startDate: site.startDate,
+                endDate: site.endDate,
+                personInCharge: site.personInCharge,
+                personInChargeContact: site.personInChargeContact,
+                contact: site.contact,
+                countPost: countPost,
+                fileNameLogo: fileName ? fileName : null,
+                fileKeyLogo: key ? key : null,
+            };
+        });
+        return new PaginationResponse(siteList, new PageInfo(siteListCount));
     }
 }
