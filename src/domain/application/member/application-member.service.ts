@@ -334,6 +334,7 @@ export class ApplicationMemberService {
                 },
                 post: {
                     select: {
+                        id: true,
                         interested: {
                             where: {
                                 member: {
@@ -595,6 +596,7 @@ export class ApplicationMemberService {
         }
         const offer = (await this.prismaService.application.findMany(query)).map((item) => {
             return {
+                postId: item.post.id,
                 endDate: item.post.endDate,
                 type: item.team ? OfferType.TEAM : OfferType.INDIVIDUAL,
                 id: item.id,
