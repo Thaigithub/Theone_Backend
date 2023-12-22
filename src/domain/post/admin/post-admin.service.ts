@@ -3,12 +3,18 @@ import { CodeType, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { PostAdminPostStatusFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
+import {
+    ApplicationAdminSearchCategoryFilter,
+    ApplicationAdminSortFilter,
+    ApplicationAdminStatusFilter,
+    PostAdminPostStatusFilter,
+    PostAdminSearchCategoryFilter,
+} from './dto/post-admin-filter';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
-import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import { PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
-import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @Injectable()
 export class PostAdminService {
@@ -71,6 +77,76 @@ export class PostAdminService {
             where: queryFilter,
         });
         return new PaginationResponse(postList, new PageInfo(postListCount));
+    }
+
+    async getPostApplicationList(query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetListResponse> {
+        /*
+        This function use for search & filtering the post list based on screen "Support Management"
+        */
+        const queryFilter: Prisma.PostWhereInput = {
+            ...(query.status == ApplicationAdminStatusFilter.STOPPED && { isActive: false }),
+            ...(query.status == ApplicationAdminStatusFilter.HIDDEN && { isHidden: true }),
+            ...(query.status == ApplicationAdminStatusFilter.CLOSED && { status: 'DEADLINE' }),
+            isActive: true,
+            ...(query.status == ApplicationAdminStatusFilter.IN_PROGRESS
+                ? {
+                      OR: [{ status: 'RECRUITING' }, { status: 'PREPARE' }],
+                  }
+                : {}),
+            ...(!query.searchCategory && query.searchTerm
+                ? {
+                      OR: [
+                          { name: { contains: query.searchTerm, mode: 'insensitive' } },
+                          { site: { name: { contains: query.searchTerm, mode: 'insensitive' } } },
+                      ],
+                  }
+                : {}),
+            ...(query.searchCategory == ApplicationAdminSearchCategoryFilter.ANNOUNCEMENT_NAME && {
+                name: { contains: query.searchTerm, mode: 'insensitive' },
+            }),
+            ...(query.searchCategory == ApplicationAdminSearchCategoryFilter.SITE_NAME && {
+                site: { name: { contains: query.searchTerm, mode: 'insensitive' } },
+            }),
+        };
+        const sortStrategy: Prisma.PostOrderByWithRelationInput = {
+            ...(query.sortByApplication == ApplicationAdminSortFilter.HIGHEST_APPLICATION && {
+                applicants: {
+                    _count: 'desc',
+                },
+            }),
+            ...(query.sortByApplication == ApplicationAdminSortFilter.LOWEST_APPLICATION && {
+                applicants: {
+                    _count: 'asc',
+                },
+            }),
+            ...(query.sortByApplication == ApplicationAdminSortFilter.MOST_RECENT && { startDate: 'desc' }),
+        };
+        const tempList = await this.prismaService.post.findMany({
+            select: {
+                id: true,
+                name: true,
+                applicants: true,
+                startDate: true,
+                status: true,
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+            where: queryFilter,
+            orderBy: sortStrategy,
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const postList = tempList.map((application) => ({
+            ...application,
+            countApplication: application.applicants.length,
+            applicants: undefined, // Remove the 'applicants' attribute if desired
+        }));
+        const applicationListCount = await this.prismaService.post.count({
+            where: queryFilter,
+        });
+        return new PaginationResponse(postList, new PageInfo(applicationListCount));
     }
 
     async getPostDetails(id: number): Promise<PostAdminDetailResponse> {

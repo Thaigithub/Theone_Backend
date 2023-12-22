@@ -1,17 +1,13 @@
-import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApplicationAdminService } from './application-admin.service';
-import {
-    ApplicationAdminSearchCategoryFilter,
-    ApplicationAdminSortFilter,
-    ApplicationAdminStatusFilter,
-} from './dto/application-admin-filter';
-import { ApplicationAdminGetPostListRequest } from './request/application-admin-get-list-post.request';
-import { ApplicationAdminGetPostListResponse } from './response/application-admin-get-list-post.response';
+import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
+import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
+import { ApplicationAdminGetResponse } from './response/application-admin-get-list.response';
 
 @ApiTags('[ADMIN] Application Management')
 @Controller('/admin/applications')
@@ -21,47 +17,39 @@ import { ApplicationAdminGetPostListResponse } from './response/application-admi
 @ApiProduces('application/json')
 export class ApplicationAdminController {
     constructor(private applicationAdminService: ApplicationAdminService) {}
-
-    @Get()
+    @Get('/:id')
     @ApiOperation({
-        summary: 'Listing announcements',
-        description: 'Admin can search announcements by many conditions.',
+        summary: 'List applications',
+        description: 'Admin can list applications based on their announcement id',
     })
     @ApiResponse({
         status: HttpStatus.OK,
-        description: 'The announcement lists retrieved successfully',
-        type: ApplicationAdminGetPostListRequest,
+        description: 'The application lists retrieved successfully',
+        type: ApplicationAdminGetListRequest,
     })
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({
-        name: 'status',
-        type: 'enum',
-        enum: ApplicationAdminStatusFilter,
-        required: false,
+    async getApplicationList(
+        @Param('id', ParseIntPipe) id: number,
+        @Query() query: ApplicationAdminGetListRequest,
+    ): Promise<BaseResponse<ApplicationAdminGetResponse>> {
+        const applicationList = await this.applicationAdminService.getApplicationList(id, query);
+        return BaseResponse.of(applicationList);
+    }
+
+    @Get('/infor/:id')
+    @ApiOperation({
+        summary: 'Retrieve application information',
+        description: 'Admin can retrieve information based on their application id',
     })
-    @ApiQuery({
-        name: 'searchCategory',
-        type: 'enum',
-        enum: ApplicationAdminSearchCategoryFilter,
-        required: false,
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'The application lists retrieved successfully',
+        type: ApplicationAdminGetDetailResponse,
     })
-    @ApiQuery({
-        name: 'sortByApplication',
-        type: 'enum',
-        enum: ApplicationAdminSortFilter,
-        required: false,
-    })
-    @ApiQuery({
-        name: 'searchTerm',
-        type: String,
-        required: false,
-        description: 'Any text to search, for example: "The One"',
-    })
-    async getAnnouncementList(
-        @Query() query: ApplicationAdminGetPostListRequest,
-    ): Promise<BaseResponse<ApplicationAdminGetPostListResponse>> {
-        const postList = await this.applicationAdminService.getPostList(query);
-        return BaseResponse.of(postList);
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Can not retrieve application information' })
+    async getApplicationInfor(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ApplicationAdminGetDetailResponse>> {
+        const application = await this.applicationAdminService.getApplicationInfor(id);
+        return BaseResponse.of(application);
     }
 }

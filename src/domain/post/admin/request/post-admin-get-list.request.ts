@@ -1,9 +1,77 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
-import { PostAdminPostStatusFilter, PostAdminPostTypeFilter, PostAdminSearchCategoryFilter } from '../dto/post-admin-filter';
+import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import {
+    ApplicationAdminSearchCategoryFilter,
+    ApplicationAdminSortFilter,
+    ApplicationAdminStatusFilter,
+    PostAdminPostStatusFilter,
+    PostAdminPostTypeFilter,
+    PostAdminSearchCategoryFilter,
+} from '../dto/post-admin-filter';
 
-export class PostAdminGetListRequest {
+class BaseListRequest {
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @ApiProperty({
+        type: 'string',
+        required: false,
+    })
+    public searchTerm: string;
+
+    @Expose()
+    @IsOptional()
+    @Transform(({ value }) => value && parseInt(value))
+    @ApiProperty({
+        type: 'number',
+        required: false,
+    })
+    public pageSize: number;
+
+    @Expose()
+    @IsOptional()
+    @Transform(({ value }) => value && parseInt(value))
+    @ApiProperty({
+        type: 'number',
+        required: false,
+    })
+    public pageNumber: number;
+}
+
+export class ApplicationAdminGetListRequest extends BaseListRequest {
+    @Expose()
+    @IsEnum(ApplicationAdminStatusFilter)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: ApplicationAdminStatusFilter,
+        required: false,
+    })
+    public status: ApplicationAdminStatusFilter;
+
+    @Expose()
+    @IsEnum(ApplicationAdminSearchCategoryFilter)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: ApplicationAdminSearchCategoryFilter,
+        required: false,
+    })
+    public searchCategory: ApplicationAdminSearchCategoryFilter;
+
+    @Expose()
+    @IsEnum(ApplicationAdminSortFilter)
+    @IsOptional()
+    @ApiProperty({
+        type: 'enum',
+        enum: ApplicationAdminSortFilter,
+        required: false,
+    })
+    public sortByApplication: ApplicationAdminSortFilter;
+}
+
+export class PostAdminGetListRequest extends BaseListRequest {
     @Expose()
     @IsEnum(PostAdminPostTypeFilter)
     @IsOptional()
@@ -57,33 +125,4 @@ export class PostAdminGetListRequest {
         required: false,
     })
     public searchCategory: PostAdminSearchCategoryFilter;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
-    public searchTerm: string;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    public pageSize: number;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    public pageNumber: number;
 }
