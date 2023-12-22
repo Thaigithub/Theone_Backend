@@ -334,6 +334,14 @@ export class ApplicationMemberService {
                 },
                 post: {
                     select: {
+                        interested: {
+                            where: {
+                                member: {
+                                    accountId,
+                                },
+                            },
+                        },
+                        workLocation: true,
                         endDate: true,
                         name: true,
                         occupation: {
@@ -551,6 +559,7 @@ export class ApplicationMemberService {
         }
         const offer = (await this.prismaService.application.findMany(query)).map((item) => {
             return {
+                endDate: item.post.endDate,
                 type: item.team ? OfferType.TEAM : OfferType.INDIVIDUAL,
                 id: item.id,
                 requestDate: new Date(item.assignedAt).toISOString(),
@@ -566,6 +575,8 @@ export class ApplicationMemberService {
                 siteName: item.post.site?.name,
                 siteAddress: item.post.site?.address,
                 occupationName: item.post.occupation ? item.post.occupation.codeName : '',
+                workLocation: item.post.workLocation,
+                isInterested: item.post.interested.length === 0 ? false : true,
             };
         });
         const total = await this.prismaService.application.count({
