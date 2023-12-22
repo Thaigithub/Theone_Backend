@@ -388,7 +388,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.APPROVE_BY_MEMBER,
                     },
@@ -402,7 +405,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.APPROVE_BY_MEMBER,
                     },
@@ -419,7 +425,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.REJECT_BY_MEMBER,
                     },
@@ -433,7 +442,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.REJECT_BY_MEMBER,
                     },
@@ -450,7 +462,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                             endDate: {
                                 lt: new Date().toISOString(),
                             },
@@ -467,7 +482,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                             endDate: {
                                 lt: new Date().toISOString(),
                             },
@@ -491,7 +509,10 @@ export class ApplicationMemberService {
                         interviewStatus: InterviewStatus.PASS,
                     },
                     post: {
-                        name: body.postName,
+                        name: {
+                            contains: body.postName,
+                            mode: 'insensitive',
+                        },
                         endDate: {
                             gt: Date(),
                         },
@@ -509,7 +530,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.APPROVE_BY_COMPANY,
                     },
@@ -523,7 +547,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                         status: PostApplicationStatus.APPROVE_BY_COMPANY,
                     },
@@ -540,7 +567,10 @@ export class ApplicationMemberService {
                             interviewStatus: InterviewStatus.PASS,
                         },
                         post: {
-                            name: body.postName,
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                     },
                     {
@@ -551,6 +581,12 @@ export class ApplicationMemberService {
                         },
                         interview: {
                             interviewStatus: InterviewStatus.PASS,
+                        },
+                        post: {
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
                         },
                     },
                 ];
