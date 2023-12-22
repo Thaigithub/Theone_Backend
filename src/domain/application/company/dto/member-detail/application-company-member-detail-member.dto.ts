@@ -28,7 +28,7 @@ export class ApplicationCompantMemberDetailMemberDTO {
     public account: ApplicationCompanyMemberDetailAccountDTO;
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailCareerDTO] })
-    public Career: ApplicationCompanyMemberDetailCareerDTO[];
+    public career: ApplicationCompanyMemberDetailCareerDTO[];
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailCertificatesDTO] })
     public certificates: ApplicationCompanyMemberDetailCertificatesDTO[];

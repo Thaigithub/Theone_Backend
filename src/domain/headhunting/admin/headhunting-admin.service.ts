@@ -238,7 +238,7 @@ export class HeadhuntingAdminService {
                 desiredOccupation: true,
                 specialLicenses: true,
                 certificates: true,
-                MemberEvaluation: {
+                memberEvaluation: {
                     select: {
                         averageScore: true,
                     },
@@ -326,7 +326,7 @@ export class HeadhuntingAdminService {
                         desiredOccupation: true,
                         specialLicenses: true,
                         certificates: true,
-                        MemberEvaluation: {
+                        memberEvaluation: {
                             select: {
                                 averageScore: true,
                             },
@@ -344,12 +344,12 @@ export class HeadhuntingAdminService {
                 createdAt: 'desc',
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.HIGHEST_SCORE && {
                     leader: {
-                        MemberEvaluation: { averageScore: 'desc' },
+                        memberEvaluation: { averageScore: 'desc' },
                     },
                 }),
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.LOWEST_SCORE && {
                     leader: {
-                        MemberEvaluation: { averageScore: 'asc' },
+                        memberEvaluation: { averageScore: 'asc' },
                     },
                 }),
             },

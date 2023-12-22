@@ -2,15 +2,15 @@ import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { EvaluationType } from './dto/evaluation-admin.dto';
-import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
-import { SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
-import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
-import { TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
 import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
-import { MemberEvaluationResponse } from './response/member-evaluation-admin-get-list.response';
+import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
+import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
 import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
+import { MemberEvaluationResponse } from './response/member-evaluation-admin-get-list.response';
+import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
+import { SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
+import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
+import { TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
 
 @Injectable()
 export class EvaluationAdminService {
@@ -107,10 +107,10 @@ export class EvaluationAdminService {
                 id: true,
                 totalEvaluators: true,
                 averageScore: true,
-                Site: {
+                site: {
                     select: {
                         name: true,
-                        Company: {
+                        company: {
                             select: {
                                 name: true,
                             },
@@ -126,8 +126,8 @@ export class EvaluationAdminService {
         return siteEvaluations.map((item) => {
             return {
                 id: item.id,
-                companyName: item.Site.Company.name,
-                siteName: item.Site.name,
+                companyName: item.site.company.name,
+                siteName: item.site.name,
                 totalEvaluators: item.totalEvaluators,
                 averageScore: item.averageScore,
             };
@@ -147,23 +147,23 @@ export class EvaluationAdminService {
             select: {
                 totalEvaluators: true,
                 averageScore: true,
-                Site: {
+                site: {
                     select: {
                         name: true,
                         personInCharge: true,
                         address: true,
                         contact: true,
-                        Company: {
+                        company: {
                             select: {
                                 name: true,
                             },
                         },
                     },
                 },
-                SiteEvaluationByMember: {
+                siteEvaluationByMember: {
                     select: {
                         score: true,
-                        Member: {
+                        member: {
                             select: {
                                 name: true,
                                 contact: true,
@@ -182,20 +182,20 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = siteEvaluation.SiteEvaluationByMember.map((item) => {
+        const listOfEvaluators = siteEvaluation.siteEvaluationByMember.map((item) => {
             return {
-                name: item.Member.name,
-                username: item.Member.account.username,
-                contact: item.Member.contact,
+                name: item.member.name,
+                username: item.member.account.username,
+                contact: item.member.contact,
                 score: item.score,
             };
         });
         return {
-            companyName: siteEvaluation.Site.Company.name,
-            siteName: siteEvaluation.Site.name,
-            address: siteEvaluation.Site.address,
-            contact: siteEvaluation.Site.contact,
-            personInCharge: siteEvaluation.Site.personInCharge,
+            companyName: siteEvaluation.site.company.name,
+            siteName: siteEvaluation.site.name,
+            address: siteEvaluation.site.address,
+            contact: siteEvaluation.site.contact,
+            personInCharge: siteEvaluation.site.personInCharge,
             totalEvaluators: siteEvaluation.totalEvaluators,
             averageScore: siteEvaluation.averageScore,
             listOfEvaluators,
@@ -209,7 +209,7 @@ export class EvaluationAdminService {
                 id: true,
                 totalEvaluators: true,
                 averageScore: true,
-                Team: {
+                team: {
                     select: {
                         name: true,
                         totalMembers: true,
@@ -229,9 +229,9 @@ export class EvaluationAdminService {
         return teamEvaluations.map((item) => {
             return {
                 id: item.id,
-                teamName: item.Team.name,
-                leaderName: item.Team.leader.name,
-                totalMembers: item.Team.totalMembers,
+                teamName: item.team.name,
+                leaderName: item.team.leader.name,
+                totalMembers: item.team.totalMembers,
                 totalEvaluators: item.totalEvaluators,
                 averageScore: item.averageScore,
             };
@@ -251,7 +251,7 @@ export class EvaluationAdminService {
             select: {
                 totalEvaluators: true,
                 averageScore: true,
-                Team: {
+                team: {
                     select: {
                         name: true,
                         totalMembers: true,
@@ -262,15 +262,15 @@ export class EvaluationAdminService {
                         },
                     },
                 },
-                TeamEvaluationByCompany: {
+                teamEvaluationByCompany: {
                     select: {
                         score: true,
-                        Site: {
+                        site: {
                             select: {
                                 name: true,
                                 contact: true,
                                 personInCharge: true,
-                                Company: {
+                                company: {
                                     select: {
                                         name: true,
                                     },
@@ -285,19 +285,19 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = teamEvaluation.TeamEvaluationByCompany.map((item) => {
+        const listOfEvaluators = teamEvaluation.teamEvaluationByCompany.map((item) => {
             return {
-                companyName: item.Site.Company.name,
-                siteName: item.Site.name,
-                siteContact: item.Site.contact,
-                personInCharge: item.Site.personInCharge,
+                companyName: item.site.company.name,
+                siteName: item.site.name,
+                siteContact: item.site.contact,
+                personInCharge: item.site.personInCharge,
                 score: item.score,
             };
         });
         return {
-            teamName: teamEvaluation.Team.name,
-            leaderName: teamEvaluation.Team.leader.name,
-            totalMembers: teamEvaluation.Team.totalMembers,
+            teamName: teamEvaluation.team.name,
+            leaderName: teamEvaluation.team.leader.name,
+            totalMembers: teamEvaluation.team.totalMembers,
             totalEvaluators: teamEvaluation.totalEvaluators,
             averageScore: teamEvaluation.averageScore,
             listOfEvaluators,
@@ -311,7 +311,7 @@ export class EvaluationAdminService {
                 id: true,
                 totalEvaluators: true,
                 averageScore: true,
-                Member: {
+                member: {
                     select: {
                         name: true,
                         contact: true,
@@ -326,8 +326,8 @@ export class EvaluationAdminService {
         return (await memberEvaluations).map((item) => {
             return {
                 id: item.id,
-                name: item.Member.name,
-                contact: item.Member.contact,
+                name: item.member.name,
+                contact: item.member.contact,
                 totalEvaluators: item.totalEvaluators,
                 averageScore: item.averageScore,
             };
@@ -347,21 +347,21 @@ export class EvaluationAdminService {
             select: {
                 totalEvaluators: true,
                 averageScore: true,
-                Member: {
+                member: {
                     select: {
                         name: true,
                         contact: true,
                     },
                 },
-                MemberEvaluationByCompany: {
+                memberEvaluationByCompany: {
                     select: {
                         score: true,
-                        Site: {
+                        site: {
                             select: {
                                 name: true,
                                 contact: true,
                                 personInCharge: true,
-                                Company: {
+                                company: {
                                     select: {
                                         name: true,
                                     },
@@ -376,18 +376,18 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = memberEvaluation.MemberEvaluationByCompany.map((item) => {
+        const listOfEvaluators = memberEvaluation.memberEvaluationByCompany.map((item) => {
             return {
-                companyName: item.Site.Company.name,
-                siteName: item.Site.name,
-                siteContact: item.Site.contact,
-                personInCharge: item.Site.personInCharge,
+                companyName: item.site.company.name,
+                siteName: item.site.name,
+                siteContact: item.site.contact,
+                personInCharge: item.site.personInCharge,
                 score: item.score,
             };
         });
         return {
-            name: memberEvaluation.Member.name,
-            contact: memberEvaluation.Member.contact,
+            name: memberEvaluation.member.name,
+            contact: memberEvaluation.member.contact,
             totalEvaluators: memberEvaluation.totalEvaluators,
             averageScore: memberEvaluation.averageScore,
             listOfEvaluators,

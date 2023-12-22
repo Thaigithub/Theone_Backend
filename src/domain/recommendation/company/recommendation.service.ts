@@ -137,7 +137,7 @@ export class RecommendationCompanyService {
                             username: true,
                         },
                     },
-                    Career: {
+                    career: {
                         select: {
                             companyName: true,
                             siteName: true,

@@ -122,7 +122,7 @@ export class PostMemberService {
             select: {
                 specialLicenses: {
                     select: {
-                        Code: {
+                        code: {
                             select: {
                                 id: true,
                             },
@@ -136,7 +136,7 @@ export class PostMemberService {
         });
 
         const memberSpecialLicenseIdList = memberSpecialLicenseList.specialLicenses.map((item) => {
-            return item.Code.id;
+            return item.code.id;
         });
 
         const post = await this.prismaService.post.findUnique({

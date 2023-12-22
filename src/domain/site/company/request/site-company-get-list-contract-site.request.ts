@@ -1,35 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PostApplicationStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
+import { IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
 
-export class ApplicationMemberGetListRequest {
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
+export class SiteCompanyGetListForContractRequest {
     @Expose()
     @IsNumberString()
     @IsOptional()
+    @ApiProperty({
+        type: String,
+    })
     public pageSize: string;
 
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     @Expose()
     @IsNumberString()
     @IsOptional()
-    public pageNumber: string;
-
-    @Expose()
-    @IsEnum(PostApplicationStatus)
-    @IsOptional()
     @ApiProperty({
-        type: 'enum',
-        enum: PostApplicationStatus,
+        type: String,
     })
-    public status: PostApplicationStatus;
+    public pageNumber: string;
 
     @Expose()
     @IsString()
@@ -54,4 +42,13 @@ export class ApplicationMemberGetListRequest {
         example: '2023-05-10',
     })
     public endDate: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @ApiProperty({
+        description: 'keyword',
+        example: '2asdfadsf',
+    })
+    public keyword: string;
 }

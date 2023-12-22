@@ -80,7 +80,7 @@ export class ApplicationMemberService {
                                 address: true,
                                 personInCharge: true,
                                 originalBuilding: true,
-                                Company: {
+                                company: {
                                     select: {
                                         id: true,
                                         name: true,
@@ -106,7 +106,7 @@ export class ApplicationMemberService {
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
                 applicationId: item.id,
-                companyLogo: item.post.site.Company.logo.file,
+                companyLogo: item.post.site.company.logo.file,
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
@@ -201,7 +201,7 @@ export class ApplicationMemberService {
                                 name: true,
                                 startDate: true,
                                 endDate: true,
-                                Company: {
+                                company: {
                                     select: {
                                         id: true,
                                         name: true,
@@ -228,9 +228,9 @@ export class ApplicationMemberService {
         console.log(application);
         if (!application) throw new NotFoundException('Application not found');
         return {
-            companyLogo: application.post.site.Company.logo.file,
-            companyName: application.post.site.Company.name,
-            companyId: application.post.site.Company.id,
+            companyLogo: application.post.site.company.logo.file,
+            companyName: application.post.site.company.name,
+            companyId: application.post.site.company.id,
             postId: application.post.id,
             postName: application.post.name,
             postStatus: application.post.status,
@@ -345,7 +345,7 @@ export class ApplicationMemberService {
                             select: {
                                 address: true,
                                 name: true,
-                                Company: {
+                                company: {
                                     select: {
                                         logo: {
                                             select: {
@@ -557,9 +557,9 @@ export class ApplicationMemberService {
                 applicationStatus: item.status,
                 teamName: item.team ? item.team.name : '',
                 companyLogo: {
-                    key: item.post.site.Company.logo.file.key,
-                    fileName: item.post.site.Company.logo.file.fileName,
-                    type: item.post.site.Company.logo.file.type,
+                    key: item.post.site.company.logo.file.key,
+                    fileName: item.post.site.company.logo.file.fileName,
+                    type: item.post.site.company.logo.file.type,
                     // size: item.post.site.Company.logo.file.size,
                 },
                 postName: item.post.name,

@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
+import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract-site.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
+import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract-site.response';
 import { SiteResponse } from './response/site-company-get-list.response';
 
 @Injectable()
@@ -149,5 +152,41 @@ export class SiteCompanyService {
                 isActive: false,
             },
         });
+    }
+
+    async getListForContractSite(
+        accountId: number,
+        request: SiteCompanyGetListForContractRequest,
+    ): Promise<SiteCompanyGetListForContractResponse> {
+        const query = {
+            where: {
+                Company: {
+                    accountId,
+                },
+                name: {
+                    contains: request.keyword,
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+                numberOfContract: true,
+            },
+            skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
+            take: request.pageSize && parseInt(request.pageSize),
+        };
+        const sites = (await this.prismaService.site.findMany(query)).map((item) => {
+            return {
+                siteId: item.id,
+                siteName: item.name,
+                startDate: item.startDate,
+                endDate: item.endDate,
+                numberOfContract: item.numberOfContract,
+            };
+        });
+        const total = await this.prismaService.site.count({ where: query.where });
+        return new PaginationResponse(sites, new PageInfo(total));
     }
 }
