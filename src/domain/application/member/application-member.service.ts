@@ -115,8 +115,8 @@ export class ApplicationMemberService {
                 endDate: item.post.endDate,
                 status: item.status,
                 appliedDate: item.assignedAt,
-                siteName: item.post.site.name,
-                siteAddress: item.post.site.address,
+                siteName: item.post.site ? item.post.site.name : '',
+                siteAddress: item.post.site ? item.post.site.address : '',
             };
         });
         const total = await this.prismaService.application.count({ where: search.where });
