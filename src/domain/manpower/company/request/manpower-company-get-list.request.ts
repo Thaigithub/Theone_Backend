@@ -3,7 +3,7 @@ import { ExperienceType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class PostMemberGetListRequest {
+export class ManpowerCompanyGetListRequest {
     @ApiProperty({
         type: 'string',
         required: false,
@@ -22,16 +22,6 @@ export class PostMemberGetListRequest {
     @IsString()
     @IsOptional()
     public occupationList: string | number[];
-
-    @ApiProperty({
-        type: 'string',
-        required: false,
-        example: '1,2,3',
-    })
-    @Expose()
-    @IsString()
-    @IsOptional()
-    public constructionMachineryList: string | number[];
 
     @ApiProperty({
         type: 'string',

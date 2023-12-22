@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { OccupationResponse, PostResponse } from './response/post-member-get-list.response';
+import { PostResponse } from './response/post-member-get-list.response';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
-import { CodeType, ExperienceType } from '@prisma/client';
+import { ExperienceType } from '@prisma/client';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 
 @Injectable()
 export class PostMemberService {
@@ -23,19 +24,6 @@ export class PostMemberService {
         return member.id;
     }
 
-    async getCodeList(typeOfCode: CodeType): Promise<OccupationResponse[]> {
-        return await this.prismaService.code.findMany({
-            select: {
-                id: true,
-                codeName: true,
-            },
-            where: {
-                isActive: true,
-                codeType: typeOfCode,
-            },
-        });
-    }
-
     async getList(accountId: number, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
         if (siteId) {
             const siteExist = await this.prismaService.site.count({
@@ -46,7 +34,6 @@ export class PostMemberService {
             });
             if (!siteExist) throw new NotFoundException('Site does not exist');
         }
-
         const memberId = await this.getMemberId(accountId);
         const interestPosts = await this.prismaService.interest.findMany({
             select: {
@@ -63,6 +50,9 @@ export class PostMemberService {
             select: {
                 id: true,
                 name: true,
+                startWorkDate: true,
+                endWorkDate: true,
+                numberOfPeople: true,
                 endDate: true,
                 occupation: {
                     select: {
@@ -80,30 +70,47 @@ export class PostMemberService {
             },
             where: {
                 isActive: true,
-                name: query?.searchCategory === 'postName' ? { contains: query.keyword } : undefined,
-                site: {
-                    id: siteId,
-                    name: query?.searchCategory === 'siteName' ? { contains: query.keyword } : undefined,
-                },
-                experienceType: { in: query?.experienceTypeList as ExperienceType[] },
-                occupationId: { in: query?.occupationList as number[] },
-                specialNoteId: { in: query?.constructionMachineryList as number[] },
+                OR: query.keyword && [
+                    {
+                        name: { contains: query.keyword },
+                    },
+                    {
+                        site: {
+                            name: { contains: query.keyword },
+                        },
+                    },
+                ],
+                siteId,
+                experienceType: { in: query.experienceTypeList as ExperienceType[] },
+                occupationId: { in: query.occupationList as number[] },
+                specialNoteId: { in: query.constructionMachineryList as number[] },
             },
-            skip: query?.pageNumber && query?.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query?.pageNumber && query?.pageSize && query.pageSize,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            ...QueryPagingHelper.queryPaging(query),
         });
         return posts.map((item) => {
             const site = item.site;
+            const startWorkDate = item.startWorkDate.toISOString().split('T')[0];
+            const endWorkDate = item.endWorkDate.toISOString().split('T')[0];
+            const endDate = item.endDate.toISOString().split('T')[0];
             const occupation = item.occupation ? item.occupation.codeName : null;
             delete item.site;
             delete item.occupation;
+            delete item.startWorkDate;
+            delete item.endWorkDate;
+            delete item.endDate;
             return {
                 ...item,
                 occupation,
-                siteName: site.name,
-                siteAddress: site.address,
-                siteAddressCity: site.addressCity,
-                siteAddressDistrict: site.addressDistrict,
+                startWorkDate,
+                endWorkDate,
+                endDate,
+                siteName: site ? site.name : null,
+                siteAddress: site ? site.address : null,
+                siteAddressCity: site ? site.addressCity : null,
+                siteAddressDistrict: site ? site.addressDistrict : null,
                 isInterest: listInterestPostIds.includes(item.id) ? true : false,
             };
         });
@@ -134,10 +141,32 @@ export class PostMemberService {
                 accountId,
             },
         });
-
-        const memberSpecialLicenseIdList = memberSpecialLicenseList.specialLicenses.map((item) => {
-            return item.code.id;
+        const memberCertificatesList = await this.prismaService.member.findUnique({
+            select: {
+                certificates: {
+                    select: {
+                        code: {
+                            select: {
+                                id: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                accountId,
+            },
         });
+        const memberRegisteredCodeIdsList = [
+            ...new Set([
+                ...memberSpecialLicenseList.specialLicenses.map((item) => {
+                    return item.code.id;
+                }),
+                ...memberCertificatesList.certificates.map((item) => {
+                    return item.code.id;
+                }),
+            ]),
+        ];
 
         const post = await this.prismaService.post.findUnique({
             select: {
@@ -210,7 +239,10 @@ export class PostMemberService {
                 experienceType: post.experienceType,
                 occupation: post.occupation ? post.occupation.codeName : null,
                 specialNote: post.specialNote ? post.specialNote.codeName : null,
-                isEligibleToApply: memberSpecialLicenseIdList.includes(post.specialNote?.id) ? true : false,
+                isEligibleToApply:
+                    !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialNote?.id)
+                        ? true
+                        : false,
             },
             workingCondition: {
                 salaryType: post.salaryType,

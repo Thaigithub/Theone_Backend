@@ -18,7 +18,18 @@ export class ApplicationAdminService {
                     select: {
                         name: true,
                         contact: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                         totalExperienceYears: true,
                         totalExperienceMonths: true,
                         desiredSalary: true,
@@ -42,13 +53,14 @@ export class ApplicationAdminService {
         });
         const applicationList = applications.map((applicant) => {
             const { id, assignedAt, member, team, interview } = applicant;
-            const { name, region, totalExperienceYears, totalExperienceMonths, desiredSalary } = member || {};
+            const { name, district, totalExperienceYears, totalExperienceMonths, desiredSalary } = member || {};
             return {
                 id: id,
                 name: name ? name : team.name,
                 contact: member?.contact ? member?.contact : null,
                 isTeam: team ? true : false,
-                region: region ? region : member?.region,
+                city: district.city,
+                district: district,
                 totalExperienceYears,
                 totalExperienceMonths,
                 desiredSalary,

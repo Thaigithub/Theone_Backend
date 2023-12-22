@@ -126,7 +126,18 @@ export class RecommendationCompanyService {
                     name: true,
                     contact: true,
                     email: true,
-                    region: true,
+                    district: {
+                        select: {
+                            englishName: true,
+                            koreanName: true,
+                            city: {
+                                select: {
+                                    englishName: true,
+                                    koreanName: true,
+                                },
+                            },
+                        },
+                    },
                     longitude: true,
                     latitude: true,
                     desiredSalary: true,

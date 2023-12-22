@@ -4,6 +4,7 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list-request';
 import { CareerResponse } from './response/career-member-get-list.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 
 @Injectable()
 export class CareerMemberService {
@@ -44,10 +45,7 @@ export class CareerMemberService {
             },
             where: this.parseConditionsFromQuery(query, memberId),
 
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            ...QueryPagingHelper.queryPaging(query),
         });
     }
 
