@@ -201,20 +201,20 @@ export class ApplicationMemberService {
                                 name: true,
                                 startDate: true,
                                 endDate: true,
-                                company: {
+                            },
+                        },
+                        company: {
+                            select: {
+                                id: true,
+                                name: true,
+                                logo: {
                                     select: {
-                                        id: true,
-                                        name: true,
-                                        logo: {
+                                        file: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        key: true,
-                                                        fileName: true,
-                                                        type: true,
-                                                        // size: true,
-                                                    },
-                                                },
+                                                key: true,
+                                                fileName: true,
+                                                type: true,
+                                                // size: true,
                                             },
                                         },
                                     },
@@ -228,16 +228,16 @@ export class ApplicationMemberService {
         console.log(application);
         if (!application) throw new NotFoundException('Application not found');
         return {
-            companyLogo: application.post.site.company.logo.file,
-            companyName: application.post.site.company.name,
-            companyId: application.post.site.company.id,
+            companyLogo: application.post.company.logo.file,
+            companyName: application.post.company.name,
+            companyId: application.post.company.id,
             postId: application.post.id,
             postName: application.post.name,
             postStatus: application.post.status,
-            siteAddress: application.post.site.address,
-            siteStartDate: application.post.site.startDate,
-            siteEndDate: application.post.site.endDate,
-            siteName: application.post.site.name,
+            siteAddress: application.post.site ? application.post.site.address : '',
+            siteStartDate: application.post.site ? application.post.site.startDate : null,
+            siteEndDate: application.post.site ? application.post.site.endDate : null,
+            siteName: application.post.site ? application.post.site.name : '',
             postEndDate: application.post.startDate,
             postStartDate: application.post.endDate,
             status: application.status,
