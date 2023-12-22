@@ -12,26 +12,21 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AccountType, CodeType, ExperienceType } from '@prisma/client';
+import { AccountType, ExperienceType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PostMemberService } from './post-member.service';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import {
-    ConstructionMachinaryResponse,
-    OccupationResponse,
-    PostMemberGetListResponse,
-    PostResponse,
-} from './response/post-member-get-list.response';
+import { PostMemberGetListResponse, PostResponse } from './response/post-member-get-list.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 
-@ApiTags('[MEMBER] Post management')
 @Controller('/member/posts')
+@ApiTags('[MEMBER] Post management')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiBearerAuth()
@@ -40,41 +35,13 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 export class PostMemberController {
     constructor(private postMemberService: PostMemberService) {}
 
-    @Get('occupation')
-    @ApiOperation({
-        summary: 'Get list of occupation',
-        description: 'Member can retrieve all occupation when drop down filter by occupation',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: [OccupationResponse] })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getOccupationList(): Promise<BaseResponse<OccupationResponse[]>> {
-        return BaseResponse.of(await this.postMemberService.getCodeList(CodeType.JOB));
-    }
-
-    @Get('construction-machinary')
-    @ApiOperation({
-        summary: 'Get list of construction machinary',
-        description: 'Member can retrieve all occupation when drop down filter by occupation',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: [ConstructionMachinaryResponse] })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getConstructionMachinaryList(): Promise<BaseResponse<ConstructionMachinaryResponse[]>> {
-        return BaseResponse.of(await this.postMemberService.getCodeList(CodeType.SPECIAL_NOTE));
-    }
-
-    @Get()
-    @ApiOperation({
-        summary: 'Get list of posts',
-        description: 'Member can retrieve all posts',
-    })
-    @ApiOkResponsePaginated(PostResponse)
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getList(
-        @Query() query: PostMemberGetListRequest,
-        @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
-        @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
-        @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
-        @Req() request: AccountIdExtensionRequest,
+    private async getListPost(
+        request: AccountIdExtensionRequest,
+        query: PostMemberGetListRequest,
+        occupationList: [string] | undefined,
+        constructionMachineryList: [string],
+        experienceTypeList: [string] | undefined,
+        siteId: number,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         // Check validation
         const parsedOccupationList = occupationList?.map((item) => {
@@ -99,12 +66,31 @@ export class PostMemberController {
         query.constructionMachineryList = parsedConstructionMachineryList;
         query.experienceTypeList = parsedExperienceTypeList;
 
-        const list = await this.postMemberService.getList(request.user.accountId, query, undefined);
+        const list = await this.postMemberService.getList(request.user.accountId, query, siteId);
         const total = await this.postMemberService.getTotal();
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
     }
 
+    // Get list all
+    @Get()
+    @ApiOperation({
+        summary: 'Get list of posts',
+        description: 'Member can retrieve all posts',
+    })
+    @ApiOkResponsePaginated(PostResponse)
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async getList(
+        @Query() query: PostMemberGetListRequest,
+        @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
+        @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
+        @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<PostMemberGetListResponse>> {
+        return await this.getListPost(request, query, occupationList, constructionMachineryList, experienceTypeList, undefined);
+    }
+
+    // Get list by site id
     @Get('sites/:id')
     @ApiOperation({
         summary: 'Get list of posts by siteId',
@@ -114,14 +100,16 @@ export class PostMemberController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListPostsBySite(
         @Param('id', ParseIntPipe) siteId: number,
+        @Query() query: PostMemberGetListRequest,
+        @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
+        @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
+        @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
-        const list = await this.postMemberService.getList(request.user.accountId, undefined, siteId);
-        const total = await this.postMemberService.getTotal();
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+        return await this.getListPost(request, query, occupationList, constructionMachineryList, experienceTypeList, siteId);
     }
 
+    // Get detail
     @Get(':id')
     @ApiOperation({
         summary: 'Get post information detail',
@@ -136,6 +124,7 @@ export class PostMemberController {
         return BaseResponse.of(await this.postMemberService.getDetail(id, request.user.accountId));
     }
 
+    // Apply
     @Post('/:id/apply')
     @ApiOperation({
         summary: 'Apply a post',
@@ -147,6 +136,7 @@ export class PostMemberController {
         return BaseResponse.of(await this.postMemberService.addApplyPost(request.user.accountId, id));
     }
 
+    // Interest
     @Post('/:id/interest')
     @ApiOperation({
         summary: 'Add interest post',

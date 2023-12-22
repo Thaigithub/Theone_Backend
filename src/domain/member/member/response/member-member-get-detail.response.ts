@@ -5,6 +5,7 @@ import {
     AccountStatus,
     BankAccount,
     BasicHealthSafetyCertificate,
+    Code,
     File,
     ForeignWorker,
     Member,
@@ -102,7 +103,9 @@ class MemberDetailResponse {
     @ApiProperty({ type: String })
     email: Member['email'];
     @ApiProperty({ type: String })
-    desiredOccupation: Member['desiredOccupation'];
+    desiredOccupation: {
+        codeName: Code['codeName'];
+    };
     @ApiProperty({ type: 'enum', enum: MemberLevel })
     level: Member['level'];
     @ApiProperty({ type: 'enum', enum: SignupMethodType })

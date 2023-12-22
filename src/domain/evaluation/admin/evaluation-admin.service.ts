@@ -11,6 +11,7 @@ import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation
 import { SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
 import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
 import { TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 
 @Injectable()
 export class EvaluationAdminService {
@@ -120,8 +121,7 @@ export class EvaluationAdminService {
             },
             where: this.parseConditionsFromQuery(EvaluationType.SITE, query),
             orderBy,
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            ...QueryPagingHelper.queryPaging(query),
         });
         return siteEvaluations.map((item) => {
             return {
@@ -223,8 +223,7 @@ export class EvaluationAdminService {
             },
             where: this.parseConditionsFromQuery(EvaluationType.TEAM, query),
             orderBy,
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            ...QueryPagingHelper.queryPaging(query),
         });
         return teamEvaluations.map((item) => {
             return {
@@ -320,8 +319,7 @@ export class EvaluationAdminService {
             },
             where: this.parseConditionsFromQuery(EvaluationType.MEMBER, query),
             orderBy,
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            ...QueryPagingHelper.queryPaging(query),
         });
         return (await memberEvaluations).map((item) => {
             return {

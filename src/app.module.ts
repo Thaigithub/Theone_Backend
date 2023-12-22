@@ -22,8 +22,11 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { ManpowerModule } from 'domain/manpower/manpower.module';
+import { FilterModule } from 'domain/filter/filter.module';
 @Module({
     imports: [
+        FilterModule,
         PrismaModule,
         AccountModule,
         AuthModule,
@@ -45,6 +48,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterviewModule,
         HeadhuntingModule,
         ContractModule,
+        ManpowerModule,
         MatchingModule,
         RegionModule,
     ],

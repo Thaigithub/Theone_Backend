@@ -12,8 +12,29 @@ export class ApplicationAdminResponse {
     @ApiProperty({ type: Boolean, example: false })
     public isTeam: boolean;
 
-    @ApiProperty({ type: 'string', example: '404 Building 101, 9, Nambusu...' })
-    public region: string;
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public city: {
+        englishName: string;
+        koreanName: string;
+    };
+
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public district: {
+        englishName: string;
+        koreanName: string;
+    };
 
     @ApiProperty({ type: Number, example: 5 })
     public totalExperienceYears: number;

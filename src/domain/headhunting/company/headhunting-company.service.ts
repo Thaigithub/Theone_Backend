@@ -51,7 +51,18 @@ export class HeadhuntingCompanyService {
                         totalExperienceYears: true,
                         specialLicenses: true,
                         desiredSalary: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
                 team: {
@@ -81,11 +92,30 @@ export class HeadhuntingCompanyService {
             ...QueryPagingHelper.queryPaging(query),
         });
 
+        const newList = list.map((item) => {
+            const district = item.member.district;
+            delete item.member.district;
+            return {
+                ...item,
+                member: {
+                    ...item.member,
+                    city: {
+                        englishName: district.city.englishName,
+                        koreanName: district.city.koreanName,
+                    },
+                    district: {
+                        englishName: district.englishName,
+                        koreanName: district.koreanName,
+                    },
+                },
+            };
+        });
+
         const listCount = await this.prismaService.headhuntingRecommendation.count({
             // Conditions based on request query
             where: queryFilter,
         });
 
-        return new PaginationResponse(list, new PageInfo(listCount));
+        return new PaginationResponse(newList, new PageInfo(listCount));
     }
 }

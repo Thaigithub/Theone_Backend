@@ -42,7 +42,11 @@ export class MemberMemberService {
                 name: true,
                 contact: true,
                 email: true,
-                desiredOccupation: true,
+                desiredOccupation: {
+                    select: {
+                        codeName: true,
+                    },
+                },
                 level: true,
                 signupMethod: true,
                 createdAt: true,

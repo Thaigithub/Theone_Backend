@@ -63,7 +63,18 @@ export class ApplicationCompanyService {
                         totalExperienceYears: true,
                         specialLicenses: true,
                         desiredSalary: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
                 team: {
@@ -91,12 +102,31 @@ export class ApplicationCompanyService {
             ...QueryPagingHelper.queryPaging(query),
         });
 
+        const newApplicationList = applicationList.map((item) => {
+            const district = item.member.district;
+            delete item.member.district;
+            return {
+                ...item,
+                member: {
+                    ...item.member,
+                    city: {
+                        englishName: district.city.englishName,
+                        koreanName: district.city.koreanName,
+                    },
+                    district: {
+                        englishName: district.englishName,
+                        koreanName: district.koreanName,
+                    },
+                },
+            };
+        });
+
         const applicationListCount = await this.prismaService.application.count({
             // Conditions based on request query
             where: queryFilter,
         });
 
-        return new PaginationResponse(applicationList, new PageInfo(applicationListCount));
+        return new PaginationResponse(newApplicationList, new PageInfo(applicationListCount));
     }
 
     async updateApplicationStatus(accountId: any, applicationId: number, status: PostApplicationStatus) {

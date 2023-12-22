@@ -15,8 +15,29 @@ export class ApplicationCompantMemberDetailMemberDTO {
     @ApiProperty({ example: 'theone@gmail.com' })
     public email: string;
 
-    @ApiProperty({ example: 'Gangnam-gu, Seoul' })
-    public region: string;
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public city: {
+        englishName: string;
+        koreanName: string;
+    };
+
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public district: {
+        englishName: string;
+        koreanName: string;
+    };
 
     @ApiProperty({ example: 'string' })
     public longitude: string;

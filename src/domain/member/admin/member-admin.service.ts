@@ -7,6 +7,7 @@ import { searchCategory } from './dto/member-admin-search-category.request.dto';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
 import { MemberResponse } from './response/member-admin-get-list.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 
 @Injectable()
 export class MemberAdminService {
@@ -66,10 +67,7 @@ export class MemberAdminService {
             // Conditions based on request query
             where: this.parseConditionsFromQuery(query),
 
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            skip: query.pageNumber && query.pageSize ? (query.pageNumber - 1) * query.pageSize : undefined,
-            take: query.pageNumber && query.pageSize ? query.pageSize : undefined,
+            ...QueryPagingHelper.queryPaging(query),
         });
     }
 

@@ -17,7 +17,7 @@ export class MemberCompanyService {
             },
         });
 
-        return await this.prismaService.application.findUniqueOrThrow({
+        const application = await this.prismaService.application.findUniqueOrThrow({
             where: {
                 id,
                 post: {
@@ -30,7 +30,18 @@ export class MemberCompanyService {
                         name: true,
                         contact: true,
                         email: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                         longitude: true,
                         latitude: true,
                         desiredSalary: true,
@@ -80,5 +91,22 @@ export class MemberCompanyService {
                 },
             },
         });
+        const district = application.member.district;
+        delete application.member.district;
+
+        return {
+            ...application,
+            member: {
+                ...application.member,
+                city: {
+                    englishName: district.city.englishName,
+                    koreanName: district.city.koreanName,
+                },
+                district: {
+                    englishName: district.englishName,
+                    koreanName: district.koreanName,
+                },
+            },
+        };
     }
 }

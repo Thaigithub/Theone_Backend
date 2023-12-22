@@ -28,6 +28,27 @@ export class ApplicationCompanyApplicantsMemberDTO {
     @ApiProperty({ example: 'abc' })
     public desiredSalary: Member['desiredSalary'];
 
-    @ApiProperty({ example: 'abc' })
-    public region: Member['region'];
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public city: {
+        englishName: string;
+        koreanName: string;
+    };
+
+    @ApiProperty({
+        type: 'object',
+        example: {
+            englishName: 'Seoul',
+            koreanName: '근무지원내역',
+        },
+    })
+    public district: {
+        englishName: string;
+        koreanName: string;
+    };
 }
