@@ -12,7 +12,11 @@ import {
 } from './dto/post-admin-filter';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
+import {
+    PostAdminModifyPostTypeRequest,
+    PostAdminModifyPullUpRequest,
+    PostAdminModifyRequest,
+} from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
@@ -315,6 +319,21 @@ export class PostAdminService {
                 },
                 data: {
                     isPulledUp: payload.isPulledUp,
+                },
+            });
+        }
+    }
+
+    async changePostType(id: number, payload: PostAdminModifyPostTypeRequest) {
+        const post_record = await this.checkExisPost(id);
+        if (post_record.type != payload.type) {
+            await this.prismaService.post.update({
+                where: {
+                    id: id,
+                    isActive: true,
+                },
+                data: {
+                    type: payload.type,
                 },
             });
         }
