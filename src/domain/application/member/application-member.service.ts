@@ -572,7 +572,7 @@ export class ApplicationMemberService {
                     // size: item.post.site.Company.logo.file.size,
                 },
                 postName: item.post.name,
-                siteName: item.post.site?.name,
+                siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site?.address,
                 occupationName: item.post.occupation ? item.post.occupation.codeName : '',
                 workLocation: item.post.workLocation,
