@@ -3,17 +3,19 @@ import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 
-export class PostAdminModifyRequest {
+export class PostAdminModifyPostTypeRequest {
     @Expose()
     @IsEnum(PostType)
     @IsOptional()
     @ApiProperty({
         type: 'enum',
         enum: PostType,
-        example: PostType.COMMON,
+        example: PostType.PREMIUM,
     })
     public type: PostType;
+}
 
+export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
     @Expose()
     @IsEnum(PostCategory)
     @ApiProperty({

@@ -15,7 +15,7 @@ import {
 import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
+import { PostAdminModifyPostTypeRequest, PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
@@ -176,6 +176,20 @@ export class PostAdminController {
         @Body() payload: PostAdminModifyPullUpRequest,
     ): Promise<BaseResponse<void>> {
         await this.postAdminService.changePullUp(id, payload);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:id/type/')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Admin change to poststype of a post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePostType(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: PostAdminModifyPostTypeRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postAdminService.changePostType(id, payload);
         return BaseResponse.ok();
     }
 
