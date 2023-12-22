@@ -80,19 +80,19 @@ export class ApplicationMemberService {
                                 address: true,
                                 personInCharge: true,
                                 originalBuilding: true,
-                                company: {
+                            },
+                        },
+                        company: {
+                            select: {
+                                id: true,
+                                name: true,
+                                logo: {
                                     select: {
-                                        id: true,
-                                        name: true,
-                                        logo: {
+                                        file: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        key: true,
-                                                        type: true,
-                                                    },
-                                                },
+                                                fileName: true,
+                                                key: true,
+                                                type: true,
                                             },
                                         },
                                     },
@@ -106,7 +106,7 @@ export class ApplicationMemberService {
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
                 applicationId: item.id,
-                companyLogo: item.post.site.company.logo.file,
+                companyLogo: item.post.company.logo.file,
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
@@ -573,7 +573,7 @@ export class ApplicationMemberService {
                 },
                 postName: item.post.name,
                 siteName: item.post.site ? item.post.site.name : '',
-                siteAddress: item.post.site?.address,
+                siteAddress: item.post.site ? item.post.site.address : '',
                 occupationName: item.post.occupation ? item.post.occupation.codeName : '',
                 workLocation: item.post.workLocation,
                 isInterested: item.post.interested.length === 0 ? false : true,
