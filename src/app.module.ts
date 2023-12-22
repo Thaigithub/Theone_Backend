@@ -8,11 +8,13 @@ import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FileModule } from 'domain/file/file.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InterviewModule } from 'domain/interview/interview.module';
+import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PostModule } from 'domain/post/post.module';
 import { RecommendationModule } from 'domain/recommendation/recommendation.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
+import { RegionModule } from 'region/region.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -43,6 +45,8 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterviewModule,
         HeadhuntingModule,
         ContractModule,
+        MatchingModule,
+        RegionModule,
     ],
 })
 export class AppModule {}

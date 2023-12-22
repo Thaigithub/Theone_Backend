@@ -99,34 +99,36 @@ model Member {
   siteEvaluationByMember       SiteEvaluationByMember?
   specialLicenses              SpecialLicense[]
   leader                       Team[]
+  matchingRecommendation       MatchingRecommendation[]
 
   @@map("members")
 }
 
 model Company {
-  id                 Int          @id @default(autoincrement())
-  accountId          Int          @unique @map("account_id")
-  name               String
-  address            String
-  longitude          Float
-  latitude           Float
-  estDate            DateTime     @map("est_date")
-  businessRegNumber  String       @unique @map("buss_reg_number")
-  corporateRegNumber String       @unique @map("corp_reg_number")
-  type               CompanyType
-  email              String       @unique
-  phone              String
-  contactPhone       String       @map("contact_phone")
-  contactName        String       @map("contact_name")
-  isActive           Boolean      @default(true) @map("is_active")
-  createdAt          DateTime     @default(now()) @map("created_at")
-  updatedAt          DateTime     @updatedAt @map("updated_at")
-  presentativeName   String       @map("presentative_name")
-  account            Account      @relation(fields: [accountId], references: [id])
-  contactCard        ContactCard?
-  logo               Logo?
-  posts              Post[]
-  sites              Site[]
+  id                     Int                      @id @default(autoincrement())
+  accountId              Int                      @unique @map("account_id")
+  name                   String
+  address                String
+  longitude              Float
+  latitude               Float
+  estDate                DateTime                 @map("est_date")
+  businessRegNumber      String                   @unique @map("buss_reg_number")
+  corporateRegNumber     String                   @unique @map("corp_reg_number")
+  type                   CompanyType
+  email                  String                   @unique
+  phone                  String
+  contactPhone           String                   @map("contact_phone")
+  contactName            String                   @map("contact_name")
+  isActive               Boolean                  @default(true) @map("is_active")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+  presentativeName       String                   @map("presentative_name")
+  account                Account                  @relation(fields: [accountId], references: [id])
+  contactCard            ContactCard?
+  logo                   Logo?
+  posts                  Post[]
+  sites                  Site[]
+  matchingRecommendation MatchingRecommendation[]
 
   @@map("companies")
 }
@@ -172,6 +174,9 @@ model Team {
   teamEvaluation            TeamEvaluation?
   file                      File                        @relation(fields: [fileId], references: [id])
   leader                    Member                      @relation(fields: [leaderId], references: [id])
+  totalExperienceYears      Int?                        @map("total_experience_years")
+  totalExperienceMonths     Int?                        @map("total_experience_months")
+  matchingRecommendation    MatchingRecommendation[]
 
   @@map("teams")
 }
@@ -709,6 +714,47 @@ model Contract {
   file           File        @relation(fields: [fileId], references: [id])
 
   @@map("contracts")
+}
+
+model City {
+  id          Int        @id @default(autoincrement())
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+  koreanName  String     @map("korean_name")
+  englishName String     @map("english_name")
+  district    District[]
+
+  @@map("city")
+}
+
+model District {
+  id          Int      @id @default(autoincrement())
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  koreanName  String   @map("korean_name")
+  englishName String   @map("english_name")
+  city        City     @relation(fields: [cityId], references: [id])
+  cityId      Int      @map("city_id")
+
+  @@map("district")
+}
+
+model MatchingRecommendation {
+  id         Int      @id @default(autoincrement())
+  memberId   Int?     @map("member_id")
+  teamId     Int?     @map("team_id")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date()
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  member     Member?  @relation(fields: [memberId], references: [id])
+  team       Team?    @relation(fields: [teamId], references: [id])
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  Int      @map("company_id")
+
+  @@unique([memberId, assignedAt])
+  @@unique([teamId, assignedAt])
+  @@map("matching_recommendations")
 }
 
 enum BannerStatus {
