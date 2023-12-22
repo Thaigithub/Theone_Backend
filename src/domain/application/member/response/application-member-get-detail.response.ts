@@ -24,6 +24,12 @@ export class ApplicationMemberGetDetailResponse {
     siteEndDate: Site['endDate'];
     @ApiProperty({ type: String })
     siteName: Site['name'];
+    @ApiProperty({ type: String })
+    sitePersonInCharge: Site['personInCharge'];
+    @ApiProperty({ type: String })
+    sitePersonInChargeContact: Site['personInChargeContact'];
+    @ApiProperty({ type: String })
+    siteEmail: Site['email'];
     @ApiProperty({ type: Date })
     postEndDate: Post['endDate'];
     @ApiProperty({ type: Date })
