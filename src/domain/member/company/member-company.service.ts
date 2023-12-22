@@ -41,7 +41,7 @@ export class MemberCompanyService {
                                 username: true,
                             },
                         },
-                        Career: {
+                        career: {
                             select: {
                                 companyName: true,
                                 siteName: true,

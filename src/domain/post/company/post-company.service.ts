@@ -317,7 +317,7 @@ export class PostCompanyService {
                 startDate: true,
                 endDate: true,
                 status: true,
-                HeadhuntingRequest: {
+                headhuntingRequest: {
                     select: {
                         date: true,
                         status: true,

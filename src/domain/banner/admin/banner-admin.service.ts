@@ -448,7 +448,7 @@ export class AdminBannerService {
                         site: {
                             select: {
                                 name: true,
-                                Company: {
+                                company: {
                                     select: {
                                         id: true,
                                         name: true,
@@ -490,9 +490,9 @@ export class AdminBannerService {
             postId: banner.postId,
             postName: banner.post.name,
             siteName: banner.post.site.name,
-            companyId: banner.post.site.Company.id,
-            companyName: banner.post.site.Company.name,
-            presentativeName: banner.post.site.Company.presentativeName,
+            companyId: banner.post.site.company.id,
+            companyName: banner.post.site.company.name,
+            presentativeName: banner.post.site.company.presentativeName,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,
@@ -625,7 +625,7 @@ export class AdminBannerService {
                             select: {
                                 name: true,
                                 companyId: true,
-                                Company: {
+                                company: {
                                     select: {
                                         name: true,
                                         presentativeName: true,
@@ -643,8 +643,8 @@ export class AdminBannerService {
             siteId: banner.siteBanner.siteId,
             siteName: banner.siteBanner.site.name,
             companyId: banner.siteBanner.site.companyId,
-            companyName: banner.siteBanner.site.Company.name,
-            presentativeName: banner.siteBanner.site.Company.presentativeName,
+            companyName: banner.siteBanner.site.company.name,
+            presentativeName: banner.siteBanner.site.company.presentativeName,
             desiredStartDate: banner.siteBanner.desiredStartDate,
             desiredEndDate: banner.siteBanner.desiredEndDate,
             acceptDate: banner.siteBanner.acceptDate,

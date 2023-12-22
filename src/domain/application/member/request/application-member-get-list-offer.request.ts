@@ -23,14 +23,14 @@ export class ApplicationMemberGetListOfferRequest {
     @IsNumberString()
     @IsOptional()
     @ApiProperty({
-        type: Number,
+        type: String,
     })
     public pageSize: string;
 
     @IsNumberString()
     @IsOptional()
     @ApiProperty({
-        type: Number,
+        type: String,
     })
     public pageNumber: string;
 }

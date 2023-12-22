@@ -3,6 +3,7 @@ import { ApplicationModule } from 'domain/application/application.module';
 import { BannerModule } from 'domain/banner/banner.module';
 import { CertificateModule } from 'domain/certificate/certificate.module';
 import { CodeModule } from 'domain/code/code.module';
+import { ContractModule } from 'domain/contract/contract.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FileModule } from 'domain/file/file.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
@@ -41,6 +42,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         RecommendationModule,
         InterviewModule,
         HeadhuntingModule,
+        ContractModule,
     ],
 })
 export class AppModule {}
