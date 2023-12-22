@@ -11,6 +11,7 @@ import {
     ApplicationCompanyGetListApplicantsItemResponse,
     ApplicationCompanyGetListApplicantsResponse,
 } from './response/application-company-get-list-applicants.response';
+import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
 
 @ApiTags('[COMPANY] Application Management')
 @Controller('/company/applications')
@@ -21,6 +22,13 @@ import {
 @ApiConsumes('application/json')
 export class ApplicationCompanyController {
     constructor(private applicationCompanyService: ApplicationCompanyService) {}
+    @Get('/offer-by-post/:id')
+    async getApplicationOfferByPost(
+        @Param('id', ParseIntPipe) postId: number,
+        @Req() req: any,
+    ): Promise<BaseResponse<ApplicationCompanyGetListOfferByPost>> {
+        return BaseResponse.of(await this.applicationCompanyService.getListOfferByPost(req.user.accountId, postId));
+    }
 
     @Get('/:postId')
     @ApiOperation({

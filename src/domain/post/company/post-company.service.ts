@@ -11,6 +11,7 @@ import { PostCompanyGetListRequest } from './request/post-company-get-list.reque
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
+import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
@@ -405,5 +406,27 @@ export class PostCompanyService {
                 },
             },
         });
+    }
+    async getListBySite(accountId: number, siteId: number): Promise<PostCompanyGetListBySite> {
+        const posts = (
+            await this.prismaService.post.findMany({
+                where: {
+                    company: {
+                        accountId,
+                    },
+                    siteId,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                },
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+            };
+        });
+        return new PaginationResponse(posts, new PageInfo(posts.length));
     }
 }

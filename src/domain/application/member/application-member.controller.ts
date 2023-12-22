@@ -21,6 +21,7 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 @ApiBearerAuth()
 export class ApplicationMemberController {
     constructor(private applicationMemberService: ApplicationMemberService) {}
+
     @Patch('/:id/accept')
     @ApiOperation({
         summary: 'Accept offer',
@@ -92,6 +93,7 @@ export class ApplicationMemberController {
     ): Promise<BaseResponse<ApplicationMemberGetListOfferResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getApplicationOfferList(request.user.accountId, body));
     }
+
     @Get('/:id')
     @ApiOperation({
         summary: 'Listing post applied',

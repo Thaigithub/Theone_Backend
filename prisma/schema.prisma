@@ -700,7 +700,7 @@ model Contract {
   id             Int         @id @default(autoincrement())
   contractNumber String      @unique @map("contract_number")
   paymentForm    PaymentForm @default(FIRST_CLASS) @map("payment_form")
-  ammount        Int         @default(0)
+  amount         Int         @default(0)
   startDate      DateTime    @map("start_date") @db.Date
   endDate        DateTime    @map("end_date") @db.Date
   fileId         Int         @unique @map("file_id")

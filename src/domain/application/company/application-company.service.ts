@@ -6,6 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
+import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -163,5 +164,57 @@ export class ApplicationCompanyService {
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
+    }
+    async getListOfferByPost(accountId, postId): Promise<ApplicationCompanyGetListOfferByPost> {
+        const offer = (
+            await this.prismaService.application.findMany({
+                where: {
+                    postId,
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                    status: PostApplicationStatus.APPROVE_BY_MEMBER,
+                },
+                select: {
+                    id: true,
+                    team: {
+                        select: {
+                            name: true,
+                            leader: {
+                                select: {
+                                    contact: true,
+                                },
+                            },
+                        },
+                    },
+                    member: {
+                        select: {
+                            name: true,
+                            contact: true,
+                        },
+                    },
+                },
+            })
+        ).map((item) => {
+            return {
+                applicationId: item.id,
+                type: item.member ? 'INDIVIDUAL' : 'TEAM',
+                member: item.member
+                    ? {
+                          name: item.member.name,
+                          contact: item.member.contact,
+                      }
+                    : null,
+                team: item.team
+                    ? {
+                          name: item.team.name,
+                          contact: item.team.leader.contact,
+                      }
+                    : null,
+            };
+        });
+        return new PaginationResponse(offer, new PageInfo(offer.length));
     }
 }
