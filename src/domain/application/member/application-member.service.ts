@@ -345,18 +345,18 @@ export class ApplicationMemberService {
                             select: {
                                 address: true,
                                 name: true,
-                                company: {
+                            },
+                        },
+                        company: {
+                            select: {
+                                logo: {
                                     select: {
-                                        logo: {
+                                        file: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        type: true,
-                                                        size: true,
-                                                        key: true,
-                                                    },
-                                                },
+                                                fileName: true,
+                                                type: true,
+                                                size: true,
+                                                key: true,
                                             },
                                         },
                                     },
@@ -557,14 +557,14 @@ export class ApplicationMemberService {
                 applicationStatus: item.status,
                 teamName: item.team ? item.team.name : '',
                 companyLogo: {
-                    key: item.post.site.company.logo.file.key,
-                    fileName: item.post.site.company.logo.file.fileName,
-                    type: item.post.site.company.logo.file.type,
+                    key: item.post.company.logo.file.key,
+                    fileName: item.post.company.logo.file.fileName,
+                    type: item.post.company.logo.file.type,
                     // size: item.post.site.Company.logo.file.size,
                 },
                 postName: item.post.name,
-                siteName: item.post.site.name,
-                siteAddress: item.post.site.address,
+                siteName: item.post.site?.name,
+                siteAddress: item.post.site?.address,
                 occupationName: item.post.occupation ? item.post.occupation.codeName : '',
             };
         });
