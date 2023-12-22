@@ -12,7 +12,7 @@ import {
 } from './dto/post-admin-filter';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminModifyRequest } from './request/post-admin-modify-request';
+import { PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
@@ -264,43 +264,59 @@ export class PostAdminService {
             throw new HttpException('The Post or Site is not found or has been deleted', HttpStatus.NOT_FOUND);
         }
     }
+    async checkExisPost(id: number) {
+        const post_record = await this.prismaService.post.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+        });
+        if (!post_record) {
+            throw new NotFoundException('The Post id is not found');
+        }
+        return post_record;
+    }
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
-        try {
-            await this.prismaService.post.update({
-                where: {
-                    id,
-                    isActive: true,
-                },
-                data: {
-                    isActive: false,
-                    deleteReason: query.deleteReason,
-                },
-            });
-        } catch (err) {
-            throw new HttpException('The Post Id with positive status not found!', HttpStatus.NOT_FOUND);
-        }
+        await this.checkExisPost(id);
+        await this.prismaService.post.update({
+            where: {
+                id,
+                isActive: true,
+            },
+            data: {
+                isActive: false,
+                deleteReason: query.deleteReason,
+            },
+        });
     }
     async changeHiddenStatus(id: number, payload: PostAdminModifyRequest) {
-        try {
-            const post_record = await this.prismaService.post.findUnique({
+        const post_record = await this.checkExisPost(id);
+        if (post_record.isHidden != payload.isHidden) {
+            await this.prismaService.post.update({
                 where: {
                     id: id,
                     isActive: true,
                 },
+                data: {
+                    isHidden: payload.isHidden,
+                },
             });
-            if (post_record.isHidden != payload.isHidden) {
-                await this.prismaService.post.update({
-                    where: {
-                        id: id,
-                    },
-                    data: {
-                        isHidden: payload.isHidden,
-                    },
-                });
-            }
-        } catch (err) {
-            throw new HttpException('The Post id is not found', HttpStatus.NOT_FOUND);
+        }
+    }
+
+    async changePullUp(id: number, payload: PostAdminModifyPullUpRequest) {
+        const post_record = await this.checkExisPost(id);
+        if (post_record.isPulledUp != payload.isPulledUp) {
+            await this.prismaService.post.update({
+                where: {
+                    id: id,
+                    isActive: true,
+                },
+                data: {
+                    isPulledUp: payload.isPulledUp,
+                },
+            });
         }
     }
 }
