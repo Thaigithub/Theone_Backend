@@ -7,5 +7,6 @@ import { RecommendationCompanyService } from './company/recommendation.service';
     imports: [PrismaModule],
     controllers: [RecommendationCompanyController],
     providers: [RecommendationCompanyService],
+    exports: [RecommendationCompanyService],
 })
 export class RecommendationModule {}

@@ -11,7 +11,7 @@ export class RecommendationCompanyService {
     async proposeInterview(
         accountId: number,
         applicantId: number,
-        headhunting: SupportCategory,
+        supportCategory: SupportCategory,
         body: RecommendationCompanyInterviewProposeRequest,
     ) {
         const account = await this.prismaService.account.findUnique({
@@ -44,9 +44,10 @@ export class RecommendationCompanyService {
                 },
             });
 
-            if (!applicant) throw new BadRequestException('No applicant found');
+            if (!applicant && supportCategory === SupportCategory.HEADHUNTING)
+                throw new BadRequestException('No applicant found');
 
-            await this.proposeInterviewEachObject('memberId', applicantId, headhunting, body);
+            await this.proposeInterviewEachObject('memberId', applicantId, supportCategory, body);
         } else {
             const applicant = await this.prismaService.headhuntingRecommendation.findUnique({
                 where: {
@@ -57,9 +58,10 @@ export class RecommendationCompanyService {
                 },
             });
 
-            if (!applicant) throw new BadRequestException('No applicant found');
+            if (!applicant && supportCategory === SupportCategory.HEADHUNTING)
+                throw new BadRequestException('No applicant found');
 
-            await this.proposeInterviewEachObject('teamId', applicantId, headhunting, body);
+            await this.proposeInterviewEachObject('teamId', applicantId, supportCategory, body);
         }
     }
 
