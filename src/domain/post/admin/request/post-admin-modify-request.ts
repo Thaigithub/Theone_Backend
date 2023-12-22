@@ -211,3 +211,10 @@ export class PostAdminModifyRequest {
     @IsOptional()
     public deleteReason: string;
 }
+
+export class PostAdminModifyPullUpRequest {
+    @Expose()
+    @IsBoolean()
+    @ApiProperty({ type: Boolean, example: true })
+    public isPulledUp: boolean;
+}

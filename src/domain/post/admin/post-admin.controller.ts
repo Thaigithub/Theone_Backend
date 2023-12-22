@@ -15,7 +15,7 @@ import {
 import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminModifyRequest } from './request/post-admin-modify-request';
+import { PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
@@ -162,6 +162,20 @@ export class PostAdminController {
         @Body() payload: PostAdminModifyRequest,
     ): Promise<BaseResponse<void>> {
         await this.postAdminService.changeHiddenStatus(id, payload);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:id/pullup/')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Admin change pullUp flag of a post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePullUp(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: PostAdminModifyPullUpRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postAdminService.changePullUp(id, payload);
         return BaseResponse.ok();
     }
 
