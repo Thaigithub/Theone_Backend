@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,11 +17,11 @@ model Account {
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
   lastAccessAt           DateTime               @default(now()) @map("last_access_at")
+  accountStatusHistories AccountStatusHistory[]
   admin                  Admin?
   company                Company?
   member                 Member?
   otps                   OtpProvider[]
-  accountStatusHistories AccountStatusHistory[]
 
   @@map("accounts")
 }
@@ -48,8 +45,8 @@ model OtpProvider {
   otpCode   String?  @map("otp_code")
   checked   Boolean  @default(false)
   accountId Int      @map("account_id")
-  account   Account  @relation(fields: [accountId], references: [id])
   otpType   OtpType  @map("otp_type")
+  account   Account  @relation(fields: [accountId], references: [id])
 
   @@map("otp_providers")
 }
@@ -62,8 +59,8 @@ model Admin {
   isActive    Boolean      @default(true) @map("is_active")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
-  permissions Permission[]
   account     Account      @relation(fields: [accountId], references: [id])
+  permissions Permission[]
 
   @@map("admins")
 }
@@ -87,21 +84,21 @@ model Member {
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
+  applyPosts                   Application[]
+  bankAccount                  BankAccount?
+  career                       Career[]
   certificates                 Certificate[]
-  specialLicenses              SpecialLicense[]
+  disability                   Disability?
+  foreignWorker                ForeignWorker?
+  headhuntingRecommendation    HeadhuntingRecommendation[]
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  interestSites                Interest[]
+  memberEvaluation             MemberEvaluation?
   account                      Account                       @relation(fields: [accountId], references: [id])
   teams                        MembersOnTeams[]
-  leader                       Team[]
-  foreignWorker                ForeignWorker?
-  bankAccount                  BankAccount?
-  disability                   Disability?
-  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
-  career                       Career[]
   siteEvaluationByMember       SiteEvaluationByMember?
-  interestSites                Interest[]
-  applyPosts                   Application[]
-  memberEvaluation             MemberEvaluation?
-  headhuntingRecommendation    HeadhuntingRecommendation[]
+  specialLicenses              SpecialLicense[]
+  leader                       Team[]
 
   @@map("members")
 }
@@ -109,7 +106,6 @@ model Member {
 model Company {
   id                 Int          @id @default(autoincrement())
   accountId          Int          @unique @map("account_id")
-  account            Account      @relation(fields: [accountId], references: [id])
   name               String
   address            String
   longitude          Float
@@ -120,16 +116,17 @@ model Company {
   type               CompanyType
   email              String       @unique
   phone              String
-  presentativeName   String       @map("presentative_name")
   contactPhone       String       @map("contact_phone")
   contactName        String       @map("contact_name")
   isActive           Boolean      @default(true) @map("is_active")
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")
-  sites              Site[]
-  logo               Logo?
+  presentativeName   String       @map("presentative_name")
+  account            Account      @relation(fields: [accountId], references: [id])
   contactCard        ContactCard?
+  logo               Logo?
   posts              Post[]
+  sites              Site[]
 
   @@map("companies")
 }
@@ -137,8 +134,8 @@ model Company {
 model Logo {
   id        Int     @id @default(autoincrement())
   companyId Int     @unique @map("company_id")
-  company   Company @relation(fields: [companyId], references: [id])
   fileId    Int     @unique @map("file_id")
+  company   Company @relation(fields: [companyId], references: [id])
   file      File    @relation(fields: [fileId], references: [id])
 
   @@map("logos")
@@ -147,8 +144,8 @@ model Logo {
 model ContactCard {
   id        Int     @id @default(autoincrement())
   companyId Int     @unique @map("company_id")
-  company   Company @relation(fields: [companyId], references: [id])
   fileId    Int     @unique @map("file_id")
+  company   Company @relation(fields: [companyId], references: [id])
   file      File    @relation(fields: [fileId], references: [id])
 
   @@map("contact_cards")
@@ -165,16 +162,16 @@ model Team {
   createdAt                 DateTime                    @default(now()) @map("created_at")
   updatedAt                 DateTime                    @updatedAt @map("updated_at")
   status                    TeamStatus                  @default(GENERAL)
-  members                   MembersOnTeams[]
   totalMembers              Int                         @default(0) @map("total_members")
-  leader                    Member                      @relation(fields: [leaderId], references: [id])
   fileId                    Int                         @unique @map("file_id")
-  file                      File                        @relation(fields: [fileId], references: [id])
   exposureStatus            Boolean                     @default(false) @map("exposure_status")
   numberOfRecruitments      Int                         @default(0) @map("number_of_recruitments")
-  teamEvaluation            TeamEvaluation?
   posts                     Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
+  members                   MembersOnTeams[]
+  teamEvaluation            TeamEvaluation?
+  file                      File                        @relation(fields: [fileId], references: [id])
+  leader                    Member                      @relation(fields: [leaderId], references: [id])
 
   @@map("teams")
 }
@@ -199,12 +196,12 @@ model ForeignWorker {
   serialNumber       String   @map("serial_number")
   dateOfIssue        DateTime @map("date_of_issue") @db.Date
   memberId           Int      @unique @map("member_id")
-  member             Member   @relation(fields: [memberId], references: [id])
   fileId             Int      @unique @map("file_id")
-  file               File     @relation(fields: [fileId], references: [id])
   isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
+  file               File     @relation(fields: [fileId], references: [id])
+  member             Member   @relation(fields: [memberId], references: [id])
 
   @@map("foreign_workers")
 }
@@ -215,10 +212,10 @@ model BankAccount {
   accountNumber String   @map("account_number")
   bankName      String   @map("bank_name")
   memberId      Int      @unique @map("member_id")
-  member        Member   @relation(fields: [memberId], references: [id])
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  member        Member   @relation(fields: [memberId], references: [id])
 
   @@map("bank_accounts")
 }
@@ -228,12 +225,12 @@ model Disability {
   disableType  DisabledType  @map("disable_type")
   disableLevel DisabledLevel
   memberId     Int           @unique @map("member_id")
-  member       Member        @relation(fields: [memberId], references: [id])
   fileId       Int           @unique @map("file_id")
-  file         File          @relation(fields: [fileId], references: [id])
   isActive     Boolean       @default(true) @map("is_active")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
+  file         File          @relation(fields: [fileId], references: [id])
+  member       Member        @relation(fields: [memberId], references: [id])
 
   @@map("disabilities")
 }
@@ -243,12 +240,12 @@ model BasicHealthSafetyCertificate {
   registrationNumber String   @map("registration_number")
   dateOfCompletion   DateTime @map("date_of_completion") @db.Date
   memberId           Int      @unique @map("member_id")
-  member             Member   @relation(fields: [memberId], references: [id])
   fileId             Int      @unique @map("file_id")
-  file               File     @relation(fields: [fileId], references: [id])
   isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
+  file               File     @relation(fields: [fileId], references: [id])
+  member             Member   @relation(fields: [memberId], references: [id])
 
   @@map("hst_certificates")
 }
@@ -262,24 +259,24 @@ model File {
   isDeactivated                Boolean                       @default(false) @map("is_deactivated")
   createdAt                    DateTime                      @default(now()) @map("created_at")
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  banner                       Banner?
+  certificate                  Certificate?
+  contactCard                  ContactCard?
+  contract                     Contract?
   disability                   Disability?
   foreignWorker                ForeignWorker?
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
-  certificate                  Certificate?
-  banner                       Banner?
+  logo                         Logo?
   specialLicense               SpecialLicense?
   team                         Team?
-  logo                         Logo?
-  contactCard                  ContactCard?
-  contract                     Contract?
 
   @@map("files")
 }
 
 model Permission {
   adminId    Int      @map("admin_id")
-  admin      Admin    @relation(fields: [adminId], references: [id])
   functionId Int      @map("function_id")
+  admin      Admin    @relation(fields: [adminId], references: [id])
   function   Function @relation(fields: [functionId], references: [id])
 
   @@id([adminId, functionId])
@@ -289,9 +286,9 @@ model Permission {
 model Function {
   id         Int          @id @default(autoincrement())
   name       FunctionName
-  permission Permission[]
   createdAt  DateTime     @default(now()) @map("created_at")
   updatedAt  DateTime     @updatedAt @map("updated_at")
+  permission Permission[]
 
   @@map("functions")
 }
@@ -305,12 +302,12 @@ model Certificate {
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   memberId          Int               @map("member_id")
-  member            Member            @relation(fields: [memberId], references: [id])
   fileId            Int               @unique @map("file_id")
-  file              File              @relation(fields: [fileId], references: [id])
   isSpecial         Boolean           @default(false)
   codeId            Int?              @map("code_id")
   code              Code?             @relation(fields: [codeId], references: [id])
+  file              File              @relation(fields: [fileId], references: [id])
+  member            Member            @relation(fields: [memberId], references: [id])
 
   @@map("certificates")
 }
@@ -324,11 +321,11 @@ model SpecialLicense {
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
   memberId        Int               @map("member_id")
-  member          Member            @relation(fields: [memberId], references: [id])
   codeId          Int?              @map("code_id")
-  code            Code?             @relation(fields: [codeId], references: [id])
   fileId          Int               @unique @map("file_id")
+  code            Code?             @relation(fields: [codeId], references: [id])
   file            File              @relation(fields: [fileId], references: [id])
+  member          Member            @relation(fields: [memberId], references: [id])
 
   @@map("special_license")
 }
@@ -343,87 +340,85 @@ model Career {
   isExperienced     Boolean    @map("is_experienced")
   experiencedYears  Int        @default(0)
   experiencedMonths Int        @default(0)
-  occupation        Code?      @relation(fields: [occupationId], references: [id])
   occupationId      Int?
   isActive          Boolean    @default(true) @map("is_active")
   createdAt         DateTime   @default(now()) @map("created_at")
   updatedAt         DateTime   @updatedAt @map("updated_at")
   memberId          Int        @map("member_id")
   member            Member     @relation(fields: [memberId], references: [id])
+  occupation        Code?      @relation(fields: [occupationId], references: [id])
 
   @@map("careers")
 }
 
 model Banner {
   id            Int            @id @default(autoincrement())
-  generalBanner GeneralBanner?
-  postBanner    PostBanner?
-  siteBanner    SiteBanner?
-  status        BannerStatus   @default(value: EXPOSE)
+  status        BannerStatus   @default(EXPOSE)
   fileId        Int            @unique
-  file          File           @relation(fields: [fileId], references: [id])
   isActive      Boolean        @default(true) @map("is_active")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
+  file          File           @relation(fields: [fileId], references: [id])
+  generalBanner GeneralBanner?
+  postBanner    PostBanner?
+  siteBanner    SiteBanner?
 
   @@map("banners")
 }
 
 model GeneralBanner {
   id        Int      @unique
-  banner    Banner   @relation(fields: [id], references: [id])
   urlLink   String   @map("url_link")
   title     String
   startDate DateTime @map("start_date") @db.Date
   endDate   DateTime @map("end_date") @db.Date
   regDate   DateTime @default(now()) @map("register_date") @db.Date
   priority  Int?
+  banner    Banner   @relation(fields: [id], references: [id])
 
   @@map("general_banners")
 }
 
 model PostBanner {
   id                Int                @unique
-  banner            Banner             @relation(fields: [id], references: [id])
   postId            Int                @map("post_id")
-  post              Post               @relation(fields: [postId], references: [id])
   type              PostBannerType
-  companyPostBanner CompanyPostBanner?
   adminPostBanner   AdminPostBanner?
+  companyPostBanner CompanyPostBanner?
+  banner            Banner             @relation(fields: [id], references: [id])
+  post              Post               @relation(fields: [postId], references: [id])
 
   @@map("post_banners")
 }
 
 model CompanyPostBanner {
   id               Int                 @unique
-  postBanner       PostBanner          @relation(fields: [id], references: [id])
   requestDate      DateTime            @map("request_date") @db.Date
   acceptDate       DateTime?           @map("accept_date") @db.Date
   desiredStartDate DateTime            @map("desired_start_date") @db.Date
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date
   priority         Int?
   status           RequestBannerStatus
+  postBanner       PostBanner          @relation(fields: [id], references: [id])
 
   @@map("company_post_banners")
 }
 
 model AdminPostBanner {
   id         Int        @unique
-  postBanner PostBanner @relation(fields: [id], references: [id])
   urlLink    String     @map("url_link")
   startDate  DateTime   @map("start_date") @db.Date
   endDate    DateTime   @map("end_date") @db.Date
   regDate    DateTime   @map("register_date") @db.Date
   priority   Int?       @unique
+  postBanner PostBanner @relation(fields: [id], references: [id])
 
   @@map("admin_post_banners")
 }
 
 model SiteBanner {
   id               Int                 @unique
-  banner           Banner              @relation(fields: [id], references: [id])
   siteId           Int                 @map("site_id")
-  site             Site                @relation(fields: [siteId], references: [id])
   title            String
   requestDate      DateTime            @map("request_date") @db.Date
   acceptDate       DateTime?           @map("accept_date") @db.Date
@@ -431,6 +426,8 @@ model SiteBanner {
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date
   priority         Int?                @unique
   status           RequestBannerStatus
+  banner           Banner              @relation(fields: [id], references: [id])
+  site             Site                @relation(fields: [siteId], references: [id])
 
   @@map("site_banners")
 }
@@ -443,11 +440,11 @@ model Code {
   code           String           @unique
   codeName       String           @map("code_name")
   codeType       CodeType         @map("code_type")
-  asSpecial      Post[]           @relation(name: "post_special")
-  asJob          Post[]           @relation(name: "post_occupation")
   career         Career[]
-  specialLicense SpecialLicense[]
   certificate    Certificate[]
+  asJob          Post[]           @relation("post_occupation")
+  asSpecial      Post[]           @relation("post_special")
+  specialLicense SpecialLicense[]
 
   @@map("codes")
 }
@@ -461,8 +458,6 @@ model Site {
   type                      SiteType                   @default(REGISTERED)
   name                      String?
   address                   String?
-  addressCity               String?                    @map("address_city")
-  addressDistrict           String?                    @map("address_district")
   longitude                 Float?
   latitude                  Float?
   contact                   String?
@@ -476,14 +471,16 @@ model Site {
   startDate                 DateTime?                  @map("start_date") @db.Date
   endDate                   DateTime?                  @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
-  company                   Company                    @relation(fields: [companyId], references: [id])
-  siteEvaluation            SiteEvaluation?
-  teamEvaluationByCompany   TeamEvaluationByCompany?
-  memberEvaluationByCompany MemberEvaluationByCompany?
-  siteBanner                SiteBanner[]
-  interestMember            Interest[]
-  post                      Post[]
   numberOfContract          Int                        @default(0)
+  addressCity               String?                    @map("address_city")
+  addressDistrict           String?                    @map("address_district")
+  interestMember            Interest[]
+  memberEvaluationByCompany MemberEvaluationByCompany?
+  post                      Post[]
+  siteBanner                SiteBanner[]
+  siteEvaluation            SiteEvaluation?
+  company                   Company                    @relation(fields: [companyId], references: [id])
+  teamEvaluationByCompany   TeamEvaluationByCompany?
 
   @@map("sites")
 }
@@ -503,31 +500,31 @@ model Post {
   endDate                   DateTime                    @map("end_date") @db.Date
   experienceType            ExperienceType              @map("experience_type")
   numberOfPeople            Int                         @map("number_of_people")
-  specialNote               Code?                       @relation(name: "post_special", fields: [specialNoteId], references: [id])
-  specialNoteId             Int?                        @map("special_note_id")
-  occupation                Code?                       @relation(name: "post_occupation", fields: [occupationId], references: [id])
-  occupationId              Int?                        @map("occupation_id")
   otherInformation          String                      @map("other_information")
   salaryType                SalaryType?                 @map("salary_type")
   salaryAmount              Int?                        @map("salary_amount")
-  startWorkDate             DateTime?                   @map("start_work_date") @db.Date()
-  endWorkDate               DateTime?                   @map("end_work_date") @db.Date()
+  startWorkDate             DateTime?                   @map("start_work_date") @db.Date
+  endWorkDate               DateTime?                   @map("end_work_date") @db.Date
   workday                   Workday[]
-  startWorkTime             DateTime?                   @map("start_work_time") @db.Time()
-  endWorkTime               DateTime?                   @map("end_work_time") @db.Time()
-  site                      Site?                       @relation(fields: [siteId], references: [id])
-  siteId                    Int?                        @map("site_id")
-  company                   Company                     @relation(fields: [companyId], references: [id])
-  companyId                 Int                         @map("company_id")
+  startWorkTime             DateTime?                   @map("start_work_time") @db.Time(6)
+  endWorkTime               DateTime?                   @map("end_work_time") @db.Time(6)
   postEditor                String?                     @map("post_editor")
   view                      Int                         @default(0)
-  postBanner                PostBanner[]
-  interested                Interest[]
-  applicants                Application[]
-  headhuntingRequest        HeadhuntingRequest[]
-  headhuntingRecommendation HeadhuntingRecommendation[]
-  deleteReason              String?                     @map("delete_reason")
   workLocation              String?                     @map("work_location")
+  companyId                 Int                         @map("company_id")
+  deleteReason              String?                     @map("delete_reason")
+  occupationId              Int?                        @map("occupation_id")
+  siteId                    Int?                        @map("site_id")
+  specialNoteId             Int?                        @map("special_note_id")
+  applicants                Application[]
+  headhuntingRecommendation HeadhuntingRecommendation[]
+  headhuntingRequest        HeadhuntingRequest?
+  interested                Interest[]
+  postBanner                PostBanner[]
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
+  site                      Site?                       @relation(fields: [siteId], references: [id])
+  specialNote               Code?                       @relation("post_special", fields: [specialNoteId], references: [id])
 
   @@map("posts")
 }
@@ -553,23 +550,23 @@ model SiteEvaluationByMember {
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   score            Int?           @db.SmallInt
-  siteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
   siteEvaluationId Int            @map("site_evaluation_id")
   memberId         Int            @unique @map("member_id")
   member           Member         @relation(fields: [memberId], references: [id])
+  siteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
 
   @@map("site_evaluations_by_member")
 }
 
 model Interest {
   id         Int      @id @default(autoincrement())
-  member     Member   @relation(fields: [memberId], references: [id])
   memberId   Int      @map("member_id")
-  site       Site?    @relation(fields: [siteId], references: [id])
   siteId     Int?     @map("site_id")
-  post       Post?    @relation(fields: [postId], references: [id])
   postId     Int?     @map("post_id")
   assignedAt DateTime @default(now())
+  member     Member   @relation(fields: [memberId], references: [id])
+  post       Post?    @relation(fields: [postId], references: [id])
+  site       Site?    @relation(fields: [siteId], references: [id])
 
   @@unique([memberId, postId])
   @@unique([memberId, siteId])
@@ -578,17 +575,17 @@ model Interest {
 
 model Application {
   id         Int                   @id @default(autoincrement())
-  member     Member?               @relation(fields: [memberId], references: [id])
   memberId   Int?                  @map("member_id")
-  team       Team?                 @relation(fields: [teamId], references: [id])
   teamId     Int?                  @map("team_id")
-  post       Post                  @relation(fields: [postId], references: [id])
   postId     Int                   @map("post_id")
   status     PostApplicationStatus @default(APPLY)
   assignedAt DateTime              @default(now())
   updatedAt  DateTime              @updatedAt @map("updated_at")
-  interview  Interview?
+  member     Member?               @relation(fields: [memberId], references: [id])
+  post       Post                  @relation(fields: [postId], references: [id])
+  team       Team?                 @relation(fields: [teamId], references: [id])
   contract   Contract?
+  interview  Interview?
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -616,10 +613,10 @@ model TeamEvaluationByCompany {
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   score            Int?           @db.SmallInt
-  teamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
   teamEvaluationId Int            @map("team_evaluation_id")
   siteId           Int            @unique @map("site_id")
   site             Site           @relation(fields: [siteId], references: [id])
+  teamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
 
   @@map("team_evaluations_by_company")
 }
@@ -645,9 +642,9 @@ model MemberEvaluationByCompany {
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
   score              Int?             @db.SmallInt
-  memberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
   memberEvaluationId Int              @map("member_evaluation_id")
   siteId             Int              @unique @map("site_id")
+  memberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
   site               Site             @relation(fields: [siteId], references: [id])
 
   @@map("member_evaluations_by_company")
@@ -658,15 +655,14 @@ model HeadhuntingRequest {
   isActive     Boolean       @default(true) @map("is_active")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
-  post         Post          @relation(fields: [postId], references: [id])
-  postId       Int
-  date         DateTime      @default(now()) @db.Date()
+  postId       Int           @unique
+  date         DateTime      @default(now()) @db.Date
   status       RequestStatus
   object       RequestObject
   detail       String        @default("")
   rejectReason String        @default("") @map("reject_reason")
+  post         Post          @relation(fields: [postId], references: [id])
 
-  @@unique([postId])
   @@map("headhunting_requests")
 }
 
@@ -676,24 +672,24 @@ model Interview {
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @updatedAt @map("updated_at")
   supportCategory      SupportCategory @map("interview_category")
-  application          Application     @relation(fields: [applicationId], references: [id])
   applicationId        Int             @unique
   interviewStatus      InterviewStatus @map("interview_status")
   interviewRequestDate DateTime        @default(now()) @map("interview_request_date") @db.Date
+  application          Application     @relation(fields: [applicationId], references: [id])
 
   @@map("interviews")
 }
 
 model HeadhuntingRecommendation {
   id         Int      @id @default(autoincrement())
-  member     Member?  @relation(fields: [memberId], references: [id])
   memberId   Int?     @map("member_id")
-  team       Team?    @relation(fields: [teamId], references: [id])
   teamId     Int?     @map("team_id")
-  post       Post     @relation(fields: [postId], references: [id])
   postId     Int      @map("post_id")
   assignedAt DateTime @default(now()) @map("assigned_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
+  member     Member?  @relation(fields: [memberId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id])
+  team       Team?    @relation(fields: [teamId], references: [id])
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -708,9 +704,9 @@ model Contract {
   startDate      DateTime    @map("start_date") @db.Date
   endDate        DateTime    @map("end_date") @db.Date
   fileId         Int         @unique @map("file_id")
-  file           File        @relation(fields: [fileId], references: [id])
-  application    Application @relation(fields: [applicationId], references: [id])
   applicationId  Int         @unique @map("application_id")
+  application    Application @relation(fields: [applicationId], references: [id])
+  file           File        @relation(fields: [fileId], references: [id])
 
   @@map("contracts")
 }
@@ -894,10 +890,10 @@ enum PostStatus {
 }
 
 enum ExperienceType {
-  SHORT // From 1 to 4 years of experience
-  MEDIUM // From 5 to 9 years of experience
-  LONG // From 10 years of experience
-  REGARDLESS // Any type of experience
+  SHORT
+  MEDIUM
+  LONG
+  REGARDLESS
 }
 
 enum SalaryType {
@@ -946,7 +942,7 @@ enum RequestObject {
 }
 
 enum SupportCategory {
-  NORMAL //Member apply and conduct interview
+  NORMAL
   MATCHING
   HEADHUNTING
   MANPOWER
