@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { ContractType } from './enum/contract-company-type-contract.enum';
+import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
 
@@ -71,5 +72,37 @@ export class ContractCompanyService {
         });
         const total = await this.prismaService.contract.count({ where: query.where });
         return new PaginationResponse(contracts, new PageInfo(total));
+    }
+    async createContract(accountId: number, body: ContractCompanyCreateRequest): Promise<void> {
+        const count = await this.prismaService.application.count({
+            where: {
+                id: body.applicationId,
+                status: PostApplicationStatus.APPROVE_BY_MEMBER,
+                post: {
+                    company: {
+                        accountId,
+                    },
+                },
+            },
+        });
+        if (count === 0) throw new NotFoundException('Application not found or not ready');
+        await this.prismaService.file.create({
+            data: {
+                key: body.fileKey,
+                fileName: body.fileName,
+                size: body.fileSize,
+                type: body.fileType,
+                contract: {
+                    create: {
+                        applicationId: body.applicationId,
+                        contractNumber: body.contractNumber,
+                        startDate: body.startDate,
+                        endDate: body.endDate,
+                        paymentForm: body.paymentForm,
+                        amount: body.amount,
+                    },
+                },
+            },
+        });
     }
 }

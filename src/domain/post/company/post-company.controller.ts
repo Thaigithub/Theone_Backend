@@ -29,6 +29,7 @@ import { PostCompanyDetailResponse } from './response/post-company-detail.respon
 import { PostCompanyGetItemApplicantsResponse } from './response/post-company-get-item-applicants.response';
 import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
+import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import {
     PostCompanyGetItemHeadhuntingRequestResponse,
     PostCompanyGetListHeadhuntingRequestResponse,
@@ -44,6 +45,14 @@ import { PostCompanyGetListResponse } from './response/post-company-get-list.res
 @ApiConsumes('application/json')
 export class PostCompanyController {
     constructor(private postCompanyService: PostCompanyService) {}
+
+    @Get('/site/:id')
+    async getListBySite(
+        @Req() req: any,
+        @Param('id', ParseIntPipe) siteId: number,
+    ): Promise<BaseResponse<PostCompanyGetListBySite>> {
+        return BaseResponse.of(await this.postCompanyService.getListBySite(req.user.accountId, siteId));
+    }
 
     @Post('/:id/headhunting-request')
     @ApiOperation({
