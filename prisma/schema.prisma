@@ -518,7 +518,7 @@ model Post {
   specialNoteId             Int?                        @map("special_note_id")
   applicants                Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
-  headhuntingRequest        HeadhuntingRequest?
+  headhuntingRequest        HeadhuntingRequest[]
   interested                Interest[]
   postBanner                PostBanner[]
   company                   Company                     @relation(fields: [companyId], references: [id])
