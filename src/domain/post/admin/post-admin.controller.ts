@@ -4,13 +4,20 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PostAdminPostStatusFilter, PostAdminPostTypeFilter, PostAdminSearchCategoryFilter } from './dto/post-admin-filter';
+import {
+    ApplicationAdminSearchCategoryFilter,
+    ApplicationAdminSortFilter,
+    ApplicationAdminStatusFilter,
+    PostAdminPostStatusFilter,
+    PostAdminPostTypeFilter,
+    PostAdminSearchCategoryFilter,
+} from './dto/post-admin-filter';
 import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
-import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import { PostAdminModifyRequest } from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
-import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @ApiTags('[ADMIN] Posts Management')
 @Controller('/admin/posts')
@@ -23,7 +30,7 @@ export class PostAdminController {
 
     @Get()
     @ApiOperation({
-        summary: 'Listing announcements',
+        summary: 'List announcements',
         description: 'Admin can search announcements by many conditions.',
     })
     @ApiResponse({
@@ -74,6 +81,47 @@ export class PostAdminController {
         return BaseResponse.of(posts);
     }
 
+    @Get('/support')
+    @ApiOperation({
+        summary: 'List Post',
+        description: 'Admin can search posts by many conditions.',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'The Post lists retrieved successfully',
+        type: ApplicationAdminGetListRequest,
+    })
+    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
+    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
+    @ApiQuery({
+        name: 'status',
+        type: 'enum',
+        enum: ApplicationAdminStatusFilter,
+        required: false,
+    })
+    @ApiQuery({
+        name: 'searchCategory',
+        type: 'enum',
+        enum: ApplicationAdminSearchCategoryFilter,
+        required: false,
+    })
+    @ApiQuery({
+        name: 'sortByApplication',
+        type: 'enum',
+        enum: ApplicationAdminSortFilter,
+        required: false,
+    })
+    @ApiQuery({
+        name: 'searchTerm',
+        type: String,
+        required: false,
+        description: 'Any text to search, for example: "The One"',
+    })
+    async getPostList(@Query() query: ApplicationAdminGetListRequest): Promise<BaseResponse<ApplicationAdminGetListResponse>> {
+        const postList = await this.postAdminService.getPostApplicationList(query);
+        return BaseResponse.of(postList);
+    }
+
     @Get('/:id')
     @ApiOperation({
         summary: 'Post detail',
@@ -92,7 +140,7 @@ export class PostAdminController {
     @Patch('/:id')
     @ApiOperation({
         summary: 'Change post information',
-        description: 'Company change post information',
+        description: 'Admin change post information',
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async changePageInfo(
@@ -106,7 +154,7 @@ export class PostAdminController {
     @Patch('/:id/exposure/')
     @ApiOperation({
         summary: 'Change post information',
-        description: 'Company change post information',
+        description: 'Admin change isHidden of post',
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async changeHiddenStatus(
