@@ -74,14 +74,14 @@ export class MatchingCompanyService {
             },
         });
 
-        if (existMatching) {
+        if (existMatching.length > 0) {
             const allMembers = existMatching.filter((matching) => !matching.team).map((matching) => matching.member);
             const allTeams = existMatching.filter((matching) => !matching.member).map((matching) => matching.team);
 
             return this.mappingResponseDTO(allMembers, allTeams);
         }
 
-        if (!existMatching && query.date === MatchingCompanyGetListDateEnum.TODAY) {
+        if (!existMatching.length && query.date === MatchingCompanyGetListDateEnum.TODAY) {
             //TODO: Apply Algorithm for AutoMatching
             // Fake for now
             const members = await this.prismaService.member.findMany({

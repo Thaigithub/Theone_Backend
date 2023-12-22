@@ -31,5 +31,6 @@ export class MatchingCompanyGetListRecommendationRequest {
 
     @Expose()
     @IsEnum(MatchingCompanyGetListDateEnum)
+    @IsOptional()
     public date: MatchingCompanyGetListDateEnum;
 }
