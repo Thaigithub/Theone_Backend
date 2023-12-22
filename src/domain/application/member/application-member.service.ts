@@ -197,6 +197,9 @@ export class ApplicationMemberService {
                         status: true,
                         site: {
                             select: {
+                                personInCharge: true,
+                                personInChargeContact: true,
+                                email: true,
                                 address: true,
                                 name: true,
                                 startDate: true,
@@ -238,6 +241,9 @@ export class ApplicationMemberService {
             siteStartDate: application.post.site ? application.post.site.startDate : null,
             siteEndDate: application.post.site ? application.post.site.endDate : null,
             siteName: application.post.site ? application.post.site.name : '',
+            sitePersonInCharge: application.post.site ? application.post.site.personInCharge : '',
+            sitePersonInChargeContact: application.post.site ? application.post.site.personInChargeContact : '',
+            siteEmail: application.post.site ? application.post.site.email : '',
             postEndDate: application.post.startDate,
             postStartDate: application.post.endDate,
             status: application.status,
