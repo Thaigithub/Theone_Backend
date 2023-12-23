@@ -8,6 +8,7 @@ import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.repo
 import { ContractCompanyService } from './contract-company.service';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
+import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse, GetListForSite } from './response/contract-company-get-list-for-site.response';
 
 @ApiTags('[COMPANY] Contract Management')
@@ -33,6 +34,15 @@ export class ContractCompanyController {
     ): Promise<BaseResponse<ContractCompanyGetListForSiteResponse>> {
         return BaseResponse.of(await this.contractCompanyService.getContractOnSite(id, request.user.accountId, query));
     }
+
+    @Get('/:id')
+    async getDetailContract(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: any,
+    ): Promise<BaseResponse<ContractCompanyGetDetailResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.getDetail(id, req.user.accountId));
+    }
+
     @Put()
     async createContract(@Body() body: ContractCompanyCreateRequest, @Req() request: any): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.createContract(request.user.accountId, body));

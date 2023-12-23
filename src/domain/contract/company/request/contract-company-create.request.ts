@@ -48,4 +48,8 @@ export class ContractCompanyCreateRequest {
     @Expose()
     @IsNumber()
     fileSize: number;
+
+    @Expose()
+    @IsString()
+    department: string;
 }
