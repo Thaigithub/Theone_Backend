@@ -715,6 +715,7 @@ model Contract {
   applicationId  Int         @unique @map("application_id")
   application    Application @relation(fields: [applicationId], references: [id])
   file           File        @relation(fields: [fileId], references: [id])
+  department     String      @default("")
 
   @@map("contracts")
 }
