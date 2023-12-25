@@ -27,9 +27,9 @@ export class EvaluationAdminService {
                 const siteQuery = query as SiteEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
-                    Site: {
+                    site: {
                         name: siteQuery.keywordBySiteName && { contains: siteQuery.keywordBySiteName },
-                        Company: {
+                        company: {
                             name: siteQuery.keywordByCompanyName && { contains: siteQuery.keywordByCompanyName },
                         },
                     },
@@ -39,7 +39,7 @@ export class EvaluationAdminService {
                 const teamQuery = query as TeamEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
-                    Team: {
+                    team: {
                         name: teamQuery.keywordByTeamName && { contains: teamQuery.keywordByTeamName },
                         leader: {
                             name: teamQuery.keywordByLeaderName && { contains: teamQuery.keywordByLeaderName },
@@ -51,7 +51,7 @@ export class EvaluationAdminService {
                 const memberQuery = query as MemberEvaluationAdminGetListRequest;
                 whereConditions = {
                     isActive: true,
-                    Member: {
+                    member: {
                         name: memberQuery.keywordByName && { contains: memberQuery.keywordByName },
                     },
                 };
