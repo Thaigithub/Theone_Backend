@@ -25,4 +25,7 @@ export class ContractAdminGetDetailContractorResponse {
 
     @ApiProperty({ example: ContractStatus.CONTRACT_TERMINATED })
     contractStatus: ContractStatus;
+
+    @ApiProperty({ example: 'key' })
+    key: string;
 }
