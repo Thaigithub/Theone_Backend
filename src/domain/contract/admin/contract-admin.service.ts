@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { ContractStatus } from 'utils/enum/contract-status.enum';
@@ -8,6 +8,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './dto/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './dto/contract-admin-get-list-sort.enum';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
+import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';
 import { ContractAdminGetDetailContractorResponse } from './response/contract-admin-get-detail-contractor.response';
 import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
@@ -176,6 +177,11 @@ export class ContractAdminService {
                         },
                     },
                 },
+                file: {
+                    select: {
+                        key: true,
+                    },
+                },
             },
         });
 
@@ -196,6 +202,7 @@ export class ContractAdminService {
                         contractStartDate: contractor.startDate?.toISOString() || null,
                         contractEndDate: contractor.endDate?.toISOString() || null,
                         contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
+                        key: contractor.file?.key || null,
                     };
 
                     return contractorResponse;
@@ -208,6 +215,7 @@ export class ContractAdminService {
                         contractStartDate: contractor.startDate?.toISOString() || null,
                         contractEndDate: contractor.endDate?.toISOString() || null,
                         contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
+                        key: contractor.file?.key || null,
                     };
 
                     return contractorResponse;
@@ -225,5 +233,54 @@ export class ContractAdminService {
             if (startDate <= now && now <= endDate) return ContractStatus.UNDER_CONTRACT;
             if (endDate < now) return ContractStatus.CONTRACT_TERMINATED;
         }
+    }
+
+    async registrationContract(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                file: true,
+            },
+        });
+
+        if (!contract) {
+            throw new NotFoundException('Contract not found');
+        }
+
+        await this.prismaService.contract.update({
+            where: { id },
+            data: {
+                file: {
+                    create: { size: body.size, type: body.type, key: body.key, fileName: body.filename },
+                },
+            },
+        });
+    }
+
+    async editContract(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                file: true,
+            },
+        });
+
+        if (!contract) {
+            throw new NotFoundException('Contract not found');
+        }
+
+        await this.prismaService.file.update({
+            where: { id: contract.fileId },
+            data: {
+                size: body.size,
+                type: body.type,
+                key: body.key,
+                fileName: body.filename,
+            },
+        });
     }
 }

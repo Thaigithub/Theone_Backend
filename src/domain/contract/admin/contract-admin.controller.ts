@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { ContractAdminService } from './contract-admin.service';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
+import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';
 import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
 import { ContractAdminGetTotalContractsResponse } from './response/contract-admin-get-total-contracts.response';
@@ -54,5 +55,17 @@ export class ContractAdminController {
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ContractAdminGetDetailResponse>> {
         const code = await this.contractAdminService.getDetail(id);
         return BaseResponse.of(code);
+    }
+
+    @Post(':id/registration')
+    async registrationContract(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
+        const upload = await this.contractAdminService.registrationContract(id, body);
+        return BaseResponse.of(upload);
+    }
+
+    @Post(':id/edit')
+    async editContract(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
+        const upload = await this.contractAdminService.editContract(id, body);
+        return BaseResponse.of(upload);
     }
 }
