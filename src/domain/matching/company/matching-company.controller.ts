@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    HttpStatus,
+    Param,
+    ParseArrayPipe,
+    ParseIntPipe,
+    Put,
+    Query,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, SupportCategory } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -25,8 +37,17 @@ export class MatchingCompanyController {
     async getList(
         @Req() req: any,
         @Query() query: MatchingCompanyGetListRecommendationRequest,
+        @Query('occupationIds', ParseArrayPipe) occupationIds: string[],
+        @Query('specialNoteIds', ParseArrayPipe) specialNoteIds: string[],
+        @Query('regionIds', ParseArrayPipe) regionIds: string[],
     ): Promise<BaseResponse<MatchingCompanyGetListRecommendation>> {
-        const code = await this.matchingCompanyService.getList(req.user.accountId, query);
+        const code = await this.matchingCompanyService.getList(
+            req.user.accountId,
+            query,
+            occupationIds,
+            specialNoteIds,
+            regionIds,
+        );
         return BaseResponse.of(code);
     }
 

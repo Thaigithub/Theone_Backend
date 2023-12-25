@@ -15,8 +15,11 @@ export class MatchingCompanyService {
     async getList(
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
+        occupationIds: string[],
+        specialNoteIds: string[],
+        regionIds: string[],
     ): Promise<MatchingCompanyGetListRecommendation> {
-        console.log('MATCHING QUERY', query);
+        console.log('MATCHING QUERY', query, occupationIds, specialNoteIds, regionIds);
 
         const account = await this.prismaService.account.findUnique({
             where: {
