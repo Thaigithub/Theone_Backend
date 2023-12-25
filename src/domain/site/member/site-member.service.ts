@@ -1,16 +1,28 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
+import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
 export class SiteMemberService {
     constructor(private prismaService: PrismaService) {}
-
+    async checkExistSite(id: number) {
+        const siteRecord = await this.prismaService.site.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+        });
+        if (!siteRecord) {
+            throw new NotFoundException('The Site Id is not found');
+        }
+        return siteRecord;
+    }
     async updateInterestSite(accountId: number, id: number): Promise<SiteMemberUpdateInterestResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
@@ -22,16 +34,7 @@ export class SiteMemberService {
             },
         });
 
-        const site = await this.prismaService.site.findUnique({
-            where: {
-                id: id,
-                isActive: true,
-            },
-        });
-
-        if (!site) {
-            throw new BadRequestException('Site does not exist');
-        }
+        await this.checkExistSite(id);
 
         //Check exist member - site
         //If exist, remove that record
@@ -40,7 +43,7 @@ export class SiteMemberService {
             where: {
                 memberId_siteId: {
                     memberId: account.member.id,
-                    siteId: site.id,
+                    siteId: id,
                 },
             },
         });
@@ -50,7 +53,7 @@ export class SiteMemberService {
                 where: {
                     memberId_siteId: {
                         memberId: account.member.id,
-                        siteId: site.id,
+                        siteId: id,
                     },
                 },
             });
@@ -60,7 +63,7 @@ export class SiteMemberService {
             await this.prismaService.interest.create({
                 data: {
                     member: { connect: { id: account.member.id } },
-                    site: { connect: { id: site.id } },
+                    site: { connect: { id: id } },
                 },
             });
 
@@ -145,5 +148,76 @@ export class SiteMemberService {
             };
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
+    }
+
+    async getSiteDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
+        await this.checkExistSite(id);
+        const siteRecord = await this.prismaService.site.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            select: {
+                id: true,
+                name: true,
+                address: true,
+                startDate: true,
+                endDate: true,
+                personInCharge: true,
+                personInChargeContact: true,
+                contact: true,
+                company: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        logo: {
+                            select: {
+                                file: {
+                                    select: {
+                                        fileName: true,
+                                        key: true,
+                                    },
+                                },
+                            },
+                        },
+                        contactName: true,
+                        presentativeName: true,
+                        email: true,
+                        contactPhone: true,
+                    },
+                },
+            },
+        });
+        const member = await this.prismaService.member.findUnique({
+            where: { accountId: accountId },
+            include: { interestSites: true },
+        });
+
+        const siteInfor = {
+            site: {
+                id: siteRecord.id,
+                name: siteRecord.name,
+                address: siteRecord.address,
+                isInterest: member ? member.interestSites.some((interest) => interest.siteId === id) : false,
+                startDate: siteRecord.startDate,
+                endDate: siteRecord.endDate,
+                personInCharge: siteRecord.personInCharge,
+                personInChargeContact: siteRecord.personInChargeContact,
+                contact: siteRecord.contact,
+            },
+            company: {
+                id: siteRecord.company.id,
+                name: siteRecord.company.name,
+                address: siteRecord.company.address,
+                logoFileName: siteRecord.company.logo ? siteRecord.company.logo.file.fileName : null,
+                logoFileKey: siteRecord.company.logo ? siteRecord.company.logo.file.key : null,
+                contactName: siteRecord.company.contactName,
+                presentativeName: siteRecord.company.presentativeName,
+                email: siteRecord.company.email,
+                contactPhone: siteRecord.company.contactPhone,
+            },
+        };
+        return siteInfor;
     }
 }

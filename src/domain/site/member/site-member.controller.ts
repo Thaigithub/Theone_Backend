@@ -4,10 +4,11 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
+import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
+import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
+import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 import { SiteMemberService } from './site-member.service';
-import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
-import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
 
 @ApiTags('[MEMBER] Sites Management')
 @Controller('/member/sites')
@@ -45,5 +46,22 @@ export class SiteMemberController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getSites(@Query() query: SiteMemberGetListRequest): Promise<BaseResponse<SiteMemberGetListResponse>> {
         return BaseResponse.of(await this.siteMemberService.getSiteList(query));
+    }
+
+    @Get('/:id')
+    @ApiOperation({
+        summary: 'Site detail',
+        description: 'Retrieve detail information of a site',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: SiteMemberGetDetailResponse,
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetail(
+        @Req() request: any,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<SiteMemberGetDetailResponse>> {
+        return BaseResponse.of(await this.siteMemberService.getSiteDetail(request.user.accountId, id));
     }
 }
