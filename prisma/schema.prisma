@@ -706,7 +706,6 @@ model HeadhuntingRecommendation {
 
 model Contract {
   id             Int         @id @default(autoincrement())
-  contractNumber String      @unique @map("contract_number")
   paymentForm    PaymentForm @default(FIRST_CLASS) @map("payment_form")
   amount         Int         @default(0)
   startDate      DateTime    @map("start_date") @db.Date

@@ -5,6 +5,7 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
 import { ContractType } from './enum/contract-company-type-contract.enum';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
+import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
 
@@ -74,6 +75,7 @@ export class ContractCompanyService {
         const total = await this.prismaService.contract.count({ where: query.where });
         return new PaginationResponse(contracts, new PageInfo(total));
     }
+
     async createContract(accountId: number, body: ContractCompanyCreateRequest): Promise<void> {
         const application = await this.prismaService.application.findFirst({
             where: {
@@ -104,9 +106,8 @@ export class ContractCompanyService {
                 contract: {
                     create: {
                         applicationId: body.applicationId,
-                        contractNumber: body.contractNumber,
-                        startDate: body.startDate,
-                        endDate: body.endDate,
+                        startDate: new Date(body.startDate),
+                        endDate: new Date(body.endDate),
                         paymentForm: body.paymentForm,
                         amount: body.amount,
                         department: body.department,
@@ -115,6 +116,7 @@ export class ContractCompanyService {
             },
         });
     }
+
     async getDetail(contractId, accountId): Promise<ContractCompanyGetDetailResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
@@ -195,5 +197,40 @@ export class ContractCompanyService {
             file: contract.file,
             department: contract.department,
         };
+    }
+
+    async update(contractId: number, accountId: number, body: ContractCompanyUpdateRequest): Promise<void> {
+        const contract = await this.prismaService.contract.findFirst({
+            where: {
+                id: contractId,
+                application: {
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+        });
+        if (!contract) throw new NotFoundException('Contract not found');
+        await this.prismaService.contract.update({
+            where: {
+                id: contractId,
+            },
+            data: {
+                startDate: new Date(body.startDate),
+                endDate: new Date(body.endDate),
+                paymentForm: body.paymentForm,
+                amount: body.amount,
+                file: {
+                    update: {
+                        key: body.fileKey,
+                        fileName: body.fileName,
+                        size: body.fileSize,
+                        type: body.fileType,
+                    },
+                },
+            },
+        });
     }
 }
