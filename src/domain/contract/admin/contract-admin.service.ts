@@ -39,7 +39,7 @@ export class ContractAdminService {
                 AND: [{ status: SiteStatus.APPROVED }, { endDate: { lt: new Date() } }],
             }),
             ...(query.category === ContractAdminGetListCategory.COMPANY_NAME && {
-                Company: {
+                company: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
             }),
@@ -181,8 +181,8 @@ export class ContractAdminService {
 
         const detailResponse: ContractAdminGetDetailResponse = {
             siteName: detailSite.name,
-            startDate: detailSite.startDate.toISOString(),
-            endDate: detailSite.endDate.toISOString(),
+            startDate: detailSite.startDate?.toISOString() || null,
+            endDate: detailSite.endDate?.toISOString() || null,
             manager: detailSite.personInCharge,
             siteContact: detailSite.contact,
             siteEmail: detailSite.email,
@@ -193,8 +193,8 @@ export class ContractAdminService {
                         name: contractor.application.member.name,
                         leaderName: null,
                         contact: contractor.application.member.contact,
-                        contractStartDate: contractor.startDate.toISOString(),
-                        contractEndDate: contractor.endDate.toISOString(),
+                        contractStartDate: contractor.startDate?.toISOString() || null,
+                        contractEndDate: contractor.endDate?.toISOString() || null,
                         contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
                     };
 
@@ -205,8 +205,8 @@ export class ContractAdminService {
                         name: contractor.application.team.name,
                         leaderName: contractor.application.team.leader.name,
                         contact: contractor.application.team.leader.contact,
-                        contractStartDate: contractor.startDate.toISOString(),
-                        contractEndDate: contractor.endDate.toISOString(),
+                        contractStartDate: contractor.startDate?.toISOString() || null,
+                        contractEndDate: contractor.endDate?.toISOString() || null,
                         contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
                     };
 
