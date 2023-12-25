@@ -160,7 +160,7 @@ export class SiteCompanyService {
     ): Promise<SiteCompanyGetListForContractResponse> {
         const query = {
             where: {
-                Company: {
+                company: {
                     accountId,
                 },
                 name: {
