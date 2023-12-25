@@ -32,6 +32,7 @@ export class ContractCompanyService {
                 },
             },
             select: {
+                id: true,
                 startDate: true,
                 endDate: true,
                 application: {
@@ -63,9 +64,10 @@ export class ContractCompanyService {
         };
         const contracts = (await this.prismaService.contract.findMany(query)).map((item) => {
             return {
+                id: item.id,
                 type: item.application.member ? ContractType.INDIVIDUAL : ContractType.TEAM,
                 name: item.application.member ? item.application.member.name : item.application.team.name,
-                id: item.application.member ? item.application.member.id : item.application.team.id,
+                applicantId: item.application.member ? item.application.member.id : item.application.team.id,
                 contact: item.application.member ? item.application.member.contact : item.application.team.leader.contact,
                 teamLeaderName: item.application.member ? null : item.application.team.leader.name,
                 startDate: item.startDate,
@@ -130,7 +132,13 @@ export class ContractCompanyService {
                 },
             },
             select: {
-                file: true,
+                file: {
+                    select: {
+                        fileName: true,
+                        type: true,
+                        key: true,
+                    },
+                },
                 startDate: true,
                 endDate: true,
                 paymentForm: true,
