@@ -17,12 +17,13 @@ export class MatchingCompanyGetListRecommendationRequest {
     public specialNoteId: number[];
 
     @Expose()
-    @IsString()
+    @IsString({ each: true })
     @IsOptional()
     @Matches(/^\d+-\d+$/, {
         message: 'Invalid format. Please use the format: "123-456".',
+        each: true,
     })
-    public regionId: string;
+    public regionId: string[];
 
     @Expose()
     @IsEnum(ExperienceType)
