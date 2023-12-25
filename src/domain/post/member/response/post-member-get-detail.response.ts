@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Code, ExperienceType, File, Post, SalaryType, Site, Workday } from '@prisma/client';
+import { City, Code, District, ExperienceType, File, Post, SalaryType, Site, Workday } from '@prisma/client';
 
 export class PostMemberGetDetailResponse {
     @ApiProperty({
@@ -137,8 +137,8 @@ export class PostMemberGetDetailResponse {
         companyLogoKey: File['key'];
         siteName: Site['name'];
         siteAddress: Site['address'];
-        siteAddressCity: Site['addressCity'];
-        siteAddressDistrict: Site['addressDistrict'];
+        siteAddressCity: City['englishName'];
+        siteAddressDistrict: District['englishName'];
         personInCharge: Site['personInCharge'];
         personInChargeContact: Site['personInChargeContact'];
         contact: Site['contact'];

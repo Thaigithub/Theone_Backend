@@ -480,8 +480,8 @@ model Site {
   endDate                   DateTime?                  @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
   numberOfContract          Int                        @default(0)
-  addressCity               String?                    @map("address_city")
-  addressDistrict           String?                    @map("address_district")
+  districtId                Int?                       @map("district_id")
+  district                  District?                  @relation(fields: [districtId], references: [id])
   interestMember            Interest[]
   memberEvaluationByCompany MemberEvaluationByCompany?
   post                      Post[]
@@ -705,16 +705,16 @@ model HeadhuntingRecommendation {
 }
 
 model Contract {
-  id             Int         @id @default(autoincrement())
-  paymentForm    PaymentForm @default(FIRST_CLASS) @map("payment_form")
-  amount         Int         @default(0)
-  startDate      DateTime    @map("start_date") @db.Date
-  endDate        DateTime    @map("end_date") @db.Date
-  fileId         Int         @unique @map("file_id")
-  applicationId  Int         @unique @map("application_id")
-  application    Application @relation(fields: [applicationId], references: [id])
-  file           File        @relation(fields: [fileId], references: [id])
-  department     String      @default("")
+  id            Int         @id @default(autoincrement())
+  paymentForm   PaymentForm @default(FIRST_CLASS) @map("payment_form")
+  amount        Int         @default(0)
+  startDate     DateTime    @map("start_date") @db.Date
+  endDate       DateTime    @map("end_date") @db.Date
+  fileId        Int         @unique @map("file_id")
+  applicationId Int         @unique @map("application_id")
+  application   Application @relation(fields: [applicationId], references: [id])
+  file          File        @relation(fields: [fileId], references: [id])
+  department    String      @default("")
 
   @@map("contracts")
 }
@@ -741,6 +741,7 @@ model District {
   city        City     @relation(fields: [cityId], references: [id])
   cityId      Int      @map("city_id")
   member      Member[]
+  site        Site[]
 
   @@map("district")
 }

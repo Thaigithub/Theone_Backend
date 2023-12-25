@@ -22,6 +22,14 @@ export class SiteCompanyUpdateRequest {
     @Expose()
     public address: string;
 
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @Matches(/^\d+-\d+$/, {
+        message: 'Invalid format. Please use the format: "123-456".',
+    })
+    public regionId: string;
+
     @ApiProperty({
         type: 'string',
         required: true,

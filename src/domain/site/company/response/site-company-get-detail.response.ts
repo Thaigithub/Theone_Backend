@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ContractStatus, Site } from '@prisma/client';
+import { City, ContractStatus, District, Site } from '@prisma/client';
 
 export class SiteCompanyGetDetailResponse {
     @ApiProperty({ type: 'number' })
@@ -7,6 +7,9 @@ export class SiteCompanyGetDetailResponse {
 
     @ApiProperty({ type: 'string' })
     name: Site['name'];
+
+    @ApiProperty({ type: 'string' })
+    email: Site['email'];
 
     @ApiProperty({ type: 'string' })
     address: Site['address'];
@@ -34,4 +37,9 @@ export class SiteCompanyGetDetailResponse {
 
     @ApiProperty({ type: 'string' })
     endDate: Site['endDate'];
+
+    city: City['englishName'];
+    cityKorean: City['koreanName'];
+    district: District['englishName'];
+    districtKorean: District['koreanName'];
 }

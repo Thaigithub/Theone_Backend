@@ -92,7 +92,12 @@ export class ContractCompanyService {
             select: {
                 post: {
                     select: {
-                        site: true,
+                        site: {
+                            select: {
+                                id: true,
+                                numberOfContract: true,
+                            },
+                        },
                     },
                 },
             },
@@ -115,6 +120,14 @@ export class ContractCompanyService {
                         department: body.department,
                     },
                 },
+            },
+        });
+        await this.prismaService.site.update({
+            where: {
+                id: application.post.site.id,
+            },
+            data: {
+                numberOfContract: application.post.site.numberOfContract + 1,
             },
         });
     }
