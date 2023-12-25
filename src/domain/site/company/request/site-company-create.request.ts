@@ -20,21 +20,12 @@ export class SiteCompanyCreateRequest {
     @Expose()
     public address: string;
 
-    @ApiProperty({
-        type: 'string',
-        required: true,
-    })
-    @IsString()
     @Expose()
-    public addressCity: string;
-
-    @ApiProperty({
-        type: 'string',
-        required: true,
-    })
     @IsString()
-    @Expose()
-    public addressDistrict: string;
+    @Matches(/^\d+-\d+$/, {
+        message: 'Invalid format. Please use the format: "123-456".',
+    })
+    public regionId: string;
 
     @ApiProperty({
         type: 'string',

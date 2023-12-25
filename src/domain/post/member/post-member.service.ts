@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { PostResponse } from './response/post-member-get-list.response';
-import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { ExperienceType } from '@prisma/client';
-import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { PostMemberGetListRequest } from './request/post-member-get-list.request';
+import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
+import { PostResponse } from './response/post-member-get-list.response';
+import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
 @Injectable()
 export class PostMemberService {
@@ -63,8 +63,16 @@ export class PostMemberService {
                     select: {
                         name: true,
                         address: true,
-                        addressCity: true,
-                        addressDistrict: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -109,8 +117,8 @@ export class PostMemberService {
                 endDate,
                 siteName: site ? site.name : null,
                 siteAddress: site ? site.address : null,
-                siteAddressCity: site ? site.addressCity : null,
-                siteAddressDistrict: site ? site.addressDistrict : null,
+                siteAddressCity: site ? site.district.city.englishName : null,
+                siteAddressDistrict: site ? site.district.englishName : null,
                 isInterest: listInterestPostIds.includes(item.id) ? true : false,
             };
         });
@@ -215,8 +223,16 @@ export class PostMemberService {
                         personInCharge: true,
                         personInChargeContact: true,
                         address: true,
-                        addressCity: true,
-                        addressDistrict: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                    },
+                                },
+                            },
+                        },
                         originalBuilding: true,
                     },
                 },
@@ -257,8 +273,8 @@ export class PostMemberService {
                 companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
                 siteName: post.site ? post.site.name : null,
                 siteAddress: post.site ? post.site.address : null,
-                siteAddressCity: post.site ? post.site.addressCity : null,
-                siteAddressDistrict: post.site ? post.site.addressDistrict : null,
+                siteAddressCity: post.site ? post.site.district.city.englishName : null,
+                siteAddressDistrict: post.site ? post.site.district.englishName : null,
                 personInCharge: post.site ? post.site.personInCharge : null,
                 personInChargeContact: post.site ? post.site.personInChargeContact : null,
                 contact: post.site ? post.site.contact : null,

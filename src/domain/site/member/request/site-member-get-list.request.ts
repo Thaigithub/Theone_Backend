@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class SiteMemberGetListRequest {
     @Expose()
@@ -14,13 +14,12 @@ export class SiteMemberGetListRequest {
     name: string;
 
     @Expose()
-    @IsOptional()
     @IsString()
-    @ApiProperty({
-        type: 'string',
-        example: 'Seooul',
+    @IsOptional()
+    @Matches(/^\d+-\d+$/, {
+        message: 'Invalid format. Please use the format: "123-456".',
     })
-    addressCity: string;
+    public regionId: string;
 
     @ApiProperty({
         type: 'number',

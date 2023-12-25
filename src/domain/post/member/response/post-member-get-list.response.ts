@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Code, Post, Site } from '@prisma/client';
+import { City, Code, District, Post, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
 export class ConstructionMachinaryResponse {
@@ -24,10 +24,10 @@ export class PostResponse {
     siteAddress: Site['address'];
 
     @ApiProperty({ type: 'string' })
-    siteAddressCity: Site['addressCity'];
+    siteAddressCity: City['englishName'];
 
     @ApiProperty({ type: 'string' })
-    siteAddressDistrict: Site['addressDistrict'];
+    siteAddressDistrict: District['englishName'];
 
     @ApiProperty({ type: 'string', format: 'date' })
     startWorkDate: string;

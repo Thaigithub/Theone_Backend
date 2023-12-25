@@ -68,9 +68,25 @@ export class SiteMemberService {
         }
     }
     async getSiteList(query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
+        const idNationWide = (
+            await this.prismaService.city.findMany({
+                where: {
+                    englishName: 'Nationwide',
+                },
+                select: {
+                    id: true,
+                },
+            })
+        ).map((item) => item.id);
+        const [cityId, districtId] = query.regionId.split('-').map(Number);
         const queryFilter: Prisma.SiteWhereInput = {
             ...(query.name && { name: { contains: query.name, mode: 'insensitive' } }),
-            addressCity: query.addressCity,
+            district: {
+                id: idNationWide.includes(cityId) ? undefined : districtId,
+                city: {
+                    id: cityId,
+                },
+            },
             isActive: true,
         };
         const sites = await this.prismaService.site.findMany({
