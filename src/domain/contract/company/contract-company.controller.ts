@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -8,6 +8,7 @@ import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.repo
 import { ContractCompanyService } from './contract-company.service';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
+import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse, GetListForSite } from './response/contract-company-get-list-for-site.response';
 
@@ -43,6 +44,14 @@ export class ContractCompanyController {
         return BaseResponse.of(await this.contractCompanyService.getDetail(id, req.user.accountId));
     }
 
+    @Patch('/:id')
+    async updateContract(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: any,
+        @Body() body: ContractCompanyUpdateRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.contractCompanyService.update(id, req.user.accountId, body));
+    }
     @Put()
     async createContract(@Body() body: ContractCompanyCreateRequest, @Req() request: any): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.createContract(request.user.accountId, body));
