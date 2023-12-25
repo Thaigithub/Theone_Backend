@@ -8,6 +8,8 @@ export class GetListForSite {
     type: ContractType;
     @ApiProperty({ type: Number })
     id: number;
+    @ApiProperty({ type: Number })
+    applicantId: number;
     @ApiProperty({ type: String })
     name: string;
     @ApiProperty({ type: String })
