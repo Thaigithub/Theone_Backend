@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType } from '@prisma/client';
+import { ExperienceType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
@@ -10,6 +10,61 @@ import { PostMemberUpdateInterestResponse } from './response/post-member-update-
 @Injectable()
 export class PostMemberService {
     constructor(private prismaService: PrismaService) {}
+
+    private parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Prisma.PostWhereInput {
+        if (query.regionList) {
+            (query.regionList as string[]).map(async (region) => {
+                const [cityCode] = region.split('-');
+                const isNationwide = await this.prismaService.city.count({
+                    where: {
+                        isActive: true,
+                        id: parseInt(cityCode),
+                        englishName: 'Nationwide',
+                    },
+                });
+                if (isNationwide) query.regionList = undefined;
+            });
+        }
+
+        return {
+            isActive: true,
+            AND: [
+                {
+                    OR: query.keyword && [
+                        {
+                            name: { contains: query.keyword, mode: 'insensitive' },
+                        },
+                        {
+                            site: {
+                                name: { contains: query.keyword, mode: 'insensitive' },
+                            },
+                        },
+                    ],
+                },
+                {
+                    OR:
+                        query.regionList &&
+                        (query.regionList as string[]).map((region) => {
+                            const [cityCode, districtCode] = region.split('-');
+                            return {
+                                site: {
+                                    district: {
+                                        id: parseInt(districtCode),
+                                        city: {
+                                            id: parseInt(cityCode),
+                                        },
+                                    },
+                                },
+                            };
+                        }),
+                },
+            ],
+            siteId,
+            experienceType: { in: query.experienceTypeList as ExperienceType[] },
+            occupationId: { in: query.occupationList as number[] },
+            specialNoteId: { in: query.constructionMachineryList as number[] },
+        };
+    }
 
     private async getMemberId(accountId: number) {
         const member = await this.prismaService.member.findUnique({
@@ -76,23 +131,7 @@ export class PostMemberService {
                     },
                 },
             },
-            where: {
-                isActive: true,
-                OR: query.keyword && [
-                    {
-                        name: { contains: query.keyword },
-                    },
-                    {
-                        site: {
-                            name: { contains: query.keyword },
-                        },
-                    },
-                ],
-                siteId,
-                experienceType: { in: query.experienceTypeList as ExperienceType[] },
-                occupationId: { in: query.occupationList as number[] },
-                specialNoteId: { in: query.constructionMachineryList as number[] },
-            },
+            where: this.parseConditionFromQuery(query, siteId),
             orderBy: {
                 createdAt: 'desc',
             },
@@ -117,10 +156,16 @@ export class PostMemberService {
                 endDate,
                 siteName: site ? site.name : null,
                 siteAddress: site ? site.address : null,
-                siteAddressCity: site ? site.district.city.englishName : null,
-                siteAddressDistrict: site ? site.district.englishName : null,
+                siteAddressCity: site && site.district ? site.district.city.englishName : null,
+                siteAddressDistrict: site && site.district ? site.district.englishName : null,
                 isInterest: listInterestPostIds.includes(item.id) ? true : false,
             };
+        });
+    }
+
+    async getTotal(query: PostMemberGetListRequest, siteId: number): Promise<number> {
+        return await this.prismaService.post.count({
+            where: this.parseConditionFromQuery(query, siteId),
         });
     }
 
@@ -282,14 +327,6 @@ export class PostMemberService {
             },
             workLocation: post.workLocation,
         };
-    }
-
-    async getTotal(): Promise<number> {
-        return await this.prismaService.post.count({
-            where: {
-                isActive: true,
-            },
-        });
     }
 
     async addApplyPost(accountId: number, id: number) {
