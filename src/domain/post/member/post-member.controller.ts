@@ -41,6 +41,7 @@ export class PostMemberController {
         occupationList: [string] | undefined,
         constructionMachineryList: [string],
         experienceTypeList: [string] | undefined,
+        regionList: [string] | undefined,
         siteId: number,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         // Check validation
@@ -65,9 +66,10 @@ export class PostMemberController {
         query.occupationList = parsedOccupationList;
         query.constructionMachineryList = parsedConstructionMachineryList;
         query.experienceTypeList = parsedExperienceTypeList;
+        query.regionList = regionList;
 
         const list = await this.postMemberService.getList(request.user.accountId, query, siteId);
-        const total = await this.postMemberService.getTotal();
+        const total = await this.postMemberService.getTotal(query, siteId);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
     }
@@ -85,9 +87,18 @@ export class PostMemberController {
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
         @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
+        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
-        return await this.getListPost(request, query, occupationList, constructionMachineryList, experienceTypeList, undefined);
+        return await this.getListPost(
+            request,
+            query,
+            occupationList,
+            constructionMachineryList,
+            experienceTypeList,
+            regionList,
+            undefined,
+        );
     }
 
     // Get list by site id
@@ -104,9 +115,18 @@ export class PostMemberController {
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
         @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
+        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
-        return await this.getListPost(request, query, occupationList, constructionMachineryList, experienceTypeList, siteId);
+        return await this.getListPost(
+            request,
+            query,
+            occupationList,
+            constructionMachineryList,
+            experienceTypeList,
+            regionList,
+            siteId,
+        );
     }
 
     // Get detail

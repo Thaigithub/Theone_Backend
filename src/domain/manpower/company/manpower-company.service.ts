@@ -1,13 +1,100 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { ManpowerCompanyGetListRequest } from './request/manpower-company-get-list.request';
-import { ExperienceType } from '@prisma/client';
+import { ExperienceType, Prisma } from '@prisma/client';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ManpowerResponse } from './response/manpower-company-get-list.response';
 
 @Injectable()
 export class ManpowerCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
+
+    private parseConditionFromQuery(query: ManpowerCompanyGetListRequest): Prisma.MemberWhereInput {
+        if (query.regionList) {
+            (query.regionList as string[]).map(async (region) => {
+                const [cityCode] = region.split('-');
+                const isNationwide = await this.prismaService.city.count({
+                    where: {
+                        isActive: true,
+                        id: parseInt(cityCode),
+                        englishName: 'Nationwide',
+                    },
+                });
+                if (isNationwide) query.regionList = undefined;
+            });
+        }
+
+        return {
+            isActive: true,
+            AND: [
+                {
+                    OR: query.experienceTypeList && [
+                        {
+                            totalExperienceYears: query.experienceTypeList.includes(ExperienceType.SHORT)
+                                ? { gte: 1, lte: 4 }
+                                : null,
+                        },
+                        {
+                            totalExperienceYears: query.experienceTypeList?.includes(ExperienceType.MEDIUM)
+                                ? { gte: 5, lte: 9 }
+                                : null,
+                        },
+                        {
+                            totalExperienceYears: query.experienceTypeList?.includes(ExperienceType.LONG)
+                                ? { gte: 10, lte: 1000 }
+                                : null,
+                        },
+                    ],
+                },
+                {
+                    OR: query.keyword && [
+                        {
+                            desiredOccupation: {
+                                codeName: { contains: query.keyword, mode: 'insensitive' },
+                            },
+                        },
+                        {
+                            district: {
+                                OR: [
+                                    {
+                                        englishName: { contains: query.keyword, mode: 'insensitive' },
+                                    },
+                                    {
+                                        koreanName: { contains: query.keyword, mode: 'insensitive' },
+                                    },
+                                    {
+                                        city: {
+                                            englishName: { contains: query.keyword, mode: 'insensitive' },
+                                        },
+                                    },
+                                    {
+                                        city: {
+                                            koreanName: { contains: query.keyword, mode: 'insensitive' },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+                {
+                    OR:
+                        query.regionList &&
+                        (query.regionList as string[]).map((region) => {
+                            const [cityCode, districtCode] = region.split('-');
+                            return {
+                                district: {
+                                    id: parseInt(districtCode),
+                                    city: {
+                                        id: parseInt(cityCode),
+                                    },
+                                },
+                            };
+                        }),
+                },
+            ],
+        };
+    }
 
     async getList(query: ManpowerCompanyGetListRequest): Promise<ManpowerResponse[]> {
         const members = await this.prismaService.member.findMany({
@@ -45,52 +132,7 @@ export class ManpowerCompanyService {
                     },
                 },
             },
-            where: {
-                AND: [
-                    {
-                        OR: query.experienceTypeList && [
-                            {
-                                totalExperienceYears: query.experienceTypeList.includes(ExperienceType.SHORT)
-                                    ? { gte: 1, lte: 4 }
-                                    : undefined,
-                            },
-                            {
-                                totalExperienceYears: query.experienceTypeList.includes(ExperienceType.MEDIUM)
-                                    ? { gte: 5, lte: 9 }
-                                    : undefined,
-                            },
-                            {
-                                totalExperienceYears: query.experienceTypeList.includes(ExperienceType.LONG)
-                                    ? { gte: 10, lte: 1000 }
-                                    : undefined,
-                            },
-                        ],
-                    },
-                    {
-                        OR: query.keyword && [
-                            {
-                                desiredOccupation: {
-                                    codeName: { contains: query.keyword },
-                                },
-                            },
-                            {
-                                district: {
-                                    OR: [
-                                        {
-                                            englishName: { contains: query.keyword },
-                                        },
-                                        {
-                                            city: {
-                                                englishName: { contains: query.keyword },
-                                            },
-                                        },
-                                    ],
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
+            where: this.parseConditionFromQuery(query),
             ...QueryPagingHelper.queryPaging(query),
         });
 
@@ -115,11 +157,9 @@ export class ManpowerCompanyService {
         });
     }
 
-    async getTotal(): Promise<number> {
+    async getTotal(query: ManpowerCompanyGetListRequest): Promise<number> {
         return await this.prismaService.member.count({
-            where: {
-                isActive: true,
-            },
+            where: this.parseConditionFromQuery(query),
         });
     }
 }

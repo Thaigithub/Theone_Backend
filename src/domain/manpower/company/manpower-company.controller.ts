@@ -31,6 +31,7 @@ export class ManpowerCompanyController {
         @Query() query: ManpowerCompanyGetListRequest,
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
+        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
     ): Promise<BaseResponse<ManpowerCompanyGetListResponse>> {
         // Check validation
         const parsedOccupationList = occupationList?.map((item) => {
@@ -48,9 +49,10 @@ export class ManpowerCompanyController {
         });
         query.occupationList = parsedOccupationList;
         query.experienceTypeList = parsedExperienceTypeList;
+        query.regionList = regionList;
 
         const list = await this.manpowerCompanyService.getList(query);
-        const total = await this.manpowerCompanyService.getTotal();
+        const total = await this.manpowerCompanyService.getTotal(query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
 
         return BaseResponse.of(paginationResponse);
