@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
     $Enums,
-    Account,
-    AccountStatus,
     BankAccount,
     BasicHealthSafetyCertificate,
     Code,
@@ -12,43 +10,7 @@ import {
     MemberLevel,
     SignupMethodType,
 } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
 
-class MemberResponse {
-    @ApiProperty({ type: 'string' })
-    id: Member['id'];
-
-    @ApiProperty({ type: 'string' })
-    name: Member['name'];
-
-    @ApiProperty({ type: 'string' })
-    contact: Member['contact'];
-
-    @ApiProperty({
-        type: 'string',
-        example: [...Object.values(MemberLevel)],
-    })
-    level: Member['level'];
-
-    @ApiProperty({
-        type: 'object',
-        properties: {
-            username: {
-                type: 'string',
-            },
-            status: {
-                type: 'string',
-                example: [...Object.values(AccountStatus)],
-            },
-        },
-    })
-    account: {
-        username: Account['username'];
-        status: Account['status'];
-    };
-}
-
-class GetMembersListResponse extends PaginationResponse<MemberResponse> {}
 class BankAccountType {
     @ApiProperty({ type: String })
     accountHolder: BankAccount['accountHolder'];
@@ -95,7 +57,7 @@ class BasicHealthSafetyCertificateType {
     @ApiProperty({ type: FileType })
     file: FileType;
 }
-class MemberDetailResponse {
+export class MemberDetailResponse {
     @ApiProperty({ type: String })
     name: Member['name'];
     @ApiProperty({ type: String })
@@ -119,5 +81,3 @@ class MemberDetailResponse {
     @ApiProperty({ type: BasicHealthSafetyCertificateType })
     basicHealthSafetyCertificate: BasicHealthSafetyCertificateType;
 }
-
-export { GetMembersListResponse, MemberDetailResponse, MemberResponse };

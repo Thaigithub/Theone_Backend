@@ -1,8 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountCompanyService } from './account-company.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
+import { CompanyCompanyGetDetail } from './response/account-company-get-detail.response';
 
 @ApiTags('[COMPANY] Accounts Management')
 @Controller('/company/accounts')
@@ -48,5 +52,12 @@ export class AccountCompanyController {
     @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Missing the parameter', type: BaseResponse })
     async accountMemberCheck(@Param('username') username: string): Promise<BaseResponse<boolean>> {
         return BaseResponse.of(await this.accountCompanyService.accountCompanyCheck(username));
+    }
+
+    @Roles(AccountType.COMPANY)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Get()
+    async getDetail(@Req() req: any): Promise<BaseResponse<CompanyCompanyGetDetail>> {
+        return BaseResponse.of(await this.accountCompanyService.getDetail(req.user.accountId));
     }
 }
