@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AccountType, OtpType } from '@prisma/client';
+import { AccountType, OtpType, SignupMethodType } from '@prisma/client';
 import { APPLE_OAUTH_RESTAPI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_VERIFY_URL, NAVER_VERIFY_URL } from 'app.config';
 import Axios from 'axios';
 import { compare } from 'bcrypt';
@@ -89,6 +89,9 @@ export class MemberAuthService {
             where: {
                 username: loginData.username,
                 type: AccountType.MEMBER,
+                member: {
+                    signupMethod: SignupMethodType.GENERAL,
+                },
             },
         });
 
@@ -162,6 +165,7 @@ export class MemberAuthService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                signupMethod: SignupMethodType.GOOGLE,
                 account: {
                     type: AccountType.MEMBER,
                     isActive: true,
@@ -176,6 +180,7 @@ export class MemberAuthService {
                 },
             },
         });
+        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -190,6 +195,7 @@ export class MemberAuthService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                signupMethod: SignupMethodType.APPLE,
                 account: {
                     type: AccountType.MEMBER,
                     isActive: true,
@@ -220,6 +226,7 @@ export class MemberAuthService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                signupMethod: SignupMethodType.KAKAO,
                 account: {
                     type: AccountType.MEMBER,
                     isActive: true,
@@ -250,6 +257,7 @@ export class MemberAuthService {
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
+                signupMethod: SignupMethodType.NAVER,
                 account: {
                     type: AccountType.MEMBER,
                     isActive: true,

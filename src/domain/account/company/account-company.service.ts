@@ -3,6 +3,7 @@ import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
+import { CompanyCompanyGetDetail } from './response/account-company-get-detail.response';
 @Injectable()
 export class AccountCompanyService {
     constructor(private prismaService: PrismaService) {}
@@ -98,5 +99,34 @@ export class AccountCompanyService {
                 },
             },
         });
+    }
+    async getDetail(accountId: number): Promise<CompanyCompanyGetDetail> {
+        const company = await this.prismaService.company.findUnique({
+            where: {
+                accountId,
+            },
+            select: {
+                name: true,
+                logo: {
+                    select: {
+                        file: {
+                            select: {
+                                fileName: true,
+                                key: true,
+                                type: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        return {
+            name: company.name,
+            logo: {
+                fileName: company.logo.file.fileName,
+                type: company.logo.file.type,
+                key: company.logo.file.key,
+            },
+        };
     }
 }

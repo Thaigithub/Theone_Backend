@@ -480,8 +480,8 @@ model Site {
   endDate                   DateTime?                  @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
   numberOfContract          Int                        @default(0)
-  districtId                Int?                       @map("district_id")
-  district                  District?                  @relation(fields: [districtId], references: [id])
+  districtId                Int                        @map("district_id")
+  district                  District                   @relation(fields: [districtId], references: [id])
   interestMember            Interest[]
   memberEvaluationByCompany MemberEvaluationByCompany?
   post                      Post[]
@@ -715,6 +715,7 @@ model Contract {
   application   Application @relation(fields: [applicationId], references: [id])
   file          File        @relation(fields: [fileId], references: [id])
   department    String      @default("")
+  labor         Labor?
 
   @@map("contracts")
 }
@@ -760,6 +761,40 @@ model MatchingRecommendation {
   @@unique([memberId, assignedAt])
   @@unique([teamId, assignedAt])
   @@map("matching_recommendations")
+}
+
+model Labor {
+  id            Int             @id @default(autoincrement())
+  contractId    Int             @unique @map("contract_id")
+  contract      Contract        @relation(fields: [contractId], references: [id])
+  workday       Workday[]
+  salaryHistory SalaryHistory[]
+  numberOfHours Int             @map("number_of_hours")
+
+  @@map("labors")
+}
+
+model SalaryHistory {
+  id                  Int      @id @default(autoincrement())
+  laborId             Int      @map("labor_id")
+  labor               Labor    @relation(fields: [laborId], references: [id])
+  base                Int      @default(0)
+  otherAllowance      Int      @default(0) @map("other_allowance")
+  overtimePay         Int      @default(0) @map("overtime_pay")
+  meals               Int      @default(0)
+  totalPayment        Int      @default(0) @map("total_payment")
+  nationalPension     Int      @default(0) @map("national_pension")
+  heathInsurance      Int      @default(0) @map("health_insurance")
+  longTermCare        Int      @default(0) @map("long_term_care")
+  employmentInsurance Int      @default(0) @map("employment_insurance")
+  retirementDeduction Int      @default(0) @map("retirement_deduction")
+  incomeTax           Int      @default(0) @map("income_tax")
+  residentTax         Int      @default(0) @map("resident_tax")
+  totalDeductible     Int      @default(0) @map("total_deductible")
+  actualPayment       Int      @default(0) @map("actual_payment")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Date
+
+  @@map("salary_histories")
 }
 
 enum BannerStatus {
