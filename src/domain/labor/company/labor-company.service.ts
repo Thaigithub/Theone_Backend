@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborType } from './enum/labor-company-labor-type.enum';
+import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 
@@ -87,5 +88,52 @@ export class LaborCompanyService {
             where: request.where,
         });
         return new PaginationResponse(labor, new PageInfo(total));
+    }
+    async create(accountId: number, body: LaborCompanyCreateRequest): Promise<void> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id: body.contractId,
+                application: {
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+            select: {
+                labor: true,
+            },
+        });
+        if (!contract) throw new NotFoundException('Contract not found');
+        if (contract.labor) throw new BadRequestException('Labor existed!');
+        const labor = await this.prismaService.labor.create({
+            data: {
+                contractId: body.contractId,
+                numberOfHours: body.numberOfHours,
+            },
+            select: {
+                id: true,
+            },
+        });
+        await this.prismaService.workDate.createMany({
+            data: body.workDate.map((item) => {
+                return {
+                    laborId: labor.id,
+                    date: new Date(item.date),
+                };
+            }),
+        });
+        await this.prismaService.salaryHistory.createMany({
+            data: body.salaryHistory.map((item) => {
+                const { date, ...rest } = item;
+                return {
+                    laborId: labor.id,
+                    ...rest,
+                    month: new Date(date.date).getMonth(),
+                    year: new Date(date.date).getFullYear(),
+                };
+            }),
+        });
     }
 }
