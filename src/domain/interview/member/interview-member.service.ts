@@ -36,9 +36,6 @@ export class InterviewMemberService {
                             gte: query.startDate && new Date(query.startDate),
                             lte: query.endDate && new Date(query.endDate),
                         },
-                        interview: {
-                            NOT: null,
-                        },
                     },
                     {
                         team: {
@@ -50,11 +47,11 @@ export class InterviewMemberService {
                             gte: query.startDate && new Date(query.startDate),
                             lte: query.endDate && new Date(query.endDate),
                         },
-                        interview: {
-                            NOT: null,
-                        },
                     },
                 ],
+                NOT: {
+                    interview: null,
+                },
             },
             select: {
                 id: true,
