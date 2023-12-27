@@ -1,31 +1,17 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpStatus,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-    Put,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
-import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { CareerMemberService } from './career-member.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 import { CareerMemberUpdateRequest } from './request/career-member-update.request';
+import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
