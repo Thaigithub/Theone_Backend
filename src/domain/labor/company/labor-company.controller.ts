@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -6,6 +6,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { LaborCompanyService } from './labor-company.service';
+import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 
@@ -16,9 +17,9 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 @ApiBearerAuth()
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
-    @Patch('id')
+    @Patch('/id')
     async update() {}
-    @Get('id')
+    @Get('/id')
     async getDetail() {}
 
     @Get()
@@ -29,5 +30,7 @@ export class LaborCompanyController {
         return BaseResponse.of(await this.laborCompanyService.getList(req.user.accountId, query));
     }
     @Post()
-    async create() {}
+    async create(@Req() req: AccountIdExtensionRequest, @Body() body: LaborCompanyCreateRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.create(req.user.accountId, body));
+    }
 }
