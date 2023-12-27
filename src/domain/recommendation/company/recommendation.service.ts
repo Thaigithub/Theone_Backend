@@ -140,8 +140,6 @@ export class RecommendationCompanyService {
                             },
                         },
                     },
-                    longitude: true,
-                    latitude: true,
                     desiredSalary: true,
                     totalExperienceYears: true,
                     totalExperienceMonths: true,
@@ -201,7 +199,18 @@ export class RecommendationCompanyService {
                 },
                 select: {
                     name: true,
-                    region: true,
+                    district: {
+                        select: {
+                            englishName: true,
+                            koreanName: true,
+                            city: {
+                                select: {
+                                    englishName: true,
+                                    koreanName: true,
+                                },
+                            },
+                        },
+                    },
                     leader: {
                         select: {
                             contact: true,

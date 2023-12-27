@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CertificateStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { SpecialLicenseMemberGetRequest } from './request/special-license-member-get.request';
 import { SpecialLicenseMemberUpsertRequest } from './request/special-license-member-upsert.request';
 import { SpecialLicenseMemberGetResponse } from './response/special-license-member.response';

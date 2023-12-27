@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
 import { ExtractJwt, JwtFromRequestFunction, Strategy } from 'passport-jwt';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { UID } from 'utils/uid';
+import { UID } from 'utils/uid-generator';
 
 export interface AuthJwtFakePayloadData {
     accountId: string;

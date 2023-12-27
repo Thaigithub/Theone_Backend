@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { City, Code, District, Post, Site } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ConstructionMachinaryResponse {
     @ApiProperty({ type: 'number' })

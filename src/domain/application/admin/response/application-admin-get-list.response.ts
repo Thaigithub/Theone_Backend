@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { InterviewStatus } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { InterviewStatus, Member } from '@prisma/client';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ApplicationAdminResponse {
     @ApiProperty({ type: 'string', example: 'Gildong Ho...' })
@@ -43,7 +43,7 @@ export class ApplicationAdminResponse {
     public totalExperienceMonths: number;
 
     @ApiProperty({ type: 'string', example: '140,000 won per day' })
-    public desiredSalary: string;
+    public desiredSalary: Member['desiredSalary'];
 
     @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
     public assignedAt: Date;

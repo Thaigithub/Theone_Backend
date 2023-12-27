@@ -8,4 +8,4 @@ import { LaborCompanyService } from './company/labor-company.service';
     controllers: [LaborCompanyController],
     providers: [LaborCompanyService],
 })
-export class InterviewModule {}
+export class LaborModule {}

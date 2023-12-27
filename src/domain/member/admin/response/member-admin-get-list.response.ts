@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Account, AccountStatus, Member, MemberLevel } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class MemberResponse {
     @ApiProperty({ type: 'string' })

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
@@ -38,7 +38,18 @@ export class ApplicationAdminService {
                 team: {
                     select: {
                         name: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
                 assignedAt: true,

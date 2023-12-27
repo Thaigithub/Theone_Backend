@@ -19,18 +19,8 @@ export class MemberTeamService {
         }
         try {
             await this.prismaService.$transaction(async (prisma) => {
-                const file = await prisma.file.create({
-                    data: {
-                        type: request.fileType,
-                        key: request.fileKey,
-                        size: request.fileSize,
-                        fileName: request.fileName,
-                    },
-                });
-
                 await prisma.team.create({
                     data: {
-                        fileId: file.id,
                         name: request.teamName,
                         leaderId: member.id,
                         introduction: request.introduction,
@@ -152,16 +142,6 @@ export class MemberTeamService {
                 data: {
                     name: request.teamName,
                     introduction: request.introduction,
-                    file: {
-                        update: {
-                            fileName: request.fileName,
-                            type: request.fileType,
-                            size: request.fileSize,
-                        },
-                    },
-                },
-                include: {
-                    file: true,
                 },
             });
         } catch (error) {

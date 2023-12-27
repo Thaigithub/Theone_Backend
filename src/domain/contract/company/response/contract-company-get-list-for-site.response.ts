@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Contract, Member } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { ContractType } from '../enum/contract-company-type-contract.enum';
 
 export class GetListForSite {

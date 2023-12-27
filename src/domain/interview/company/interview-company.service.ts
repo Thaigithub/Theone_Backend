@@ -5,7 +5,7 @@ import { MemberCompanyService } from 'domain/member/company/member-company.servi
 import { CompanyTeamService } from 'domain/team/company/member-company.service';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';

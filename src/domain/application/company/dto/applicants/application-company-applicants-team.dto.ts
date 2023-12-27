@@ -12,7 +12,7 @@ export class ApplicationCompanyApplicantsLeaderDTO {
     public totalExperienceYears: Member['totalExperienceYears'];
 
     @ApiProperty({ example: 'abc' })
-    public desiredSalary: string;
+    public desiredSalary: Member['desiredSalary'];
 }
 
 export class ApplicationCompanyApplicantsTeamDTO {
@@ -20,7 +20,14 @@ export class ApplicationCompanyApplicantsTeamDTO {
     public name: string;
 
     @ApiProperty({ example: 'abc' })
-    public region: string;
+    public district: {
+        englishName: string;
+        koreanName: string;
+        city: {
+            englishName: string;
+            koreanName: string;
+        };
+    };
 
     @ApiProperty({ type: ApplicationCompanyApplicantsLeaderDTO })
     public leader: ApplicationCompanyApplicantsLeaderDTO;

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Application, Code, Post, PostApplicationStatus, PostStatus, Site } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { FileClass } from '../dto/application-member-filetype.response.dto';
 
 class ApplicationMemberGetResponse {
@@ -28,6 +28,8 @@ class ApplicationMemberGetResponse {
     appliedDate: Application['assignedAt'];
     @ApiProperty({ type: Number })
     applicationId: Application['id'];
+    @ApiProperty({ type: Boolean })
+    isInterested: boolean;
 }
 
 export class ApplicationMemberGetListResponse extends PaginationResponse<ApplicationMemberGetResponse> {}

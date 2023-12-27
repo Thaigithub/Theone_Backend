@@ -3,14 +3,14 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
-import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { CareerMemberService } from './career-member.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list-request';
 import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)

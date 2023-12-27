@@ -1,4 +1,4 @@
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class GetPostBySite {
     id: number;

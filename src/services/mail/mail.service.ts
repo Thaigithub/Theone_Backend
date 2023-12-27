@@ -32,7 +32,7 @@ export class MailService {
             },
         });
     }
-    public async sendEmail(to: string, subject: string, context: MailContext, template: string) {
+    public async sendEmail(to: string, subject: string, context: MailContext, template: string): Promise<void> {
         await this.setTransport();
         this.mailerService.sendMail({
             transporterName: 'gmail',

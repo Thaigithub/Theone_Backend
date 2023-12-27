@@ -3,7 +3,7 @@ import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { ContractStatus } from 'utils/enum/contract-status.enum';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './dto/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './dto/contract-admin-get-list-sort.enum';

@@ -6,8 +6,11 @@ import { CodeModule } from 'domain/code/code.module';
 import { ContractModule } from 'domain/contract/contract.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FileModule } from 'domain/file/file.module';
+import { FilterModule } from 'domain/filter/filter.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InterviewModule } from 'domain/interview/interview.module';
+import { LaborModule } from 'domain/labor/labor.module';
+import { ManpowerModule } from 'domain/manpower/manpower.module';
 import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PostModule } from 'domain/post/post.module';
@@ -22,8 +25,6 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
-import { ManpowerModule } from 'domain/manpower/manpower.module';
-import { FilterModule } from 'domain/filter/filter.module';
 @Module({
     imports: [
         FilterModule,
@@ -51,6 +52,7 @@ import { FilterModule } from 'domain/filter/filter.module';
         ManpowerModule,
         MatchingModule,
         RegionModule,
+        LaborModule,
     ],
 })
 export class AppModule {}

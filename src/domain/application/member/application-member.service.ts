@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InterviewStatus, PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { ChangeApplicationStatus } from './enum/application-member-change-status.enum';
 import { ApplicationMemberGetListOfferFilter } from './enum/application-member-get-list-offer-filter.enum';
 import { OfferType } from './enum/application-member-get-list-offer-type.enum';
@@ -14,7 +14,11 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 @Injectable()
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
-    async getApplicationList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
+    async getApplicationList(
+        id: number,
+        query: ApplicationMemberGetListRequest,
+        status: PostApplicationStatus[],
+    ): Promise<ApplicationMemberGetListResponse> {
         const teams = (
             await this.prismaService.member.findUnique({
                 where: {
@@ -40,7 +44,9 @@ export class ApplicationMemberService {
                                 id,
                             },
                         },
-                        status: query.status,
+                        status: {
+                            in: status,
+                        },
                         assignedAt: {
                             gt: query.startDate && new Date(query.startDate),
                             lt: query.endDate && new Date(query.endDate),
@@ -52,7 +58,9 @@ export class ApplicationMemberService {
                                 in: teams,
                             },
                         },
-                        status: query.status,
+                        status: {
+                            in: status,
+                        },
                     },
                 ],
             },
@@ -62,6 +70,13 @@ export class ApplicationMemberService {
                 assignedAt: true,
                 post: {
                     select: {
+                        interested: {
+                            where: {
+                                member: {
+                                    accountId: id,
+                                },
+                            },
+                        },
                         id: true,
                         name: true,
                         endDate: true,
@@ -117,6 +132,7 @@ export class ApplicationMemberService {
                 appliedDate: item.assignedAt,
                 siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site ? item.post.site.address : '',
+                isInterested: item.post.interested.length === 0 ? false : true,
             };
         });
         const total = await this.prismaService.application.count({ where: search.where });

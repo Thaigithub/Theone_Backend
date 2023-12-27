@@ -19,7 +19,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { UpSertMemberCertificateRequest } from 'domain/certificate/member/request/member-certificate.request';
 import { GetMemberCertificateResponse } from 'domain/certificate/member/response/member-certificate.response';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { CertificateService } from '../certificate.service';
 
 @ApiTags('[MEMBER] Certificate Management')

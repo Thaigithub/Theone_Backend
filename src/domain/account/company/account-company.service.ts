@@ -60,8 +60,6 @@ export class AccountCompanyService {
                     create: {
                         name: request.name,
                         address: request.address,
-                        longitude: request.longitude,
-                        latitude: request.latitude,
                         estDate: new Date(request.estDate),
                         businessRegNumber: request.businessRegNum,
                         corporateRegNumber: request.corporateRegNum,

@@ -21,7 +21,6 @@ model Account {
   admin                  Admin?
   company                Company?
   member                 Member?
-  otps                   OtpProvider[]
 
   @@map("accounts")
 }
@@ -41,12 +40,11 @@ model AccountStatusHistory {
 
 model OtpProvider {
   id        Int      @id @default(autoincrement())
-  updatedAt DateTime @updatedAt @map("updated_at")
-  otpCode   String?  @map("otp_code")
+  createdAt DateTime @default(now()) @map("created_at")
+  otpCode   String   @map("otp_code")
   checked   Boolean  @default(false)
-  accountId Int      @map("account_id")
-  otpType   OtpType  @map("otp_type")
-  account   Account  @relation(fields: [accountId], references: [id])
+  type      OtpType
+  ip        String
 
   @@map("otp_providers")
 }
@@ -73,35 +71,34 @@ model Member {
   createdAt                    DateTime                      @default(now()) @map("created_at")
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
   district                     District?                     @relation(fields: [districtId], references: [id])
-  longitude                    String?
-  latitude                     String?
+  address                      String?
   contact                      String?
   email                        String?                       @unique
   desiredOccupation            Code?                         @relation(fields: [codeId], references: [id])
   totalExperienceYears         Int?                          @map("total_experience_years")
   totalExperienceMonths        Int?                          @map("total_experience_months")
-  desiredSalary                String?                       @map("desired_salary")
+  desiredSalary                Int?                          @map("desired_salary")
   signupMethod                 SignupMethodType              @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
+  districtId                   Int?                          @map("district_id")
+  codeId                       Int?                          @map("code_id")
+  account                      Account                       @relation(fields: [accountId], references: [id])
   applyPosts                   Application[]
   bankAccount                  BankAccount?
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   career                       Career[]
   certificates                 Certificate[]
   disability                   Disability?
   foreignWorker                ForeignWorker?
   headhuntingRecommendation    HeadhuntingRecommendation[]
-  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   interestSites                Interest[]
+  matchingRecommendation       MatchingRecommendation[]
   memberEvaluation             MemberEvaluation?
-  account                      Account                       @relation(fields: [accountId], references: [id])
   teams                        MembersOnTeams[]
   siteEvaluationByMember       SiteEvaluationByMember?
   specialLicenses              SpecialLicense[]
   leader                       Team[]
-  codeId                       Int?                          @map("code_id")
-  matchingRecommendation       MatchingRecommendation[]
-  districtId                   Int?                          @map("district_id")
 
   @@map("members")
 }
@@ -111,8 +108,6 @@ model Company {
   accountId              Int                      @unique @map("account_id")
   name                   String
   address                String
-  longitude              Float
-  latitude               Float
   estDate                DateTime                 @map("est_date")
   businessRegNumber      String                   @unique @map("buss_reg_number")
   corporateRegNumber     String                   @unique @map("corp_reg_number")
@@ -160,21 +155,20 @@ model Team {
   code                      String?
   name                      String
   introduction              String?
-  region                    String?
+  districtId                Int?                        @map("district_id")
+  district                  District?                   @relation(fields: [districtId], references: [id])
   leaderId                  Int                         @map("leader_id")
   isActive                  Boolean                     @default(true) @map("is_active")
   createdAt                 DateTime                    @default(now()) @map("created_at")
   updatedAt                 DateTime                    @updatedAt @map("updated_at")
   status                    TeamStatus                  @default(GENERAL)
   totalMembers              Int                         @default(0) @map("total_members")
-  fileId                    Int                         @unique @map("file_id")
   exposureStatus            Boolean                     @default(false) @map("exposure_status")
   numberOfRecruitments      Int                         @default(0) @map("number_of_recruitments")
   posts                     Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
   members                   MembersOnTeams[]
   teamEvaluation            TeamEvaluation?
-  file                      File                        @relation(fields: [fileId], references: [id])
   leader                    Member                      @relation(fields: [leaderId], references: [id])
   totalExperienceYears      Int?                        @map("total_experience_years")
   totalExperienceMonths     Int?                        @map("total_experience_months")
@@ -275,7 +269,6 @@ model File {
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   logo                         Logo?
   specialLicense               SpecialLicense?
-  team                         Team?
 
   @@map("files")
 }
@@ -743,6 +736,7 @@ model District {
   cityId      Int      @map("city_id")
   member      Member[]
   site        Site[]
+  team        Team[]
 
   @@map("district")
 }

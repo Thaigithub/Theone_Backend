@@ -3,7 +3,7 @@ import { Prisma, TeamStatus } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { SearchCategoryForSearch, SearchSortForSearch } from './dto/team-search';
 import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
 import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';

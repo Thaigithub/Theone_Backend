@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BannerStatus, PostBannerType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { PostSearchCaterory, SiteSearchCaterory } from './dto/banner-admin-search-category.dto';
 import { AdminBannerChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
 import { AdminBannerCreateJobPostRequest } from './request/banner-admin-create-admin-jobpost.request';
