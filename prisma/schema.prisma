@@ -99,6 +99,7 @@ model Member {
   siteEvaluationByMember       SiteEvaluationByMember?
   specialLicenses              SpecialLicense[]
   leader                       Team[]
+  memberMatching               MemberMatching[]
 
   @@map("members")
 }
@@ -527,6 +528,7 @@ model Post {
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
   site                      Site?                       @relation(fields: [siteId], references: [id])
   specialNote               Code?                       @relation("post_special", fields: [specialNoteId], references: [id])
+  memberMatchings           MemberMatching[]
 
   @@map("posts")
 }
@@ -756,6 +758,20 @@ model MatchingRecommendation {
   @@unique([memberId, assignedAt])
   @@unique([teamId, assignedAt])
   @@map("matching_recommendations")
+}
+
+model MemberMatching {
+  id         Int      @id @default(autoincrement())
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int      @map("post_id")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date()
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isRefuse   Boolean  @default(false)
+  member     Member   @relation(fields: [memberId], references: [id])
+  memberId   Int      @map("member_id")
+
+  @@unique([postId, assignedAt, memberId])
+  @@map("member_matching")
 }
 
 model Labor {
