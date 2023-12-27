@@ -775,36 +775,47 @@ model MemberMatching {
 }
 
 model Labor {
-  id            Int             @id @default(autoincrement())
-  contractId    Int             @unique @map("contract_id")
-  contract      Contract        @relation(fields: [contractId], references: [id])
-  workday       Workday[]
-  salaryHistory SalaryHistory[]
-  numberOfHours Int             @map("number_of_hours")
+  id              Int             @id @default(autoincrement())
+  contractId      Int             @unique @map("contract_id")
+  contract        Contract        @relation(fields: [contractId], references: [id])
+  workdates       WorkDate[]
+  salaryHistories SalaryHistory[]
+  numberOfHours   Int             @map("number_of_hours")
 
   @@map("labors")
 }
 
-model SalaryHistory {
-  id                  Int      @id @default(autoincrement())
-  laborId             Int      @map("labor_id")
-  labor               Labor    @relation(fields: [laborId], references: [id])
-  base                Int      @default(0)
-  otherAllowance      Int      @default(0) @map("other_allowance")
-  overtimePay         Int      @default(0) @map("overtime_pay")
-  meals               Int      @default(0)
-  totalPayment        Int      @default(0) @map("total_payment")
-  nationalPension     Int      @default(0) @map("national_pension")
-  heathInsurance      Int      @default(0) @map("health_insurance")
-  longTermCare        Int      @default(0) @map("long_term_care")
-  employmentInsurance Int      @default(0) @map("employment_insurance")
-  retirementDeduction Int      @default(0) @map("retirement_deduction")
-  incomeTax           Int      @default(0) @map("income_tax")
-  residentTax         Int      @default(0) @map("resident_tax")
-  totalDeductible     Int      @default(0) @map("total_deductible")
-  actualPayment       Int      @default(0) @map("actual_payment")
-  createdAt           DateTime @default(now()) @map("created_at") @db.Date
+model WorkDate {
+  id      Int      @id @default(autoincrement())
+  laborId Int      @map("labor_id")
+  labor   Labor    @relation(fields: [laborId], references: [id])
+  date    DateTime @db.Date
 
+  @@map("work_dates")
+}
+
+model SalaryHistory {
+  id                  Int   @id @default(autoincrement())
+  laborId             Int   @map("labor_id")
+  labor               Labor @relation(fields: [laborId], references: [id])
+  base                Int   @default(0)
+  otherAllowance      Int   @default(0) @map("other_allowance")
+  overtimePay         Int   @default(0) @map("overtime_pay")
+  meals               Int   @default(0)
+  totalPayment        Int   @default(0) @map("total_payment")
+  nationalPension     Int   @default(0) @map("national_pension")
+  heathInsurance      Int   @default(0) @map("health_insurance")
+  longTermCare        Int   @default(0) @map("long_term_care")
+  employmentInsurance Int   @default(0) @map("employment_insurance")
+  retirementDeduction Int   @default(0) @map("retirement_deduction")
+  incomeTax           Int   @default(0) @map("income_tax")
+  residentTax         Int   @default(0) @map("resident_tax")
+  totalDeductible     Int   @default(0) @map("total_deductible")
+  actualPayment       Int   @default(0) @map("actual_payment")
+  year                Int   @default(0)
+  month               Int   @default(0)
+
+  @@unique([laborId, year, month])
   @@map("salary_histories")
 }
 

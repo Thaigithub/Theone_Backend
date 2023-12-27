@@ -40,6 +40,7 @@ export class LaborCompanyService {
                 labor: {
                     select: {
                         id: true,
+                        numberOfHours: true,
                     },
                 },
                 application: {
@@ -79,6 +80,7 @@ export class LaborCompanyService {
                 siteName: item.application.post.site.name,
                 startDate: item.startDate,
                 endDate: item.endDate,
+                numberOfHours: item.labor ? item.labor.numberOfHours : null,
             };
         });
         const total = await this.prismaService.contract.count({

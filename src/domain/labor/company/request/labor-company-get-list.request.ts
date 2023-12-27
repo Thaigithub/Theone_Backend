@@ -3,12 +3,14 @@ import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator
 import { LaborType } from '../enum/labor-company-labor-type.enum';
 
 export class LaborCompanyGetListRequest {
+    @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     public startDate: string;
 
+    @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
