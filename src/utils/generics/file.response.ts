@@ -1,8 +1,7 @@
 import { FileType } from '@prisma/client';
 
-export class FileUploadRequest {
-    filename: string;
-    size: number;
+export class FileResponse {
+    fileName: string;
     type: FileType;
     key: string;
 }

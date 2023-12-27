@@ -1,12 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PostApplicationStatus } from '@prisma/client';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
 
-export class ApplicationMemberGetListRequest {
+export enum InterviewStatus {
+    INTERVIEW_PROPOSAL = 'INTERVIEW_PROPOSAL',
+    INTERVIEW_COMPLETED = 'INTERVIEW_COMPLETED',
+    PASS = 'PASS',
+    FAIL = 'FAIL',
+    DEADLINE = 'DEADLINE',
+}
+
+export class InterviewMemberGetListRequest {
     @IsOptional()
-    @IsEnum(PostApplicationStatus)
-    public status: PostApplicationStatus;
+    @IsEnum(InterviewStatus)
+    public status: InterviewStatus;
 
     @ApiProperty({
         type: 'string',
@@ -15,7 +22,8 @@ export class ApplicationMemberGetListRequest {
     @Expose()
     @IsNumberString()
     @IsOptional()
-    public pageSize: string;
+    @Transform(({ value }) => value && parseInt(value))
+    public pageSize: number;
 
     @ApiProperty({
         type: 'string',
@@ -24,7 +32,8 @@ export class ApplicationMemberGetListRequest {
     @Expose()
     @IsNumberString()
     @IsOptional()
-    public pageNumber: string;
+    @Transform(({ value }) => value && parseInt(value))
+    public pageNumber: number;
 
     @Expose()
     @IsString()

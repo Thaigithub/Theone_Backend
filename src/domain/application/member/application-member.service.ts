@@ -14,11 +14,7 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 @Injectable()
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
-    async getApplicationList(
-        id: number,
-        query: ApplicationMemberGetListRequest,
-        status: PostApplicationStatus[],
-    ): Promise<ApplicationMemberGetListResponse> {
+    async getApplicationList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
         const teams = (
             await this.prismaService.member.findUnique({
                 where: {
@@ -44,9 +40,7 @@ export class ApplicationMemberService {
                                 id,
                             },
                         },
-                        status: {
-                            in: status,
-                        },
+                        status: query.status,
                         assignedAt: {
                             gt: query.startDate && new Date(query.startDate),
                             lt: query.endDate && new Date(query.endDate),
@@ -58,9 +52,7 @@ export class ApplicationMemberService {
                                 in: teams,
                             },
                         },
-                        status: {
-                            in: status,
-                        },
+                        status: query.status,
                     },
                 ],
             },
