@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Application, Company, Post, PostApplicationStatus, PostStatus, Site } from '@prisma/client';
 import { FileClass } from '../dto/application-member-filetype.response.dto';
-import { Team } from '../dto/application-member-teamtype.response.dto';
+import { Member, Team } from '../dto/application-member-teamtype.response.dto';
 
 export class ApplicationMemberGetDetailResponse {
     @ApiProperty({ type: String })
@@ -44,4 +44,5 @@ export class ApplicationMemberGetDetailResponse {
     isInterested: boolean;
     @ApiProperty({ type: Team })
     team: Team;
+    member: Member;
 }

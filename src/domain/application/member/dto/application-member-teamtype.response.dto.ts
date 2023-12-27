@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-class Member {
+export class Member {
     @ApiProperty({ type: String })
     name: string;
     @ApiProperty({ type: String })

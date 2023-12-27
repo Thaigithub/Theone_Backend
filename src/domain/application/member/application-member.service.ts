@@ -169,6 +169,12 @@ export class ApplicationMemberService {
             select: {
                 assignedAt: true,
                 status: true,
+                member: {
+                    select: {
+                        name: true,
+                        contact: true,
+                    },
+                },
                 team: {
                     select: {
                         name: true,
@@ -258,12 +264,20 @@ export class ApplicationMemberService {
             appliedDate: application.assignedAt,
             occupationName: application.post.occupation ? application.post.occupation.codeName : null,
             isInterested: application.post.interested.length !== 0 ? true : false,
-            team: application.team && {
-                name: application.team.name,
-                members: application.team.members.map((item) => {
-                    return { name: item.member.name, contact: item.member.contact };
-                }),
-            },
+            team: application.team
+                ? {
+                      name: application.team.name,
+                      members: application.team.members.map((item) => {
+                          return { name: item.member.name, contact: item.member.contact };
+                      }),
+                  }
+                : null,
+            member: application.member
+                ? {
+                      name: application.member.name,
+                      contact: application.member.contact,
+                  }
+                : null,
         };
     }
     async changeApplicationStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
