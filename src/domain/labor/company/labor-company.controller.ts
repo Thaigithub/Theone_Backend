@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -16,6 +16,11 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 @ApiBearerAuth()
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
+    @Patch('id')
+    async update() {}
+    @Get('id')
+    async getDetail() {}
+
     @Get()
     async getList(
         @Req() req: AccountIdExtensionRequest,
@@ -23,4 +28,6 @@ export class LaborCompanyController {
     ): Promise<BaseResponse<LaborCompanyGetListResponse>> {
         return BaseResponse.of(await this.laborCompanyService.getList(req.user.accountId, query));
     }
+    @Post()
+    async create() {}
 }
