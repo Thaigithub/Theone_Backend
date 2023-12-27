@@ -121,12 +121,12 @@ export class ApplicationCompanyService {
                 member: {
                     ...item.member,
                     city: {
-                        englishName: district.city.englishName,
-                        koreanName: district.city.koreanName,
+                        englishName: district?.city.englishName || null,
+                        koreanName: district?.city.koreanName || null,
                     },
                     district: {
-                        englishName: district.englishName,
-                        koreanName: district.koreanName,
+                        englishName: district?.englishName || null,
+                        koreanName: district?.koreanName || null,
                     },
                 },
             };

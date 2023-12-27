@@ -4,7 +4,7 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class WorkAdminGetDetailListHistoryRequest {
     @ApiProperty({
-        example: '2023-12-01',
+        example: '2023-12',
     })
     @Expose()
     @IsString()

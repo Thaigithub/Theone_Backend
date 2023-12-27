@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, SiteStatus } from '@prisma/client';
+import { Response } from 'express';
+import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -9,14 +11,20 @@ import { WorkAdminGetListCategory } from './dto/work-admin-get-list-category.enu
 import { WorkAdminGetListSort } from './dto/work-admin-get-list-sort.enum';
 import { WorkAdminGetDetailListHistoryRequest } from './request/work-admin-get-detail-list-history.request';
 import { WorkAdminGetListRequest } from './request/work-admin-get-list.request';
-import { WorkAdminGetDetailListHistoryResponse } from './response/work-admin-get-detail-list-history.response';
+import {
+    WorkAdminGetDetailItemHistoryResponse,
+    WorkAdminGetDetailListHistoryResponse,
+} from './response/work-admin-get-detail-list-history.response';
 import { WorkAdminGetDetailSiteResponse } from './response/work-admin-get-detail-site.response';
 import { WorkAdminGetItemResponse, WorkAdminGetListResponse } from './response/work-admin-get-list.response';
 import { WorkerAdminGetTotalWorkersResponse } from './response/work-admin-get-total-workers.response';
 
 @Injectable()
 export class WorkAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly excelService: ExcelService,
+    ) {}
 
     queryFilter(query: WorkAdminGetListRequest): Prisma.SiteWhereInput {
         return {
@@ -95,6 +103,7 @@ export class WorkAdminService {
 
         const listResponse: WorkAdminGetItemResponse[] = lists.map((list) => {
             return {
+                id: list.id,
                 companyName: list.company.name,
                 siteName: list.name,
                 numberOfWorkers: list.numberOfWorkers,
@@ -151,6 +160,137 @@ export class WorkAdminService {
         id: number,
         query: WorkAdminGetDetailListHistoryRequest,
     ): Promise<WorkAdminGetDetailListHistoryResponse> {
-        return;
+        const queryFilter: Prisma.LaborWhereInput = {
+            contract: {
+                application: {
+                    post: {
+                        siteId: id,
+                    },
+                },
+            },
+        };
+
+        const lists = await this.prismaService.labor.findMany({
+            select: {
+                contract: {
+                    select: {
+                        application: {
+                            select: {
+                                member: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                team: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                workdates: true,
+            },
+            where: queryFilter,
+
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
+        });
+
+        const count = await this.prismaService.labor.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        const listResponse: WorkAdminGetDetailItemHistoryResponse[] = lists.map((list) => {
+            return {
+                workerName: !list.contract.application.member
+                    ? list.contract.application.team.name
+                    : list.contract.application.member.name,
+                workDay: list.workdates
+                    .map((workdate) => workdate.date)
+                    .filter((workdate) => workdate.toISOString().includes(query.date)),
+            } as WorkAdminGetDetailItemHistoryResponse;
+        });
+
+        return new PaginationResponse(listResponse, new PageInfo(count));
+    }
+
+    async downloadDetailHistory(id: number, query: WorkAdminGetDetailListHistoryRequest, response: Response) {
+        const lists = await this.prismaService.labor.findMany({
+            select: {
+                contract: {
+                    select: {
+                        application: {
+                            select: {
+                                member: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                team: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                workdates: true,
+            },
+            where: {
+                contract: {
+                    application: {
+                        post: {
+                            siteId: id,
+                        },
+                    },
+                },
+            },
+        });
+
+        const listResponse: WorkAdminGetDetailItemHistoryResponse[] = lists.map((list) => {
+            return {
+                workerName: !list.contract.application.member
+                    ? list.contract.application.team.name
+                    : list.contract.application.member.name,
+                workDay: list.workdates
+                    .map((workdate) => workdate.date)
+                    .filter((workdate) => workdate.toISOString().includes(query.date)),
+            } as WorkAdminGetDetailItemHistoryResponse;
+        });
+
+        const year = parseInt(query.date.split('-')[0]);
+        const month = parseInt(query.date.split('-')[1]);
+        const numberOfDays = new Date(year, month, 0).getDate();
+        const excelTemplate = this.displayListExcelTemplate(numberOfDays, query.date, listResponse);
+
+        const excelStream = await this.excelService.createExcelFile(excelTemplate, 'WorkHistory_' + query.date);
+        response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        response.setHeader('Content-Disposition', `attachment; filename=WorkHistory_${query.date}.xlsx`);
+        excelStream.pipe(response);
+    }
+
+    displayListExcelTemplate(numberOfDays: number, targetDate: string, listResponse: WorkAdminGetDetailItemHistoryResponse[]) {
+        const excelTemplate = [];
+
+        listResponse.forEach((item) => {
+            const temp = { ...item };
+
+            for (let day = 1; day < numberOfDays + 1; day++) {
+                temp[`${targetDate}-${day}`] = item.workDay
+                    .map((date) => date.toISOString())
+                    .includes(`${targetDate}-${day}T00:00:00.000Z`)
+                    ? 'O'
+                    : '';
+                delete temp.workDay;
+            }
+            excelTemplate.push(temp);
+        });
+
+        return excelTemplate;
     }
 }
