@@ -96,14 +96,30 @@ export class ContractCompanyService {
                             select: {
                                 id: true,
                                 numberOfContract: true,
+                                numberOfWorkers: true,
                             },
                         },
+                    },
+                },
+                team: {
+                    select: {
+                        _count: {
+                            select: {
+                                members: true,
+                            },
+                        },
+                    },
+                },
+                member: {
+                    select: {
+                        id: true,
                     },
                 },
             },
         });
         if (!application) throw new NotFoundException('Application not found or not ready');
         if (!application.post.site) throw new BadRequestException('This post has no site to create contract');
+
         await this.prismaService.file.create({
             data: {
                 key: body.fileKey,
@@ -128,6 +144,9 @@ export class ContractCompanyService {
             },
             data: {
                 numberOfContract: application.post.site.numberOfContract + 1,
+                numberOfWorkers: !application.member
+                    ? application.post.site.numberOfWorkers + application.team._count.members
+                    : application.post.site.numberOfWorkers + 1,
             },
         });
     }

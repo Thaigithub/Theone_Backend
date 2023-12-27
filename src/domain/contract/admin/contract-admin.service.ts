@@ -4,6 +4,7 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { ContractStatus } from 'utils/enum/contract-status.enum';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './dto/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './dto/contract-admin-get-list-sort.enum';
@@ -99,23 +100,11 @@ export class ContractAdminService {
                 companyName: list.company.name,
                 siteName: list.name,
                 numberOfContracts: list.numberOfContract,
-                status: this.getSiteStatus(list.status, list.startDate, list.endDate),
+                status: getSiteStatus(list.status, list.startDate, list.endDate),
             } as ContractAdminGetItemResponse;
         });
 
         return new PaginationResponse(listResponse, new PageInfo(count));
-    }
-
-    getSiteStatus(status: SiteStatus, startDate: Date, endDate: Date): SitePeriodStatus {
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        if (startDate && endDate && status === SitePeriodStatus.APPROVED) {
-            if (now < startDate) return SitePeriodStatus.PREPARE;
-            if (startDate <= now && now <= endDate) return SitePeriodStatus.PROCEEDING;
-            if (endDate < now) return SitePeriodStatus.END;
-        }
-
-        return SitePeriodStatus[status];
     }
 
     async getTotalContracts(query: ContractAdminGetListRequest): Promise<ContractAdminGetTotalContractsResponse> {
