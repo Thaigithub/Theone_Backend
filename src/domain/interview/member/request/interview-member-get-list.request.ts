@@ -11,6 +11,7 @@ export enum InterviewStatus {
 }
 
 export class InterviewMemberGetListRequest {
+    @Expose()
     @IsOptional()
     @IsEnum(InterviewStatus)
     public status: InterviewStatus;
