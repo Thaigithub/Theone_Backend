@@ -10,6 +10,13 @@ import { HeadhuntinAdminGetListRecommendationSort } from '../dto/headhunting-adm
 
 class HeadhuntingAdminGetListRecommendationRequest {
     @Expose()
+    @IsOptional()
+    @IsNumber()
+    @ApiProperty()
+    @Transform(({ value }) => value && parseInt(value))
+    public requestId: number;
+
+    @Expose()
     @IsEnum(HeadhuntinAdminGetListRecommendationSort)
     @IsOptional()
     @ApiProperty({

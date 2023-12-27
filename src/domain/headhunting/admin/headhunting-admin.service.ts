@@ -49,6 +49,7 @@ export class HeadhuntingAdminService {
                 id: true,
                 date: true,
                 status: true,
+                object: true,
                 post: {
                     select: {
                         id: true,
@@ -248,6 +249,7 @@ export class HeadhuntingAdminService {
                         averageScore: true,
                     },
                 },
+                headhuntingRecommendation: true,
             },
             where: queryFilter,
             orderBy: {
@@ -268,7 +270,24 @@ export class HeadhuntingAdminService {
             where: queryFilter,
         });
 
-        return new PaginationResponse(list, new PageInfo(listCount));
+        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+            where: {
+                id: query.requestId,
+                isActive: true,
+            },
+        });
+
+        const responseList = list.map((item) => {
+            const response: HeadhuntingAdminGetListRecommendationResponse = {
+                ...item,
+                isSuggest: item.headhuntingRecommendation
+                    .map((recommend) => recommend.postId)
+                    .includes(headhuntingRequest.postId),
+            };
+            return response;
+        });
+
+        return new PaginationResponse(responseList, new PageInfo(listCount));
     }
 
     async addListMemberRecommendation(body: HeadhuntingAdminAddMemberRecommendationRequest) {
@@ -343,6 +362,7 @@ export class HeadhuntingAdminService {
                         },
                     },
                 },
+                headhuntingRecommendation: true,
             },
             where: queryFilter,
             orderBy: {
@@ -367,7 +387,26 @@ export class HeadhuntingAdminService {
             where: queryFilter,
         });
 
-        return new PaginationResponse(list, new PageInfo(listCount));
+        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+            where: {
+                id: query.requestId,
+                isActive: true,
+            },
+        });
+
+        const responseList = list.map((item) => {
+            console.log(headhuntingRequest.postId);
+
+            const response: HeadhuntingAdminGetListRecommendationResponse = {
+                ...item,
+                isSuggest: item.headhuntingRecommendation
+                    .map((recommend) => recommend.postId)
+                    .includes(headhuntingRequest.postId),
+            };
+            return response;
+        });
+
+        return new PaginationResponse(responseList, new PageInfo(listCount));
     }
 
     async addListTeamRecommendation(body: HeadhuntingAdminAddTeamRecommendationRequest) {
