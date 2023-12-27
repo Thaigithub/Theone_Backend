@@ -168,7 +168,7 @@ export class HeadhuntingAdminService {
                 id,
                 isActive: true,
                 status: {
-                    in: [RequestStatus.RE_APPLY, RequestStatus.APPLY],
+                    in: [RequestStatus.RE_APPLY, RequestStatus.APPLY, RequestStatus.APPROVED],
                 },
             },
         });
@@ -238,6 +238,11 @@ export class HeadhuntingAdminService {
                 desiredOccupation: true,
                 specialLicenses: true,
                 certificates: true,
+                account: {
+                    select: {
+                        username: true,
+                    },
+                },
                 memberEvaluation: {
                     select: {
                         averageScore: true,
@@ -246,12 +251,11 @@ export class HeadhuntingAdminService {
             },
             where: queryFilter,
             orderBy: {
-                createdAt: 'desc',
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.HIGHEST_SCORE && {
-                    MemberEvaluation: { averageScore: 'desc' },
+                    memberEvaluation: { averageScore: { sort: 'desc', nulls: 'last' } },
                 }),
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.LOWEST_SCORE && {
-                    MemberEvaluation: { averageScore: 'asc' },
+                    memberEvaluation: { averageScore: { sort: 'asc', nulls: 'last' } },
                 }),
             },
             // Pagination
@@ -326,6 +330,7 @@ export class HeadhuntingAdminService {
                         desiredOccupation: true,
                         specialLicenses: true,
                         certificates: true,
+                        level: true,
                         memberEvaluation: {
                             select: {
                                 averageScore: true,
@@ -341,15 +346,14 @@ export class HeadhuntingAdminService {
             },
             where: queryFilter,
             orderBy: {
-                createdAt: 'desc',
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.HIGHEST_SCORE && {
                     leader: {
-                        memberEvaluation: { averageScore: 'desc' },
+                        memberEvaluation: { averageScore: { sort: 'desc', nulls: 'last' } },
                     },
                 }),
                 ...(query.sortScore === HeadhuntinAdminGetListRecommendationSort.LOWEST_SCORE && {
                     leader: {
-                        memberEvaluation: { averageScore: 'asc' },
+                        memberEvaluation: { averageScore: { sort: 'asc', nulls: 'last' } },
                     },
                 }),
             },
