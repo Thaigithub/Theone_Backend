@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -20,7 +20,9 @@ export class LaborCompanyController {
     @Patch('/id')
     async update() {}
     @Get('/id')
-    async getDetail() {}
+    async getDetail(@Param('id', ParseIntPipe) id: number, @Req() req: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.getDetail(req.user.accountId, id));
+    }
 
     @Get()
     async getList(
