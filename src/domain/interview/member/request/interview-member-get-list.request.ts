@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 
 export enum InterviewStatus {
     INTERVIEW_PROPOSAL = 'INTERVIEW_PROPOSAL',
@@ -15,22 +15,12 @@ export class InterviewMemberGetListRequest {
     @IsEnum(InterviewStatus)
     public status: InterviewStatus;
 
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     @Expose()
-    @IsNumberString()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
     public pageSize: number;
 
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     @Expose()
-    @IsNumberString()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
     public pageNumber: number;
