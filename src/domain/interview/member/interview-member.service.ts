@@ -159,6 +159,21 @@ export class InterviewMemberService {
                 });
                 break;
             }
+            default: {
+                search.where.OR = search.where.OR.map((item) => {
+                    return {
+                        ...item,
+                        status: {
+                            in: [
+                                PostApplicationStatus.PROPOSAL_INTERVIEW,
+                                PostApplicationStatus.APPROVE_BY_COMPANY,
+                                PostApplicationStatus.REJECT_BY_COMPANY,
+                            ],
+                        },
+                    };
+                });
+                break;
+            }
         }
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
