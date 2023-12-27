@@ -174,8 +174,8 @@ export class MemberTeamService {
             throw new BadRequestException('Team does not exist');
         }
 
-        if (!team.members.map((member) => member.memberId).includes(account.member.id) && team.leaderId !== account.member.id) {
-            throw new BadRequestException('You are not belong to the team');
+        if (team.leaderId !== account.member.id) {
+            throw new BadRequestException("You are not the team's leader");
         }
 
         //Check exist post

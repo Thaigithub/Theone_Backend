@@ -473,6 +473,7 @@ model Site {
   endDate                   DateTime?                  @map("end_date") @db.Date
   companyId                 Int                        @map("company_id")
   numberOfContract          Int                        @default(0)
+  numberOfWorkers           Int                        @default(0)
   districtId                Int                        @map("district_id")
   district                  District                   @relation(fields: [districtId], references: [id])
   interestMember            Interest[]
@@ -1016,7 +1017,6 @@ enum RequestObject {
 }
 
 enum SupportCategory {
-  NORMAL
   MATCHING
   HEADHUNTING
   MANPOWER
