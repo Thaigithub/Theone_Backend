@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InterviewStatus, PostApplicationStatus, Prisma, SupportCategory } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
@@ -89,7 +89,18 @@ export class ApplicationCompanyService {
                                 desiredSalary: true,
                             },
                         },
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },

@@ -18,7 +18,7 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { SpecialLicenseMemberUpsertRequest } from './request/special-license-member-upsert.request';
 import { SpecialLicenseMemberGetResponse } from './response/special-license-member.response';
 import { SpecialLicenseService } from './special-license-member.service';

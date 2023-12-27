@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CodeAdminFilter } from './dto/code-admin-filter.enum';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';

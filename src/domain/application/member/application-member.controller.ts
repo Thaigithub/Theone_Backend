@@ -1,6 +1,6 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AccountType } from '@prisma/client';
+import { AccountType, PostApplicationStatus } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -125,7 +125,8 @@ export class ApplicationMemberController {
     async getApplicationList(
         @Req() request: any,
         @Query() query: ApplicationMemberGetListRequest,
+        @Query('status', ParseArrayPipe) status: PostApplicationStatus[],
     ): Promise<BaseResponse<ApplicationMemberGetListResponse>> {
-        return BaseResponse.of(await this.applicationMemberService.getApplicationList(request.user.accountId, query));
+        return BaseResponse.of(await this.applicationMemberService.getApplicationList(request.user.accountId, query, status));
     }
 }

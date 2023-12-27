@@ -3,7 +3,7 @@ import { $Enums, AccountStatus, AccountType, AdminLevel, Prisma } from '@prisma/
 import { hash } from 'bcrypt';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AdminSearchCategories } from './dto/admin-admin-search';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';

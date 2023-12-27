@@ -6,9 +6,9 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountType, ExperienceType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { ManpowerCompanyGetListRequest } from './request/manpower-company-get-list.request';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { ManpowerCompanyGetListResponse, ManpowerResponse } from './response/manpower-company-get-list.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 
 @Controller('/company/manpower')
 @ApiTags('[COMPANY] Manpower management')

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ContractAdminGetItemResponse {
     @ApiProperty({ example: 1 })

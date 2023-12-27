@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Post, PostStatus } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { PostCompanyGetListHeadhuntingRequestDTO } from '../dto/post-company-get-list-headhunting-request.dto';
 import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list.response';
 

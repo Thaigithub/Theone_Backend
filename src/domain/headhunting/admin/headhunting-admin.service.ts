@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, RequestObject, RequestStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import {
     HeadhuntingAdminGetListMemberApprovalCategory,

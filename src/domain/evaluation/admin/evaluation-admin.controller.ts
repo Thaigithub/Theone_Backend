@@ -4,7 +4,7 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { EvaluationType } from './dto/evaluation-admin.dto';
 import { EvaluationAdminService } from './evaluation-admin.service';
 import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
@@ -19,7 +19,7 @@ import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation
 import { SiteEvaluationAdminGetListResponse, SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
 import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
 import { TeamEvaluationAdminGetListResponse, TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)

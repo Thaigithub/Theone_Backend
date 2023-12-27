@@ -5,14 +5,15 @@ import { compare } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
-import { UID } from 'utils/uid';
+import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
-import { AuthCompanyPasswordRequest } from './request/auth-company-email-password.request';
-import { AuthCompanyUserIdRequest } from './request/auth-company-email-username.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
-import { AuthCompanyPasswordEmailCheckValidRequest } from './request/auth-company-verify-email-password.request';
-import { AuthCompanyUserIdEmailCheckValidRequest } from './request/auth-company-verify-email-username.request';
+import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
+import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
+import { AuthCompanyOtpVerifyRequest } from './request/auth-company-otp-verify.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
+import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
+import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
 
 @Injectable()
 export class CompanyAuthService {
@@ -23,56 +24,6 @@ export class CompanyAuthService {
         private readonly otpService: OtpService,
     ) {}
 
-    async sendEmailOtp(request: AuthCompanyUserIdRequest | AuthCompanyPasswordRequest, isPassword: boolean): Promise<void> {
-        const companyQuery = {
-            where: {
-                name: request.name,
-                email: request.email,
-                account: {
-                    type: AccountType.COMPANY,
-                    isActive: true,
-                },
-            },
-            include: isPassword ? { account: true } : undefined,
-        };
-        if (isPassword) {
-            const passwordRequest = request as AuthCompanyPasswordRequest;
-            companyQuery.where.account['username'] = passwordRequest.username;
-        }
-        const company = await this.prismaService.company.findFirst(companyQuery);
-        if (!company) {
-            throw new NotFoundException(`Company with name ${request.name} and email ${request.email} not found `);
-        }
-        await this.otpService.sendOtp({ accountId: company.accountId, type: OtpType.EMAIL });
-    }
-
-    async verifyEmailOtp(
-        request: AuthCompanyUserIdEmailCheckValidRequest | AuthCompanyPasswordEmailCheckValidRequest,
-        isPassword: boolean,
-    ): Promise<boolean> {
-        const companyQuery: any = {
-            where: {
-                name: request.name,
-                contact: request.email,
-                account: {
-                    type: AccountType.COMPANY,
-                    isActive: true,
-                },
-            },
-            include: isPassword ? { account: true } : undefined,
-        };
-        if (isPassword) {
-            const passwordRequest = request as AuthCompanyPasswordEmailCheckValidRequest;
-            companyQuery.where.account = {
-                username: passwordRequest.username,
-            };
-        }
-        const company = await this.prismaService.company.findFirst(companyQuery);
-        if (!company) {
-            throw new NotFoundException(`Company with name ${request.name} and email ${request.email} not found `);
-        }
-        return await this.otpService.checkValidOtp({ accountId: company.accountId, type: OtpType.EMAIL, code: request.code });
-    }
     async login(loginData: AuthCompanyLoginRequest): Promise<AuthCompanyLoginResponse> {
         this.logger.log('Login account');
         const account = await this.prismaService.account.findUnique({
@@ -111,8 +62,30 @@ export class CompanyAuthService {
         return { token, uid, type };
     }
 
-    fakeUidAccount(accountId: number): string {
-        return new UID(accountId, DbType.Account, 0).toString();
+    async sendOtp(
+        request: AuthCompanyUserIdRequest | AuthCompanyPasswordRequest,
+        ip: string,
+    ): Promise<AuthCompanyOtpSendResponse> {
+        const passwordRequest = request as AuthCompanyPasswordRequest;
+        const company = await this.prismaService.company.findFirst({
+            where: {
+                name: request.name,
+                email: request.email,
+                account: {
+                    type: AccountType.COMPANY,
+                    isActive: true,
+                    username: passwordRequest.username,
+                },
+            },
+        });
+        if (!company) {
+            throw new NotFoundException(`Account not found `);
+        }
+        return await this.otpService.sendOtp({ email: company.email, phoneNumber: null, type: OtpType.PHONE, ip: ip });
+    }
+
+    async verifyOtp(request: AuthCompanyOtpVerifyRequest, ip: string): Promise<AuthCompanyOtpVerifyResponse> {
+        return await this.otpService.checkValidOtp(request, ip);
     }
 
     async verifyPayload(accountId: number): Promise<AuthJwtPayloadData> {
@@ -133,6 +106,10 @@ export class CompanyAuthService {
         };
 
         return payloadData;
+    }
+
+    fakeUidAccount(accountId: number): string {
+        return new UID(accountId, DbType.Account, 0).toString();
     }
 
     signToken(payloadData: AuthJwtFakePayloadData): string {

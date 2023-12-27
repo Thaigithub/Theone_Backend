@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { RecommendationCompanyGetListHeadhuntingApprovedRequest } from '../admin/request/recommendation-company-get-list-headhunting-approved.request';
 import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from '../admin/response/recommendation-company-get-list-headhunting-approved.response';
@@ -78,7 +78,18 @@ export class HeadhuntingCompanyService {
                                 desiredSalary: true,
                             },
                         },
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },

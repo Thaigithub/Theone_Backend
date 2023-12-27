@@ -42,8 +42,6 @@ export class MemberCompanyService {
                                 },
                             },
                         },
-                        longitude: true,
-                        latitude: true,
                         desiredSalary: true,
                         totalExperienceYears: true,
                         totalExperienceMonths: true,

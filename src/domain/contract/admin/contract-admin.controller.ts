@@ -4,7 +4,7 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { ContractAdminService } from './contract-admin.service';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';

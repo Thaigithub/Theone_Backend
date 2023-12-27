@@ -6,7 +6,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { GetAdminTeamResponse, GetTeamDetailsResponse } from 'domain/team/admin/response/admin-team.response';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
 import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
 import { AdminTeamService } from './team-admin.service';

@@ -6,7 +6,7 @@ import {
 } from 'domain/certificate/member/request/member-certificate.request';
 import { GetMemberCertificateResponse } from 'domain/certificate/member/response/member-certificate.response';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 @Injectable()
 export class CertificateService {

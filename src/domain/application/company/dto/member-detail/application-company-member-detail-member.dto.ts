@@ -39,12 +39,6 @@ export class ApplicationCompantMemberDetailMemberDTO {
         koreanName: string;
     };
 
-    @ApiProperty({ example: 'string' })
-    public longitude: string;
-
-    @ApiProperty({ example: 'string' })
-    public latitude: string;
-
     @ApiProperty({ type: ApplicationCompanyMemberDetailAccountDTO })
     public account: ApplicationCompanyMemberDetailAccountDTO;
 

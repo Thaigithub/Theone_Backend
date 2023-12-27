@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationCompanyApplicantsMemberDTO } from 'domain/application/company/dto/applicants/application-company-applicants-member.dto';
 import { ApplicationCompanyApplicantsTeamDTO } from 'domain/application/company/dto/applicants/application-company-applicants-team.dto';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class RecommendationCompanyGetItemHeadhuntingApprovedResponse {
     @ApiProperty({ type: ApplicationCompanyApplicantsMemberDTO })

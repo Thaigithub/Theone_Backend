@@ -5,7 +5,7 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberAdminService } from './member-admin.service';
 import {
     ChangeMemberRequest,
@@ -15,7 +15,7 @@ import {
 } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
 import { MemberAdminGetListResponse, MemberResponse } from './response/member-admin-get-list.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 
 @ApiTags('[ADMIN] Member Management')
 @Roles(AccountType.ADMIN)

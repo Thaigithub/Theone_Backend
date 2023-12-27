@@ -27,7 +27,18 @@ export class CompanyTeamService {
                 team: {
                     select: {
                         name: true,
-                        region: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: {
+                                    select: {
+                                        englishName: true,
+                                        koreanName: true,
+                                    },
+                                },
+                            },
+                        },
                         leader: {
                             select: {
                                 contact: true,

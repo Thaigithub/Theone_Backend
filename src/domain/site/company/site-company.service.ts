@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract-site.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';

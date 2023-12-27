@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Banner, BannerStatus, CompanyPostBanner, Post, Site } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { FileClass } from '../dto/banner-admin-filetype.response.dto';
 
 class CompanyJobPostBannerResponse {

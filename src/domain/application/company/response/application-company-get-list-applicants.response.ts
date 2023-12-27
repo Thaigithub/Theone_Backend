@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 import { ApplicationCompanyApplicantsMemberDTO } from '../dto/applicants/application-company-applicants-member.dto';
 import { ApplicationCompanyApplicantsTeamDTO } from '../dto/applicants/application-company-applicants-team.dto';
 

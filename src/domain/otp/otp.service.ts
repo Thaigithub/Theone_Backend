@@ -1,72 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { OtpType } from '@prisma/client';
 import { SMS_OTP_VALID_TIME } from 'app.config';
 import { MailService } from 'services/mail/mail.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { OTPGenerator } from 'utils/otp-generator';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
-import { OtpCheckValidRequest, OtpSendRequest } from './request/otp-send.request';
+import { OtpSendRequest } from './request/otp-send.request';
+import { OtpCheckValidRequest } from './request/otp-verify.request';
+import { OtpSendResponse } from './response/otp-send.response';
+import { OtpStatus, OtpVerifyResponse } from './response/otp-verify.response';
 @Injectable()
 export class OtpService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly mailService: MailService,
+        private prismaService: PrismaService,
+        private mailService: MailService,
+        // private smsService: SmsService,
     ) {}
-    async sendOtp(request: OtpSendRequest): Promise<void> {
-        const newOtp = OTPGenerator.generateOTPString();
+    async sendOtp(request: OtpSendRequest): Promise<OtpSendResponse> {
         const existedOtp = await this.prismaService.otpProvider.findFirst({
             where: {
-                otpCode: newOtp,
+                ip: request.ip,
+            },
+            orderBy: {
+                createdAt: 'desc',
             },
         });
-        if (!existedOtp || getTimeDifferenceInMinutes(existedOtp.updatedAt) < parseInt(SMS_OTP_VALID_TIME, 10)) {
-            await this.prismaService.otpProvider.create({
-                data: {
-                    otpType: request.type,
-                    accountId: request.accountId,
-                    otpCode: newOtp,
-                },
-            });
-        } else {
-            await this.prismaService.otpProvider.update({
-                where: {
-                    id: existedOtp.id,
-                },
-                data: {
-                    accountId: request.accountId,
-                    otpType: request.type,
-                },
-            });
+        if (getTimeDifferenceInMinutes(existedOtp.createdAt) < 1) {
+            throw new BadRequestException('Wait for 1 minute till next request');
         }
-        if (request.type === OtpType.EMAIL) {
-            const company = await this.prismaService.company.findUnique({
-                where: {
-                    accountId: request.accountId,
-                },
-                select: {
-                    email: true,
-                    name: true,
-                },
-            });
-            await this.mailService.sendEmail(
-                company.email,
-                'OTP Verification Email',
-                { name: company.name, code: newOtp },
-                'otp-verify',
-            );
+        const otp = await this.prismaService.otpProvider.create({
+            data: {
+                otpCode: OTPGenerator.generateOTPString(),
+                type: request.type,
+                ip: request.ip,
+            },
+            select: {
+                id: true,
+                otpCode: true,
+            },
+        });
+        if (request.type === OtpType.PHONE) {
+            // await this.smsService.sendOTPSMS(request.phoneNumber, otp.otpCode);
         } else {
+            await this.mailService.sendEmail(request.email, 'OTP Verification Email', { code: otp.otpCode }, 'otp-verify');
         }
+        return { otpId: otp.id };
     }
-    async checkValidOtp(request: OtpCheckValidRequest): Promise<boolean> {
-        const existedOtp = await this.prismaService.otpProvider.findFirst({
+    async checkValidOtp(request: OtpCheckValidRequest, ip: string): Promise<OtpVerifyResponse> {
+        const existedOtp = await this.prismaService.otpProvider.findUnique({
             where: {
-                accountId: request.accountId,
-                otpCode: request.code,
-                otpType: request.type,
+                id: request.otpId,
+                ip,
             },
         });
-        if (!existedOtp || getTimeDifferenceInMinutes(existedOtp.updatedAt) > parseInt(SMS_OTP_VALID_TIME, 10)) {
-            return false;
+        if (!existedOtp) {
+            return {
+                isVerified: false,
+                status: OtpStatus.NOT_FOUND,
+            };
+        }
+        if (getTimeDifferenceInMinutes(existedOtp.createdAt) > parseInt(SMS_OTP_VALID_TIME, 10)) {
+            return {
+                isVerified: false,
+                status: OtpStatus.OUT_OF_TIME,
+            };
+        }
+        if (existedOtp.otpCode !== request.code) {
+            return {
+                isVerified: false,
+                status: OtpStatus.WRONG_CODE,
+            };
         }
         await this.prismaService.otpProvider.update({
             where: {
@@ -76,23 +79,9 @@ export class OtpService {
                 checked: true,
             },
         });
-        return true;
+        return {
+            isVerified: true,
+            status: OtpStatus.VERIFIED,
+        };
     }
-    // async confirmValidOtp(request: OtpCheckValidRequest): Promise<boolean> {
-    //     const existedOtp = await this.prismaService.otpProvider.findFirst({
-    //         where: {
-    //             otpCode: request.code,
-    //             checked: true,
-    //         },
-    //     });
-    //     if (!existedOtp) {
-    //         throw new NotFoundException('Otp code is not valid');
-    //     }
-    //     await this.prismaService.otpProvider.delete({
-    //         where: {
-    //             id: existedOtp.id,
-    //         },
-    //     });
-    //     return true;
-    // }
 }

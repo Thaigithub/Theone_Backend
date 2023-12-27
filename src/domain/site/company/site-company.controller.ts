@@ -16,10 +16,10 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pageInfo.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator.reponse';
-import { AccountIdExtensionRequest } from 'utils/generics/upsert-account.request';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract-site.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';

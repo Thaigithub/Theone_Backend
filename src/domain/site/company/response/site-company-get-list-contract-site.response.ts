@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Site } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pageInfo.response';
+import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class GetListForContract {
     @ApiProperty({ type: Number })

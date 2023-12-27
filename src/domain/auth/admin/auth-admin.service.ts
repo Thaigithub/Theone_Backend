@@ -4,7 +4,7 @@ import { AccountType } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
-import { UID } from 'utils/uid';
+import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request';
 import { AuthAdminLoginResponse } from './response/auth-admin-login.response';

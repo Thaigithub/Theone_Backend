@@ -9,16 +9,17 @@ import { OAuth2Client } from 'google-auth-library';
 import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
-import { UID } from 'utils/uid';
+import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
-import { AccountDTO } from './dto/auth-company-account.dto';
+import { AccountDTO } from './dto/auth-member-account.dto';
 import { AuthMemberLoginRequest } from './request/auth-member-login-normal.request';
 import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social.request';
-import { AuthMemberPasswordRequest } from './request/auth-member-sms-password.request';
-import { AuthMemberUserIdRequest } from './request/auth-member-sms-username.request';
-import { AuthMemberPasswordSmsCheckValidRequest } from './request/auth-member-verify-sms-password.request';
-import { AuthMemberUserIdSmsCheckValidRequest } from './request/auth-member-verify-sms-username.request';
+import { AuthMemberPasswordRequest } from './request/auth-member-otp-send-password.request';
+import { AuthMemberUserIdRequest } from './request/auth-member-otp-send-username.request';
+import { AuthMemberOtpVerifyRequest } from './request/auth-member-otp-verify.request';
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
+import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
+import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 const appleClient = new JwksClient({
@@ -33,55 +34,26 @@ export class MemberAuthService {
         private readonly jwtService: JwtService,
         private readonly otpService: OtpService,
     ) {}
-    async sendOtp(request: AuthMemberUserIdRequest | AuthMemberPasswordRequest, isPassword: boolean): Promise<void> {
-        const memberQuery = {
+    async sendOtp(request: AuthMemberUserIdRequest | AuthMemberPasswordRequest, ip: string): Promise<AuthMemberOtpSendResponse> {
+        const passwordRequest = request as AuthMemberPasswordRequest;
+        const member = await this.prismaService.member.findFirst({
             where: {
                 name: request.name,
                 contact: request.phoneNumber,
                 account: {
                     type: AccountType.MEMBER,
                     isActive: true,
+                    username: passwordRequest.username,
                 },
             },
-            include: isPassword ? { account: true } : undefined,
-        };
-
-        if (isPassword) {
-            const passwordRequest = request as AuthMemberPasswordRequest;
-            memberQuery.where.account['username'] = passwordRequest.username;
-        }
-        const member = await this.prismaService.member.findFirst(memberQuery);
+        });
         if (!member) {
-            throw new NotFoundException(`Member with name ${request.name} and phone number ${request.phoneNumber} not found `);
+            throw new NotFoundException(`Account not found `);
         }
-        await this.otpService.sendOtp({ accountId: member.accountId, type: OtpType.PHONE });
+        return await this.otpService.sendOtp({ email: null, phoneNumber: member.contact, type: OtpType.PHONE, ip: ip });
     }
-    async verifySmsOtp(
-        request: AuthMemberUserIdSmsCheckValidRequest | AuthMemberPasswordSmsCheckValidRequest,
-        isPassword: boolean,
-    ): Promise<boolean> {
-        const memberQuery: any = {
-            where: {
-                name: request.name,
-                contact: request.phoneNumber,
-                account: {
-                    type: AccountType.MEMBER,
-                    isActive: true,
-                },
-            },
-            include: isPassword ? { account: true } : undefined,
-        };
-        if (isPassword) {
-            const passwordRequest = request as AuthMemberPasswordSmsCheckValidRequest;
-            memberQuery.where.account = {
-                username: passwordRequest.username,
-            };
-        }
-        const member = await this.prismaService.member.findFirst(memberQuery);
-        if (!member) {
-            throw new NotFoundException(`Member with name ${request.name} and phone number ${request.phoneNumber} not found `);
-        }
-        return await this.otpService.checkValidOtp({ accountId: member.accountId, type: OtpType.PHONE, code: request.code });
+    async verifyOtp(request: AuthMemberOtpVerifyRequest, ip: string): Promise<AuthMemberOtpVerifyResponse> {
+        return await this.otpService.checkValidOtp(request, ip);
     }
     async login(loginData: AuthMemberLoginRequest): Promise<AuthMemberLoginResponse> {
         this.logger.log('Login account');
