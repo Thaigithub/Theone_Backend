@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 import { WorkDate } from './labor-company-workdate.dto';
 
-export class SalaryHistory {
+export class SalaryHistory extends WorkDate {
     @Expose()
     @IsNumber()
     base: number;
@@ -23,7 +23,7 @@ export class SalaryHistory {
     nationalPension: number;
     @Expose()
     @IsNumber()
-    heathInsurance: number;
+    healthInsurance: number;
     @Expose()
     @IsNumber()
     longTermCare: number;
@@ -45,6 +45,4 @@ export class SalaryHistory {
     @Expose()
     @IsNumber()
     actualPayment: number;
-    @Expose()
-    date: WorkDate;
 }

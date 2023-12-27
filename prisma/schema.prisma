@@ -804,7 +804,7 @@ model SalaryHistory {
   meals               Int   @default(0)
   totalPayment        Int   @default(0) @map("total_payment")
   nationalPension     Int   @default(0) @map("national_pension")
-  heathInsurance      Int   @default(0) @map("health_insurance")
+  healthInsurance     Int   @default(0) @map("health_insurance")
   longTermCare        Int   @default(0) @map("long_term_care")
   employmentInsurance Int   @default(0) @map("employment_insurance")
   retirementDeduction Int   @default(0) @map("retirement_deduction")

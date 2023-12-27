@@ -130,10 +130,11 @@ export class LaborCompanyService {
                 return {
                     laborId: labor.id,
                     ...rest,
-                    month: new Date(date.date).getMonth(),
-                    year: new Date(date.date).getFullYear(),
+                    month: new Date(date).getMonth(),
+                    year: new Date(date).getFullYear(),
                 };
             }),
         });
     }
+    async getDetail(accountId: number, id: number): Promise<void> {}
 }
