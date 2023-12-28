@@ -15,7 +15,11 @@ import {
 import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import { PostAdminModifyPostTypeRequest, PostAdminModifyPullUpRequest, PostAdminModifyRequest } from './request/post-admin-modify-request';
+import {
+    PostAdminModifyPostTypeRequest,
+    PostAdminModifyPullUpRequest,
+    PostAdminModifyRequest,
+} from './request/post-admin-modify-request';
 import { PostAdminDetailResponse } from './response/post-admin-detail.response';
 import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
 

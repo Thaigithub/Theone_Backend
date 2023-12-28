@@ -222,7 +222,13 @@ export class AccountMemberService {
                         team: {
                             select: {
                                 name: true,
-                                code: true,
+                                code: {
+                                    select: {
+                                        id: true,
+                                        codeName: true,
+                                        code: true,
+                                    },
+                                },
                             },
                         },
                     },

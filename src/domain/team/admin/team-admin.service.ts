@@ -23,6 +23,13 @@ export class AdminTeamService {
             },
             include: {
                 leader: true,
+                code: {
+                    select: {
+                        id: true,
+                        code: true,
+                        codeName: true,
+                    },
+                },
             },
         });
         if (!teams) {
@@ -52,7 +59,13 @@ export class AdminTeamService {
             select: {
                 leaderId: true,
                 name: true,
-                code: true,
+                code: {
+                    select: {
+                        id: true,
+                        code: true,
+                        codeName: true,
+                    },
+                },
             },
         });
         const members = await this.prismaService.membersOnTeams.findMany({
@@ -78,7 +91,7 @@ export class AdminTeamService {
         });
         return {
             teamName: team.name,
-            teamCode: team.code,
+            code: team.code,
             members: members.map(
                 (memberInfo) =>
                     ({
@@ -112,20 +125,20 @@ export class AdminTeamService {
             if (searchCategory !== undefined) {
                 switch (searchCategory) {
                     case SearchCategoryForSearch.TEAM_CODE:
-                        where.code = { contains: unifiedsearchKeyword };
+                        where.code.codeName = { contains: unifiedsearchKeyword, mode: 'insensitive' };
                         break;
                     case SearchCategoryForSearch.TEAM_NAME:
-                        where.name = { contains: unifiedsearchKeyword };
+                        where.name = { contains: unifiedsearchKeyword, mode: 'insensitive' };
                         break;
                     case SearchCategoryForSearch.TEAM_LEADER:
-                        where.leader = { name: { contains: unifiedsearchKeyword } };
+                        where.leader = { name: { contains: unifiedsearchKeyword, mode: 'insensitive' } };
                         break;
                     default:
                         break;
                 }
             } else {
                 where.OR = [
-                    { code: { contains: unifiedsearchKeyword } },
+                    { code: { codeName: { contains: unifiedsearchKeyword } } },
                     { name: { contains: unifiedsearchKeyword } },
                     { leader: { name: { contains: unifiedsearchKeyword } } },
                 ];
@@ -135,6 +148,13 @@ export class AdminTeamService {
             where,
             include: {
                 leader: true,
+                code: {
+                    select: {
+                        id: true,
+                        code: true,
+                        codeName: true,
+                    },
+                },
             },
             orderBy,
             skip: request.pageNumber && (Number(request.pageNumber) - 1) * Number(request.pageSize),

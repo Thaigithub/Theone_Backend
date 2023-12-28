@@ -78,7 +78,18 @@ export class MemberAdminGetDetailResponse {
                     type: 'string',
                 },
                 code: {
-                    type: 'string',
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'number',
+                        },
+                        codeName: {
+                            type: 'string',
+                        },
+                        code: {
+                            type: 'string',
+                        },
+                    },
                 },
             },
         },
@@ -86,6 +97,10 @@ export class MemberAdminGetDetailResponse {
     teams: {
         id: Team['id'];
         name: Team['name'];
-        code: Team['code'];
+        code: {
+            id: number;
+            codeName: string;
+            code: string;
+        };
     }[];
 }
