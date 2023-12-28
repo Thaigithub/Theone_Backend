@@ -3,6 +3,7 @@ import {
     Account,
     AccountStatus,
     BankAccount,
+    Code,
     Disability,
     DisabledType,
     ForeignWorker,
@@ -97,10 +98,6 @@ export class MemberAdminGetDetailResponse {
     teams: {
         id: Team['id'];
         name: Team['name'];
-        code: {
-            id: number;
-            codeName: string;
-            code: string;
-        };
+        occupation: Code['codeName'];
     }[];
 }

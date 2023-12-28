@@ -26,6 +26,7 @@ import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+
 @Module({
     imports: [
         FilterModule,

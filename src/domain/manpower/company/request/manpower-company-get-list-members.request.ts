@@ -3,7 +3,7 @@ import { ExperienceType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
-export class ManpowerCompanyGetListRequest {
+export class ManpowerCompanyGetListMembersRequest {
     @ApiProperty({
         type: 'string',
         required: false,

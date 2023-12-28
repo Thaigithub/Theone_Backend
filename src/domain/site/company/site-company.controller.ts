@@ -128,7 +128,7 @@ export class SiteCompanyController {
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<SiteCompanyGetListResponse>> {
         const list = await this.siteCompanyService.getList(query, request.user.accountId);
-        const total = await this.siteCompanyService.getTotal();
+        const total = await this.siteCompanyService.getTotal(query, request.user.accountId);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
     }

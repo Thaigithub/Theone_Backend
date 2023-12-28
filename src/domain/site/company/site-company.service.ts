@@ -26,10 +26,14 @@ export class SiteCompanyService {
         return company.id;
     }
 
-    async getTotal(): Promise<number> {
+    async getTotal(query: SiteCompanyGetListRequest, accountId: number): Promise<number> {
+        const companyId = await this.getCompanyId(accountId);
+
         return await this.prismaService.site.count({
             where: {
                 isActive: true,
+                status: query.status,
+                companyId,
             },
         });
     }
