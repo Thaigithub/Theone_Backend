@@ -778,20 +778,11 @@ model Labor {
   id              Int             @id @default(autoincrement())
   contractId      Int             @unique @map("contract_id")
   contract        Contract        @relation(fields: [contractId], references: [id])
-  workdates       WorkDate[]
+  workDates       DateTime[]      @map("work_dates") @db.Date
   salaryHistories SalaryHistory[]
   numberOfHours   Int             @map("number_of_hours")
 
   @@map("labors")
-}
-
-model WorkDate {
-  id      Int      @id @default(autoincrement())
-  laborId Int      @map("labor_id")
-  labor   Labor    @relation(fields: [laborId], references: [id])
-  date    DateTime @db.Date
-
-  @@map("work_dates")
 }
 
 model SalaryHistory {
