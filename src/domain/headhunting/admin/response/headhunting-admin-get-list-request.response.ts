@@ -11,6 +11,8 @@ export class HeadhuntingAdminGetItemRequestResponse {
     public siteName: string;
     @ApiProperty({ example: 'Post name' })
     public postName: string;
+    @ApiProperty({ example: 'Object' })
+    public object: string;
     @ApiProperty({ example: RequestStatus.APPLY })
     public status: RequestStatus;
     @ApiProperty({ example: '2023-12-18T00:00:00.000Z' })
