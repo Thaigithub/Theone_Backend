@@ -3,11 +3,11 @@ import { Member as MemberPrisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { searchCategory } from './dto/member-admin-search-category.request.dto';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
 import { MemberResponse } from './response/member-admin-get-list.response';
-import { QueryPagingHelper } from 'utils/pagination-query';
 
 @Injectable()
 export class MemberAdminService {
@@ -132,7 +132,13 @@ export class MemberAdminService {
                             select: {
                                 id: true,
                                 name: true,
-                                code: true,
+                                code: {
+                                    select: {
+                                        id: true,
+                                        code: true,
+                                        codeName: true,
+                                    },
+                                },
                             },
                         },
                     },
