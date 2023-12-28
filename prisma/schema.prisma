@@ -154,8 +154,8 @@ model ContactCard {
 
 model Team {
   id                        Int                         @id @default(autoincrement())
-  codeId                    Int?                        @map("code_id")
-  code                      Code?                       @relation(fields: [codeId], references: [id])
+  codeId                    Int                         @map("code_id")
+  code                      Code                        @relation(fields: [codeId], references: [id])
   name                      String
   introduction              String?
   districtId                Int                         @map("district_id")
