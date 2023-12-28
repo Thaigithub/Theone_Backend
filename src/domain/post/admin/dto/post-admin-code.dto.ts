@@ -11,7 +11,6 @@ export class PostAdminCodeDTO {
     @ApiProperty({
         type: 'enum',
         enum: CodeType,
-        example: CodeType.JOB,
     })
     public codeType: CodeType;
 }

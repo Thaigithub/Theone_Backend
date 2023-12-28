@@ -1,12 +1,12 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CareerType, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerResponse } from './response/career-member-get-list.response';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { CareerMemberUpdateRequest } from './request/career-member-update.request';
-import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
+import { CareerResponse } from './response/career-member-get-list.response';
 
 @Injectable()
 export class CareerMemberService {
@@ -78,7 +78,7 @@ export class CareerMemberService {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
-                codeType: CodeType.JOB,
+                codeType: CodeType.GENERAL,
                 isActive: true,
             },
         });
@@ -110,7 +110,7 @@ export class CareerMemberService {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
-                codeType: CodeType.JOB,
+                codeType: CodeType.GENERAL,
                 isActive: true,
             },
         });

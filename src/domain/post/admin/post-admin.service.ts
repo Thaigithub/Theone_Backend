@@ -160,7 +160,7 @@ export class PostAdminService {
                 isActive: true,
             },
             include: {
-                specialNote: {
+                specialOccupation: {
                     select: {
                         code: true,
                         codeName: true,
@@ -205,8 +205,8 @@ export class PostAdminService {
     }
 
     async changePostInfo(id: number, request: PostAdminModifyRequest) {
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
-        await this.checkCodeType(request.occupationId, CodeType.JOB);
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
+        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -229,7 +229,7 @@ export class PostAdminService {
                     endDate: request.endDate,
                     experienceType: request.experienceType,
                     numberOfPeople: request.numberOfPeople,
-                    specialNoteId: request.specialNoteId || null,
+                    specialOccupationId: request.specialNoteId || null,
                     occupationId: request.occupationId || null,
                     otherInformation: request.otherInformation,
                     salaryType: request.salaryType,

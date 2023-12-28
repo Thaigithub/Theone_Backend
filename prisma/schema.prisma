@@ -460,7 +460,7 @@ model Code {
   codeType       CodeType         @map("code_type")
   career         Career[]
   certificate    Certificate[]
-  asJob          Post[]           @relation("post_occupation")
+  asGeneral      Post[]           @relation("post_occupation")
   asSpecial      Post[]           @relation("post_special")
   specialLicense SpecialLicense[]
   member         Member[]
@@ -536,7 +536,7 @@ model Post {
   deleteReason              String?                     @map("delete_reason")
   occupationId              Int?                        @map("occupation_id")
   siteId                    Int?                        @map("site_id")
-  specialNoteId             Int?                        @map("special_note_id")
+  specialOccupationId       Int?                        @map("special_occupation_id")
   applicants                Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
   headhuntingRequest        HeadhuntingRequest[]
@@ -545,7 +545,7 @@ model Post {
   company                   Company                     @relation(fields: [companyId], references: [id])
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
   site                      Site?                       @relation(fields: [siteId], references: [id])
-  specialNote               Code?                       @relation("post_special", fields: [specialNoteId], references: [id])
+  specialOccupation         Code?                       @relation("post_special", fields: [specialOccupationId], references: [id])
   memberMatchings           MemberMatching[]
 
   @@map("posts")
@@ -974,8 +974,8 @@ enum OtpType {
 }
 
 enum CodeType {
-  SPECIAL_NOTE
-  JOB
+  SPECIAL
+  GENERAL
 }
 
 enum ContractStatus {

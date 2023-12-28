@@ -130,7 +130,7 @@ export class HeadhuntingAdminService {
                                 email: true,
                             },
                         },
-                        specialNote: {
+                        specialOccupation: {
                             select: {
                                 codeName: true,
                             },
@@ -155,7 +155,7 @@ export class HeadhuntingAdminService {
             siteContact: headhuntingDetail.post.site?.contact || null,
             siteEmail: headhuntingDetail.post.site?.email || null,
             occupation: headhuntingDetail.post.occupation?.codeName || null,
-            specialNote: headhuntingDetail.post.specialNote?.codeName || null,
+            specialNote: headhuntingDetail.post.specialOccupation?.codeName || null,
             career: headhuntingDetail.post.experienceType,
             employee: headhuntingDetail.object,
             title: headhuntingDetail.post.name,

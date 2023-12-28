@@ -48,7 +48,7 @@ export class PostCompanyDetailResponse {
     @ApiProperty({
         type: PostCompanyCodeDTO,
     })
-    public specialNote: PostCompanyCodeDTO;
+    public specialOccupation: PostCompanyCodeDTO;
 
     @ApiProperty({
         type: PostCompanyCodeDTO,
