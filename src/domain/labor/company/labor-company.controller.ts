@@ -8,7 +8,11 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { LaborCompanyService } from './labor-company.service';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
+import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
+import { LaborCompanyUpdateRequest } from './request/labor-company-update.request';
+import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
+import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
 
 @ApiTags('[COMPANY] Labor Management')
 @Controller('/company/labors')
@@ -17,10 +21,35 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 @ApiBearerAuth()
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
-    @Patch('/id')
-    async update() {}
-    @Get('/id')
-    async getDetail(@Param('id', ParseIntPipe) id: number, @Req() req: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+    @Get('/:id/salary/:salaryId')
+    async getDetailSalary(
+        @Param('id', ParseIntPipe) laborId: number,
+        @Param('salaryId', ParseIntPipe) salaryId: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<LaborCompanyGetDetailSalaryResponse>> {
+        return BaseResponse.of(await this.laborCompanyService.getDetailSalary(req.user.accountId, laborId, salaryId));
+    }
+    @Post('/:id/salary')
+    async createSalary(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+        @Body() body: LaborCompanyCreateSalaryRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.createSalary(req.user.accountId, id, body));
+    }
+    @Patch('/:id')
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+        @Body() body: LaborCompanyUpdateRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.update(req.user.accountId, id, body));
+    }
+    @Get('/:id')
+    async getDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<LaborCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.laborCompanyService.getDetail(req.user.accountId, id));
     }
 
