@@ -70,8 +70,8 @@ export class PostCompanyService {
             throw new BadRequestException('Site does not found');
         }
 
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
-        await this.checkCodeType(request.occupationId, CodeType.JOB);
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
+        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -116,7 +116,7 @@ export class PostCompanyService {
                 companyId: account.company.id,
             },
             include: {
-                specialNote: {
+                specialOccupation: {
                     select: {
                         code: true,
                         codeName: true,
@@ -150,8 +150,8 @@ export class PostCompanyService {
             throw new BadRequestException('Site does not found');
         }
 
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL_NOTE);
-        await this.checkCodeType(request.occupationId, CodeType.JOB);
+        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
+        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -173,7 +173,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeople: request.numberOfPeople,
-                specialNoteId: request.specialNoteId || null,
+                specialOccupationId: request.specialNoteId || null,
                 occupationId: request.occupationId || null,
                 otherInformation: request.otherInformation,
                 salaryType: request.salaryType,

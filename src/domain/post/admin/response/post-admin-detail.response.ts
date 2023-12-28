@@ -32,7 +32,7 @@ export class PostAdminDetailResponse {
     @ApiProperty({
         type: PostAdminCodeDTO,
     })
-    public specialNote: PostAdminCodeDTO;
+    public specialOccupation: PostAdminCodeDTO;
 
     @ApiProperty({
         type: PostAdminCodeDTO,

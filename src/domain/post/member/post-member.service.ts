@@ -63,7 +63,7 @@ export class PostMemberService {
             type: query.postType,
             experienceType: { in: query.experienceTypeList as ExperienceType[] },
             occupationId: { in: query.occupationList as number[] },
-            specialNoteId: { in: query.constructionMachineryList as number[] },
+            specialOccupationId: { in: query.constructionMachineryList as number[] },
         };
     }
 
@@ -242,7 +242,7 @@ export class PostMemberService {
                         codeName: true,
                     },
                 },
-                specialNote: {
+                specialOccupation: {
                     select: {
                         id: true,
                         codeName: true,
@@ -307,9 +307,9 @@ export class PostMemberService {
             eligibility: {
                 experienceType: post.experienceType,
                 occupation: post.occupation ? post.occupation.codeName : null,
-                specialNote: post.specialNote ? post.specialNote.codeName : null,
+                specialNote: post.specialOccupation ? post.specialOccupation.codeName : null,
                 isEligibleToApply:
-                    !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialNote?.id)
+                    !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialOccupation?.id)
                         ? true
                         : false,
             },
