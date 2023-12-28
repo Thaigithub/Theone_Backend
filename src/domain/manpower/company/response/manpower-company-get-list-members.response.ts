@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Certificate, Code, Member, SpecialLicense } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class ManpowerResponse {
+export class ManpowerListMembersResponse {
     @ApiProperty({ type: 'number' })
     public id: Member['id'];
 
@@ -37,4 +37,4 @@ export class ManpowerResponse {
     public numberOfTeams: number;
 }
 
-export class ManpowerCompanyGetListResponse extends PaginationResponse<ManpowerResponse> {}
+export class ManpowerCompanyGetListMembersResponse extends PaginationResponse<ManpowerListMembersResponse> {}

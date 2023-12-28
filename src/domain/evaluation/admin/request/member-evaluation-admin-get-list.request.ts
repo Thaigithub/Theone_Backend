@@ -19,7 +19,7 @@ export class MemberEvaluationAdminGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keywordByName: string;
+    public keyword: string;
 
     @ApiProperty({
         type: 'number',

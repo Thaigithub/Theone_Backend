@@ -1,23 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Company, Member, Site, Team, TeamEvaluation, TeamEvaluationByCompany } from '@prisma/client';
 
-class ListOfEvaluators {
-    @ApiProperty({ type: 'string' })
-    companyName: Company['name'];
-
-    @ApiProperty({ type: 'string' })
-    siteName: Site['name'];
-
-    @ApiProperty({ type: 'string' })
-    siteContact: Site['contact'];
-
-    @ApiProperty({ type: 'string' })
-    personInCharge: Site['personInCharge'];
-
-    @ApiProperty({ type: 'number' })
-    score: TeamEvaluationByCompany['score'];
-}
-
 export class TeamEvaluationAdminGetDetailResponse {
     @ApiProperty({ type: 'string' })
     teamName: Team['name'];
@@ -34,6 +17,34 @@ export class TeamEvaluationAdminGetDetailResponse {
     @ApiProperty({ type: 'number' })
     averageScore: TeamEvaluation['averageScore'];
 
-    @ApiProperty({ type: () => [ListOfEvaluators] })
-    listOfEvaluators: ListOfEvaluators[];
+    @ApiProperty({
+        type: 'array',
+        items: {
+            type: 'object',
+            properties: {
+                companyName: {
+                    type: 'string',
+                },
+                siteName: {
+                    type: 'string',
+                },
+                contact: {
+                    type: 'string',
+                },
+                ersonInCharge: {
+                    type: 'string',
+                },
+                score: {
+                    type: 'number',
+                },
+            },
+        },
+    })
+    listOfEvaluators: {
+        companyName: Company['name'];
+        siteName: Site['name'];
+        siteContact: Site['contact'];
+        personInCharge: Site['personInCharge'];
+        score: TeamEvaluationByCompany['score'];
+    }[];
 }

@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsBooleanString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export enum SiteEvaluationSearchCategory {
+    COMPANY_NAME = 'COMPANY_NAME',
+    SITE_NAME = 'SITE_NAME',
+}
 
 export class SiteEvaluationAdminGetListRequest {
     @ApiProperty({
@@ -13,13 +18,14 @@ export class SiteEvaluationAdminGetListRequest {
     public isHighestRating: string;
 
     @ApiProperty({
-        type: 'string',
+        type: 'enum',
+        enum: SiteEvaluationSearchCategory,
         required: false,
     })
     @Expose()
-    @IsString()
+    @IsEnum(SiteEvaluationSearchCategory)
     @IsOptional()
-    public keywordByCompanyName: string;
+    public searchCategory: SiteEvaluationSearchCategory;
 
     @ApiProperty({
         type: 'string',
@@ -28,7 +34,7 @@ export class SiteEvaluationAdminGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keywordBySiteName: string;
+    public keyword: string;
 
     @ApiProperty({
         type: 'number',

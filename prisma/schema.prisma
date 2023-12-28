@@ -96,7 +96,7 @@ model Member {
   matchingRecommendation       MatchingRecommendation[]
   memberEvaluation             MemberEvaluation?
   teams                        MembersOnTeams[]
-  siteEvaluationByMember       SiteEvaluationByMember?
+  siteEvaluationByMember       SiteEvaluationByMember[]
   specialLicenses              SpecialLicense[]
   leader                       Team[]
   memberMatching               MemberMatching[]
@@ -470,20 +470,20 @@ model Code {
 }
 
 model Site {
-  id                        Int                        @id @default(autoincrement())
-  isActive                  Boolean                    @default(true) @map("is_active")
-  createdAt                 DateTime                   @default(now()) @map("created_at")
-  updatedAt                 DateTime                   @updatedAt @map("updated_at")
-  status                    SiteStatus                 @default(REVIEWING)
-  type                      SiteType                   @default(REGISTERED)
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  status                    SiteStatus                  @default(REVIEWING)
+  type                      SiteType                    @default(REGISTERED)
   name                      String?
   address                   String?
   longitude                 Float?
   latitude                  Float?
   contact                   String?
-  personInCharge            String?                    @map("person_in_charge")
-  personInChargeContact     String?                    @map("person_in_charge_contact")
-  originalBuilding          String?                    @map("original_building")
+  personInCharge            String?                     @map("person_in_charge")
+  personInChargeContact     String?                     @map("person_in_charge_contact")
+  originalBuilding          String?                     @map("original_building")
   email                     String?
   taxInvoiceEmail           String?                    @map("tax_invoice_email")
   siteManagementNumber      String?                    @map("site_management_number")
@@ -496,12 +496,12 @@ model Site {
   districtId                Int                        @map("district_id")
   district                  District                   @relation(fields: [districtId], references: [id])
   interestMember            Interest[]
-  memberEvaluationByCompany MemberEvaluationByCompany?
+  memberEvaluationByCompany MemberEvaluationByCompany[]
   post                      Post[]
   siteBanner                SiteBanner[]
   siteEvaluation            SiteEvaluation?
-  company                   Company                    @relation(fields: [companyId], references: [id])
-  teamEvaluationByCompany   TeamEvaluationByCompany?
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  teamEvaluationByCompany   TeamEvaluationByCompany[]
 
   @@map("sites")
 }
@@ -567,16 +567,16 @@ model SiteEvaluation {
 }
 
 model SiteEvaluationByMember {
-  id               Int            @id @default(autoincrement())
   isActive         Boolean        @default(true) @map("is_active")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   score            Int?           @db.SmallInt
   siteEvaluationId Int            @map("site_evaluation_id")
-  memberId         Int            @unique @map("member_id")
+  memberId         Int            @map("member_id")
   member           Member         @relation(fields: [memberId], references: [id])
   siteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
 
+  @@id([siteEvaluationId, memberId])
   @@map("site_evaluations_by_member")
 }
 
@@ -630,16 +630,16 @@ model TeamEvaluation {
 }
 
 model TeamEvaluationByCompany {
-  id               Int            @id @default(autoincrement())
   isActive         Boolean        @default(true) @map("is_active")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   score            Int?           @db.SmallInt
   teamEvaluationId Int            @map("team_evaluation_id")
-  siteId           Int            @unique @map("site_id")
+  siteId           Int            @map("site_id")
   site             Site           @relation(fields: [siteId], references: [id])
   teamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
 
+  @@id([teamEvaluationId, siteId])
   @@map("team_evaluations_by_company")
 }
 
@@ -659,16 +659,16 @@ model MemberEvaluation {
 }
 
 model MemberEvaluationByCompany {
-  id                 Int              @id @default(autoincrement())
   isActive           Boolean          @default(true) @map("is_active")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
   score              Int?             @db.SmallInt
   memberEvaluationId Int              @map("member_evaluation_id")
-  siteId             Int              @unique @map("site_id")
+  siteId             Int              @map("site_id")
   memberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
   site               Site             @relation(fields: [siteId], references: [id])
 
+  @@id([memberEvaluationId, siteId])
   @@map("member_evaluations_by_company")
 }
 

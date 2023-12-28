@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsBooleanString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export enum TeamEvaluationSearchCategory {
+    TEAM_NAME = 'TEAM_NAME',
+    LEADER_NAME = 'LEADER_NAME',
+}
 
 export class TeamEvaluationAdminGetListRequest {
     @ApiProperty({
@@ -13,13 +18,14 @@ export class TeamEvaluationAdminGetListRequest {
     public isHighestRating: string;
 
     @ApiProperty({
-        type: 'string',
+        type: 'enum',
+        enum: TeamEvaluationSearchCategory,
         required: false,
     })
     @Expose()
-    @IsString()
+    @IsEnum(TeamEvaluationSearchCategory)
     @IsOptional()
-    public keywordByTeamName: string;
+    public searchCategory: TeamEvaluationSearchCategory;
 
     @ApiProperty({
         type: 'string',
@@ -28,7 +34,7 @@ export class TeamEvaluationAdminGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keywordByLeaderName: string;
+    public keyword: string;
 
     @ApiProperty({
         type: 'number',

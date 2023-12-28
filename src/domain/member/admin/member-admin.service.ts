@@ -150,7 +150,7 @@ export class MemberAdminService {
             return {
                 id: item.team.id,
                 name: item.team.name,
-                code: item.team.code,
+                occupation: item.team.code.codeName,
             };
         });
 

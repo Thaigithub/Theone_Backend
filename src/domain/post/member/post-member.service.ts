@@ -11,7 +11,7 @@ import { PostMemberUpdateInterestResponse } from './response/post-member-update-
 export class PostMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    private parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Prisma.PostWhereInput {
+    protected parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Prisma.PostWhereInput {
         if (query.regionList) {
             (query.regionList as string[]).map(async (region) => {
                 const [cityCode] = region.split('-');
@@ -60,6 +60,7 @@ export class PostMemberService {
                 },
             ],
             siteId,
+            type: query.postType,
             experienceType: { in: query.experienceTypeList as ExperienceType[] },
             occupationId: { in: query.occupationList as number[] },
             specialNoteId: { in: query.constructionMachineryList as number[] },
@@ -89,18 +90,24 @@ export class PostMemberService {
             });
             if (!siteExist) throw new NotFoundException('Site does not exist');
         }
-        const memberId = await this.getMemberId(accountId);
-        const interestPosts = await this.prismaService.interest.findMany({
-            select: {
-                postId: true,
-            },
-            where: {
-                memberId,
-            },
-        });
-        const listInterestPostIds = interestPosts.map((item) => {
-            return item.postId;
-        });
+
+        let listInterestPostIds: number[];
+
+        if (accountId) {
+            const memberId = await this.getMemberId(accountId);
+            const interestPosts = await this.prismaService.interest.findMany({
+                select: {
+                    postId: true,
+                },
+                where: {
+                    memberId,
+                },
+            });
+            listInterestPostIds = interestPosts.map((item) => {
+                return item.postId;
+            });
+        }
+
         const posts = await this.prismaService.post.findMany({
             select: {
                 id: true,
@@ -137,6 +144,7 @@ export class PostMemberService {
             },
             ...QueryPagingHelper.queryPaging(query),
         });
+
         return posts.map((item) => {
             const site = item.site;
             const startWorkDate = item.startWorkDate.toISOString().split('T')[0];
@@ -156,9 +164,9 @@ export class PostMemberService {
                 endDate,
                 siteName: site ? site.name : null,
                 siteAddress: site ? site.address : null,
-                siteAddressCity: site && site.district ? site.district.city.englishName : null,
-                siteAddressDistrict: site && site.district ? site.district.englishName : null,
-                isInterest: listInterestPostIds.includes(item.id) ? true : false,
+                siteAddressCity: site?.district ? site.district.city.englishName : null,
+                siteAddressDistrict: site?.district ? site.district.englishName : null,
+                isInterest: listInterestPostIds && listInterestPostIds.includes(item.id) ? true : false,
             };
         });
     }

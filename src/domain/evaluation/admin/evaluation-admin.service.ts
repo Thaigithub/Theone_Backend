@@ -3,8 +3,14 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { EvaluationType } from './dto/evaluation-admin.dto';
 import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
-import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
-import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
+import {
+    SiteEvaluationAdminGetListRequest,
+    SiteEvaluationSearchCategory,
+} from './request/site-evaluation-admin-get-list.request';
+import {
+    TeamEvaluationAdminGetListRequest,
+    TeamEvaluationSearchCategory,
+} from './request/team-evaluation-admin-get-list.request';
 import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
 import { MemberEvaluationResponse } from './response/member-evaluation-admin-get-list.response';
 import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
@@ -28,9 +34,19 @@ export class EvaluationAdminService {
                 whereConditions = {
                     isActive: true,
                     site: {
-                        name: siteQuery.keywordBySiteName && { contains: siteQuery.keywordBySiteName },
+                        name:
+                            siteQuery.searchCategory === SiteEvaluationSearchCategory.SITE_NAME
+                                ? {
+                                      contains: siteQuery.keyword,
+                                  }
+                                : undefined,
                         company: {
-                            name: siteQuery.keywordByCompanyName && { contains: siteQuery.keywordByCompanyName },
+                            name:
+                                siteQuery.searchCategory === SiteEvaluationSearchCategory.COMPANY_NAME
+                                    ? {
+                                          contains: siteQuery.keyword,
+                                      }
+                                    : undefined,
                         },
                     },
                 };
@@ -40,9 +56,19 @@ export class EvaluationAdminService {
                 whereConditions = {
                     isActive: true,
                     team: {
-                        name: teamQuery.keywordByTeamName && { contains: teamQuery.keywordByTeamName },
+                        name:
+                            teamQuery.searchCategory === TeamEvaluationSearchCategory.TEAM_NAME
+                                ? {
+                                      contains: teamQuery.keyword,
+                                  }
+                                : undefined,
                         leader: {
-                            name: teamQuery.keywordByLeaderName && { contains: teamQuery.keywordByLeaderName },
+                            name:
+                                teamQuery.searchCategory === TeamEvaluationSearchCategory.LEADER_NAME
+                                    ? {
+                                          contains: teamQuery.keyword,
+                                      }
+                                    : undefined,
                         },
                     },
                 };
@@ -52,7 +78,7 @@ export class EvaluationAdminService {
                 whereConditions = {
                     isActive: true,
                     member: {
-                        name: memberQuery.keywordByName && { contains: memberQuery.keywordByName },
+                        name: memberQuery.keyword && { contains: memberQuery.keyword },
                     },
                 };
                 break;

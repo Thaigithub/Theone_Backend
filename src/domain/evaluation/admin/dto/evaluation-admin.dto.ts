@@ -1,5 +1,5 @@
 export enum EvaluationType {
-    SITE,
-    TEAM,
-    MEMBER,
+    SITE = 'SITE',
+    TEAM = 'TEAM',
+    MEMBER = 'MEMBER',
 }
