@@ -9,6 +9,7 @@ export class CodeAdminUpsertRequest {
     @ApiProperty({
         type: 'enum',
         enum: CodeType,
+        example: CodeType.GENERAL,
     })
     public codeType: CodeType;
 

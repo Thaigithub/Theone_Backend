@@ -317,6 +317,7 @@ model Certificate {
   status            CertificateStatus @default(REQUESTING)
   certificateNumber String            @map("certificate_number")
   acquisitionDate   DateTime          @map("acquisition_date")
+  isActive          Boolean           @default(true) @map("is_active")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   memberId          Int               @map("member_id")

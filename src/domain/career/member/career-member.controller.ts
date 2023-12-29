@@ -1,16 +1,15 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { CareerMemberService } from './career-member.service';
 import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberUpdateRequest } from './request/career-member-update.request';
 import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -34,23 +33,8 @@ export class CareerMemberController {
     ): Promise<BaseResponse<CareerMemberGetListResponse>> {
         const list = await this.careerMemberService.getList(query, request.user.accountId);
         const total = await this.careerMemberService.getTotal(query, request.user.accountId);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
-    }
-
-    // Get career
-    @Get('/:id')
-    @ApiOperation({
-        summary: 'Get list of careers of a member',
-        description: 'Members can retrieve all of their careers',
-    })
-    @ApiOkResponsePaginated(CareerResponse)
-    async getDetail(
-        @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<CareerResponse>> {
-        const careerDetail = await this.careerMemberService.getDetail(id, request.user.accountId);
-        return BaseResponse.of(careerDetail);
+        const paginationReponse = new PaginationResponse(list, new PageInfo(total));
+        return BaseResponse.of(paginationReponse);
     }
 
     // Create new career
@@ -74,30 +58,8 @@ export class CareerMemberController {
         return BaseResponse.ok();
     }
 
-    // Update career
-    @Put('/:id')
-    @ApiOperation({
-        summary: 'Update career',
-        description: 'Members can update their own GENERAL career',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        description: 'Update career successfully',
-        status: HttpStatus.OK,
-    })
-    async updateCareer(
-        @Body() body: CareerMemberUpdateRequest,
-        @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<null>> {
-        body.startDate = new Date(body.startDate).toISOString();
-        body.endDate = new Date(body.endDate).toISOString();
-        await this.careerMemberService.updateCareer(id, body, request.user.accountId);
-        return BaseResponse.ok();
-    }
-
     // Delete a career
-    @Delete('/:id')
+    @Delete(':id')
     @ApiOperation({
         summary: 'Delete career',
         description: 'Members can delete a registered career',

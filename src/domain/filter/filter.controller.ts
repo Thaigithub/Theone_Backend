@@ -18,25 +18,25 @@ import { CodeResponse } from './response/filter-get-code.response';
 export class FilterController {
     constructor(private readonly filterService: FilterService) {}
 
-    @Get('occupation')
+    @Get('general')
     @ApiOperation({
         summary: 'Get list of occupation',
         description: 'User can retrieve all occupation when drop down filter by occupation',
     })
     @ApiResponse({ status: HttpStatus.OK, type: [CodeResponse] })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getOccupationList(): Promise<BaseResponse<CodeResponse[]>> {
+    async getGeneralList(): Promise<BaseResponse<CodeResponse[]>> {
         return BaseResponse.of(await this.filterService.getCodeList(CodeType.GENERAL));
     }
 
-    @Get('construction-machinary')
+    @Get('special')
     @ApiOperation({
         summary: 'Get list of construction machinary',
         description: 'User can retrieve all occupation when drop down filter by occupation',
     })
     @ApiResponse({ status: HttpStatus.OK, type: [CodeResponse] })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getConstructionMachinaryList(): Promise<BaseResponse<CodeResponse[]>> {
+    async getSpecialList(): Promise<BaseResponse<CodeResponse[]>> {
         return BaseResponse.of(await this.filterService.getCodeList(CodeType.SPECIAL));
     }
 }

@@ -1,4 +1,5 @@
 import { Certificate, File } from '@prisma/client';
+
 export class GetMemberCertificateResponse {
     id: Certificate['id'];
     name: Certificate['name'];
@@ -7,6 +8,7 @@ export class GetMemberCertificateResponse {
     certificateNumber: Certificate['certificateNumber'];
     file: CertificateFileResponse;
 }
+
 export class CertificateFileResponse {
     type: File['type'];
     key: File['key'];
