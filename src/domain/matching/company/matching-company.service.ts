@@ -3,6 +3,7 @@ import { Company, Member, RequestObject, Team } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { MatchingCompanyGetListDateEnum } from './dto/matching-company-get-list-date.enum';
 import { MatchingCompanyGetListRecommendationRequest } from './request/matching-company-get-list-recommendation.request';
+import { TeamMemberDetail } from './response/matching-company-get-item-recommendation-team-detail.response';
 import {
     MatchingCompanyGetItemRecommendation,
     MatchingCompanyGetListRecommendation,
@@ -57,6 +58,11 @@ export class MatchingCompanyService {
                     include: {
                         specialLicenses: true,
                         certificates: true,
+                        applyPosts: {
+                            include: {
+                                contract: true,
+                            },
+                        },
                     },
                 },
                 team: {
@@ -68,6 +74,12 @@ export class MatchingCompanyService {
                                     include: {
                                         specialLicenses: true,
                                         certificates: true,
+                                        desiredOccupation: true,
+                                        applyPosts: {
+                                            include: {
+                                                contract: true,
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -91,6 +103,11 @@ export class MatchingCompanyService {
                 include: {
                     specialLicenses: true,
                     certificates: true,
+                    applyPosts: {
+                        include: {
+                            contract: true,
+                        },
+                    },
                 },
                 take: 10,
             });
@@ -104,6 +121,12 @@ export class MatchingCompanyService {
                                 include: {
                                     specialLicenses: true,
                                     certificates: true,
+                                    desiredOccupation: true,
+                                    applyPosts: {
+                                        include: {
+                                            contract: true,
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -175,10 +198,20 @@ export class MatchingCompanyService {
                         object: RequestObject.INDIVIDUAL,
                         name: member.name,
                         contact: member.contact,
-                        career: member.totalExperienceYears + 'years' + member.totalExperienceMonths + 'months',
+                        totalMonths: member.totalExperienceMonths,
+                        totalYears: member.totalExperienceYears,
                         specialNote: member.specialLicenses.map((special) => special.name),
                         certificate: member.certificates.map((certificate) => certificate.name),
                         numberOfTeamMembers: null,
+                        memberDetail: {
+                            localInformation: member.address,
+                            totalMonths: member.totalExperienceMonths,
+                            totalYears: member.totalExperienceYears,
+                            entire: member.applyPosts?.some((application) => application.contract?.endDate > new Date())
+                                ? 'On duty'
+                                : 'Looking for a job',
+                        },
+                        teamDetail: null,
                     } as MatchingCompanyGetItemRecommendation;
                 }),
                 ...teams.map((team) => {
@@ -187,10 +220,37 @@ export class MatchingCompanyService {
                         object: RequestObject.TEAM,
                         name: team.name,
                         contact: team.leader.contact,
-                        career: team.totalExperienceYears + 'years' + team.totalExperienceMonths + 'months',
+                        totalMonths: team.totalExperienceMonths,
+                        totalYears: team.totalExperienceYears,
                         specialNote: this.getAllSpecialNoteTeam(team),
                         certificate: this.getAllCertificareTeam(team),
                         numberOfTeamMembers: team.members.length + 1,
+                        memberDetail: null,
+                        teamDetail: {
+                            leaderName: team.leader.name,
+                            leaderContact: team.leader.contact,
+                            leaderAddress: team.leader.address,
+                            totalYears: team.totalExperienceYears,
+                            totalMonths: team.totalExperienceMonths,
+                            member: team.members.map((memberTeam) => {
+                                const member = memberTeam.member;
+                                const memberResponse: TeamMemberDetail = {
+                                    rank: member.id === team.leaderId ? 'TEAM LEADER' : 'TEAM MEMBER',
+                                    name: member.name,
+                                    contact: member.contact,
+                                    totalYears: member.totalExperienceYears,
+                                    totalMonths: member.totalExperienceMonths,
+                                    occupation: member.desiredOccupation?.codeName || null,
+                                    workingStatus: member.applyPosts?.some(
+                                        (application) => application.contract?.endDate > new Date(),
+                                    )
+                                        ? 'On duty'
+                                        : 'Looking for a job',
+                                };
+
+                                return memberResponse;
+                            }),
+                        },
                     } as MatchingCompanyGetItemRecommendation;
                 }),
             ],

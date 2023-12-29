@@ -690,7 +690,7 @@ model HeadhuntingRequest {
   isActive                  Boolean                     @default(true) @map("is_active")
   createdAt                 DateTime                    @default(now()) @map("created_at")
   updatedAt                 DateTime                    @updatedAt @map("updated_at")
-  postId                    Int
+  postId                    Int                         @unique()
   date                      DateTime                    @default(now()) @db.Date
   status                    RequestStatus
   object                    RequestObject
@@ -699,7 +699,6 @@ model HeadhuntingRequest {
   post                      Post                        @relation(fields: [postId], references: [id])
   headhuntingRecommendation HeadhuntingRecommendation[]
 
-  @@unique([postId, object])
   @@map("headhunting_requests")
 }
 
