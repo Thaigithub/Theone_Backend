@@ -129,4 +129,51 @@ export class HeadhuntingCompanyService {
 
         return new PaginationResponse(newList, new PageInfo(listCount));
     }
+
+    async getDetailRequest(accountId: number, postId: number) {
+        const account = await this.prismaService.account.findUniqueOrThrow({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                company: true,
+            },
+        });
+
+        return await this.prismaService.headhuntingRequest.findUnique({
+            where: {
+                postId,
+                isActive: true,
+                post: {
+                    companyId: account.company.id,
+                },
+            },
+            select: {
+                object: true,
+                detail: true,
+                post: {
+                    select: {
+                        name: true,
+                        experienceType: true,
+                        occupation: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        specialOccupation: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        site: {
+                            select: {
+                                personInCharge: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
 }

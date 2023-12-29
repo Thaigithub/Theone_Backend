@@ -38,4 +38,14 @@ export class HeadhuntingCompanyController {
         );
         return BaseResponse.of(recommendationApplicants);
     }
+
+    @Get(':postId/request')
+    @ApiOperation({
+        summary: 'Detail of Headhunting request of a post',
+        description: 'Company can view detail of Headhunting request of a post',
+    })
+    async getDetailRequest(@Param('postId', ParseIntPipe) postId: number, @Req() request: any): Promise<BaseResponse<any>> {
+        const recommendationApplicants = await this.headhuntingCompanyService.getDetailRequest(request.user.accountId, postId);
+        return BaseResponse.of(recommendationApplicants);
+    }
 }
