@@ -80,4 +80,36 @@ export class CareerMemberController {
         await this.careerMemberService.deleteCareer(id, request.user.accountId);
         return BaseResponse.ok();
     }
+
+    @Post('/apply-certificate')
+    @ApiOperation({
+        summary: 'Applying for certification',
+    })
+    @ApiResponse({
+        type: BaseResponse,
+        description: 'Career certification application has been completed',
+        status: HttpStatus.OK,
+    })
+    async applyCertificate(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<null>> {
+        await this.careerMemberService.applyCertificate(request.user.accountId);
+        return BaseResponse.ok();
+    }
+
+    @Post('/certification-experience/health-insurance')
+    async getCertificationExperienceHealthInsurance(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<null>> {
+        await this.careerMemberService.getCertExperienceByHealthInsurance(request.user.accountId);
+        return BaseResponse.ok();
+    }
+
+    @Post('/certification-experience/employment-insurance')
+    async getCertificationExperienceEmploymentInsurance(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<null>> {
+        await this.careerMemberService.getCertExperienceByEmploymentInsurance(request.user.accountId);
+        return BaseResponse.ok();
+    }
+
+    @Post('/certification-experience/the-one-site')
+    async getCertificationExperienceTheOneSite(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<null>> {
+        await this.careerMemberService.getCertExperienceByTheOneSite(request.user.accountId);
+        return BaseResponse.ok();
+    }
 }
