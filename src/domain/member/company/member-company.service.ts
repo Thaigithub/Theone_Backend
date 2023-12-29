@@ -129,103 +129,79 @@ export class MemberCompanyService {
     }
 
     async getMemberDetail(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
-        const account = await this.prismaService.account.findUnique({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
-        const application = await this.prismaService.application.findUniqueOrThrow({
+        const application = await this.prismaService.member.findUniqueOrThrow({
             where: {
                 id,
-                post: {
-                    companyId: account.company.id,
-                },
             },
             select: {
-                member: {
+                name: true,
+                contact: true,
+                email: true,
+                district: {
                     select: {
-                        name: true,
-                        contact: true,
-                        email: true,
-                        district: {
+                        englishName: true,
+                        koreanName: true,
+                        city: {
                             select: {
                                 englishName: true,
                                 koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
-                            },
-                        },
-                        desiredSalary: true,
-                        totalExperienceYears: true,
-                        totalExperienceMonths: true,
-                        account: {
-                            select: {
-                                username: true,
-                            },
-                        },
-                        career: {
-                            select: {
-                                companyName: true,
-                                siteName: true,
-                                occupation: true,
-                                startDate: true,
-                                endDate: true,
-                                experiencedYears: true,
-                                experiencedMonths: true,
-                            },
-                        },
-                        certificates: {
-                            select: {
-                                name: true,
-                                certificateNumber: true,
-                            },
-                        },
-                        specialLicenses: {
-                            select: {
-                                name: true,
-                                licenseNumber: true,
-                            },
-                        },
-                        basicHealthSafetyCertificate: {
-                            select: {
-                                registrationNumber: true,
-                                dateOfCompletion: true,
-                                file: true,
                             },
                         },
                     },
                 },
-                interview: {
+                desiredSalary: true,
+                totalExperienceYears: true,
+                totalExperienceMonths: true,
+                account: {
                     select: {
-                        interviewStatus: true,
+                        username: true,
+                    },
+                },
+                career: {
+                    select: {
+                        companyName: true,
+                        siteName: true,
+                        occupation: true,
+                        startDate: true,
+                        endDate: true,
+                        experiencedYears: true,
+                        experiencedMonths: true,
+                    },
+                },
+                certificates: {
+                    select: {
+                        name: true,
+                        certificateNumber: true,
+                    },
+                },
+                specialLicenses: {
+                    select: {
+                        name: true,
+                        licenseNumber: true,
+                    },
+                },
+                basicHealthSafetyCertificate: {
+                    select: {
+                        registrationNumber: true,
+                        dateOfCompletion: true,
+                        file: true,
                     },
                 },
             },
         });
-        const district = application.member.district;
-        delete application.member.district;
+
+        const district = application.district;
+        delete application.district;
 
         return {
             ...application,
-            member: {
-                ...application.member,
-                city: {
-                    englishName: district.city.englishName,
-                    koreanName: district.city.koreanName,
-                },
-                district: {
-                    englishName: district.englishName,
-                    koreanName: district.koreanName,
-                },
+            city: {
+                englishName: district?.city.englishName || null,
+                koreanName: district?.city.koreanName || null,
+            },
+            district: {
+                englishName: district?.englishName || null,
+                koreanName: district?.koreanName || null,
             },
         };
     }

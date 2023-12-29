@@ -3,8 +3,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { RecommendationCompanyGetListHeadhuntingApprovedRequest } from '../admin/request/recommendation-company-get-list-headhunting-approved.request';
-import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from '../admin/response/recommendation-company-get-list-headhunting-approved.response';
+import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
+import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/headhunting-company-get-list-recommendation.response';
 
 @Injectable()
 export class HeadhuntingCompanyService {
@@ -13,7 +13,7 @@ export class HeadhuntingCompanyService {
     async getListRecommendation(
         accountId: number,
         postId: number,
-        query: RecommendationCompanyGetListHeadhuntingApprovedRequest,
+        query: HeadhuntingGetListRecommendationRequest,
     ): Promise<RecommendationCompanyGetListHeadhuntingApprovedResponse> {
         const account = await this.prismaService.account.findUniqueOrThrow({
             where: {
@@ -104,22 +104,43 @@ export class HeadhuntingCompanyService {
         });
 
         const newList = list.map((item) => {
-            const district = item.member.district;
-            delete item.member.district;
-            return {
-                ...item,
-                member: {
-                    ...item.member,
-                    city: {
-                        englishName: district.city.englishName,
-                        koreanName: district.city.koreanName,
+            if (item.member) {
+                const district = item.member.district;
+                delete item.member.district;
+                return {
+                    ...item,
+                    team: null,
+                    member: {
+                        ...item.member,
+                        city: {
+                            englishName: district?.city.englishName || null,
+                            koreanName: district?.city.koreanName || null,
+                        },
+                        district: {
+                            englishName: district?.englishName || null,
+                            koreanName: district?.koreanName || null,
+                        },
                     },
-                    district: {
-                        englishName: district.englishName,
-                        koreanName: district.koreanName,
+                };
+            } else {
+                const district = item.team.district;
+                delete item.team.district;
+                return {
+                    ...item,
+                    member: null,
+                    team: {
+                        ...item.team,
+                        city: {
+                            englishName: district?.city.englishName || null,
+                            koreanName: district?.city.koreanName || null,
+                        },
+                        district: {
+                            englishName: district?.englishName || null,
+                            koreanName: district?.koreanName || null,
+                        },
                     },
-                },
-            };
+                };
+            }
         });
 
         const listCount = await this.prismaService.headhuntingRecommendation.count({

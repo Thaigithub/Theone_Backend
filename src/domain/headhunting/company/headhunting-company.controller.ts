@@ -5,12 +5,14 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
-import { RecommendationCompanyGetListHeadhuntingApprovedRequest } from '../admin/request/recommendation-company-get-list-headhunting-approved.request';
+
+import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
+
+import { HeadhuntingCompanyService } from './headhunting-company.service';
 import {
     RecommendationCompanyGetItemHeadhuntingApprovedResponse,
     RecommendationCompanyGetListHeadhuntingApprovedResponse,
-} from '../admin/response/recommendation-company-get-list-headhunting-approved.response';
-import { HeadhuntingCompanyService } from './headhunting-company.service';
+} from './response/headhunting-company-get-list-recommendation.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -29,7 +31,7 @@ export class HeadhuntingCompanyController {
     async getListRecommendation(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: any,
-        @Query() query: RecommendationCompanyGetListHeadhuntingApprovedRequest,
+        @Query() query: HeadhuntingGetListRecommendationRequest,
     ): Promise<BaseResponse<RecommendationCompanyGetListHeadhuntingApprovedResponse>> {
         const recommendationApplicants = await this.headhuntingCompanyService.getListRecommendation(
             request.user.accountId,

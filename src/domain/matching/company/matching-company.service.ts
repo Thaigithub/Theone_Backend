@@ -17,9 +17,9 @@ export class MatchingCompanyService {
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
     ): Promise<MatchingCompanyGetListRecommendation> {
-        const occupationIds = (query.occupationIds && query.occupationIds.split(',')) || null;
-        const specialNoteIds = (query.specialOccupationIds && query.specialOccupationIds.split(',')) || null;
-        const regionIds = (query.regionIds && query.regionIds.split(',')) || null;
+        const occupationIds = (query.occupation && query.occupation.split(',')) || null;
+        const specialNoteIds = (query.specialOccupation && query.specialOccupation.split(',')) || null;
+        const regionIds = (query.region && query.region.split(',')) || null;
 
         console.log('MATCHING QUERY', query, occupationIds, specialNoteIds, regionIds);
 

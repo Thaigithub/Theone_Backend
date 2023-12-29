@@ -411,8 +411,6 @@ export class HeadhuntingAdminService {
         });
 
         const responseList = list.map((item) => {
-            console.log(headhuntingRequest.postId);
-
             const response: HeadhuntingAdminGetListRecommendationResponse = {
                 ...item,
                 isSuggest: item.headhuntingRecommendation
