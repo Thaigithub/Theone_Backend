@@ -190,7 +190,6 @@ export class WorkAdminService {
                         },
                     },
                 },
-                workdates: true,
             },
             where: queryFilter,
 
@@ -206,12 +205,12 @@ export class WorkAdminService {
 
         const listResponse: WorkAdminGetDetailItemHistoryResponse[] = lists.map((list) => {
             return {
-                workerName: !list.contract.application.member
-                    ? list.contract.application.team.name
-                    : list.contract.application.member.name,
-                workDay: list.workdates
-                    .map((workdate) => workdate.date)
-                    .filter((workdate) => workdate.toISOString().includes(query.date)),
+                // workerName: !list.contract.application.member
+                //     ? list.contract.application.team.name
+                //     : list.contract.application.member.name,
+                // workDay: list.workdates
+                //     .map((workdate) => workdate.date)
+                //     .filter((workdate) => workdate.toISOString().includes(query.date)),
             } as WorkAdminGetDetailItemHistoryResponse;
         });
 
@@ -239,7 +238,6 @@ export class WorkAdminService {
                         },
                     },
                 },
-                workdates: true,
             },
             where: {
                 contract: {
@@ -254,12 +252,12 @@ export class WorkAdminService {
 
         const listResponse: WorkAdminGetDetailItemHistoryResponse[] = lists.map((list) => {
             return {
-                workerName: !list.contract.application.member
-                    ? list.contract.application.team.name
-                    : list.contract.application.member.name,
-                workDay: list.workdates
-                    .map((workdate) => workdate.date)
-                    .filter((workdate) => workdate.toISOString().includes(query.date)),
+                // workerName: !list.contract.application.member
+                //     ? list.contract.application.team.name
+                //     : list.contract.application.member.name,
+                // workDay: list.workDates
+                //     .map((workdate) => workdate.date)
+                //     .filter((workdate) => workdate.toISOString().includes(query.date)),
             } as WorkAdminGetDetailItemHistoryResponse;
         });
 
