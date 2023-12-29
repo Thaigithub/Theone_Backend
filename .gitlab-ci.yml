@@ -1,19 +1,19 @@
 stages:
-  - deploy
+    - deploy
 
 deploy:
-  stage: deploy
-  image: alpine:3.11
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( yum update -y && yum install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$AWS_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-    - mkdir ~/.ssh && touch ~/.ssh/config
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - ssh-keyscan -H $AWS_EC2_IP >> ~/.ssh/known_hosts
-  script:
-    - echo "Deploying started..."
-    - ssh $AWS_EC2_USER@$AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sh $AWS_SCRIPT_PATH"
-    - echo "Finished deploying the app."
-  only:
-    - develop
+    stage: deploy
+    image: alpine:3.11
+    before_script:
+        - 'command -v ssh-agent >/dev/null || ( yum update -y && yum install openssh-client -y )'
+        - eval $(ssh-agent -s)
+        - echo "$AWS_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+        - mkdir ~/.ssh && touch ~/.ssh/config
+        - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+        - ssh-keyscan -H $AWS_EC2_IP >> ~/.ssh/known_hosts
+    script:
+        - echo "Deploying started..."
+        - ssh $AWS_EC2_USER@$AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sudo sh $AWS_SCRIPT_PATH"
+        - echo "Finished deploying the app."
+    only:
+        - develop
