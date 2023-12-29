@@ -8,6 +8,7 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { MatchingMemberGetListCategory } from './dto/matching-member-get-list-category.enum';
 import { MatchingMemberGetListRequest } from './request/matching-member-get-list.request';
+import { MatchingMemberTeamApplyRequest } from './request/matching-member-team-apply.request';
 import { MatchingMemberGetDetailResponse } from './response/matching-member-get-detail.response';
 import { MatchingMemberGetItemResponse, MatchingMemberGetListResponse } from './response/matching-member-get-list.response';
 import { MatchingMemberInterestPostResponse } from './response/matching-member-interest-post.response';
@@ -213,6 +214,10 @@ export class MatchingMemberService {
             },
         });
 
+        if (!matchingPost) {
+            throw new NotFoundException('Post not found');
+        }
+
         const detailPost: MatchingMemberGetDetailResponse = {
             postId: matchingPost.post.id,
             postName: matchingPost.post.name,
@@ -271,7 +276,17 @@ export class MatchingMemberService {
 
         await this.postMemberService.addApplyPost(accountId, matchingPost.postId);
     }
-    async teamApplyPost(accountId: number, id: number): Promise<void> {
+    async teamApplyPost(accountId: number, id: number, body: MatchingMemberTeamApplyRequest): Promise<void> {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                member: true,
+            },
+        });
+
         const matchingPost = await this.prismaService.memberMatching.findUnique({
             where: {
                 id,
@@ -280,9 +295,21 @@ export class MatchingMemberService {
 
         if (!matchingPost) throw new NotFoundException('No matching post found');
 
+        const team = await this.prismaService.team.findUnique({
+            where: {
+                id: body.teamId,
+            },
+        });
+
+        if (!team) {
+            throw new NotFoundException('Team not found');
+        }
+
+        if (team.leaderId !== account.member.id) throw new BadRequestException('You are not allow to do this');
+
         const payload = {
-            teamId: 1, //What team ID
-            postId: matchingPost.id,
+            teamId: body.teamId,
+            postId: matchingPost.postId,
         };
         await this.memberTeamService.addApplyPost(accountId, payload);
     }

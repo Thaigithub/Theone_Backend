@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -6,6 +6,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MatchingMemberService } from './matching-member.service';
 import { MatchingMemberGetListRequest } from './request/matching-member-get-list.request';
+import { MatchingMemberTeamApplyRequest } from './request/matching-member-team-apply.request';
 import { MatchingMemberGetDetailResponse } from './response/matching-member-get-detail.response';
 import { MatchingMemberGetListResponse } from './response/matching-member-get-list.response';
 import { MatchingMemberInterestPostResponse } from './response/matching-member-interest-post.response';
@@ -53,7 +54,11 @@ export class MatchingMemberController {
     }
 
     @Post(':id/team-apply')
-    async teamApplyPost(@Req() req: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.matchingMemberService.teamApplyPost(req.user.accountId, id));
+    async teamApplyPost(
+        @Req() req: any,
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: MatchingMemberTeamApplyRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.matchingMemberService.teamApplyPost(req.user.accountId, id, body));
     }
 }
