@@ -4,6 +4,9 @@ import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class WorkAdminGetItemResponse {
+    @ApiProperty({ example: '1' })
+    id: number;
+
     @ApiProperty({ example: 'companyName' })
     companyName: string;
 
