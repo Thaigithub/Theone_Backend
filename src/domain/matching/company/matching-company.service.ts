@@ -16,10 +16,11 @@ export class MatchingCompanyService {
     async getList(
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
-        occupationIds: string[],
-        specialNoteIds: string[],
-        regionIds: string[],
     ): Promise<MatchingCompanyGetListRecommendation> {
+        const occupationIds = (query.occupationIds && query.occupationIds.split(',')) || null;
+        const specialNoteIds = (query.specialOccupationIds && query.specialOccupationIds.split(',')) || null;
+        const regionIds = (query.regionIds && query.regionIds.split(',')) || null;
+
         console.log('MATCHING QUERY', query, occupationIds, specialNoteIds, regionIds);
 
         const account = await this.prismaService.account.findUnique({
