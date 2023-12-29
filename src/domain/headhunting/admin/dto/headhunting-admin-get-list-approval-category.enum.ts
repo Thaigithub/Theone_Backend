@@ -14,3 +14,9 @@ export enum HeadhuntingAdminGetListTeamApprovalCategory {
     SPECIAL = 'SPECIAL',
     ID = 'ID',
 }
+
+export enum HeadhuntingAdminGetListApprovalCategory {
+    SITE_NAME = 'SITE_NAME',
+    POST_NAME = 'POST_NAME',
+    WORK_NAME = 'WORK_NAME',
+}

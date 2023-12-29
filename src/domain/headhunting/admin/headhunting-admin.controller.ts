@@ -11,13 +11,17 @@ import {
     HeadhuntingAdminAddTeamRecommendationRequest,
 } from './request/headhunting-admin-add-recommendation.request';
 import { HeadhuntingAdminDenyRequestRequest } from './request/headhunting-admin-deny-request.request';
+import { HeadhuntingAdminGetListApprovalRequest } from './request/headhunting-admin-get-list-approval.request';
 import {
     HeadhuntingAdminGetListMemberRecommendationRequest,
     HeadhuntingAdminGetListTeamRecommendationRequest,
 } from './request/headhunting-admin-get-list-recommendation.request';
 import { HeadhuntingAdminGetListRequestRequest } from './request/headhunting-admin-get-list-request.request';
+import { HeadhuntingGetDetailApprovalIndividualResponse } from './response/headhunting-admin-get-detail-approval.response';
 import { HeadhuntingAdminGetDetailRequestResponse } from './response/headhunting-admin-get-detail-request.response';
-import { HeadhuntingAdminGetListRecommendationResponse } from './response/headhunting-admin-get-list-approval.response';
+import { HeadhuntingGetDetailApprovalTeamResponse } from './response/headhunting-admin-get-detail-team-approval.response';
+import { HeadhuntingAdminGetListApprovalResponse } from './response/headhunting-admin-get-list-approval.response';
+import { HeadhuntingAdminGetListRecommendationResponse } from './response/headhunting-admin-get-list-recommendation.response';
 import {
     HeadhuntingAdminGetItemRequestResponse,
     HeadhuntingAdminGetListRequestResponse,
@@ -44,6 +48,17 @@ export class HeadhuntingAdminController {
         return BaseResponse.of(code);
     }
 
+    @Get('approval')
+    @ApiOperation({
+        summary: 'Listing headhunting request approved',
+        description: 'Admin can list headhunting request approved',
+    })
+    async getListApproved(
+        @Query() query: HeadhuntingAdminGetListApprovalRequest,
+    ): Promise<BaseResponse<HeadhuntingAdminGetListApprovalResponse>> {
+        return BaseResponse.of(await this.headhuntingAdminService.getListApproved(query));
+    }
+
     @Get(':id')
     @ApiOperation({
         summary: 'Headhunting request detail',
@@ -56,6 +71,36 @@ export class HeadhuntingAdminController {
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<HeadhuntingAdminGetDetailRequestResponse>> {
         return BaseResponse.of(await this.headhuntingAdminService.getDetail(id));
+    }
+
+    @Get(':id/approval-individual')
+    @ApiOperation({
+        summary: 'Headhunting approval detail',
+        description: 'Admin can view headhunting approval detail',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: HeadhuntingAdminGetDetailRequestResponse,
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetailIndividual(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<HeadhuntingGetDetailApprovalIndividualResponse>> {
+        return BaseResponse.of(await this.headhuntingAdminService.getDetailIndividual(id));
+    }
+
+    @Get(':id/approval-team')
+    @ApiOperation({
+        summary: 'Headhunting approval detail',
+        description: 'Admin can view headhunting approval detail',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: HeadhuntingAdminGetDetailRequestResponse,
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetailTeam(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<HeadhuntingGetDetailApprovalTeamResponse>> {
+        return BaseResponse.of(await this.headhuntingAdminService.getDetailTeam(id));
     }
 
     @Put(':id/approve')

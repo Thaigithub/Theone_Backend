@@ -3,10 +3,14 @@ import { Prisma, RequestObject, RequestStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { HeadhuntingAdminGetDetailApprovalRank } from './dto/headhunting-admin-get-detail-approval-rank.enum';
 import {
+    HeadhuntingAdminGetListApprovalCategory,
     HeadhuntingAdminGetListMemberApprovalCategory,
     HeadhuntingAdminGetListTeamApprovalCategory,
 } from './dto/headhunting-admin-get-list-approval-category.enum';
+import { HeadhuntingAdminGetListApprovalMatching } from './dto/headhunting-admin-get-list-approval-matching.enum';
+import { HeadhuntingAdminGetListApprovalPayment } from './dto/headhunting-admin-get-list-approval-payment.enum';
 import { HeadhuntingAdminGetListCategory } from './dto/headhunting-admin-get-list-category.enum';
 import { HeadhuntinAdminGetListRecommendationSort } from './dto/headhunting-admin-get-list-recommendation-sort.enum';
 import {
@@ -14,13 +18,23 @@ import {
     HeadhuntingAdminAddTeamRecommendationRequest,
 } from './request/headhunting-admin-add-recommendation.request';
 import { HeadhuntingAdminDenyRequestRequest } from './request/headhunting-admin-deny-request.request';
+import { HeadhuntingAdminGetListApprovalRequest } from './request/headhunting-admin-get-list-approval.request';
 import {
     HeadhuntingAdminGetListMemberRecommendationRequest,
     HeadhuntingAdminGetListTeamRecommendationRequest,
 } from './request/headhunting-admin-get-list-recommendation.request';
 import { HeadhuntingAdminGetListRequestRequest } from './request/headhunting-admin-get-list-request.request';
+import {
+    HeadhuntingGetDetailApprovalIndividualResponse,
+    HeadhuntingGetDetailApprovalMemberResponse,
+} from './response/headhunting-admin-get-detail-approval.response';
 import { HeadhuntingAdminGetDetailRequestResponse } from './response/headhunting-admin-get-detail-request.response';
-import { HeadhuntingAdminGetListRecommendationResponse } from './response/headhunting-admin-get-list-approval.response';
+import { HeadhuntingGetDetailApprovalTeamResponse } from './response/headhunting-admin-get-detail-team-approval.response';
+import {
+    HeadhuntingAdminGetItemApprovalResponse,
+    HeadhuntingAdminGetListApprovalResponse,
+} from './response/headhunting-admin-get-list-approval.response';
+import { HeadhuntingAdminGetListRecommendationResponse } from './response/headhunting-admin-get-list-recommendation.response';
 import {
     HeadhuntingAdminGetItemRequestResponse,
     HeadhuntingAdminGetListRequestResponse,
@@ -33,6 +47,7 @@ export class HeadhuntingAdminService {
     async getList(query: HeadhuntingAdminGetListRequestRequest): Promise<HeadhuntingAdminGetListRequestResponse> {
         const queryFilter: Prisma.HeadhuntingRequestWhereInput = {
             isActive: true,
+            status: { in: [RequestStatus.APPLY, RequestStatus.RE_APPLY] },
             ...(query.startRequestDate && { date: { gte: new Date(query.startRequestDate) } }),
             ...(query.endRequestDate && { date: { lte: new Date(query.endRequestDate) } }),
             ...(query.status && { status: RequestStatus[query.status] }),
@@ -315,6 +330,7 @@ export class HeadhuntingAdminService {
             data: {
                 memberId: body.memberId,
                 postId: request.postId,
+                headhuntingRequestId: body.requestId,
             },
         });
     }
@@ -434,7 +450,238 @@ export class HeadhuntingAdminService {
             data: {
                 teamId: body.teamId,
                 postId: request.postId,
+                headhuntingRequestId: body.requestId,
             },
         });
+    }
+
+    async getListApproved(query: HeadhuntingAdminGetListApprovalRequest): Promise<HeadhuntingAdminGetListApprovalResponse> {
+        const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {
+            ...(query.startRecommendationDate && { assignedAt: { gte: new Date(query.startRecommendationDate) } }),
+            ...(query.endRecommendationDate && { assignedAt: { lte: new Date(query.endRecommendationDate) } }),
+            ...(query.startMatchingDate && { assignedAt: { gte: new Date(query.startMatchingDate) } }),
+            ...(query.endMatchingDate && { assignedAt: { gte: new Date(query.endMatchingDate) } }),
+            //TODO: All approval, dont need requestStatus, matchingStatus
+            ...(query.paymentStatus && {}), //TODO: Adjust in future
+            ...(query.startPaymentDate && {}), //TODO: Adjust in future
+            ...(query.endPaymentDate && {}), //TODO: Adjust in future
+            ...(query.category === HeadhuntingAdminGetListApprovalCategory.POST_NAME && {
+                post: { name: { contains: query.keyword, mode: 'insensitive' } },
+            }),
+            ...(query.category === HeadhuntingAdminGetListApprovalCategory.SITE_NAME && {
+                post: { site: { name: { contains: query.keyword, mode: 'insensitive' } } },
+            }),
+            ...(query.category === HeadhuntingAdminGetListApprovalCategory.WORK_NAME && {
+                OR: [
+                    { member: { name: { contains: query.keyword, mode: 'insensitive' } } },
+                    { team: { name: { contains: query.keyword, mode: 'insensitive' } } },
+                ],
+            }),
+        };
+
+        const list = await this.prismaService.headhuntingRecommendation.findMany({
+            select: {
+                id: true,
+                assignedAt: true,
+                member: true,
+                team: {
+                    select: {
+                        name: true,
+                        leader: true,
+                    },
+                },
+                post: {
+                    select: {
+                        id: true,
+                        name: true,
+                        headhuntingRequest: true,
+                        site: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                        company: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: queryFilter,
+            orderBy: {},
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
+        });
+
+        const listCount = await this.prismaService.headhuntingRecommendation.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        const responseList: HeadhuntingAdminGetItemApprovalResponse[] = list.map((item) => {
+            return {
+                id: item.id,
+                object: !item.member ? RequestObject.TEAM : RequestObject.INDIVIDUAL,
+                postName: item.post?.name,
+                siteName: item.post.site?.name || null,
+                recommendationDate: item.assignedAt,
+                workername: !item.member ? item.team.name : item.member.name,
+                tier: item.member?.level || null,
+                requestStatus: RequestStatus.APPROVED,
+                matchingStatus: HeadhuntingAdminGetListApprovalMatching.SUCCESSFUL,
+                matchingDay: item.assignedAt,
+                paymentStatus: HeadhuntingAdminGetListApprovalPayment.UNPAID, //TODO: Adjust in future
+                paymentDate: new Date(), //TODO: Adjust in future
+            } as HeadhuntingAdminGetItemApprovalResponse;
+        });
+
+        return new PaginationResponse(responseList, new PageInfo(listCount));
+    }
+
+    async getDetailIndividual(id: number): Promise<HeadhuntingGetDetailApprovalIndividualResponse> {
+        const detail = await this.prismaService.headhuntingRecommendation.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                headhuntingRequest: true,
+                member: {
+                    include: {
+                        account: true,
+                        desiredOccupation: true,
+                        specialLicenses: {
+                            include: {
+                                code: true,
+                            },
+                        },
+                        certificates: true,
+                    },
+                },
+                post: {
+                    include: {
+                        site: true,
+                        specialNote: true,
+                        occupation: true,
+                    },
+                },
+            },
+        });
+
+        const detailResponse: HeadhuntingGetDetailApprovalIndividualResponse = {
+            general: {
+                id: detail.id,
+                siteName: detail.post.site?.name || null,
+                siteContact: detail.post.site?.contact || null,
+                personInCharge: detail.post.site?.personInCharge || null,
+                specialOccupation: detail.post.specialNote?.codeName || null,
+                occupation: detail.post.occupation?.codeName || null,
+                object: detail.headhuntingRequest.object,
+                career: detail.post.experienceType,
+                title: detail.post.name,
+                detail: detail.headhuntingRequest.detail,
+                paymentStatus: HeadhuntingAdminGetListApprovalPayment.UNPAID, //TODO: Adjust in future
+                paymentAmount: 0, //TODO: Adjust in future
+                paymentDate: new Date().toISOString(), //TODO: Adjust in future
+                matchingStatus: HeadhuntingAdminGetListApprovalMatching.SUCCESSFUL,
+                matchingDay: new Date().toISOString(),
+            },
+            member: {
+                rank: HeadhuntingAdminGetDetailApprovalRank.MEMBER,
+                name: detail.member.name,
+                contact: detail.member.contact,
+                username: detail.member.account.username,
+                occupation: detail.member.desiredOccupation?.codeName || null,
+                address: detail.member.address,
+                certificate: detail.member.certificates.map((cer) => cer.name),
+                specialOccupation: detail.member.specialLicenses.map((special) => special.code.codeName),
+                experienceMonths: detail.member.totalExperienceMonths,
+                experienceYears: detail.member.totalExperienceYears,
+            },
+        };
+
+        return detailResponse;
+    }
+
+    async getDetailTeam(id: number): Promise<HeadhuntingGetDetailApprovalTeamResponse> {
+        const detail = await this.prismaService.headhuntingRecommendation.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                headhuntingRequest: true,
+                team: {
+                    include: {
+                        members: {
+                            include: {
+                                member: {
+                                    include: {
+                                        account: true,
+                                        desiredOccupation: true,
+                                        specialLicenses: {
+                                            include: {
+                                                code: true,
+                                            },
+                                        },
+                                        certificates: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                post: {
+                    include: {
+                        site: true,
+                        specialNote: true,
+                        occupation: true,
+                    },
+                },
+            },
+        });
+
+        const detailResponse: HeadhuntingGetDetailApprovalTeamResponse = {
+            general: {
+                id: detail.id,
+                siteName: detail.post.site?.name || null,
+                siteContact: detail.post.site?.contact || null,
+                personInCharge: detail.post.site?.personInCharge || null,
+                specialOccupation: detail.post.specialNote?.codeName || null,
+                occupation: detail.post.occupation?.codeName || null,
+                object: detail.headhuntingRequest.object,
+                career: detail.post.experienceType,
+                title: detail.post.name,
+                detail: detail.headhuntingRequest.detail,
+                paymentStatus: HeadhuntingAdminGetListApprovalPayment.UNPAID, //TODO: Adjust in future
+                paymentAmount: 0, //TODO: Adjust in future
+                paymentDate: new Date().toISOString(), //TODO: Adjust in future
+                matchingStatus: HeadhuntingAdminGetListApprovalMatching.SUCCESSFUL,
+                matchingDay: new Date().toISOString(),
+            },
+            teamName: detail.team.name,
+            numberOfMembers: detail.team.totalMembers,
+            members: detail.team.members.map((memberTeam) => {
+                const member = memberTeam.member;
+                return {
+                    rank:
+                        member.id === detail.team.leaderId
+                            ? HeadhuntingAdminGetDetailApprovalRank.LEADER
+                            : HeadhuntingAdminGetDetailApprovalRank.MEMBER,
+                    name: member.name,
+                    contact: member.contact,
+                    username: member.account.username,
+                    occupation: member.desiredOccupation?.codeName,
+                    address: member.address,
+                    certificate: member.certificates.map((cer) => cer.name),
+                    specialOccupation: member.specialLicenses.map((special) => special.code.codeName),
+                    experienceMonths: member.totalExperienceMonths,
+                    experienceYears: member.totalExperienceYears,
+                } as HeadhuntingGetDetailApprovalMemberResponse;
+            }),
+        };
+
+        return detailResponse;
     }
 }

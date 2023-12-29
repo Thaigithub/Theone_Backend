@@ -359,7 +359,10 @@ export class PostCompanyService {
 
         const existRequest = await this.prismaService.headhuntingRequest.findUnique({
             where: {
-                postId: id,
+                postId_object: {
+                    postId: id,
+                    object: body.object,
+                },
                 isActive: true,
             },
         });
@@ -380,12 +383,14 @@ export class PostCompanyService {
 
             await this.prismaService.headhuntingRequest.update({
                 where: {
-                    postId: id,
+                    postId_object: {
+                        postId: id,
+                        object: body.object,
+                    },
                     isActive: true,
                 },
                 data: {
                     detail: body.detail,
-                    object: body.object,
                     status: RequestStatus.RE_APPLY,
                 },
             });
