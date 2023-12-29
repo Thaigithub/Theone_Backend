@@ -10,7 +10,6 @@ import { FilterModule } from 'domain/filter/filter.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InterviewModule } from 'domain/interview/interview.module';
 import { LaborModule } from 'domain/labor/labor.module';
-import { ManpowerModule } from 'domain/manpower/manpower.module';
 import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PostModule } from 'domain/post/post.module';
@@ -51,7 +50,6 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterviewModule,
         HeadhuntingModule,
         ContractModule,
-        ManpowerModule,
         MatchingModule,
         RegionModule,
         LaborModule,

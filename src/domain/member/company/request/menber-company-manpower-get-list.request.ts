@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExperienceType } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class ManpowerCompanyGetListMembersRequest {
+export class MemberCompanyManpowerGetListRequest {
     @ApiProperty({
         type: 'string',
         required: false,
@@ -14,37 +13,43 @@ export class ManpowerCompanyGetListMembersRequest {
     public keyword: string;
 
     @ApiProperty({
-        type: 'string',
-        required: false,
-        example: '1,2,3',
-    })
-    @Expose()
-    @IsString()
-    @IsOptional()
-    public occupationList: string | number[];
-
-    @ApiProperty({
-        type: 'string',
+        type: 'array',
+        items: {
+            type: 'string',
+        },
         required: false,
         example: 'SHORT,MEDIUM,LONG,REGARDLESS',
     })
     @Expose()
     @IsString()
     @IsOptional()
-    public experienceTypeList: string | ExperienceType[];
+    public experienceTypeList: string[];
 
     @ApiProperty({
-        type: 'string',
+        type: 'array',
+        items: {
+            type: 'string',
+        },
         required: false,
-        example: '00-00,00-00,00-00',
+        example: '1,2,3,4,5',
     })
     @Expose()
     @IsString()
-    @Matches(/^(([0-9]+-[0-9]+)|([0-9]+-[0-9]+,){1,4}([0-9]+-[0-9]+))$/, {
-        message: 'The regionList must be in format 00-000 or 00-000,00-000...(5 times)',
-    })
     @IsOptional()
-    public regionList: string | string[];
+    public occupationList: string[];
+
+    @ApiProperty({
+        type: 'array',
+        items: {
+            type: 'string',
+        },
+        required: false,
+        example: '1,2,3,4,5',
+    })
+    @Expose()
+    @IsString()
+    @IsOptional()
+    public regionList: string[];
 
     @ApiProperty({
         type: 'number',

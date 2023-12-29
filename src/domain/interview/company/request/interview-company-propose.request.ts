@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber } from 'class-validator';
-import { InterviewProposalType } from '../dto/manpower-company-interview-proposal-type.enum';
 import { Expose } from 'class-transformer';
+import { InterviewProposalType } from '../dto/interview-company-propose.enum';
 
-export class ManpowerCompanyProposeInterviewRequest {
+export class InterviewCompanyProposeRequest {
     @ApiProperty({
         type: 'number',
         description: 'memberId or teamId',

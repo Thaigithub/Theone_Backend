@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CompanyType, FileType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumber, IsNumberString, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNumber, IsNumberString, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 
 class File {
     @Expose()
@@ -145,6 +145,7 @@ export class AccountCompanySignupRequest {
         example: 'theone@gmail.com',
     })
     @IsString()
+    @IsEmail()
     @MaxLength(100)
     readonly email: string;
 

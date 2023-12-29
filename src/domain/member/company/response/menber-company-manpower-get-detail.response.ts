@@ -38,7 +38,7 @@ class ConstrucionEquimentDetail {
     registrationNumber: SpecialLicense['licenseNumber'];
 }
 
-export class ManpowerCompanyGetMemberDetailResponse {
+export class MemberCompanyManpowerGetDetailResponse {
     @ApiProperty({ type: 'string' })
     name: Member['name'];
 
