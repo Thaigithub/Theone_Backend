@@ -41,13 +41,13 @@ export class SiteCompanyService {
     async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteResponse[]> {
         const companyId = await this.getCompanyId(accountId);
 
-        return await this.prismaService.site.findMany({
-            select: {
-                id: true,
-                name: true,
-                personInCharge: true,
-                startDate: true,
-                endDate: true,
+        const companies = await this.prismaService.site.findMany({
+            include: {
+                district: {
+                    include: {
+                        city: true,
+                    },
+                },
             },
             where: {
                 isActive: true,
@@ -58,6 +58,22 @@ export class SiteCompanyService {
             // If both pageNumber and pageSize is provided then handle the pagination
             skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
             take: query.pageNumber && query.pageSize && query.pageSize,
+        });
+
+        return companies.map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+                personInCharge: item.personInCharge,
+                personInChargeContact: item.personInChargeContact,
+                originalBuilding: item.originalBuilding,
+                startDate: item.startDate,
+                endDate: item.endDate,
+                cityKoreanName: item.district?.city.koreanName ? item.district.city.koreanName : null,
+                cityEnglishName: item.district?.city.englishName ? item.district.city.englishName : null,
+                districtKoreanName: item.district?.koreanName ? item.district.koreanName : null,
+                districtEnglishName: item.district?.englishName ? item.district.englishName : null,
+            };
         });
     }
 
