@@ -36,6 +36,9 @@ export class ApplicationAdminResponse {
         koreanName: string;
     };
 
+    @ApiProperty({ type: 'string', example: '#404, Building 101, 9, Nambusunhwan-ro 272-gil, Gwanak-gu, Seoul' })
+    public address: string;
+
     @ApiProperty({ type: Number, example: 5 })
     public totalExperienceYears: number;
 

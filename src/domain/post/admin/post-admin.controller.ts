@@ -16,6 +16,7 @@ import { PostAdminService } from './post-admin.service';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import {
+    PostAdminModifyHiddenRequest,
     PostAdminModifyPostTypeRequest,
     PostAdminModifyPullUpRequest,
     PostAdminModifyRequest,
@@ -126,6 +127,28 @@ export class PostAdminController {
         return BaseResponse.of(postList);
     }
 
+    @Patch('/pullup')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Admin change pullUp flag of a post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePullUp(@Body() payload: PostAdminModifyPullUpRequest): Promise<BaseResponse<void>> {
+        await this.postAdminService.changePullUp(payload);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/type')
+    @ApiOperation({
+        summary: 'Change post information',
+        description: 'Admin change to poststype of a post',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    async changePostType(@Body() payload: PostAdminModifyPostTypeRequest): Promise<BaseResponse<void>> {
+        await this.postAdminService.changePostType(payload);
+        return BaseResponse.ok();
+    }
+
     @Get('/:id')
     @ApiOperation({
         summary: 'Post detail',
@@ -163,37 +186,9 @@ export class PostAdminController {
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async changeHiddenStatus(
         @Param('id', ParseIntPipe) id: number,
-        @Body() payload: PostAdminModifyRequest,
+        @Body() payload: PostAdminModifyHiddenRequest,
     ): Promise<BaseResponse<void>> {
         await this.postAdminService.changeHiddenStatus(id, payload);
-        return BaseResponse.ok();
-    }
-
-    @Patch('/:id/pullup/')
-    @ApiOperation({
-        summary: 'Change post information',
-        description: 'Admin change pullUp flag of a post',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async changePullUp(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: PostAdminModifyPullUpRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.postAdminService.changePullUp(id, payload);
-        return BaseResponse.ok();
-    }
-
-    @Patch('/:id/type/')
-    @ApiOperation({
-        summary: 'Change post information',
-        description: 'Admin change to poststype of a post',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async changePostType(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: PostAdminModifyPostTypeRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.postAdminService.changePostType(id, payload);
         return BaseResponse.ok();
     }
 

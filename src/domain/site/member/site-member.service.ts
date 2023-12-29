@@ -116,6 +116,8 @@ export class SiteMemberService {
                                     select: {
                                         fileName: true,
                                         key: true,
+                                        type: true,
+                                        size: true,
                                     },
                                 },
                             },
@@ -131,8 +133,7 @@ export class SiteMemberService {
         });
         const siteList = sites.map((site) => {
             const countPost = site.post.length;
-            const fileName = site.company.logo?.file.fileName;
-            const key = site.company.logo?.file.key;
+            const file = site.company.logo?.file;
             return {
                 id: site.id,
                 name: site.name,
@@ -143,8 +144,10 @@ export class SiteMemberService {
                 personInChargeContact: site.personInChargeContact,
                 contact: site.contact,
                 countPost: countPost,
-                fileNameLogo: fileName ? fileName : null,
-                fileKeyLogo: key ? key : null,
+                logoFileName: file?.fileName ? file.fileName : null,
+                logoFileKey: file?.key ? file.key : null,
+                logoFileType: file ? file.type : null,
+                logoFileSize: file ? file.size : null,
             };
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
@@ -177,6 +180,8 @@ export class SiteMemberService {
                                     select: {
                                         fileName: true,
                                         key: true,
+                                        type: true,
+                                        size: true,
                                     },
                                 },
                             },
@@ -212,6 +217,8 @@ export class SiteMemberService {
                 address: siteRecord.company.address,
                 logoFileName: siteRecord.company.logo ? siteRecord.company.logo.file.fileName : null,
                 logoFileKey: siteRecord.company.logo ? siteRecord.company.logo.file.key : null,
+                logoFileType: siteRecord.company.logo ? siteRecord.company.logo.file.type : null,
+                logoFileSize: siteRecord.company.logo ? siteRecord.company.logo.file.size : null,
                 contactName: siteRecord.company.contactName,
                 presentativeName: siteRecord.company.presentativeName,
                 email: siteRecord.company.email,

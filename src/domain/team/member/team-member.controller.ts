@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -21,11 +22,7 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import {
-    MemberCreateTeamRequest,
-    MemberUpdateExposureStatusTeamRequest,
-    MemberUpdateTeamRequest,
-} from './request/member-upsert-team.request';
+import { MemberCreateTeamRequest, MemberUpdateExposureStatusTeamRequest } from './request/member-upsert-team.request';
 import { TeamMemberApplyPost } from './request/team-member-apply-post.request';
 import { TeamGetMemberRequest } from './request/team-member-get-member.request';
 import { GetInvitationsResponse } from './response/team-member-get-invitation-list.response';
@@ -123,66 +120,6 @@ export class MemberTeamController {
         return BaseResponse.of(await this.memberTeamService.addApplyPost(request.user.accountId, payload));
     }
 
-    @Put('/update')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @ApiOperation({
-        summary: 'Update team',
-        description: 'This endpoint update team information',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'update successfully' })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'update failed' })
-    async updateTeam(@Req() req, @Body() request: MemberUpdateTeamRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberTeamService.update(req.user.accountId, request));
-    }
-
-    @Get('/:id')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @ApiOperation({
-        summary: 'Get team details',
-        description: 'This endpoint get all information about team',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams', type: TeamMemberDetailResponse })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
-    async getTeamDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamMemberDetailResponse>> {
-        return BaseResponse.of(await this.memberTeamService.getTeamDetails(id));
-    }
-
-    @Put('/:teamId/:memberId/invite')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @ApiOperation({
-        summary: 'Invite a member to the team',
-        description: 'This endpoint get all information about team',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Invited member successfully' })
-    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Invite member failed' })
-    async inviteMember(
-        @Request() req,
-        @Param('teamId', ParseIntPipe) teamId: number,
-        @Param('memberId', ParseIntPipe) memberId: number,
-    ): Promise<BaseResponse<void>> {
-        await this.memberTeamService.inviteMember(req.user.accountId, teamId, memberId);
-        return BaseResponse.ok();
-    }
-
-    @Patch('/:id/exposure')
-    @ApiOperation({
-        summary: 'Change exposure status of a team',
-        description: 'Leader member can change the exposure status of a team',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'update successfully' })
-    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'update failed' })
-    async changeHiddenStatus(
-        @Req() req,
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: MemberUpdateExposureStatusTeamRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.memberTeamService.changeExposureStatus(req.user.accountId, id, payload);
-        return BaseResponse.ok();
-    }
-
     @Patch('/invitations/:teamId/accept')
     @ApiOperation({
         summary: 'Accept the invitation',
@@ -204,6 +141,99 @@ export class MemberTeamController {
     @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
     async declineInvitation(@Req() req: any, @Param('teamId', ParseIntPipe) teamId: number): Promise<BaseResponse<void>> {
         await this.memberTeamService.declineInvitaion(req.user.accountId, teamId);
+        return BaseResponse.ok();
+    }
+
+    @Get('/:id')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @ApiOperation({
+        summary: 'Get team details',
+        description: 'This endpoint get all information about team',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams', type: TeamMemberDetailResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
+    async getTeamDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamMemberDetailResponse>> {
+        return BaseResponse.of(await this.memberTeamService.getTeamDetails(id));
+    }
+
+    @Patch('/:teamId/update')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @ApiOperation({
+        summary: 'Update team',
+        description: 'This endpoint update team information',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'update successfully' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'update failed' })
+    async updateTeam(
+        @Req() req,
+        @Param('teamId', ParseIntPipe) teamId: number,
+        @Body() request: MemberCreateTeamRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.memberTeamService.update(req.user.accountId, teamId, request);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:id/exposure')
+    @ApiOperation({
+        summary: 'Change exposure status of a team',
+        description: 'Leader member can change the exposure status of a team',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'update successfully' })
+    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'update failed' })
+    async changeHiddenStatus(
+        @Req() req,
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: MemberUpdateExposureStatusTeamRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.memberTeamService.changeExposureStatus(req.user.accountId, id, payload);
+        return BaseResponse.ok();
+    }
+
+    @Delete('/:id/delete')
+    @ApiOperation({
+        summary: 'Delete a team',
+        description: 'Leader can delete the the team',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'declined successfully' })
+    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
+    async deleteTeam(@Req() req: any, @Param('teamId', ParseIntPipe) teamId: number): Promise<BaseResponse<void>> {
+        await this.memberTeamService.deleteTeam(req.user.accountId, teamId);
+        return BaseResponse.ok();
+    }
+
+    @Put('/:teamId/:memberId/invite')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @ApiOperation({
+        summary: 'Invite a member to the team',
+        description: 'This endpoint get all information about team',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Invited member successfully' })
+    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Invite member failed' })
+    async inviteMember(
+        @Request() req,
+        @Param('teamId', ParseIntPipe) teamId: number,
+        @Param('memberId', ParseIntPipe) memberId: number,
+    ): Promise<BaseResponse<void>> {
+        await this.memberTeamService.inviteMember(req.user.accountId, teamId, memberId);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:teamId/:memberId/cancelInvite')
+    @ApiOperation({
+        summary: 'cancel the invitation',
+        description: 'Member can cancel the invitation sent to memberId',
+    })
+    @ApiResponse({ status: HttpStatus.OK, description: 'declined successfully' })
+    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
+    async cancelInvitation(
+        @Req() req: any,
+        @Param('teamId', ParseIntPipe) teamId: number,
+        @Param('memberId', ParseIntPipe) memberId: number,
+    ): Promise<BaseResponse<void>> {
+        await this.memberTeamService.cancelInvitation(req.user.accountId, teamId, memberId);
         return BaseResponse.ok();
     }
 }

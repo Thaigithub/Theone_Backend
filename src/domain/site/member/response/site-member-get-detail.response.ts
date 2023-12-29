@@ -39,6 +39,12 @@ class CompanyDetailResponse {
     @ApiProperty({ type: 'string', example: 'File key' })
     public logoFileKey: string;
 
+    @ApiProperty({ type: 'string', example: 'File type' })
+    public logoFileType: string;
+
+    @ApiProperty({ type: BigInt, example: 'File size' })
+    public logoFileSize: bigint;
+
     @ApiProperty({ type: 'string', example: 'Name of The presentative' })
     public presentativeName: string;
 

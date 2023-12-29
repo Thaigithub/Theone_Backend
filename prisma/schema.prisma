@@ -156,7 +156,8 @@ model ContactCard {
 model Team {
   id                        Int                         @id @default(autoincrement())
   codeId                    Int                         @map("code_id")
-  code                      Code                        @relation(fields: [codeId], references: [id])
+  code                      Code                        @relation(fields: [codeId], references: [id]) // Occupation of team
+  teamCode                  String                      @default("") @map("team_code") // The digit sequence 'YYMMDDXXXXX' (different from code)
   name                      String
   introduction              String?
   districtId                Int                         @map("district_id")
@@ -546,7 +547,6 @@ model Post {
   view                      Int                         @default(0)
   workLocation              String?                     @map("work_location")
   companyId                 Int                         @map("company_id")
-  deleteReason              String?                     @map("delete_reason")
   occupationId              Int?                        @map("occupation_id")
   siteId                    Int?                        @map("site_id")
   specialOccupationId       Int?                        @map("special_occupation_id")
@@ -560,8 +560,20 @@ model Post {
   site                      Site?                       @relation(fields: [siteId], references: [id])
   specialOccupation         Code?                       @relation("post_special", fields: [specialOccupationId], references: [id])
   memberMatchings           MemberMatching[]
+  postHistory               PostHistory[]
 
   @@map("posts")
+}
+
+model PostHistory {
+  id          Int             @id @default(autoincrement())
+  createdAt   DateTime        @updatedAt @map("updated_at")
+  historyType PostHistoryType @map("history_type")
+  content     String          @map("content")
+  postId      Int             @map("post_id")
+  post        Post            @relation(fields: [postId], references: [id])
+
+  @@map("post_histories")
 }
 
 model SiteEvaluation {
@@ -941,9 +953,7 @@ enum FileType {
 enum TeamStatus {
   GENERAL
   STOPPED
-  NOT_EXPOSED
   WAITING_FOR_ACTIVITY
-  DELETED
 }
 
 enum DisabledType {
@@ -1095,4 +1105,9 @@ enum InvitationStatus {
   ACCEPTED
   REQUESTED
   DECLIENED
+}
+
+enum PostHistoryType {
+  EDITED
+  DELETED
 }

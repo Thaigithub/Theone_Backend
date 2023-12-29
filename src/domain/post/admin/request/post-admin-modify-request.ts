@@ -1,7 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import {
+    IsArray,
+    IsBoolean,
+    IsDateString,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Length,
+    MaxLength,
+} from 'class-validator';
+
+export class PostAdminModifyPullUpRequest {
+    @Expose()
+    @IsBoolean()
+    @ApiProperty({ type: Boolean, example: true })
+    public isPulledUp: boolean;
+
+    @Expose()
+    @IsArray()
+    @ApiProperty({ type: Array })
+    public ids: number[];
+}
+
+export class PostAdminModifyHiddenRequest {
+    @Expose()
+    @IsBoolean()
+    @ApiProperty({ type: Boolean })
+    @IsOptional()
+    public isHidden: boolean;
+}
 
 export class PostAdminModifyPostTypeRequest {
     @Expose()
@@ -13,6 +44,11 @@ export class PostAdminModifyPostTypeRequest {
         example: PostType.PREMIUM,
     })
     public type: PostType;
+
+    @Expose()
+    @IsArray()
+    @ApiProperty({ type: Array })
+    public ids: number[];
 }
 
 export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
@@ -208,15 +244,8 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
 
     @Expose()
     @IsString()
-    @ApiProperty({ type: 'string', example: 'Reason to delete notice' })
-    @MaxLength(500, { message: 'delete reason should be maximun 500 characters' })
+    @ApiProperty({ type: 'string', example: 'Reason to update notice' })
+    @MaxLength(500, { message: 'The reason for updating notice should be maximun 500 characters' })
     @IsOptional()
-    public deleteReason: string;
-}
-
-export class PostAdminModifyPullUpRequest {
-    @Expose()
-    @IsBoolean()
-    @ApiProperty({ type: Boolean, example: true })
-    public isPulledUp: boolean;
+    public updateReason: string;
 }
