@@ -486,16 +486,16 @@ model Site {
   personInChargeContact     String?                     @map("person_in_charge_contact")
   originalBuilding          String?                     @map("original_building")
   email                     String?
-  taxInvoiceEmail           String?                    @map("tax_invoice_email")
-  siteManagementNumber      String?                    @map("site_management_number")
-  contractStatus            ContractStatus?            @map("contract_status")
-  startDate                 DateTime?                  @map("start_date") @db.Date
-  endDate                   DateTime?                  @map("end_date") @db.Date
-  companyId                 Int                        @map("company_id")
-  numberOfContract          Int                        @default(0)
-  numberOfWorkers           Int                        @default(0)
-  districtId                Int                        @map("district_id")
-  district                  District                   @relation(fields: [districtId], references: [id])
+  taxInvoiceEmail           String?                     @map("tax_invoice_email")
+  siteManagementNumber      String?                     @map("site_management_number")
+  contractStatus            ContractStatus?             @map("contract_status")
+  startDate                 DateTime?                   @map("start_date") @db.Date
+  endDate                   DateTime?                   @map("end_date") @db.Date
+  companyId                 Int                         @map("company_id")
+  numberOfContract          Int                         @default(0)
+  numberOfWorkers           Int                         @default(0)
+  districtId                Int                         @map("district_id")
+  district                  District                    @relation(fields: [districtId], references: [id])
   interestMember            Interest[]
   memberEvaluationByCompany MemberEvaluationByCompany[]
   post                      Post[]
