@@ -7,6 +7,7 @@ export class CodeAdminGetItemResponse {
     @ApiProperty({
         type: 'enum',
         enum: CodeType,
+        example: CodeType.GENERAL,
     })
     public codeType: CodeType;
 

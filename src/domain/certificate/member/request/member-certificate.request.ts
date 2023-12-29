@@ -1,26 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FileType } from '@prisma/client';
-import { Expose } from 'class-transformer';
+import { AccountStatus, CertificateStatus, FileType } from '@prisma/client';
+import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class GetMemberCertificateRequest {
+    @ApiProperty({
+        example: 1,
+        type: 'number',
+        required: false,
+    })
     @Expose()
     @IsNumber()
     @IsOptional()
-    public accountId: number;
+    @Transform(({ value }) => value && parseInt(value))
+    public pageNumber: number;
 
+    @ApiProperty({
+        example: 20,
+        type: 'number',
+        required: false,
+    })
     @Expose()
     @IsNumber()
-    @ApiProperty({ example: 1 })
-    public page: number;
-
-    @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 20 })
-    public size: number;
+    @IsOptional()
+    @Transform(({ value }) => value && parseInt(value))
+    public pageSize: number;
 }
 
-export class UpSertMemberCertificateRequest {
+export class UpsertMemberCertificateRequest {
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Certificate 1' })
@@ -59,4 +66,15 @@ export class UpSertMemberCertificateRequest {
     @IsNumber()
     @ApiProperty({ example: 100 })
     public fileSize: number;
+}
+
+export class PartialUpdateMemberCertificateRequest {
+    @Expose()
+    @IsEnum(CertificateStatus)
+    @ApiProperty({
+        type: 'enum',
+        enum: CertificateStatus,
+        example: CertificateStatus.APPROVED,
+    })
+    public certificationStatus: CertificateStatus;
 }
