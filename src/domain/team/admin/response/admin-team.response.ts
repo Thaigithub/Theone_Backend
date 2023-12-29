@@ -1,35 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Account, Member, Team, TeamStatus } from '@prisma/client';
+import { TeamStatusForSearch } from '../dto/team-search';
 export class GetAdminTeamResponse {
-    id: Team['id'];
+    @ApiProperty({ type: Number, example: 1 })
+    id: number;
+
     @ApiProperty({
-        type: 'object',
-        properties: {
-            id: {
-                type: 'number',
-            },
-            codeName: {
-                type: 'string',
-            },
-            code: {
-                type: 'string',
-            },
-        },
+        type: 'string',
+        example: 'The teamCode is different from code (which means the occupation code)',
     })
-    code: {
-        id: number;
-        codeName: string;
-        code: string;
-    };
+    teamCode: string;
 
     @ApiProperty({ type: 'string', example: ' name' })
     name: Team['name'];
-
-    @ApiProperty({ type: Boolean, example: true })
-    isActive: Team['isActive'];
-
-    @ApiProperty({ type: 'enum', enum: TeamStatus, example: TeamStatus.GENERAL })
-    status: Team['status'];
 
     @ApiProperty({ type: 'string', example: 'leader name' })
     leaderName: string;
@@ -37,7 +20,11 @@ export class GetAdminTeamResponse {
     @ApiProperty({ type: 'string', example: 'leader contact' })
     leaderContact: string;
 
-    members?: number;
+    @ApiProperty({ type: Number, example: 1 })
+    totalMembers: number;
+
+    @ApiProperty({ type: 'enum', enum: TeamStatusForSearch, example: TeamStatus.GENERAL })
+    status: TeamStatusForSearch;
 }
 
 export class GetTeamMemberDetails {
@@ -54,23 +41,6 @@ export class GetTeamDetailsResponse {
     @ApiProperty({ type: 'string', example: ' team name' })
     teamName: Team['name'];
 
-    @ApiProperty({
-        type: 'object',
-        properties: {
-            id: {
-                type: 'number',
-            },
-            codeName: {
-                type: 'string',
-            },
-            code: {
-                type: 'string',
-            },
-        },
-    })
-    code: {
-        id: number;
-        codeName: string;
-        code: string;
-    };
+    @ApiProperty({ type: 'string', example: ' code name' })
+    teamCode: string;
 }

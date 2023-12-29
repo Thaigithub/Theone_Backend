@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FileType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class MemberCreateTeamRequest {
     @Expose()
@@ -15,12 +14,19 @@ export class MemberCreateTeamRequest {
     public introduction: string;
 
     @Expose()
+    @IsNumber()
     @ApiProperty({ type: Number })
     public codeId: number;
 
     @Expose()
+    @IsNumber()
     @ApiProperty({ type: Number, example: 1 })
     public dictrictId: number;
+
+    @Expose()
+    @IsString()
+    @ApiProperty({ type: 'string', example: '12345' })
+    public sequenceDigit: string;
 }
 
 export class MemberUpdateExposureStatusTeamRequest {
@@ -28,28 +34,4 @@ export class MemberUpdateExposureStatusTeamRequest {
     @IsBoolean()
     @ApiProperty({ type: Boolean, example: true })
     public exposureStatus: boolean;
-}
-
-export class MemberUpdateTeamRequest extends MemberCreateTeamRequest {
-    @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 1 })
-    public id: number;
-
-    @ApiProperty({ example: 'basic.pdf' })
-    public fileName: string;
-
-    @Expose()
-    @IsEnum(FileType)
-    @ApiProperty({
-        type: 'enum',
-        enum: FileType,
-        example: FileType.PDF,
-    })
-    public fileType: FileType;
-
-    @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 100 })
-    public fileSize: number;
 }

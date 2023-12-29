@@ -69,7 +69,7 @@ export class AdminTeamController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'Details of team' })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Get team details failed' })
-    async getCertificateDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<GetTeamDetailsResponse>> {
+    async getTeamDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<GetTeamDetailsResponse>> {
         const result = await this.teamService.getTeamDetail(id);
         return BaseResponse.of(result);
     }

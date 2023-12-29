@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { SearchCategoryForSearch, SearchSortForSearch, TeamStatusForSearch } from '../dto/team-search';
 
-export class AdminTeamGetListRequest {
+export class AdminTeamGetListRequest extends PaginationRequest {
     @IsOptional()
     @ApiProperty({
         type: 'enum',
@@ -39,20 +40,4 @@ export class AdminTeamGetListRequest {
     @IsString()
     @IsOptional()
     searchKeyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        example: 1,
-    })
-    @Expose()
-    @IsOptional()
-    pageNumber: number;
-
-    @ApiProperty({
-        type: 'number',
-        example: 10,
-    })
-    @Expose()
-    @IsOptional()
-    pageSize: number;
 }

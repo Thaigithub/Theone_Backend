@@ -1,5 +1,5 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { CodeType, PostType, Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CodeType, PostHistoryType, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -13,6 +13,7 @@ import {
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
 import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import {
+    PostAdminModifyHiddenRequest,
     PostAdminModifyPostTypeRequest,
     PostAdminModifyPullUpRequest,
     PostAdminModifyRequest,
@@ -23,6 +24,64 @@ import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './res
 @Injectable()
 export class PostAdminService {
     constructor(private prismaService: PrismaService) {}
+
+    async checkExistPost(id: number) {
+        const post_record = await this.prismaService.post.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+        });
+        if (!post_record) {
+            throw new NotFoundException('The Post id is not found');
+        }
+        return post_record;
+    }
+
+    async checkExistPosts(ids: number[]) {
+        if (ids.length === 0) {
+            throw new BadRequestException('The Post ids is empty');
+        }
+        const existingPosts = await this.prismaService.post.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+                isActive: true,
+            },
+        });
+        const existingIds = existingPosts.map((post) => post.id);
+        const nonExistingIds = ids.filter((id) => !existingIds.includes(id));
+        if (nonExistingIds.length > 0) {
+            throw new NotFoundException(`The Post ids: ${nonExistingIds} are not found`);
+        }
+    }
+
+    async checkExistSite(id: number) {
+        const site_record = await this.prismaService.site.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+        });
+        if (!site_record) {
+            throw new NotFoundException('The site id is not found');
+        }
+        return site_record;
+    }
+    async checkCodeType(id: number, codeType: CodeType) {
+        if (id) {
+            const code = await this.prismaService.code.findUnique({
+                where: {
+                    isActive: true,
+                    id,
+                    codeType: codeType,
+                },
+            });
+            if (!code) throw new NotFoundException(`Code ID of type ${codeType} does not exist`);
+        }
+    }
+
     async getList(query: PostAdminGetListRequest): Promise<PostAdminGetListResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             ...(query.type && { type: PostType[query.type] }),
@@ -190,18 +249,29 @@ export class PostAdminService {
         }
         return infor;
     }
-    async checkCodeType(id: number, codeType: CodeType) {
-        if (id) {
-            const code = await this.prismaService.code.findUnique({
-                where: {
-                    isActive: true,
-                    id,
-                    codeType: codeType,
-                },
-            });
 
-            if (!code) throw new BadRequestException(`Code ID of type ${codeType} does not exist`);
-        }
+    async updatePost(postId: number, historyType: PostHistoryType, data: any, content: string) {
+        const postHistory = await this.prismaService.postHistory.create({
+            data: {
+                postId: postId,
+                content: content,
+                historyType: historyType,
+            },
+        });
+        await this.prismaService.post.update({
+            where: {
+                id: postId,
+                isActive: true,
+            },
+            data: {
+                ...data,
+                postHistory: {
+                    connect: { id: postHistory.id },
+                },
+                updatedAt: new Date(),
+            },
+        });
+        return true;
     }
 
     async changePostInfo(id: number, request: PostAdminModifyRequest) {
@@ -210,92 +280,65 @@ export class PostAdminService {
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
-        request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime : undefined;
-        request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime : undefined;
-
-        try {
-            await this.prismaService.post.update({
+        request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime + 'Z' : undefined;
+        request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime + 'Z' : undefined;
+        await this.checkExistPost(id);
+        if (request.siteId) {
+            await this.checkExistSite(request.siteId);
+        }
+        const data = {
+            updatedAt: new Date(),
+            type: request.type,
+            category: request.category,
+            status: request.status,
+            name: request.name,
+            workLocation: request.workLocation,
+            startDate: request.startDate,
+            endDate: request.endDate,
+            experienceType: request.experienceType,
+            numberOfPeople: request.numberOfPeople,
+            specialNoteId: request.specialNoteId || null,
+            occupationId: request.occupationId || null,
+            otherInformation: request.otherInformation,
+            salaryType: request.salaryType,
+            salaryAmount: request.salaryAmount,
+            startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
+            endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
+            workday: request.workday,
+            startWorkTime: request.startWorkTime,
+            endWorkTime: request.endWorkTime,
+            siteId: request.siteId,
+            postEditor: request.postEditor,
+        };
+        await this.prismaService.$transaction(async () => {
+            await this.updatePost(id, PostHistoryType.EDITED, data, request.updateReason);
+            const updatedPostRecord = await this.checkExistPost(id);
+            await this.prismaService.site.update({
                 where: {
-                    id: id,
+                    id: updatedPostRecord.siteId,
                     isActive: true,
                 },
                 data: {
-                    type: request.type,
-                    category: request.category,
-                    status: request.status,
-                    name: request.name,
-                    workLocation: request.workLocation,
-                    startDate: request.startDate,
-                    endDate: request.endDate,
-                    experienceType: request.experienceType,
-                    numberOfPeople: request.numberOfPeople,
-                    specialOccupationId: request.specialNoteId || null,
-                    occupationId: request.occupationId || null,
-                    otherInformation: request.otherInformation,
-                    salaryType: request.salaryType,
-                    salaryAmount: request.salaryAmount,
-                    startWorkDate: request.startWorkDate,
-                    endWorkDate: request.endWorkDate,
-                    workday: request.workday,
-                    startWorkTime: request.startWorkTime,
-                    endWorkTime: request.endWorkTime,
-                    siteId: request.siteId,
-                    postEditor: request.postEditor,
-                    deleteReason: request.deleteReason,
+                    name: request.siteName,
+                    address: request.siteAddress,
+                    contact: request.siteContact,
+                    personInCharge: request.sitePersonInCharge,
+                    originalBuilding: request.originalBuilding,
+                    updatedAt: new Date(),
                 },
             });
-            const post_record = await this.prismaService.post.findUnique({
-                where: {
-                    id: id,
-                },
-            });
-            if (post_record.siteId) {
-                await this.prismaService.site.update({
-                    where: {
-                        id: post_record.siteId,
-                        isActive: true,
-                    },
-                    data: {
-                        name: request.siteName,
-                        address: request.siteAddress,
-                        contact: request.siteContact,
-                        personInCharge: request.sitePersonInCharge,
-                        originalBuilding: request.originalBuilding,
-                    },
-                });
-            }
-        } catch (err) {
-            throw new HttpException('The Post or Site is not found or has been deleted', HttpStatus.NOT_FOUND);
-        }
-    }
-    async checkExisPost(id: number) {
-        const post_record = await this.prismaService.post.findUnique({
-            where: {
-                id: id,
-                isActive: true,
-            },
         });
-        if (!post_record) {
-            throw new NotFoundException('The Post id is not found');
-        }
-        return post_record;
     }
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
-        await this.checkExisPost(id);
-        await this.prismaService.post.update({
-            where: {
-                id,
-                isActive: true,
-            },
-            data: {
-                isActive: false,
-                deleteReason: query.deleteReason,
-            },
-        });
+        await this.checkExistPost(id);
+        const data = {
+            isActive: false,
+        };
+        await this.updatePost(id, PostHistoryType.DELETED, data, query.deleteReason);
     }
-    async changeHiddenStatus(id: number, payload: PostAdminModifyRequest) {
-        const post_record = await this.checkExisPost(id);
+    async changeHiddenStatus(id: number, payload: PostAdminModifyHiddenRequest) {
+        const post_record = await this.checkExistPost(id);
         if (post_record.isHidden != payload.isHidden) {
             await this.prismaService.post.update({
                 where: {
@@ -304,38 +347,39 @@ export class PostAdminService {
                 },
                 data: {
                     isHidden: payload.isHidden,
+                    updatedAt: new Date(),
                 },
             });
         }
     }
 
-    async changePullUp(id: number, payload: PostAdminModifyPullUpRequest) {
-        const post_record = await this.checkExisPost(id);
-        if (post_record.isPulledUp != payload.isPulledUp) {
-            await this.prismaService.post.update({
-                where: {
-                    id: id,
-                    isActive: true,
+    async changePullUp(payload: PostAdminModifyPullUpRequest) {
+        await this.prismaService.post.updateMany({
+            where: {
+                id: {
+                    in: payload.ids,
                 },
-                data: {
-                    isPulledUp: payload.isPulledUp,
-                },
-            });
-        }
+                isActive: true,
+            },
+            data: {
+                isPulledUp: payload.isPulledUp,
+                updatedAt: new Date(),
+            },
+        });
     }
 
-    async changePostType(id: number, payload: PostAdminModifyPostTypeRequest) {
-        const post_record = await this.checkExisPost(id);
-        if (post_record.type != payload.type) {
-            await this.prismaService.post.update({
-                where: {
-                    id: id,
-                    isActive: true,
+    async changePostType(payload: PostAdminModifyPostTypeRequest) {
+        await this.prismaService.post.updateMany({
+            where: {
+                id: {
+                    in: payload.ids,
                 },
-                data: {
-                    type: payload.type,
-                },
-            });
-        }
+                isActive: true,
+            },
+            data: {
+                type: payload.type,
+                updatedAt: new Date(),
+            },
+        });
     }
 }

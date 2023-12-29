@@ -32,6 +32,9 @@ export class TeamsResponse {
     @ApiProperty({ type: Boolean, example: true })
     isActive: Team['isActive'];
 
+    @ApiProperty({ type: Boolean, example: true })
+    isLeader: boolean;
+
     @ApiProperty({ type: 'string', example: 'leader name' })
     leaderName: string;
 

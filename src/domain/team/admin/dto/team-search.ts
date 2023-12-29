@@ -1,9 +1,3 @@
-export enum SortOptionForSearch {
-    HIGHTEST_TEAM_MEMBERS = 'HIGHTEST_TEAM_MEMBERS',
-    LOWEST_TEAM_MEMBERS = 'LOWEST_TEAM_MEMBERS',
-    DEFAULT = 'DEFAULT',
-}
-
 export enum TeamStatusForSearch {
     GENERAL = 'GENERAL',
     STOPPED = 'STOPPED',
