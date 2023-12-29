@@ -37,4 +37,4 @@ export class ManpowerListMembersResponse {
     public numberOfTeams: number;
 }
 
-export class ManpowerCompanyGetListMembersResponse extends PaginationResponse<ManpowerListMembersResponse> {}
+export class MemberCompanyManpowerGetListResponse extends PaginationResponse<ManpowerListMembersResponse> {}

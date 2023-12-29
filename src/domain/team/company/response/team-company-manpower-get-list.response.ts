@@ -31,4 +31,4 @@ export class ManpowerListTeamsResponse {
     public isWorking: boolean;
 }
 
-export class ManpowerCompanyGetListTeamsResponse extends PaginationResponse<ManpowerListTeamsResponse> {}
+export class TeamCompanyManpowerGetListResponse extends PaginationResponse<ManpowerListTeamsResponse> {}

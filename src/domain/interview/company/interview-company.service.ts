@@ -1,21 +1,23 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { MemberCompanyService } from 'domain/member/company/member-company.service';
-import { CompanyTeamService } from 'domain/team/company/member-company.service';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
+import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
+import { InterviewProposalType } from './dto/interview-company-propose.enum';
+import { InterviewCompanyProposeRequest } from './request/interview-company-propose.request';
 
 @Injectable()
 export class InterviewCompanyService {
     constructor(
         private prismaService: PrismaService,
         private memberCompanyService: MemberCompanyService,
-        private companyTeamService: CompanyTeamService,
+        private teamCompanyService: TeamCompanyService,
     ) {}
 
     async getList(accountId: number, query: InterviewCompantGetListRequest): Promise<InterviewCompanyGetItemResponse> {
@@ -189,7 +191,7 @@ export class InterviewCompanyService {
 
         if (!interview) throw new BadRequestException('No interview found');
 
-        return await this.companyTeamService.getTeamDetail(accountId, interview.applicationId);
+        return await this.teamCompanyService.getTeamDetail(accountId, interview.applicationId);
     }
 
     async resultInterview(accountId: number, id: number, result: InterviewStatus) {
@@ -228,5 +230,53 @@ export class InterviewCompanyService {
         } catch (error) {
             throw new BadRequestException('No interview found');
         }
+    }
+
+    async proposeInterview(body: InterviewCompanyProposeRequest): Promise<void> {
+        const postExist = await this.prismaService.post.count({
+            where: {
+                isActive: true,
+                id: body.postId,
+            },
+        });
+        if (!postExist) throw new NotFoundException('Post does not exist');
+
+        switch (body.interviewProposalType) {
+            case InterviewProposalType.MEMBER:
+                const memberExist = await this.prismaService.member.count({
+                    where: {
+                        isActive: true,
+                        id: body.id,
+                    },
+                });
+                if (!memberExist) throw new NotFoundException('Member does not exist');
+                break;
+            case InterviewProposalType.TEAM:
+                const teamExist = await this.prismaService.team.count({
+                    where: {
+                        isActive: true,
+                        id: body.id,
+                    },
+                });
+                if (!teamExist) throw new NotFoundException('Team does not exist');
+                break;
+        }
+
+        const newApplication = await this.prismaService.application.create({
+            data: {
+                memberId: body.interviewProposalType === InterviewProposalType.MEMBER ? body.id : null,
+                teamId: body.interviewProposalType === InterviewProposalType.TEAM ? body.id : null,
+                postId: body.postId,
+                status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+            },
+        });
+
+        await this.prismaService.interview.create({
+            data: {
+                supportCategory: SupportCategory.MANPOWER,
+                applicationId: newApplication.id,
+                interviewStatus: InterviewStatus.INTERVIEWING,
+            },
+        });
     }
 }

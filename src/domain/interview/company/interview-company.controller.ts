@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, InterviewStatus } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
@@ -10,6 +10,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { InterviewCompanyService } from './interview-company.service';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
+import { InterviewCompanyProposeRequest } from './request/interview-company-propose.request';
 
 @ApiTags('[COMPANY] Interview Management')
 @Controller('/company/interviews')
@@ -93,5 +94,17 @@ export class InterviewCompanyController {
     async failInteview(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         const posts = await this.interviewCompanyService.resultInterview(request.user.accountId, id, InterviewStatus.FAIL);
         return BaseResponse.of(posts);
+    }
+
+    @Post('manpower')
+    @ApiOperation({
+        summary: 'Propose member or team interview',
+        description: 'Company can create an interview proposal for member or team',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async proposeTeamInterview(@Body() body: InterviewCompanyProposeRequest): Promise<BaseResponse<null>> {
+        await this.interviewCompanyService.proposeInterview(body);
+        return BaseResponse.ok();
     }
 }

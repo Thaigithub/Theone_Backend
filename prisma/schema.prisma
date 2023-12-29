@@ -160,6 +160,7 @@ model Team {
   teamCode                  String                      @default("") @map("team_code") // The digit sequence 'YYMMDDXXXXX' (different from code)
   name                      String
   introduction              String?
+  desiredSalary             Int?                        @map("desired_salary")
   districtId                Int                         @map("district_id")
   district                  District                    @relation(fields: [districtId], references: [id])
   leaderId                  Int                         @map("leader_id")
