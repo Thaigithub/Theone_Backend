@@ -17,15 +17,20 @@ export class MatchingCompanyGetListRecommendationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public occupationIds: string;
+    public occupation: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public specialOccupationIds: string;
+    public specialOccupation: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public regionIds: string;
+    public region: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    public keyword: string;
 }

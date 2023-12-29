@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class RecommendationCompanyGetListHeadhuntingApprovedRequest {
+export class HeadhuntingGetListRecommendationRequest {
     @ApiProperty({
         type: 'string',
         required: false,
