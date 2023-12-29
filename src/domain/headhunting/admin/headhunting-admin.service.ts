@@ -563,7 +563,7 @@ export class HeadhuntingAdminService {
                 post: {
                     include: {
                         site: true,
-                        specialNote: true,
+                        specialOccupation: true,
                         occupation: true,
                     },
                 },
@@ -576,7 +576,7 @@ export class HeadhuntingAdminService {
                 siteName: detail.post.site?.name || null,
                 siteContact: detail.post.site?.contact || null,
                 personInCharge: detail.post.site?.personInCharge || null,
-                specialOccupation: detail.post.specialNote?.codeName || null,
+                specialOccupation: detail.post.specialOccupation?.codeName || null,
                 occupation: detail.post.occupation?.codeName || null,
                 object: detail.headhuntingRequest.object,
                 career: detail.post.experienceType,
@@ -635,7 +635,7 @@ export class HeadhuntingAdminService {
                 post: {
                     include: {
                         site: true,
-                        specialNote: true,
+                        specialOccupation: true,
                         occupation: true,
                     },
                 },
@@ -648,7 +648,7 @@ export class HeadhuntingAdminService {
                 siteName: detail.post.site?.name || null,
                 siteContact: detail.post.site?.contact || null,
                 personInCharge: detail.post.site?.personInCharge || null,
-                specialOccupation: detail.post.specialNote?.codeName || null,
+                specialOccupation: detail.post.specialOccupation?.codeName || null,
                 occupation: detail.post.occupation?.codeName || null,
                 object: detail.headhuntingRequest.object,
                 career: detail.post.experienceType,
