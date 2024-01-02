@@ -42,7 +42,7 @@ export class PostAdminDetailResponse {
     @ApiProperty({
         type: 'enum',
         enum: SalaryType,
-        example: SalaryType.HOURLY,
+        example: SalaryType.DAILY,
     })
     public salaryType: SalaryType;
 
