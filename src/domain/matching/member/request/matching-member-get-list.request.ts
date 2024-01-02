@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { MatchingMemberGetListCategory } from '../dto/matching-member-get-list-category.enum';
 
-export class MatchingMemberGetListRequest {
+export class MatchingMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @ApiProperty({
@@ -12,20 +13,4 @@ export class MatchingMemberGetListRequest {
     })
     @IsEnum(MatchingMemberGetListCategory)
     public category: MatchingMemberGetListCategory;
-
-    @Expose()
-    @IsOptional()
-    @ApiProperty({
-        type: String,
-        required: false,
-    })
-    public pageSize: number;
-
-    @Expose()
-    @IsOptional()
-    @ApiProperty({
-        type: String,
-        required: false,
-    })
-    public pageNumber: number;
 }
