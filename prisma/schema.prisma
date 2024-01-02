@@ -40,11 +40,11 @@ model AccountStatusHistory {
 
 model OtpProvider {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) @map("created_at")
   otpCode   String   @map("otp_code")
   checked   Boolean  @default(false)
-  type      OtpType
+  createdAt DateTime @default(now()) @map("created_at")
   ip        String
+  type      OtpType
 
   @@map("otp_providers")
 }
@@ -70,38 +70,38 @@ model Member {
   isActive                     Boolean                         @default(true) @map("is_active")
   createdAt                    DateTime                        @default(now()) @map("created_at")
   updatedAt                    DateTime                        @updatedAt @map("updated_at")
-  district                     District?                       @relation(fields: [districtId], references: [id])
-  address                      String?
   contact                      String?
   email                        String?                         @unique
-  desiredOccupation            Code?                           @relation(fields: [codeId], references: [id])
   totalExperienceYears         Int?                            @map("total_experience_years")
   totalExperienceMonths        Int?                            @map("total_experience_months")
-  desiredSalary                Int?                            @map("desired_salary")
   signupMethod                 SignupMethodType                @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                       @map("withdrawn_date") @db.Date
-  districtId                   Int?                            @map("district_id")
   codeId                       Int?                            @map("code_id")
-  account                      Account                         @relation(fields: [accountId], references: [id])
+  districtId                   Int?                            @map("district_id")
+  address                      String?
+  desiredSalary                Int?                            @map("desired_salary")
   applyPosts                   Application[]
   bankAccount                  BankAccount?
-  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  certificationCareerRequest   CareerCertificationApplication?
   career                       Career[]
   certificates                 Certificate[]
   disability                   Disability?
   foreignWorker                ForeignWorker?
   headhuntingRecommendation    HeadhuntingRecommendation[]
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   interestSites                Interest[]
   matchingRecommendation       MatchingRecommendation[]
   memberEvaluation             MemberEvaluation?
+  memberMatching               MemberMatching[]
+  account                      Account                         @relation(fields: [accountId], references: [id])
+  desiredOccupation            Code?                           @relation(fields: [codeId], references: [id])
+  district                     District?                       @relation(fields: [districtId], references: [id])
   teams                        MembersOnTeams[]
   siteEvaluationByMember       SiteEvaluationByMember[]
   specialLicenses              SpecialLicense[]
-  leader                       Team[]
-  memberMatching               MemberMatching[]
   teamMemberInvitation         TeamMemberInvitation[]
-  certificationCareerRequest   CareerCertificationApplication?
+  leader                       Team[]
 
   @@map("members")
 }
@@ -126,9 +126,9 @@ model Company {
   account                Account                  @relation(fields: [accountId], references: [id])
   contactCard            ContactCard?
   logo                   Logo?
+  matchingRecommendation MatchingRecommendation[]
   posts                  Post[]
   sites                  Site[]
-  matchingRecommendation MatchingRecommendation[]
 
   @@map("companies")
 }
@@ -155,14 +155,8 @@ model ContactCard {
 
 model Team {
   id                        Int                         @id @default(autoincrement())
-  codeId                    Int                         @map("code_id")
-  code                      Code                        @relation(fields: [codeId], references: [id]) // Occupation of team
-  teamCode                  String                      @default("") @map("team_code") // The digit sequence 'YYMMDDXXXXX' (different from code)
   name                      String
   introduction              String?
-  desiredSalary             Int?                        @map("desired_salary")
-  districtId                Int                         @map("district_id")
-  district                  District                    @relation(fields: [districtId], references: [id])
   leaderId                  Int                         @map("leader_id")
   isActive                  Boolean                     @default(true) @map("is_active")
   createdAt                 DateTime                    @default(now()) @map("created_at")
@@ -171,15 +165,21 @@ model Team {
   totalMembers              Int                         @default(0) @map("total_members")
   exposureStatus            Boolean                     @default(false) @map("exposure_status")
   numberOfRecruitments      Int                         @default(0) @map("number_of_recruitments")
+  totalExperienceMonths     Int?                        @map("total_experience_months")
+  totalExperienceYears      Int?                        @map("total_experience_years")
+  districtId                Int                         @map("district_id")
+  codeId                    Int                         @map("code_id")
+  teamCode                  String                      @default("") @map("team_code")
+  desiredSalary             Int?                        @map("desired_salary")
   posts                     Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
+  matchingRecommendation    MatchingRecommendation[]
   members                   MembersOnTeams[]
   teamEvaluation            TeamEvaluation?
-  leader                    Member                      @relation(fields: [leaderId], references: [id])
-  totalExperienceYears      Int?                        @map("total_experience_years")
-  totalExperienceMonths     Int?                        @map("total_experience_months")
-  matchingRecommendation    MatchingRecommendation[]
   teamMemberInvitation      TeamMemberInvitation[]
+  code                      Code                        @relation(fields: [codeId], references: [id])
+  district                  District                    @relation(fields: [districtId], references: [id])
+  leader                    Member                      @relation(fields: [leaderId], references: [id])
 
   @@map("teams")
 }
@@ -320,13 +320,13 @@ model Certificate {
   status            CertificateStatus @default(REQUESTING)
   certificateNumber String            @map("certificate_number")
   acquisitionDate   DateTime          @map("acquisition_date")
-  isActive          Boolean           @default(true) @map("is_active")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   memberId          Int               @map("member_id")
   fileId            Int               @unique @map("file_id")
   isSpecial         Boolean           @default(false)
   codeId            Int?              @map("code_id")
+  isActive          Boolean           @default(true) @map("is_active")
   code              Code?             @relation(fields: [codeId], references: [id])
   file              File              @relation(fields: [fileId], references: [id])
   member            Member            @relation(fields: [memberId], references: [id])
@@ -475,10 +475,10 @@ model Code {
   codeType       CodeType         @map("code_type")
   career         Career[]
   certificate    Certificate[]
+  member         Member[]
   asGeneral      Post[]           @relation("post_occupation")
   asSpecial      Post[]           @relation("post_special")
   specialLicense SpecialLicense[]
-  member         Member[]
   team           Team[]
 
   @@map("codes")
@@ -507,15 +507,15 @@ model Site {
   endDate                   DateTime?                   @map("end_date") @db.Date
   companyId                 Int                         @map("company_id")
   numberOfContract          Int                         @default(0)
-  numberOfWorkers           Int                         @default(0)
   districtId                Int                         @map("district_id")
-  district                  District                    @relation(fields: [districtId], references: [id])
+  numberOfWorkers           Int                         @default(0)
   interestMember            Interest[]
   memberEvaluationByCompany MemberEvaluationByCompany[]
   post                      Post[]
   siteBanner                SiteBanner[]
   siteEvaluation            SiteEvaluation?
   company                   Company                     @relation(fields: [companyId], references: [id])
+  district                  District                    @relation(fields: [districtId], references: [id])
   teamEvaluationByCompany   TeamEvaluationByCompany[]
 
   @@map("sites")
@@ -553,15 +553,15 @@ model Post {
   specialOccupationId       Int?                        @map("special_occupation_id")
   applicants                Application[]
   headhuntingRecommendation HeadhuntingRecommendation[]
-  headhuntingRequest        HeadhuntingRequest[]
+  headhuntingRequest        HeadhuntingRequest?
   interested                Interest[]
+  memberMatchings           MemberMatching[]
   postBanner                PostBanner[]
+  postHistory               PostHistory[]
   company                   Company                     @relation(fields: [companyId], references: [id])
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
   site                      Site?                       @relation(fields: [siteId], references: [id])
   specialOccupation         Code?                       @relation("post_special", fields: [specialOccupationId], references: [id])
-  memberMatchings           MemberMatching[]
-  postHistory               PostHistory[]
 
   @@map("posts")
 }
@@ -703,14 +703,14 @@ model HeadhuntingRequest {
   isActive                  Boolean                     @default(true) @map("is_active")
   createdAt                 DateTime                    @default(now()) @map("created_at")
   updatedAt                 DateTime                    @updatedAt @map("updated_at")
-  postId                    Int                         @unique()
+  postId                    Int                         @unique
   date                      DateTime                    @default(now()) @db.Date
   status                    RequestStatus
   object                    RequestObject
   detail                    String                      @default("")
   rejectReason              String                      @default("") @map("reject_reason")
-  post                      Post                        @relation(fields: [postId], references: [id])
   headhuntingRecommendation HeadhuntingRecommendation[]
+  post                      Post                        @relation(fields: [postId], references: [id])
 
   @@map("headhunting_requests")
 }
@@ -736,11 +736,11 @@ model HeadhuntingRecommendation {
   postId               Int                @map("post_id")
   assignedAt           DateTime           @default(now()) @map("assigned_at")
   updatedAt            DateTime           @updatedAt @map("updated_at")
+  headhuntingRequestId Int                @map("headhunting_requestId")
+  headhuntingRequest   HeadhuntingRequest @relation(fields: [headhuntingRequestId], references: [id])
   member               Member?            @relation(fields: [memberId], references: [id])
   post                 Post               @relation(fields: [postId], references: [id])
   team                 Team?              @relation(fields: [teamId], references: [id])
-  headhuntingRequest   HeadhuntingRequest @relation(fields: [headhuntingRequestId], references: [id])
-  headhuntingRequestId Int                @map("headhunting_requestId")
 
   @@unique([memberId, postId])
   @@unique([teamId, postId])
@@ -749,15 +749,16 @@ model HeadhuntingRecommendation {
 
 model Contract {
   id            Int         @id @default(autoincrement())
-  salaryType    SalaryType  @map("salary_type")
-  amount        Int         @default(0)
+  paymentForm   PaymentForm @default(ON_SITE) @map("payment_form")
+  salaryType    SalaryType  @default(DAILY) @map("salary_type")
   startDate     DateTime    @map("start_date") @db.Date
   endDate       DateTime    @map("end_date") @db.Date
   fileId        Int         @unique @map("file_id")
   applicationId Int         @unique @map("application_id")
+  amount        Int         @default(0)
+  department    String      @default("")
   application   Application @relation(fields: [applicationId], references: [id])
   file          File        @relation(fields: [fileId], references: [id])
-  department    String      @default("")
   labor         Labor?
   createdAt     DateTime    @default(now()) @map("created_at") @db.Date
 
@@ -783,8 +784,8 @@ model District {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
   koreanName  String   @map("korean_name")
   englishName String   @map("english_name")
-  city        City     @relation(fields: [cityId], references: [id])
   cityId      Int      @map("city_id")
+  city        City     @relation(fields: [cityId], references: [id])
   member      Member[]
   site        Site[]
   team        Team[]
@@ -796,12 +797,12 @@ model MatchingRecommendation {
   id         Int      @id @default(autoincrement())
   memberId   Int?     @map("member_id")
   teamId     Int?     @map("team_id")
-  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date()
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date
   updatedAt  DateTime @updatedAt @map("updated_at")
+  companyId  Int      @map("company_id")
+  company    Company  @relation(fields: [companyId], references: [id])
   member     Member?  @relation(fields: [memberId], references: [id])
   team       Team?    @relation(fields: [teamId], references: [id])
-  company    Company  @relation(fields: [companyId], references: [id])
-  companyId  Int      @map("company_id")
 
   @@unique([memberId, assignedAt])
   @@unique([teamId, assignedAt])
@@ -810,13 +811,13 @@ model MatchingRecommendation {
 
 model MemberMatching {
   id         Int      @id @default(autoincrement())
-  post       Post     @relation(fields: [postId], references: [id])
   postId     Int      @map("post_id")
-  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date()
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date
   updatedAt  DateTime @updatedAt @map("updated_at")
   isRefuse   Boolean  @default(false)
-  member     Member   @relation(fields: [memberId], references: [id])
   memberId   Int      @map("member_id")
+  member     Member   @relation(fields: [memberId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id])
 
   @@unique([postId, assignedAt, memberId])
   @@map("member_matching")
@@ -825,8 +826,8 @@ model MemberMatching {
 model Labor {
   id              Int             @id @default(autoincrement())
   contractId      Int             @unique @map("contract_id")
-  contract        Contract        @relation(fields: [contractId], references: [id])
   workDates       WorkDate[]
+  contract        Contract        @relation(fields: [contractId], references: [id])
   salaryHistories SalaryHistory[]
 
   @@map("labors")
@@ -846,7 +847,6 @@ model WorkDate {
 model SalaryHistory {
   id                  Int      @id @default(autoincrement())
   laborId             Int      @map("labor_id")
-  labor               Labor    @relation(fields: [laborId], references: [id])
   base                Int      @default(0)
   otherAllowance      Int      @default(0) @map("other_allowance")
   overtimePay         Int      @default(0) @map("overtime_pay")
@@ -862,6 +862,7 @@ model SalaryHistory {
   totalDeductible     Int      @default(0) @map("total_deductible")
   actualPayment       Int      @default(0) @map("actual_payment")
   date                DateTime
+  labor               Labor    @relation(fields: [laborId], references: [id])
 
   @@unique([laborId, date])
   @@map("salary_histories")
@@ -1042,7 +1043,6 @@ enum ExperienceType {
 }
 
 enum SalaryType {
-  HOURLY
   DAILY
   MONTHLY
 }
@@ -1117,4 +1117,9 @@ enum InvitationStatus {
 enum PostHistoryType {
   EDITED
   DELETED
+}
+
+enum PaymentForm {
+  ON_SITE
+  BANK_TRANSFER
 }
