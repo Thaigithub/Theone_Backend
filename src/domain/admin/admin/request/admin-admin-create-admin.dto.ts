@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class AccountAdminCreateAdminDTO {
+export class AdminAdminCreateAdminDTO {
     @ApiProperty({
         type: 'string',
         examples: ['abc'],

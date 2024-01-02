@@ -1,8 +1,13 @@
-import { PaymentForm } from '@prisma/client';
+import { SalaryType } from '@prisma/client';
 import { SalaryHistory } from '../dto/labor-company-salary.dto';
 import { LaborType } from '../enum/labor-company-labor-type.enum';
 class SalaryHistoryResponse extends SalaryHistory {
     id: number;
+}
+class WorkDate {
+    id: number;
+    date: Date;
+    hours: number;
 }
 export class LaborCompanyGetDetailResponse {
     id: number;
@@ -12,9 +17,8 @@ export class LaborCompanyGetDetailResponse {
     siteName: string;
     startDate: Date;
     endDate: Date;
-    paymentForm: PaymentForm;
+    salaryType: SalaryType;
     amount: number;
-    numberOfHours: number;
-    workDate: Date[];
+    workDate: WorkDate[];
     salaryHistory: SalaryHistoryResponse[];
 }

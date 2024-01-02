@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { SalaryType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -6,7 +7,7 @@ import { LaborType } from './enum/labor-company-labor-type.enum';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
-import { LaborCompanyUpdateRequest } from './request/labor-company-update.request';
+import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-update-workdate.request';
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
@@ -45,7 +46,11 @@ export class LaborCompanyService {
                 labor: {
                     select: {
                         id: true,
-                        numberOfHours: true,
+                        workDates: {
+                            select: {
+                                hours: true,
+                            },
+                        },
                     },
                 },
                 application: {
@@ -85,7 +90,11 @@ export class LaborCompanyService {
                 siteName: item.application.post.site.name,
                 startDate: item.startDate,
                 endDate: item.endDate,
-                numberOfHours: item.labor ? item.labor.numberOfHours : null,
+                numberOfHours: item.labor
+                    ? item.labor.workDates.reduce((accum, current) => {
+                          return accum + current.hours;
+                      }, 0)
+                    : null,
             };
         });
         const total = await this.prismaService.contract.count({
@@ -94,16 +103,6 @@ export class LaborCompanyService {
         return new PaginationResponse(labor, new PageInfo(total));
     }
     async create(accountId: number, body: LaborCompanyCreateRequest): Promise<void> {
-        const count = body.workDate
-            .map((item) => {
-                const month = new Date(item.date).getMonth();
-                const year = new Date(item.date).getFullYear();
-                return year * 100 + month;
-            })
-            .reduce((accum, current) => {
-                if (!accum.includes(current)) return [...accum, current];
-            }, []).length;
-        if (count !== body.workDate.length) throw new BadRequestException('Only one payment each month');
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id: body.contractId,
@@ -117,15 +116,49 @@ export class LaborCompanyService {
             },
             select: {
                 labor: true,
+                salaryType: true,
             },
         });
         if (!contract) throw new NotFoundException('Contract not found');
         if (contract.labor) throw new BadRequestException('Labor existed!');
+        if (contract.salaryType === SalaryType.MONTHLY) {
+            const count = body.salaryHistory
+                .map((item) => {
+                    const month = new Date(item.date).getMonth();
+                    const year = new Date(item.date).getFullYear();
+                    return `${year}-${month}`;
+                })
+                .reduce((accum, current) => {
+                    if (!accum.includes(current)) {
+                        accum.push(current);
+                        return accum;
+                    } else return accum;
+                }, []);
+            if (count.length !== body.salaryHistory.length) throw new BadRequestException('Only one payment each month');
+        } else if (contract.salaryType === SalaryType.DAILY) {
+            const count = body.salaryHistory
+                .map((item) => item.date)
+                .reduce((accum, current) => {
+                    if (!accum.includes(current)) {
+                        accum.push(current);
+                        return accum;
+                    } else return accum;
+                }, []);
+            if (count.length !== body.salaryHistory.length) throw new BadRequestException('Only one payment each day');
+        }
         const labor = await this.prismaService.labor.create({
             data: {
                 contractId: body.contractId,
-                numberOfHours: body.numberOfHours,
-                workDates: body.workDate.map((item) => new Date(item.date)),
+                workDates: {
+                    createMany: {
+                        data: body.workDate.map((item) => {
+                            return {
+                                date: new Date(item.date),
+                                hours: item.hours,
+                            };
+                        }),
+                    },
+                },
             },
             select: {
                 id: true,
@@ -137,8 +170,7 @@ export class LaborCompanyService {
                 return {
                     laborId: labor.id,
                     ...rest,
-                    month: new Date(date).getMonth(),
-                    year: new Date(date).getFullYear(),
+                    date: new Date(date),
                 };
             }),
         });
@@ -160,13 +192,18 @@ export class LaborCompanyService {
             select: {
                 contractId: true,
                 id: true,
-                numberOfHours: true,
-                workDates: true,
+                workDates: {
+                    select: {
+                        date: true,
+                        hours: true,
+                        id: true,
+                    },
+                },
                 salaryHistories: true,
                 contract: {
                     select: {
                         amount: true,
-                        paymentForm: true,
+                        salaryType: true,
                         startDate: true,
                         endDate: true,
                         application: {
@@ -204,15 +241,20 @@ export class LaborCompanyService {
         });
         return {
             id: labor.id,
-            numberOfHours: labor.numberOfHours,
             salaryHistory: labor.salaryHistories.map((item) => {
-                const { month, year, laborId, ...rest } = item;
+                const { date, laborId, ...rest } = item;
                 return {
                     ...rest,
-                    date: `${year}-${month}-01`,
+                    date: date.toISOString(),
                 };
             }),
-            workDate: labor.workDates,
+            workDate: labor.workDates.map((item) => {
+                return {
+                    id: item.id,
+                    date: item.date,
+                    hours: item.hours,
+                };
+            }),
             type: labor.contract.application.member ? LaborType.INDIVIDUAL : LaborType.TEAM,
             name: labor.contract.application.member
                 ? labor.contract.application.member.name
@@ -223,36 +265,11 @@ export class LaborCompanyService {
             siteName: labor.contract.application.post.site.name,
             startDate: labor.contract.startDate,
             endDate: labor.contract.endDate,
-            paymentForm: labor.contract.paymentForm,
+            salaryType: labor.contract.salaryType,
             amount: labor.contract.amount,
         };
     }
-    async update(accountId: number, id: number, body: LaborCompanyUpdateRequest): Promise<void> {
-        const labor = await this.prismaService.labor.findUnique({
-            where: {
-                id,
-                contract: {
-                    application: {
-                        post: {
-                            company: {
-                                accountId,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        if (!labor) throw new NotFoundException('Labor not found');
-        await this.prismaService.labor.update({
-            where: {
-                id,
-            },
-            data: {
-                workDates: body.workDate.map((item) => new Date(item.date)),
-                numberOfHours: body.numberOfHours,
-            },
-        });
-    }
+
     async getDetailSalary(accountId: number, laborId: number, salaryId: number): Promise<LaborCompanyGetDetailSalaryResponse> {
         const salary = await this.prismaService.salaryHistory.findUnique({
             where: {
@@ -274,7 +291,7 @@ export class LaborCompanyService {
         if (!salary) throw new NotFoundException('Salary not found');
         return {
             ...salary,
-            date: new Date(salary.year, salary.month),
+            date: salary.date,
         };
     }
     async createSalary(accountId: number, id: number, body: LaborCompanyCreateSalaryRequest): Promise<void> {
@@ -296,8 +313,7 @@ export class LaborCompanyService {
         const count = await this.prismaService.salaryHistory.count({
             where: {
                 laborId: id,
-                year: new Date(body.date).getFullYear(),
-                month: new Date(body.date).getMonth(),
+                date: new Date(body.date),
             },
         });
         if (count !== 0) throw new BadRequestException('Salary has been registered for this month');
@@ -306,8 +322,113 @@ export class LaborCompanyService {
             data: {
                 laborId: id,
                 ...rest,
-                month: new Date(date).getMonth(),
-                year: new Date(date).getFullYear(),
+                date: new Date(date),
+            },
+        });
+    }
+    async updateWorkDate(
+        accountId: number,
+        id: number,
+        workDateId: number,
+        body: LaborCompanyUpsertWorkDateRequest,
+    ): Promise<void> {
+        const labor = await this.prismaService.labor.findUnique({
+            where: {
+                id,
+                contract: {
+                    application: {
+                        post: {
+                            company: {
+                                accountId,
+                            },
+                        },
+                    },
+                },
+            },
+            select: {
+                workDates: {
+                    select: {
+                        id: true,
+                        date: true,
+                    },
+                },
+            },
+        });
+        if (!labor) throw new NotFoundException('Labor not found');
+        if (!labor.workDates.map((item) => item.id).includes(workDateId)) throw new NotFoundException('WorkDate not found');
+        if (labor.workDates.map((item) => item.date).includes(new Date(body.date)))
+            throw new ConflictException('A salary with this date has been registered');
+        await this.prismaService.workDate.update({
+            where: {
+                id,
+            },
+            data: {
+                date: new Date(body.date),
+                hours: body.hours,
+            },
+        });
+    }
+    async createWorkDate(accountId: number, id: number, body: LaborCompanyUpsertWorkDateRequest): Promise<void> {
+        const labor = await this.prismaService.labor.findUnique({
+            where: {
+                id,
+                contract: {
+                    application: {
+                        post: {
+                            company: {
+                                accountId,
+                            },
+                        },
+                    },
+                },
+            },
+            select: {
+                workDates: {
+                    select: {
+                        date: true,
+                    },
+                },
+            },
+        });
+        if (!labor) throw new NotFoundException('Labor not found');
+        if (labor.workDates.map((item) => item.date).includes(new Date(body.date)))
+            throw new ConflictException('A salary with this date has been registered');
+        await this.prismaService.workDate.create({
+            data: {
+                date: new Date(body.date),
+                hours: body.hours,
+                laborId: id,
+            },
+        });
+    }
+    async deleteWorkDate(accountId: number, id: number, workDateId: number): Promise<void> {
+        const labor = await this.prismaService.labor.findUnique({
+            where: {
+                id,
+                contract: {
+                    application: {
+                        post: {
+                            company: {
+                                accountId,
+                            },
+                        },
+                    },
+                },
+            },
+            select: {
+                workDates: {
+                    select: {
+                        id: true,
+                        date: true,
+                    },
+                },
+            },
+        });
+        if (!labor) throw new NotFoundException('Labor not found');
+        if (!labor.workDates.map((item) => item.id).includes(workDateId)) throw new NotFoundException('WorkDate not found');
+        await this.prismaService.workDate.delete({
+            where: {
+                id: workDateId,
             },
         });
     }

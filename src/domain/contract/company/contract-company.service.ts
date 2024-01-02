@@ -131,7 +131,7 @@ export class ContractCompanyService {
                         applicationId: body.applicationId,
                         startDate: new Date(body.startDate),
                         endDate: new Date(body.endDate),
-                        paymentForm: body.paymentForm,
+                        salaryType: body.salaryType,
                         amount: body.amount,
                         department: body.department,
                     },
@@ -173,7 +173,7 @@ export class ContractCompanyService {
                 },
                 startDate: true,
                 endDate: true,
-                paymentForm: true,
+                salaryType: true,
                 amount: true,
                 department: true,
                 application: {
@@ -232,7 +232,7 @@ export class ContractCompanyService {
             contact: contract.application.member ? contract.application.member.contact : contract.application.team.leader.contact,
             startDate: contract.startDate,
             endDate: contract.endDate,
-            paymentForm: contract.paymentForm,
+            salaryType: contract.salaryType,
             amount: contract.amount,
             file: contract.file,
             department: contract.department,
@@ -260,7 +260,7 @@ export class ContractCompanyService {
             data: {
                 startDate: new Date(body.startDate),
                 endDate: new Date(body.endDate),
-                paymentForm: body.paymentForm,
+                salaryType: body.salaryType,
                 amount: body.amount,
                 file: {
                     update: {

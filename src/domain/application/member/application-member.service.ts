@@ -242,7 +242,6 @@ export class ApplicationMemberService {
                 },
             },
         });
-        console.log(application);
         if (!application) throw new NotFoundException('Application not found');
         return {
             companyLogo: application.post.company.logo.file,
