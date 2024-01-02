@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccountStatus, AccountType, MemberLevel, SignupMethodType } from '@prisma/client';
+import { AccountStatus, AccountType, CodeType, MemberLevel, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
 import { hash } from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
@@ -12,11 +12,24 @@ import { UpsertForeignWorkerRequest } from './request/account-member-upsert-fore
 import { UpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberCheckUsernameExistenceResponse } from './response/account-member-check-exist-accountId.response';
 import { MemberDetailResponse } from './response/account-member-get-detail.response';
+import { AccountMemberGetDetailMyHomeReponse } from './response/account-member-get-detail-myhome.response';
+import { AccountMemberUpdateInfoMyHomeRequest } from './request/account-member-update-info-myhome.request';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
 export class AccountMemberService {
     constructor(private prismaService: PrismaService) {}
+
+    private async checkMemberExist(accountId: number): Promise<void> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                isActive: true,
+                accountId,
+            },
+        });
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+    }
+
     async signup(request: MemberAccountSignupRequest): Promise<void> {
         if (request.recommenderId !== undefined) {
             const numRecommender = await this.prismaService.account.count({
@@ -48,6 +61,7 @@ export class AccountMemberService {
             },
         });
     }
+
     async accountMemberCheck(username: string): Promise<AccountMemberCheckUsernameExistenceResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
@@ -62,6 +76,7 @@ export class AccountMemberService {
             isExist: true,
         };
     }
+
     async accountRecommenderCheck(username: string): Promise<AccountMemberCheckUsernameExistenceResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
@@ -77,6 +92,7 @@ export class AccountMemberService {
             isExist: true,
         };
     }
+
     async signupSns(request: MemberAccountSignupSnsRequest): Promise<void> {
         const payload = (
             await googleClient.verifyIdToken({
@@ -237,7 +253,121 @@ export class AccountMemberService {
         });
     }
 
+    async getDetailMyHome(accountId: number): Promise<AccountMemberGetDetailMyHomeReponse> {
+        const member = await this.prismaService.member.findUnique({
+            include: {
+                account: true,
+            },
+            where: {
+                accountId,
+            },
+        });
+
+        if (!member) throw new NotFoundException('Member does not exist');
+
+        // Support/Work
+        const totalApplications = await this.prismaService.application.count({
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+        const totalInterviews = await this.prismaService.interview.count({
+            where: {
+                application: {
+                    member: {
+                        accountId,
+                    },
+                },
+            },
+        });
+        const totalContracts = await this.prismaService.contract.count({
+            where: {
+                application: {
+                    member: {
+                        accountId,
+                    },
+                },
+            },
+        });
+
+        // Site activity
+        let totalShifts: number = 0;
+        const listShifts = await this.prismaService.labor.findMany({
+            select: {
+                workDates: true,
+            },
+            where: {
+                contract: {
+                    application: {
+                        member: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+        });
+        listShifts.map((item) => (totalShifts += item.workDates.length));
+        const totalEvaluations = await this.prismaService.siteEvaluationByMember.count({
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        return {
+            name: member.name,
+            username: member.account.username,
+            email: member.email,
+            contact: member.contact,
+            level: member.level,
+            registrationMethod: member.signupMethod,
+            registrationDate: member.createdAt,
+            totalExperienceYears: member.totalExperienceYears,
+            totalExperienceMonths: member.totalExperienceMonths,
+            supportWork: {
+                totalApplications,
+                totalInterviews,
+                totalContracts,
+            },
+            siteActivity: {
+                totalShifts,
+                totalEvaluations,
+            },
+        };
+    }
+
+    async updateInfoMyHome(accountId: number, body: AccountMemberUpdateInfoMyHomeRequest): Promise<void> {
+        await this.checkMemberExist(accountId);
+
+        if (body.occupation) {
+            const validCode = await this.prismaService.code.findUnique({
+                where: {
+                    isActive: true,
+                    id: body.occupation,
+                    codeType: CodeType.GENERAL,
+                },
+            });
+
+            if (!validCode) throw new BadRequestException('Occupation (Code Number) is invalid');
+        }
+
+        await this.prismaService.member.update({
+            data: {
+                desiredSalary: body.desiredSalary,
+                codeId: body.occupation,
+            },
+            where: {
+                accountId,
+            },
+        });
+    }
+
     async upsertBankAccount(id: number, request: UpsertBankAccountRequest): Promise<void> {
+        await this.checkMemberExist(id);
+
         await this.prismaService.member.update({
             where: { accountId: id },
             data: {
@@ -260,6 +390,8 @@ export class AccountMemberService {
     }
 
     async upsertHSTCertificate(id: number, request: UpsertHSTCertificateRequest): Promise<void> {
+        await this.checkMemberExist(id);
+
         await this.prismaService.member.update({
             where: { accountId: id },
             data: {
@@ -296,6 +428,8 @@ export class AccountMemberService {
     }
 
     async upsertForeignWorker(id: number, request: UpsertForeignWorkerRequest): Promise<void> {
+        await this.checkMemberExist(id);
+
         await this.prismaService.member.update({
             where: { accountId: id },
             data: {
@@ -336,6 +470,8 @@ export class AccountMemberService {
     }
 
     async upsertDisability(id: number, request: UpsertDisabilityRequest): Promise<void> {
+        await this.checkMemberExist(id);
+
         await this.prismaService.member.update({
             where: { accountId: id },
             data: {
@@ -366,6 +502,118 @@ export class AccountMemberService {
                             },
                         },
                     },
+                },
+            },
+        });
+    }
+
+    async cancelMembership(accountId: number): Promise<void> {
+        await this.checkMemberExist(accountId);
+
+        await this.prismaService.member.update({
+            data: {
+                isActive: false,
+            },
+            where: {
+                accountId,
+            },
+        });
+
+        await this.prismaService.bankAccount.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.basicHealthSafetyCertificate.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.career.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.certificate.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.disability.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.foreignWorker.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.memberEvaluation.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.membersOnTeams.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+
+        await this.prismaService.teamMemberInvitation.updateMany({
+            data: {
+                isActive: false,
+            },
+            where: {
+                member: {
+                    accountId,
                 },
             },
         });

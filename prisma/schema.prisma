@@ -375,7 +375,7 @@ model Career {
 
 model CareerCertificationApplication {
   id        Int                                  @id @default(autoincrement())
-  status    CarrerCertificationApplicationStatus @default(REQUESTING) @map("status")
+  status    CareerCertificationApplicationStatus @default(REQUESTING) @map("status")
   createdAt DateTime                             @default(now()) @map("created_at")
   updatedAt DateTime                             @updatedAt @map("updated_at")
   memberId  Int?                                 @unique
@@ -1067,7 +1067,7 @@ enum PostApplicationStatus {
   APPROVE_BY_COMPANY
 }
 
-enum CarrerCertificationApplicationStatus {
+enum CareerCertificationApplicationStatus {
   REQUESTING
   APPROVED
   REFUSED
