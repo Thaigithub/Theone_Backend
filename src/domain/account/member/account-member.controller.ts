@@ -1,5 +1,8 @@
 import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
 import { MemberAccountSignupRequest } from './request/account-member-signup.request';
@@ -9,10 +12,8 @@ import { UpsertDisabilityRequest } from './request/account-member-upsert-disabil
 import { UpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { UpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberCheckUsernameExistenceResponse } from './response/account-member-check-exist-accountId.response';
+import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { MemberDetailResponse } from './response/account-member-get-detail.response';
-import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountType } from '@prisma/client';
-import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { AccountMemberGetDetailMyHomeReponse } from './response/account-member-get-detail-myhome.response';
 import { AccountMemberUpdateInfoMyHomeRequest } from './request/account-member-update-info-myhome.request';
@@ -116,6 +117,20 @@ export class AccountMemberController {
     async upsertBankAccount(@Req() request: any, @Body() bankAccount: UpsertBankAccountRequest): Promise<BaseResponse<null>> {
         await this.accountMemberService.upsertBankAccount(request.user.accountId, bankAccount);
         return BaseResponse.ok();
+    }
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Get('/bank-account')
+    @ApiOperation({
+        summary: 'Get bank account details',
+        description: 'This endpoint get bank account of active member',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: AccountMemberGetBankDetailResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async getBankAccount(@Req() request: any): Promise<BaseResponse<AccountMemberGetBankDetailResponse>> {
+        const bankInfor = await this.accountMemberService.getBankAccount(request.user.accountId);
+        return BaseResponse.of(bankInfor);
     }
 
     @Roles(AccountType.MEMBER)

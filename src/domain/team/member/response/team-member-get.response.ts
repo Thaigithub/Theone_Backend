@@ -148,7 +148,9 @@ export class TeamMemberDetailResponse {
     @ApiProperty({ type: GetTeamDetail })
     team: GetTeamDetail;
 
+    @ApiProperty({ type: [GetTeamMemberDetail] })
     members: GetTeamMemberDetail[];
 
+    @ApiProperty({ type: [GetTeamMemberInvitation] })
     memberInvitations: GetTeamMemberInvitation[];
 }
