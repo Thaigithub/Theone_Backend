@@ -6,9 +6,9 @@ import { ContractType } from './enum/contract-company-type-contract.enum';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
+import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 
 @Injectable()
 export class ContractCompanyService {
@@ -135,6 +135,7 @@ export class ContractCompanyService {
                         salaryType: body.salaryType,
                         amount: body.amount,
                         department: body.department,
+                        paymentForm: body.paymentForm,
                     },
                 },
             },
@@ -195,6 +196,7 @@ export class ContractCompanyService {
                 },
                 startDate: true,
                 endDate: true,
+                paymentForm: true,
                 salaryType: true,
                 amount: true,
                 department: true,
@@ -258,6 +260,7 @@ export class ContractCompanyService {
             amount: contract.amount,
             file: contract.file,
             department: contract.department,
+            paymentForm: contract.paymentForm,
         };
     }
 
@@ -283,6 +286,7 @@ export class ContractCompanyService {
                 startDate: new Date(body.startDate),
                 endDate: new Date(body.endDate),
                 salaryType: body.salaryType,
+                paymentForm: body.paymentForm,
                 amount: body.amount,
                 file: {
                     update: {

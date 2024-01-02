@@ -1,4 +1,4 @@
-import { FileType, SalaryType } from '@prisma/client';
+import { FileType, PaymentForm, SalaryType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsNumber, IsString, Matches } from 'class-validator';
 
@@ -20,6 +20,10 @@ export class ContractCompanyUpdateRequest {
     @Expose()
     @IsEnum(SalaryType)
     salaryType: SalaryType;
+
+    @Expose()
+    @IsEnum(PaymentForm)
+    paymentForm: PaymentForm;
 
     @Expose()
     @IsNumber()

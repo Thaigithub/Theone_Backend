@@ -8,6 +8,7 @@ import { ContractMemberGetListRequest } from './request/contract-member-get-list
 import { ContractMemberGetDetailResponse } from './response/contract-member-get-detail.response';
 import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
 import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
+import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
 
 @Injectable()
 export class ContractMemberService {
@@ -216,8 +217,11 @@ export class ContractMemberService {
                                 actualPayment: true,
                             },
                         },
-                        workDates: true,
-                        numberOfUnits: true,
+                        workDates: {
+                            select: {
+                                hours: true,
+                            },
+                        },
                     },
                 },
                 salaryType: true,
@@ -261,7 +265,9 @@ export class ContractMemberService {
                     return accum + curent.actualPayment;
                 }, 0),
                 totalDays: item.labor.workDates.length,
-                numberOfHours: item.labor.numberOfUnits,
+                totalHours: item.labor.workDates.reduce((accum, current) => {
+                    return accum + current.hours;
+                }, 0),
             };
         });
         const total = await this.prismaService.contract.count({ where: search.where });
