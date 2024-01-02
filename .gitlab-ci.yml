@@ -13,7 +13,7 @@ deploy:
         - ssh-keyscan -H $AWS_EC2_IP >> ~/.ssh/known_hosts
     script:
         - echo "Deploying started..."
-        - ssh $AWS_EC2_USER@$AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sudo sh $AWS_SCRIPT_PATH"
+        - ssh $AWS_EC2_USER@$AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sh $AWS_SCRIPT_PATH"
         - echo "Finished deploying the app."
     only:
         - develop
