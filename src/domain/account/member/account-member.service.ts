@@ -11,6 +11,7 @@ import { UpsertDisabilityRequest } from './request/account-member-upsert-disabil
 import { UpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { UpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberCheckUsernameExistenceResponse } from './response/account-member-check-exist-accountId.response';
+import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { MemberDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberGetDetailMyHomeReponse } from './response/account-member-get-detail-myhome.response';
 import { AccountMemberUpdateInfoMyHomeRequest } from './request/account-member-update-info-myhome.request';
@@ -326,6 +327,25 @@ export class AccountMemberService {
                 },
             },
         });
+    }
+
+    async getBankAccount(accountId: number): Promise<AccountMemberGetBankDetailResponse> {
+        const bankInfor = await this.prismaService.bankAccount.findFirst({
+            where: {
+                member: {
+                    accountId: accountId,
+                    isActive: true,
+                },
+                isActive: true,
+            },
+            select: {
+                id: true,
+                accountHolder: true,
+                bankName: true,
+                accountNumber: true,
+            },
+        });
+        return bankInfor;
     }
 
     async upsertHSTCertificate(id: number, request: UpsertHSTCertificateRequest): Promise<void> {

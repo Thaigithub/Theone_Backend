@@ -102,7 +102,9 @@ model Member {
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
-
+  point                        Point[]
+  totalPoint                   Int                          @default(0) @map("total_point")
+  currencyExchange             CurrencyExchange[]
   @@map("members")
 }
 
@@ -866,6 +868,36 @@ model SalaryHistory {
 
   @@unique([laborId, date])
   @@map("salary_histories")
+}
+
+model Point {
+  id                      Int                   @id @default(autoincrement())
+  memberId                Int?                  @map("member_id")
+  member                  Member?               @relation(fields: [memberId], references: [id])
+  isActive                Boolean               @default(true) @map("is_active")
+  reasonEarn              String?               @map("reason_earn")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  amount                  Int                   @default(0) @map("amount")
+
+  @@map("points")
+}
+
+model CurrencyExchange {
+  id                      Int                   @id @default(autoincrement())
+  memberId                Int?                  @map("member_id")
+  member                  Member?               @relation(fields: [memberId], references: [id])
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime?             @default(now()) @map("updated_at")
+  exchangeStatus          CurrencyExchangeStatus        @map("exchange_status")
+  amount                  Int                   @default(0) @map("amount")
+
+  @@map("currency_exchanges")
+}
+
+enum CurrencyExchangeStatus {
+  REQUESTED
+  COMPLETE
 }
 
 enum BannerStatus {
