@@ -11,7 +11,6 @@ import { ContractMemberGetListRequest } from './request/contract-member-get-list
 import { ContractMemberGetDetailResponse } from './response/contract-member-get-detail.response';
 import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
 import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
-import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
 
 @ApiTags('[MEMBER] Contract Management')
 @Controller('/member/contracts')

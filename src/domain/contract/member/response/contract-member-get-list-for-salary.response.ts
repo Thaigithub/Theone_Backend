@@ -11,6 +11,6 @@ export class GetListForSalaryResponse {
     salaryType: SalaryType;
     amount: number;
     totalDays: number;
-    numberOfHours: number;
+    totalHours: number;
 }
 export class ContractMemberGetListForSalaryResponse extends PaginationResponse<GetListForSalaryResponse> {}
