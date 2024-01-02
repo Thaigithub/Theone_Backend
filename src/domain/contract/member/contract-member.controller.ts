@@ -8,6 +8,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { ContractMemberService } from './contract-member.service';
 import { ContractMemberGetListForSalaryRequest } from './request/contract-member-get-list-for-salary.request';
 import { ContractMemberGetListRequest } from './request/contract-member-get-list.request';
+import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
 import { ContractMemberGetDetailResponse } from './response/contract-member-get-detail.response';
 import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
 import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
@@ -21,13 +22,13 @@ import { ContractMemberGetListResponse } from './response/contract-member-get-li
 @ApiConsumes('application/json')
 export class ContractMemberController {
     constructor(private contractMemberService: ContractMemberService) {}
-    // @Get('/:id/salary-site')
-    // async geDetailForSalary(
-    //     @Req() req: AccountIdExtensionRequest,
-    //     @Param('id', ParseIntPipe) id: number,
-    // ): Promise<BaseResponse<ContractMemberGetDetailForSalaryResponse>> {
-    //     return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
-    // }
+    @Get('/:id/salary-site')
+    async geDetailForSalary(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ContractMemberGetDetailForSalaryResponse>> {
+        return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
+    }
 
     @Get('/salary-site')
     async getListForSalary(
