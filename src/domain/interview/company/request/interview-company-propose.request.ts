@@ -10,7 +10,7 @@ export class InterviewCompanyProposeRequest {
     })
     @IsNumber()
     @Expose()
-    id: number;
+    memberOrTeamId: number;
 
     @ApiProperty({
         type: 'number',

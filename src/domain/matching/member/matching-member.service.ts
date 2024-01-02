@@ -87,7 +87,13 @@ export class MatchingMemberService {
                             select: {
                                 logo: {
                                     select: {
-                                        file: true,
+                                        file: {
+                                            select: {
+                                                fileName: true,
+                                                key: true,
+                                                type: true,
+                                            },
+                                        },
                                     },
                                 },
                             },

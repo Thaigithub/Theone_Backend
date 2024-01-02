@@ -101,7 +101,7 @@ model Member {
   leader                       Team[]
   memberMatching               MemberMatching[]
   teamMemberInvitation         TeamMemberInvitation[]
-  certificationCareerRequest   CarrerCertificationApplication?
+  certificationCareerRequest   CareerCertificationApplication?
 
   @@map("members")
 }
@@ -373,7 +373,7 @@ model Career {
   @@map("careers")
 }
 
-model CarrerCertificationApplication {
+model CareerCertificationApplication {
   id        Int                                  @id @default(autoincrement())
   status    CarrerCertificationApplicationStatus @default(REQUESTING) @map("status")
   createdAt DateTime                             @default(now()) @map("created_at")

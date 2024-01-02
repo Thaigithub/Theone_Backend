@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CareerType, CarrerCertificationApplicationStatus, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -87,6 +87,8 @@ export class CareerMemberService {
             },
         });
 
+        if (!occupation) throw new BadRequestException('Occupation (Code Id) does not exist');
+
         await this.prismaService.career.create({
             data: {
                 ...body,
@@ -159,7 +161,7 @@ export class CareerMemberService {
     async applyCertificate(accountId: number): Promise<void> {
         const memberId = await this.getMemberId(accountId);
         if (!memberId) throw new NotFoundException('Member not found');
-        await this.prismaService.carrerCertificationApplication.upsert({
+        await this.prismaService.careerCertificationApplication.upsert({
             where: {
                 memberId: memberId,
             },
@@ -176,7 +178,7 @@ export class CareerMemberService {
         const memberId = await this.getMemberId(accountId);
         if (!memberId) throw new NotFoundException('Member not found');
 
-        const application = await this.prismaService.carrerCertificationApplication.findUnique({
+        const application = await this.prismaService.careerCertificationApplication.findUnique({
             where: {
                 memberId,
             },
@@ -191,7 +193,7 @@ export class CareerMemberService {
         const memberId = await this.getMemberId(accountId);
         if (!memberId) throw new NotFoundException('Member not found');
 
-        const application = await this.prismaService.carrerCertificationApplication.findUnique({
+        const application = await this.prismaService.careerCertificationApplication.findUnique({
             where: {
                 memberId,
             },
@@ -206,7 +208,7 @@ export class CareerMemberService {
         const memberId = await this.getMemberId(accountId);
         if (!memberId) throw new NotFoundException('Member not found');
 
-        const application = await this.prismaService.carrerCertificationApplication.findUnique({
+        const application = await this.prismaService.careerCertificationApplication.findUnique({
             where: {
                 memberId,
             },
