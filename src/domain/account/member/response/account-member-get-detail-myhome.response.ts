@@ -28,40 +28,4 @@ export class AccountMemberGetDetailMyHomeReponse {
 
     @ApiProperty({ type: 'number' })
     public totalExperienceMonths: Member['totalExperienceMonths'];
-
-    @ApiProperty({
-        type: 'object',
-        properties: {
-            totalApplications: {
-                type: 'number',
-            },
-            totalInterviews: {
-                type: 'number',
-            },
-            totalContracts: {
-                type: 'number',
-            },
-        },
-    })
-    public supportWork: {
-        totalApplications: number;
-        totalInterviews: number;
-        totalContracts: number;
-    };
-
-    @ApiProperty({
-        type: 'object',
-        properties: {
-            totalShifts: {
-                type: 'number',
-            },
-            totalEvaluations: {
-                type: 'number',
-            },
-        },
-    })
-    public siteActivity: {
-        totalShifts: number;
-        totalEvaluations: number;
-    };
 }

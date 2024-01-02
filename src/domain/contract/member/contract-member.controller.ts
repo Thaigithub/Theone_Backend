@@ -1,5 +1,5 @@
-import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -52,5 +52,22 @@ export class ContractMemberController {
         @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ContractMemberGetListResponse>> {
         return BaseResponse.of(await this.contractMemberService.getList(req.user.accountId, query));
+    }
+
+    @Get('count')
+    @ApiOperation({
+        summary: 'Get total contracts',
+        description: 'Member can retrive total contracts',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: BaseResponse<number>,
+    })
+    @ApiResponse({
+        status: HttpStatus.NOT_FOUND,
+        type: BaseResponse,
+    })
+    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.contractMemberService.getTotal(request.user.accountId));
     }
 }

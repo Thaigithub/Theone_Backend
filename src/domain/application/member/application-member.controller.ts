@@ -11,6 +11,7 @@ import { ApplicationMemberGetListRequest } from './request/application-member-ge
 import { ApplicationMemberGetDetailResponse } from './response/application-member-get-detail.response';
 import { ApplicationMemberGetListOfferResponse } from './response/application-member-get-list-offer.response';
 import { ApplicationMemberGetListResponse } from './response/application-member-get-list.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[MEMBER] Application Management')
 @Controller('/member/applications')
@@ -127,5 +128,22 @@ export class ApplicationMemberController {
         @Query() query: ApplicationMemberGetListRequest,
     ): Promise<BaseResponse<ApplicationMemberGetListResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getApplicationList(request.user.accountId, query));
+    }
+
+    @Get('count')
+    @ApiOperation({
+        summary: 'Get total applications',
+        description: 'Member can retrive total applications',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: BaseResponse<number>,
+    })
+    @ApiResponse({
+        status: HttpStatus.NOT_FOUND,
+        type: BaseResponse,
+    })
+    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.applicationMemberService.getTotal(request.user.accountId));
     }
 }
