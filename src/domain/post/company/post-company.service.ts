@@ -10,6 +10,7 @@ import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-g
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
+import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
@@ -61,6 +62,19 @@ export class PostCompanyService {
         });
 
         return new PaginationResponse(postList, new PageInfo(postListCount));
+    }
+
+    async countPosts(accountId: number): Promise<PostCompanyCountPostsResponse> {
+        const posts = await this.prismaService.post.count({
+            // Conditions based on request query
+            where: {
+                isActive: true,
+                company: {
+                    accountId: accountId,
+                },
+            },
+        });
+        return { countPost: posts };
     }
 
     async create(accountId: number, request: PostCompanyCreateRequest) {
