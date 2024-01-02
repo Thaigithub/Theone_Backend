@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerType, CarrerCertificationApplicationStatus, CodeType } from '@prisma/client';
+import { CareerType, CareerCertificationApplicationStatus, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
@@ -169,7 +169,7 @@ export class CareerMemberService {
                 memberId,
             },
             update: {
-                status: CarrerCertificationApplicationStatus.REQUESTING,
+                status: CareerCertificationApplicationStatus.REQUESTING,
             },
         });
     }
@@ -183,7 +183,7 @@ export class CareerMemberService {
                 memberId,
             },
         });
-        if (!application || application.status != CarrerCertificationApplicationStatus.APPROVED)
+        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
 
         await this.governmentService.saveCertificationExperienceHealthInsurance(memberId);
@@ -198,7 +198,7 @@ export class CareerMemberService {
                 memberId,
             },
         });
-        if (!application || application.status != CarrerCertificationApplicationStatus.APPROVED)
+        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
 
         await this.governmentService.saveCertificationExperienceEmploymentInsurance(memberId);
@@ -213,7 +213,7 @@ export class CareerMemberService {
                 memberId,
             },
         });
-        if (!application || application.status != CarrerCertificationApplicationStatus.APPROVED)
+        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
 
         await this.governmentService.saveCertificationTheOneSite(memberId);

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
@@ -13,6 +13,9 @@ import { MemberDetailResponse } from './response/account-member-get-detail.respo
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { AccountMemberGetDetailMyHomeReponse } from './response/account-member-get-detail-myhome.response';
+import { AccountMemberUpdateInfoMyHomeRequest } from './request/account-member-update-info-myhome.request';
 
 @ApiTags('[MEMBER] Accounts Management')
 @Controller('/member/accounts')
@@ -69,6 +72,36 @@ export class AccountMemberController {
         @Param('username') username: string,
     ): Promise<BaseResponse<AccountMemberCheckUsernameExistenceResponse>> {
         return BaseResponse.of(await this.accountMemberService.accountRecommenderCheck(username));
+    }
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Get('myhome')
+    @ApiOperation({
+        summary: 'Get member information in My Home view',
+        description: 'Member can retrieve basic information in My Home',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: AccountMemberGetDetailMyHomeReponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async getDetailMyHome(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountMemberGetDetailMyHomeReponse>> {
+        return BaseResponse.of(await this.accountMemberService.getDetailMyHome(request.user.accountId));
+    }
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Patch('myhome')
+    @ApiOperation({
+        summary: 'Change member desired salary/occupation in My Home view',
+        description: 'Member can change desired salary/occupation in My Home',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
+    async updateInfoMyHome(
+        @Req() request: AccountIdExtensionRequest,
+        @Body() body: AccountMemberUpdateInfoMyHomeRequest,
+    ): Promise<BaseResponse<null>> {
+        await this.accountMemberService.updateInfoMyHome(request.user.accountId, body);
+        return BaseResponse.ok();
     }
 
     @Roles(AccountType.MEMBER)
@@ -143,5 +176,19 @@ export class AccountMemberController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getMemberDetails(@Req() request: any): Promise<BaseResponse<MemberDetailResponse>> {
         return BaseResponse.of(await this.accountMemberService.getDetail(request.user.accountId));
+    }
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Patch('cancel-membership')
+    @ApiOperation({
+        summary: 'Cancel membership',
+        description: 'Member will unsubscribe from all The One services',
+    })
+    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    async cancelMembership(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<null>> {
+        await this.accountMemberService.cancelMembership(request.user.accountId);
+        return BaseResponse.ok();
     }
 }

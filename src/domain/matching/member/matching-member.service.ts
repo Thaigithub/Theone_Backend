@@ -38,7 +38,16 @@ export class MatchingMemberService {
             },
         });
 
-        this.checkCareer(account);
+        const careerExist = await this.prismaService.career.count({
+            where: {
+                isActive: true,
+                member: {
+                    accountId,
+                },
+            },
+        });
+        console.log(careerExist);
+        if (!careerExist) throw new BadRequestException('You need to create a career first');
 
         const matchingPostToday = await this.prismaService.memberMatching.findFirst({
             where: {
@@ -330,10 +339,5 @@ export class MatchingMemberService {
         if (!matchingPost) throw new NotFoundException('No matching post found');
 
         return await this.postMemberService.updateInterestPost(accountId, matchingPost.postId);
-    }
-
-    checkCareer(account) {
-        //Checking member have create career
-        if (!account.member.career.length) throw new BadRequestException('You need to create a career first');
     }
 }
