@@ -649,4 +649,21 @@ export class ApplicationMemberService {
         });
         return new PaginationResponse(offer, new PageInfo(total));
     }
+    async getTotal(accountId: number): Promise<number> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                isActive: true,
+                accountId,
+            },
+        });
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
+        return await this.prismaService.application.count({
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+        });
+    }
 }

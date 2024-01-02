@@ -1,5 +1,5 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpStatus, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -21,5 +21,22 @@ export class InterviewMemberController {
         @Query() query: InterviewMemberGetListRequest,
     ): Promise<BaseResponse<InterviewMemberGetListResponse>> {
         return BaseResponse.of(await this.interviewMemberService.getList(request.user.accountId, query));
+    }
+
+    @Get('count')
+    @ApiOperation({
+        summary: 'Get total interviews',
+        description: 'Member can retrive total interviews',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: BaseResponse<number>,
+    })
+    @ApiResponse({
+        status: HttpStatus.NOT_FOUND,
+        type: BaseResponse,
+    })
+    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.interviewMemberService.getTotal(request.user.accountId));
     }
 }

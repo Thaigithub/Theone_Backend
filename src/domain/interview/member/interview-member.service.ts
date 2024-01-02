@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -194,5 +194,26 @@ export class InterviewMemberService {
         });
         const total = await this.prismaService.application.count({ where: search.where });
         return new PaginationResponse(application, new PageInfo(total));
+    }
+
+    async getTotal(accountId: number): Promise<number> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                isActive: true,
+                accountId,
+            },
+        });
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
+        return await this.prismaService.interview.count({
+            where: {
+                isActive: true,
+                application: {
+                    member: {
+                        accountId,
+                    },
+                },
+            },
+        });
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -225,9 +225,9 @@ export class ContractMemberService {
         };
         if (query.status === ContractStatus.END_OF_DUTY) {
             search.where.OR.map((item) => {
-                const { endDate, ...rest } = item;
+                delete item.endDate;
                 return {
-                    ...rest,
+                    ...item,
                     endDate: {
                         lte: new Date(),
                     },
@@ -236,9 +236,10 @@ export class ContractMemberService {
         }
         if (query.status === ContractStatus.ON_DUTY) {
             search.where.OR.map((item) => {
-                const { endDate, startDate, ...rest } = item;
+                delete item.startDate;
+                delete item.endDate;
                 return {
-                    ...rest,
+                    ...item,
                     endDate: {
                         gte: new Date(),
                     },
@@ -265,6 +266,25 @@ export class ContractMemberService {
         });
         const total = await this.prismaService.contract.count({ where: search.where });
         return new PaginationResponse(contracts, new PageInfo(total));
+    }
+    async getTotal(accountId: number): Promise<number> {
+        const memberExist = await this.prismaService.member.count({
+            where: {
+                isActive: true,
+                accountId,
+            },
+        });
+        if (!memberExist) throw new NotFoundException('Member does not exist');
+
+        return await this.prismaService.contract.count({
+            where: {
+                application: {
+                    member: {
+                        accountId,
+                    },
+                },
+            },
+        });
     }
     // async getDetailForSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {}
 }

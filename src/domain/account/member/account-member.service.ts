@@ -265,58 +265,6 @@ export class AccountMemberService {
 
         if (!member) throw new NotFoundException('Member does not exist');
 
-        // Support/Work
-        const totalApplications = await this.prismaService.application.count({
-            where: {
-                member: {
-                    accountId,
-                },
-            },
-        });
-        const totalInterviews = await this.prismaService.interview.count({
-            where: {
-                application: {
-                    member: {
-                        accountId,
-                    },
-                },
-            },
-        });
-        const totalContracts = await this.prismaService.contract.count({
-            where: {
-                application: {
-                    member: {
-                        accountId,
-                    },
-                },
-            },
-        });
-
-        // Site activity
-        let totalShifts: number = 0;
-        const listShifts = await this.prismaService.labor.findMany({
-            select: {
-                workDates: true,
-            },
-            where: {
-                contract: {
-                    application: {
-                        member: {
-                            accountId,
-                        },
-                    },
-                },
-            },
-        });
-        listShifts.map((item) => (totalShifts += item.workDates.length));
-        const totalEvaluations = await this.prismaService.siteEvaluationByMember.count({
-            where: {
-                member: {
-                    accountId,
-                },
-            },
-        });
-
         return {
             name: member.name,
             username: member.account.username,
@@ -327,15 +275,6 @@ export class AccountMemberService {
             registrationDate: member.createdAt,
             totalExperienceYears: member.totalExperienceYears,
             totalExperienceMonths: member.totalExperienceMonths,
-            supportWork: {
-                totalApplications,
-                totalInterviews,
-                totalContracts,
-            },
-            siteActivity: {
-                totalShifts,
-                totalEvaluations,
-            },
         };
     }
 
