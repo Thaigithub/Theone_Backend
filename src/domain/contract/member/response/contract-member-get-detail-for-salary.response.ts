@@ -1,5 +1,6 @@
 import { PaymentForm, SalaryType } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
+import { SalaryHistory } from '../dto/labor-company-salary.dto';
 
 export class ContractMemberGetDetailForSalaryResponse {
     companyName: string;
@@ -10,6 +11,7 @@ export class ContractMemberGetDetailForSalaryResponse {
     salaryType: SalaryType;
     totalDays: number;
     totalHours: number;
-    startDate: number;
-    endDate: number;
+    startDate: Date;
+    endDate: Date;
+    salaryHistories: SalaryHistory[];
 }

@@ -5,10 +5,10 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractStatus } from './enum/contract-member-status.enum';
 import { ContractMemberGetListForSalaryRequest } from './request/contract-member-get-list-for-salary.request';
 import { ContractMemberGetListRequest } from './request/contract-member-get-list.request';
+import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
 import { ContractMemberGetDetailResponse } from './response/contract-member-get-detail.response';
 import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
 import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
-import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
 
 @Injectable()
 export class ContractMemberService {
@@ -92,13 +92,28 @@ export class ContractMemberService {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
-                application: {
-                    post: {
-                        company: {
-                            accountId,
+                OR: [
+                    {
+                        application: {
+                            member: {
+                                accountId,
+                            },
                         },
                     },
-                },
+                    {
+                        application: {
+                            team: {
+                                members: {
+                                    some: {
+                                        member: {
+                                            accountId,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
             },
             select: {
                 createdAt: true,
@@ -292,5 +307,100 @@ export class ContractMemberService {
             },
         });
     }
-    // async getDetailForSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {}
+    async getDetailForSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id,
+                OR: [
+                    {
+                        application: {
+                            member: {
+                                accountId,
+                            },
+                        },
+                    },
+                    {
+                        application: {
+                            team: {
+                                members: {
+                                    some: {
+                                        member: {
+                                            accountId,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            select: {
+                startDate: true,
+                endDate: true,
+                paymentForm: true,
+                salaryType: true,
+                labor: {
+                    select: {
+                        workDates: {
+                            select: {
+                                hours: true,
+                            },
+                        },
+                    },
+                    include: {
+                        salaryHistories: true,
+                    },
+                },
+                application: {
+                    select: {
+                        post: {
+                            select: {
+                                company: {
+                                    select: {
+                                        name: true,
+                                        logo: {
+                                            select: {
+                                                file: true,
+                                            },
+                                        },
+                                    },
+                                },
+                                site: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                            },
+                        },
+                        member: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        team: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!contract) throw new NotFoundException('Contract not found');
+        return {
+            companyName: contract.application.post.company.name,
+            siteName: contract.application.post.site.name,
+            companyLogo: contract.application.post.company.logo.file,
+            name: contract.application.member ? contract.application.member.name : contract.application.team.name,
+            paymentForm: contract.paymentForm,
+            salaryType: contract.salaryType,
+            totalDays: contract.labor.workDates.length,
+            totalHours: contract.labor.workDates.reduce((accum, current) => {
+                return accum + current.hours;
+            }, 0),
+            startDate: contract.startDate,
+            endDate: contract.endDate,
+            salaryHistories: contract.labor.salaryHistories,
+        };
+    }
 }
