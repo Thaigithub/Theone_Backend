@@ -8,6 +8,7 @@ export class MatchingMemberGetListRequest {
     @IsOptional()
     @ApiProperty({
         type: MatchingMemberGetListCategory,
+        required: false,
     })
     @IsEnum(MatchingMemberGetListCategory)
     public category: MatchingMemberGetListCategory;
@@ -16,6 +17,7 @@ export class MatchingMemberGetListRequest {
     @IsOptional()
     @ApiProperty({
         type: String,
+        required: false,
     })
     public pageSize: number;
 
@@ -23,6 +25,7 @@ export class MatchingMemberGetListRequest {
     @IsOptional()
     @ApiProperty({
         type: String,
+        required: false,
     })
     public pageNumber: number;
 }

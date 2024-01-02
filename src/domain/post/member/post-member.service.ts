@@ -147,9 +147,9 @@ export class PostMemberService {
 
         return posts.map((item) => {
             const site = item.site;
-            const startWorkDate = item.startWorkDate.toISOString().split('T')[0];
-            const endWorkDate = item.endWorkDate.toISOString().split('T')[0];
-            const endDate = item.endDate.toISOString().split('T')[0];
+            const startWorkDate = item.startWorkDate ? item.startWorkDate.toISOString().split('T')[0] : null;
+            const endWorkDate = item.endWorkDate ? item.endWorkDate.toISOString().split('T')[0] : null;
+            const endDate = item.endDate ? item.endDate.toISOString().split('T')[0] : null;
             const occupation = item.occupation ? item.occupation.codeName : null;
             delete item.site;
             delete item.occupation;

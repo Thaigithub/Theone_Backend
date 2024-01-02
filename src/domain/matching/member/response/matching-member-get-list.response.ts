@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { File } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class MatchingMemberGetItemResponse {
@@ -22,7 +22,7 @@ export class MatchingMemberGetItemResponse {
     occupation: string;
 
     @ApiProperty()
-    logo: File;
+    logo: FileResponse;
 
     @ApiProperty()
     isInterested: boolean;

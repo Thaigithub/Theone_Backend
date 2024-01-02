@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
+import { Application, InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { MemberCompanyService } from 'domain/member/company/member-company.service';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
@@ -241,40 +241,84 @@ export class InterviewCompanyService {
         });
         if (!postExist) throw new NotFoundException('Post does not exist');
 
+        // Check interview exist or not
+        const interviewExist = await this.prismaService.interview.count({
+            where: {
+                application: {
+                    postId: body.postId,
+                    memberId: body.interviewProposalType === InterviewProposalType.MEMBER ? body.memberOrTeamId : undefined,
+                    teamId: body.interviewProposalType === InterviewProposalType.TEAM ? body.memberOrTeamId : undefined,
+                },
+            },
+        });
+
+        if (interviewExist) {
+            throw new BadRequestException(
+                'Interview for that member or team already existed. Can not propose for a new interview.',
+            );
+        }
+
+        let proposeApplication: Application;
+
         switch (body.interviewProposalType) {
             case InterviewProposalType.MEMBER:
                 const memberExist = await this.prismaService.member.count({
                     where: {
                         isActive: true,
-                        id: body.id,
+                        id: body.memberOrTeamId,
                     },
                 });
                 if (!memberExist) throw new NotFoundException('Member does not exist');
+                proposeApplication = await this.prismaService.application.upsert({
+                    create: {
+                        memberId: body.memberOrTeamId,
+                        postId: body.postId,
+                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    },
+                    update: {
+                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    },
+                    where: {
+                        memberId_postId: {
+                            memberId: body.memberOrTeamId,
+                            postId: body.postId,
+                        },
+                        status: PostApplicationStatus.APPLY,
+                    },
+                });
                 break;
             case InterviewProposalType.TEAM:
                 const teamExist = await this.prismaService.team.count({
                     where: {
                         isActive: true,
-                        id: body.id,
+                        id: body.memberOrTeamId,
                     },
                 });
                 if (!teamExist) throw new NotFoundException('Team does not exist');
+                proposeApplication = await this.prismaService.application.upsert({
+                    create: {
+                        teamId: body.memberOrTeamId,
+                        postId: body.postId,
+                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    },
+                    update: {
+                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    },
+                    where: {
+                        teamId_postId: {
+                            teamId: body.memberOrTeamId,
+                            postId: body.postId,
+                        },
+                        status: PostApplicationStatus.APPLY,
+                    },
+                });
                 break;
         }
 
-        const newApplication = await this.prismaService.application.create({
-            data: {
-                memberId: body.interviewProposalType === InterviewProposalType.MEMBER ? body.id : null,
-                teamId: body.interviewProposalType === InterviewProposalType.TEAM ? body.id : null,
-                postId: body.postId,
-                status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-            },
-        });
-
         await this.prismaService.interview.create({
             data: {
+                applicationId: proposeApplication.id,
                 supportCategory: SupportCategory.MANPOWER,
-                applicationId: newApplication.id,
                 interviewStatus: InterviewStatus.INTERVIEWING,
             },
         });

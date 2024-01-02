@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, Prisma } from '@prisma/client';
-import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { ExperienceType, Prisma } from '@prisma/client';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/menber-company-manpower-get-detail.response';
 
 @Injectable()
