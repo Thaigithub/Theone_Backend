@@ -239,7 +239,11 @@ export class WorkAdminService {
                         },
                     },
                 },
-                workDates: true,
+                workDates: {
+                    select: {
+                        date: true,
+                    },
+                },
             },
             where: {
                 contract: {
@@ -258,8 +262,10 @@ export class WorkAdminService {
                     ? list.contract.application.team.name
                     : list.contract.application.member.name,
                 workDay: list.workDates
-                    .filter((workdate) => workdate.date.toISOString().includes(query.date))
-                    .map((item) => item.date),
+                    ? list.workDates
+                          .filter((workdate) => workdate.date.toISOString().includes(query.date))
+                          .map((item) => item.date)
+                    : [],
             } as WorkAdminGetDetailItemHistoryResponse;
         });
 
