@@ -7,6 +7,7 @@ import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
+import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -17,19 +18,11 @@ export class ApplicationCompanyService {
         query: ApplicationCompanyGetListApplicantsRequest,
         postId: number,
     ): Promise<ApplicationCompanyGetListApplicantsResponse> {
-        const account = await this.prismaService.account.findUnique({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
         const queryFilter: Prisma.ApplicationWhereInput = {
             post: {
-                companyId: account.company.id,
+                company: {
+                    accountId: accountId,
+                },
                 id: postId,
             },
             ...(query.startApplicationDate && { assignedAt: { gte: new Date(query.startApplicationDate) } }),
@@ -140,23 +133,30 @@ export class ApplicationCompanyService {
         return new PaginationResponse(newApplicationList, new PageInfo(applicationListCount));
     }
 
-    async updateApplicationStatus(accountId: any, applicationId: number, status: PostApplicationStatus) {
-        const account = await this.prismaService.account.findUnique({
+    async countApplications(accountId: number): Promise<ApplicationCompanyCountApplicationsResponse> {
+        /* Count all active applications that company reposible for.*/
+        const applications = await this.prismaService.application.count({
+            // Conditions based on request query
             where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
+                post: {
+                    company: {
+                        accountId: accountId,
+                    },
+                },
             },
         });
+        return { countApplications: applications };
+    }
 
+    async updateApplicationStatus(accountId: number, applicationId: number, status: PostApplicationStatus) {
         try {
             await this.prismaService.application.update({
                 where: {
                     id: applicationId,
                     post: {
-                        companyId: account.company.id,
+                        company: {
+                            accountId: accountId,
+                        },
                     },
                 },
                 data: {
@@ -169,21 +169,13 @@ export class ApplicationCompanyService {
     }
 
     async proposeInterview(accountId: any, applicationId: number, supportCategory: SupportCategory) {
-        const account = await this.prismaService.account.findUniqueOrThrow({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
         const application = await this.prismaService.application.findUnique({
             where: {
                 id: applicationId,
                 post: {
-                    companyId: account.company.id,
+                    company: {
+                        accountId: accountId,
+                    },
                 },
             },
         });

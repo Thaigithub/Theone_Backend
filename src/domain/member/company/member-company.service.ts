@@ -4,6 +4,7 @@ import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/re
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/menber-company-manpower-get-detail.response';
 
@@ -132,6 +133,7 @@ export class MemberCompanyService {
         const application = await this.prismaService.member.findUniqueOrThrow({
             where: {
                 id,
+                accountId: accountId,
             },
             select: {
                 name: true,
@@ -323,5 +325,30 @@ export class MemberCompanyService {
                 total: member.specialLicenses.length,
             },
         };
+    }
+
+    async countWorkers(accountId: number): Promise<MemberCompanyCountWorkersResponse> {
+        const workers = await this.prismaService.member.count({
+            where: {
+                applyPosts: {
+                    some: {
+                        post: {
+                            company: {
+                                accountId: accountId,
+                            },
+                        },
+                        contract: {
+                            startDate: {
+                                lte: new Date(),
+                            },
+                            endDate: {
+                                gte: new Date(),
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        return { countWorkers: workers };
     }
 }

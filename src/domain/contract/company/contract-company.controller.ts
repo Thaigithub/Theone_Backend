@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -11,6 +11,7 @@ import { ContractCompanyGetListForSiteRequest } from './request/contract-company
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse, GetListForSite } from './response/contract-company-get-list-for-site.response';
+import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 
 @ApiTags('[COMPANY] Contract Management')
 @Controller('/company/contracts')
@@ -21,6 +22,17 @@ import { ContractCompanyGetListForSiteResponse, GetListForSite } from './respons
 @ApiConsumes('application/json')
 export class ContractCompanyController {
     constructor(private contractCompanyService: ContractCompanyService) {}
+
+    @Get('/count')
+    @ApiOperation({
+        summary: 'count contracts that company have responsibility (use for dashboard)',
+        description: 'Company retrieve the total contract that is active',
+    })
+    @ApiResponse({ status: HttpStatus.ACCEPTED, type: ContractCompanyCountContractsResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
+    async countPosts(@Req() req: any): Promise<BaseResponse<ContractCompanyCountContractsResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.countContracts(req.user.accountId));
+    }
 
     @Get('/site/:id')
     @ApiOperation({
@@ -52,6 +64,7 @@ export class ContractCompanyController {
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.update(id, req.user.accountId, body));
     }
+
     @Put()
     async createContract(@Body() body: ContractCompanyCreateRequest, @Req() request: any): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.createContract(request.user.accountId, body));

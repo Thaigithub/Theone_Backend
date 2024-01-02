@@ -12,6 +12,7 @@ import {
     ApplicationCompanyGetListApplicantsResponse,
 } from './response/application-company-get-list-applicants.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
+import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 
 @ApiTags('[COMPANY] Application Management')
 @Controller('/company/applications')
@@ -28,6 +29,17 @@ export class ApplicationCompanyController {
         @Req() req: any,
     ): Promise<BaseResponse<ApplicationCompanyGetListOfferByPost>> {
         return BaseResponse.of(await this.applicationCompanyService.getListOfferByPost(req.user.accountId, postId));
+    }
+
+    @Get('/count')
+    @ApiOperation({
+        summary: 'count all applications that is active in your company (use for dashboard)',
+        description: 'Company retrieve the total number of applications that is active',
+    })
+    @ApiResponse({ status: HttpStatus.ACCEPTED, type: ApplicationCompanyCountApplicationsResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
+    async countApplications(@Req() req: any): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
+        return BaseResponse.of(await this.applicationCompanyService.countApplications(req.user.accountId));
     }
 
     @Get('/:postId')

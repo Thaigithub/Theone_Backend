@@ -8,6 +8,7 @@ import { ContractCompanyGetListForSiteRequest } from './request/contract-company
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
+import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 
 @Injectable()
 export class ContractCompanyService {
@@ -149,6 +150,27 @@ export class ContractCompanyService {
                     : application.post.site.numberOfWorkers + 1,
             },
         });
+    }
+
+    async countContracts(accountId: number): Promise<ContractCompanyCountContractsResponse> {
+        const contracts = await this.prismaService.contract.count({
+            where: {
+                startDate: {
+                    lte: new Date(),
+                },
+                endDate: {
+                    gte: new Date(),
+                },
+                application: {
+                    post: {
+                        company: {
+                            accountId: accountId,
+                        },
+                    },
+                },
+            },
+        });
+        return { countContracts: contracts };
     }
 
     async getDetail(contractId, accountId): Promise<ContractCompanyGetDetailResponse> {

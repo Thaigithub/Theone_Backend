@@ -9,6 +9,7 @@ import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberCompanyService } from './member-company.service';
 import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/menber-company-manpower-get-detail.response';
 
@@ -21,6 +22,17 @@ import { MemberCompanyManpowerGetDetailResponse } from './response/menber-compan
 @ApiConsumes('application/json')
 export class MemberCompanyController {
     constructor(private memberCompanyService: MemberCompanyService) {}
+
+    @Get('/count-working-members')
+    @ApiOperation({
+        summary: 'Count all worker that are working (having that contract is active, use for dashboard)',
+        description: 'Company retrieve the total number of workers that are working (having that contract is active',
+    })
+    @ApiResponse({ status: HttpStatus.ACCEPTED, type: MemberCompanyCountWorkersResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
+    async countPosts(@Req() req: any): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
+        return BaseResponse.of(await this.memberCompanyService.countWorkers(req.user.accountId));
+    }
 
     @Get(':id/applicants')
     @ApiOperation({

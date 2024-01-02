@@ -26,6 +26,7 @@ import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-g
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
+import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
 import { PostCompanyGetItemApplicantsResponse } from './response/post-company-get-item-applicants.response';
 import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
@@ -110,6 +111,13 @@ export class PostCompanyController {
     ): Promise<BaseResponse<PostCompanyGetListApplicantsResponse>> {
         const posts = await this.postCompanyService.getListApplicantSite(request.user.accountId, query);
         return BaseResponse.of(posts);
+    }
+
+    @Get('/count')
+    @ApiResponse({ status: HttpStatus.ACCEPTED, type: PostCompanyCountPostsResponse })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
+    async countPosts(@Req() req: any): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
+        return BaseResponse.of(await this.postCompanyService.countPosts(req.user.accountId));
     }
 
     @Post('/create')
