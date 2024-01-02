@@ -62,7 +62,6 @@ export class PostCompanyDetailResponse {
     @ApiProperty({
         type: 'enum',
         enum: SalaryType,
-        example: SalaryType.FIRST_CLASS,
     })
     public salaryType: SalaryType;
 

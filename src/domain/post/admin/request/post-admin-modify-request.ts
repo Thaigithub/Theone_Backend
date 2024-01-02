@@ -149,7 +149,6 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
     @ApiProperty({
         type: 'enum',
         enum: SalaryType,
-        example: SalaryType.FIRST_CLASS,
     })
     @IsOptional()
     public salaryType: SalaryType;

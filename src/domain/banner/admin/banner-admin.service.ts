@@ -144,7 +144,6 @@ export class AdminBannerService {
                 key: banner.banner.file.key,
                 fileName: banner.banner.file.fileName,
                 type: banner.banner.file.type,
-                size: banner.banner.file.size,
             },
             status: banner.banner.status,
             title: banner.title,

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsLowercase, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
 
-export abstract class AccountAdminUpdateRequest {
+export abstract class AdminAdminUpdateRequest {
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })

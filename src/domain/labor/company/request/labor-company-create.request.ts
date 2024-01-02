@@ -13,10 +13,6 @@ export class LaborCompanyCreateRequest {
     public workDate: WorkDate[];
 
     @Expose()
-    @IsNumber()
-    public numberOfHours: number;
-
-    @Expose()
     @IsArray()
     public salaryHistory: SalaryHistory[];
 }

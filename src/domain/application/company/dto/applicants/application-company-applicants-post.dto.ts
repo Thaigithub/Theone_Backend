@@ -9,7 +9,7 @@ export class ApplicationCompanyApplicantsPostDTO {
     @ApiProperty({ example: 1000000 })
     public salaryAmount: number;
 
-    @ApiProperty({ type: 'enum', enum: SalaryType, example: SalaryType.SALARY })
+    @ApiProperty({ type: 'enum', enum: SalaryType, example: SalaryType.DAILY })
     public salaryType: SalaryType;
 
     @ApiProperty({ example: 'abc' })

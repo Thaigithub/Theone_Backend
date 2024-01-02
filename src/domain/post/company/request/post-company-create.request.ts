@@ -87,7 +87,6 @@ export class PostCompanyCreateRequest {
     @ApiProperty({
         type: 'enum',
         enum: SalaryType,
-        example: SalaryType.FIRST_CLASS,
     })
     @IsOptional()
     public salaryType: SalaryType;

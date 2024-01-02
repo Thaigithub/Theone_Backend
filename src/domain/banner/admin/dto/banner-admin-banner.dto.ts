@@ -1,9 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { FileClass } from './banner-admin-filetype.response.dto';
+import { FileUploadRequest } from 'utils/generics/file.request';
 
 export class Banner {
     @Expose()
-    @ApiProperty({ type: FileClass })
-    readonly file: FileClass;
+    readonly file: FileUploadRequest;
 }

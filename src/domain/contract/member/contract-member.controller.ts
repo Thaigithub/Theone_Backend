@@ -1,0 +1,56 @@
+import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseResponse } from 'utils/generics/base.response';
+import { ContractMemberService } from './contract-member.service';
+import { ContractMemberGetListForSalaryRequest } from './request/contract-member-get-list-for-salary.request';
+import { ContractMemberGetListRequest } from './request/contract-member-get-list.request';
+import { ContractMemberGetDetailResponse } from './response/contract-member-get-detail.response';
+import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
+import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
+import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
+
+@ApiTags('[MEMBER] Contract Management')
+@Controller('/member/contracts')
+@Roles(AccountType.MEMBER)
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@ApiBearerAuth()
+@ApiProduces('application/json')
+@ApiConsumes('application/json')
+export class ContractMemberController {
+    constructor(private contractMemberService: ContractMemberService) {}
+    // @Get('/:id/salary-site')
+    // async geDetailForSalary(
+    //     @Req() req: AccountIdExtensionRequest,
+    //     @Param('id', ParseIntPipe) id: number,
+    // ): Promise<BaseResponse<ContractMemberGetDetailForSalaryResponse>> {
+    //     return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
+    // }
+
+    @Get('/salary-site')
+    async getListForSalary(
+        @Query() query: ContractMemberGetListForSalaryRequest,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ContractMemberGetListForSalaryResponse>> {
+        return BaseResponse.of(await this.contractMemberService.getListForSalary(req.user.accountId, query));
+    }
+
+    @Get('/:id')
+    async getDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ContractMemberGetDetailResponse>> {
+        return BaseResponse.of(await this.contractMemberService.getDetail(req.user.accountId, id));
+    }
+
+    @Get()
+    async getList(
+        @Query() query: ContractMemberGetListRequest,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ContractMemberGetListResponse>> {
+        return BaseResponse.of(await this.contractMemberService.getList(req.user.accountId, query));
+    }
+}

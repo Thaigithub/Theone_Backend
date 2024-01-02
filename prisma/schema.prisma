@@ -749,7 +749,7 @@ model HeadhuntingRecommendation {
 
 model Contract {
   id            Int         @id @default(autoincrement())
-  paymentForm   PaymentForm @default(FIRST_CLASS) @map("payment_form")
+  salaryType    SalaryType  @map("salary_type")
   amount        Int         @default(0)
   startDate     DateTime    @map("start_date") @db.Date
   endDate       DateTime    @map("end_date") @db.Date
@@ -759,6 +759,7 @@ model Contract {
   file          File        @relation(fields: [fileId], references: [id])
   department    String      @default("")
   labor         Labor?
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Date
 
   @@map("contracts")
 }
@@ -825,35 +826,44 @@ model Labor {
   id              Int             @id @default(autoincrement())
   contractId      Int             @unique @map("contract_id")
   contract        Contract        @relation(fields: [contractId], references: [id])
-  workDates       DateTime[]      @map("work_dates") @db.Date
+  workDates       WorkDate[]
   salaryHistories SalaryHistory[]
-  numberOfHours   Int             @map("number_of_hours")
 
   @@map("labors")
 }
 
-model SalaryHistory {
-  id                  Int   @id @default(autoincrement())
-  laborId             Int   @map("labor_id")
-  labor               Labor @relation(fields: [laborId], references: [id])
-  base                Int   @default(0)
-  otherAllowance      Int   @default(0) @map("other_allowance")
-  overtimePay         Int   @default(0) @map("overtime_pay")
-  meals               Int   @default(0)
-  totalPayment        Int   @default(0) @map("total_payment")
-  nationalPension     Int   @default(0) @map("national_pension")
-  healthInsurance     Int   @default(0) @map("health_insurance")
-  longTermCare        Int   @default(0) @map("long_term_care")
-  employmentInsurance Int   @default(0) @map("employment_insurance")
-  retirementDeduction Int   @default(0) @map("retirement_deduction")
-  incomeTax           Int   @default(0) @map("income_tax")
-  residentTax         Int   @default(0) @map("resident_tax")
-  totalDeductible     Int   @default(0) @map("total_deductible")
-  actualPayment       Int   @default(0) @map("actual_payment")
-  year                Int   @default(0)
-  month               Int   @default(0)
+model WorkDate {
+  id      Int      @id @default(autoincrement())
+  laborId Int      @map("labor_id")
+  labor   Labor    @relation(fields: [laborId], references: [id])
+  date    DateTime @db.Date
+  hours   Int
 
-  @@unique([laborId, year, month])
+  @@unique([laborId, date])
+  @@map("work_dates")
+}
+
+model SalaryHistory {
+  id                  Int      @id @default(autoincrement())
+  laborId             Int      @map("labor_id")
+  labor               Labor    @relation(fields: [laborId], references: [id])
+  base                Int      @default(0)
+  otherAllowance      Int      @default(0) @map("other_allowance")
+  overtimePay         Int      @default(0) @map("overtime_pay")
+  meals               Int      @default(0)
+  totalPayment        Int      @default(0) @map("total_payment")
+  nationalPension     Int      @default(0) @map("national_pension")
+  healthInsurance     Int      @default(0) @map("health_insurance")
+  longTermCare        Int      @default(0) @map("long_term_care")
+  employmentInsurance Int      @default(0) @map("employment_insurance")
+  retirementDeduction Int      @default(0) @map("retirement_deduction")
+  incomeTax           Int      @default(0) @map("income_tax")
+  residentTax         Int      @default(0) @map("resident_tax")
+  totalDeductible     Int      @default(0) @map("total_deductible")
+  actualPayment       Int      @default(0) @map("actual_payment")
+  date                DateTime
+
+  @@unique([laborId, date])
   @@map("salary_histories")
 }
 
@@ -872,10 +882,6 @@ enum RequestBannerStatus {
 enum PostBannerType {
   ADMIN
   COMPANY
-}
-
-enum PaymentForm {
-  FIRST_CLASS
 }
 
 enum FunctionName {
@@ -1037,8 +1043,8 @@ enum ExperienceType {
 
 enum SalaryType {
   HOURLY
-  FIRST_CLASS
-  SALARY
+  DAILY
+  MONTHLY
 }
 
 enum Workday {

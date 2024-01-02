@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Banner, BannerStatus, GeneralBanner } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { FileClass } from '../dto/banner-admin-filetype.response.dto';
 
 export class GeneralBannerResponse {
     @ApiProperty({ type: Number })
@@ -12,8 +12,8 @@ export class GeneralBannerResponse {
     urlLink: GeneralBanner['urlLink'];
     @ApiProperty({ type: Number })
     priority: GeneralBanner['priority'];
-    @ApiProperty({ type: FileClass })
-    bannerFile: FileClass;
+    @ApiProperty({ type: FileResponse })
+    bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })
     status: Banner['status'];
     @ApiProperty({ type: Date })

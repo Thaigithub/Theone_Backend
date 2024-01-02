@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminPostBanner, Banner, BannerStatus, Post } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { FileClass } from '../dto/banner-admin-filetype.response.dto';
 
 export class AdminJobPostBannerResponse {
     @ApiProperty({ type: Number })
@@ -10,8 +10,8 @@ export class AdminJobPostBannerResponse {
     postName: Post['name'];
     @ApiProperty({ type: Number })
     postId: Post['id'];
-    @ApiProperty({ type: FileClass })
-    bannerFile: FileClass;
+    @ApiProperty({ type: FileResponse })
+    bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })
     status: Banner['status'];
     @ApiProperty({ type: String })

@@ -209,7 +209,9 @@ export class WorkAdminService {
                 workerName: !list.contract.application.member
                     ? list.contract.application.team.name
                     : list.contract.application.member.name,
-                workDay: list.workDates.filter((workdate) => workdate.toISOString().includes(query.date)),
+                workDay: list.workDates
+                    .filter((workdate) => workdate.date.toISOString().includes(query.date))
+                    .map((item) => item.date),
             } as WorkAdminGetDetailItemHistoryResponse;
         });
 
@@ -255,7 +257,9 @@ export class WorkAdminService {
                 workerName: !list.contract.application.member
                     ? list.contract.application.team.name
                     : list.contract.application.member.name,
-                workDay: list.workDates.filter((workdate) => workdate.toISOString().includes(query.date)),
+                workDay: list.workDates
+                    .filter((workdate) => workdate.date.toISOString().includes(query.date))
+                    .map((item) => item.date),
             } as WorkAdminGetDetailItemHistoryResponse;
         });
 

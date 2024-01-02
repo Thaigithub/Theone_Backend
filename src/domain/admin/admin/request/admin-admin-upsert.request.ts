@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AdminLevel, FunctionName } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
-import { AccountAdminUpdateRequest } from 'domain/account/admin/request/account-admin-update.request';
+import { AdminAdminUpdateRequest } from './admin-admin-update.request';
 
-export class AdminAdminUpsertRequest extends AccountAdminUpdateRequest {
+export class AdminAdminUpsertRequest extends AdminAdminUpdateRequest {
     @Expose()
     @IsEnum(AdminLevel)
     @ApiProperty({
