@@ -114,9 +114,18 @@ export class LaborCompanyService {
                     },
                 },
             },
-            select: {
+            include: {
+                application: {
+                    include: {
+                        member: true,
+                        post: {
+                            include: {
+                                site: true,
+                            },
+                        },
+                    },
+                },
                 labor: true,
-                salaryType: true,
             },
         });
         if (!contract) throw new NotFoundException('Contract not found');
@@ -160,10 +169,84 @@ export class LaborCompanyService {
                     },
                 },
             },
-            select: {
-                id: true,
-            },
         });
+
+        if (contract.application.memberId) {
+            // Create member evaluation ticket for company
+            const memberEvaluation = await this.prismaService.memberEvaluation.upsert({
+                create: {
+                    memberId: contract.application.memberId,
+                    totalEvaluators: 0,
+                },
+                update: {
+                    memberId: contract.application.memberId,
+                    totalEvaluators: 0,
+                    totalScore: null,
+                    averageScore: null,
+                    createdAt: new Date(),
+                },
+                where: {
+                    isActive: true,
+                    memberId: contract.application.memberId,
+                },
+            });
+            await this.prismaService.memberEvaluationByCompany.create({
+                data: {
+                    memberEvaluationId: memberEvaluation.id,
+                    siteId: contract.application.post.siteId,
+                },
+            });
+
+            // Create site evaluation ticket for contract
+            const siteEvaluation = await this.prismaService.siteEvaluation.upsert({
+                create: {
+                    siteId: contract.application.post.siteId,
+                    totalEvaluators: 0,
+                },
+                update: {
+                    siteId: contract.application.post.siteId,
+                    totalEvaluators: 0,
+                    totalScore: null,
+                    averageScore: null,
+                    createdAt: new Date(),
+                },
+                where: {
+                    isActive: true,
+                    siteId: contract.application.post.siteId,
+                },
+            });
+            await this.prismaService.siteEvaluationByContract.create({
+                data: {
+                    siteEvaluationId: siteEvaluation.id,
+                    contractId: contract.id,
+                },
+            });
+        } else if (contract.application.teamId) {
+            const teamEvaluation = await this.prismaService.teamEvaluation.upsert({
+                create: {
+                    teamId: contract.application.teamId,
+                    totalEvaluators: 0,
+                },
+                update: {
+                    teamId: contract.application.teamId,
+                    totalEvaluators: 0,
+                    totalScore: null,
+                    averageScore: null,
+                    createdAt: new Date(),
+                },
+                where: {
+                    isActive: true,
+                    teamId: contract.application.teamId,
+                },
+            });
+            await this.prismaService.teamEvaluationByCompany.create({
+                data: {
+                    teamEvaluationId: teamEvaluation.id,
+                    siteId: contract.application.post.siteId,
+                },
+            });
+        }
+
         await this.prismaService.salaryHistory.createMany({
             data: body.salaryHistory.map((item) => {
                 const { date, ...rest } = item;

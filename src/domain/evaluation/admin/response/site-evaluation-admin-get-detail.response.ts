@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Account, Company, Member, Site, SiteEvaluation, SiteEvaluationByMember } from '@prisma/client';
+import { Account, Company, Member, Site, SiteEvaluation, SiteEvaluationByContract } from '@prisma/client';
 
 export class SiteEvaluationAdminGetDetailResponse {
     @ApiProperty({ type: 'string' })
@@ -47,6 +47,6 @@ export class SiteEvaluationAdminGetDetailResponse {
         name: Member['name'];
         username: Account['username'];
         contact: Member['contact'];
-        score: SiteEvaluationByMember['score'];
+        score: SiteEvaluationByContract['score'];
     }[];
 }
