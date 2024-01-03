@@ -17,12 +17,12 @@ import {
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
 @ApiBearerAuth()
-@Controller('company/headhunting')
+@Controller('/company/headhunting')
 @ApiTags('[COMPANY] Headhunting Management')
 export class HeadhuntingCompanyController {
     constructor(private readonly headhuntingCompanyService: HeadhuntingCompanyService) {}
 
-    @Get(':postId/recommendation')
+    @Get('/:postId/recommendation')
     @ApiOperation({
         summary: 'Listing recommendation applicants',
         description: 'Company can view list applicants recommended by Admin',
@@ -41,7 +41,7 @@ export class HeadhuntingCompanyController {
         return BaseResponse.of(recommendationApplicants);
     }
 
-    @Get(':postId/request')
+    @Get('/:postId/request')
     @ApiOperation({
         summary: 'Detail of Headhunting request of a post',
         description: 'Company can view detail of Headhunting request of a post',
