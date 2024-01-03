@@ -41,7 +41,7 @@ export class LaborCompanyController {
     async update(
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
-        body: LaborCompanyUpsertWorkDateRequest,
+        @Body() body: LaborCompanyUpsertWorkDateRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborCompanyService.updateWorkDate(req.user.accountId, id, body));
     }
