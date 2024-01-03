@@ -37,7 +37,24 @@ export class HeadhuntingCompanyService {
 
         const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {
             postId,
-            ...(query.name && { OR: [{ member: { name: query.name } }, { team: { name: query.name } }] }),
+            OR: query.name && [
+                {
+                    member: {
+                        name: {
+                            contains: query.name,
+                            mode: 'insensitive',
+                        },
+                    },
+                },
+                {
+                    team: {
+                        name: {
+                            contains: query.name,
+                            mode: 'insensitive',
+                        },
+                    },
+                },
+            ],
         };
 
         const list = await this.prismaService.headhuntingRecommendation.findMany({
