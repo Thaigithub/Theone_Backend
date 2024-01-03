@@ -356,15 +356,16 @@ export class LaborCompanyService {
                 laborId: id,
             },
         });
-
-        await this.prismaService.workDate.createMany({
-            data: body.workDate.map((item) => {
-                return {
-                    date: new Date(item.date),
-                    hours: item.hours,
-                    laborId: id,
-                };
-            }),
-        });
+        if (body.workDate.length !== 0) {
+            await this.prismaService.workDate.createMany({
+                data: body.workDate.map((item) => {
+                    return {
+                        date: new Date(item.date),
+                        hours: item.hours,
+                        laborId: id,
+                    };
+                }),
+            });
+        }
     }
 }
