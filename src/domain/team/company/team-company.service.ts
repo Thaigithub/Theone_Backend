@@ -117,7 +117,7 @@ export class TeamCompanyService {
     }
 
     async getTeamDetail(accountId: any, id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
-        return await this.prismaService.team.findUniqueOrThrow({
+        const application = await this.prismaService.team.findUniqueOrThrow({
             where: {
                 id,
             },
@@ -172,6 +172,21 @@ export class TeamCompanyService {
                 },
             },
         });
+
+        const district = application.district;
+        delete application.district;
+
+        return {
+            ...application,
+            city: {
+                englishName: district?.city.englishName || null,
+                koreanName: district?.city.koreanName || null,
+            },
+            district: {
+                englishName: district?.englishName || null,
+                koreanName: district?.koreanName || null,
+            },
+        };
     }
 
     async getTeamDetailManpower(id: number): Promise<TeamCompanyManpowerGetDetailResponse> {
