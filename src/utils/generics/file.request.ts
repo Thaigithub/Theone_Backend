@@ -6,7 +6,7 @@ import { IsEnum } from 'class-validator';
 export class FileUploadRequest {
     @Expose()
     @ApiProperty()
-    filename: string;
+    fileName: string;
 
     @Expose()
     @ApiProperty()
