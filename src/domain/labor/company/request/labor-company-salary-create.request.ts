@@ -1,8 +1,7 @@
 import { Expose } from 'class-transformer';
-import { IsNumber } from 'class-validator';
-import { WorkDate } from '../dto/labor-company-workdate.dto';
+import { IsNumber, Matches } from 'class-validator';
 
-export class LaborCompanyCreateSalaryRequest extends WorkDate {
+export class LaborCompanyCreateSalaryRequest {
     @Expose()
     @IsNumber()
     base: number;
@@ -45,4 +44,10 @@ export class LaborCompanyCreateSalaryRequest extends WorkDate {
     @Expose()
     @IsNumber()
     actualPayment: number;
+
+    @Expose()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
+    })
+    date: string;
 }
