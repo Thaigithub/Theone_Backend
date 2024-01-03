@@ -1,27 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-validator';
-import { PostSearchCaterory } from '../dto/banner-admin-search-category.dto';
+import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
+import { PostSearchCaterory } from '../enum/banner-admin-post-search-category.enum';
 
-export class AdminBannerGetCompanyJobPostRequest {
-    @Expose()
-    @IsOptional()
-    @IsNumberString()
-    @ApiProperty({
-        required: false,
-        example: '1',
-    })
-    public pageNumber: string;
-
-    @Expose()
-    @IsOptional()
-    @IsNumberString()
-    @ApiProperty({
-        required: false,
-        example: '1',
-    })
-    public pageSize: string;
-
+export class AdminBannerGetCompanyJobPostRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsEnum(PostSearchCaterory)

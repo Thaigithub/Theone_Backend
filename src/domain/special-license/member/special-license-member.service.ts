@@ -34,7 +34,7 @@ export class SpecialLicenseService {
         });
         await this.prismaService.file.create({
             data: {
-                fileName: request.file.filename,
+                fileName: request.file.fileName,
                 size: request.file.size,
                 type: request.file.type,
                 key: request.file.key,
@@ -44,6 +44,7 @@ export class SpecialLicenseService {
                         licenseNumber: request.licenseNumber,
                         acquisitionDate: new Date(request.acquisitionDate),
                         memberId: member.member.id,
+                        codeId: request.codeId,
                     },
                 },
             },
@@ -115,7 +116,7 @@ export class SpecialLicenseService {
                 id,
             },
             data: {
-                fileName: request.file.filename,
+                fileName: request.file.fileName,
                 size: request.file.size,
                 type: request.file.type,
                 key: request.file.key,
