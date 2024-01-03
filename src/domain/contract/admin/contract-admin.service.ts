@@ -242,7 +242,7 @@ export class ContractAdminService {
             where: { id },
             data: {
                 file: {
-                    create: { size: body.size, type: body.type, key: body.key, fileName: body.filename },
+                    create: { size: body.size, type: body.type, key: body.key, fileName: body.fileName },
                 },
             },
         });
@@ -268,7 +268,7 @@ export class ContractAdminService {
                 size: body.size,
                 type: body.type,
                 key: body.key,
-                fileName: body.filename,
+                fileName: body.fileName,
             },
         });
     }

@@ -12,7 +12,7 @@ class AdminPostBanner {
         description: 'URL link',
         example: 'https://google.com',
     })
-    readonly urlLink: string;
+    urlLink: string;
     @Expose()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
@@ -23,7 +23,7 @@ class AdminPostBanner {
         description: 'Start date',
         example: '2023-05-10',
     })
-    readonly startDate: string;
+    startDate: string;
     @Expose()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
@@ -34,16 +34,14 @@ class AdminPostBanner {
         description: 'End date',
         example: '2023-05-10',
     })
-    readonly endDate: string;
+    endDate: string;
 }
 
 class AdPostBanner extends PostBanner {
     @Expose()
-    @ApiProperty({ type: AdminPostBanner })
     adminPostBannner: AdminPostBanner;
 }
 export class AdminBannerCreateJobPostRequest extends Banner {
     @Expose()
-    @ApiProperty({ type: AdPostBanner })
-    readonly postBanner: AdPostBanner;
+    postBanner: AdPostBanner;
 }

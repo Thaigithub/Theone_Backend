@@ -2,7 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BannerStatus, PostBannerType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { PostSearchCaterory, SiteSearchCaterory } from './dto/banner-admin-search-category.dto';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { PostSearchCaterory } from './enum/banner-admin-post-search-category.enum';
+import { SiteSearchCaterory } from './enum/banner-admin-site-search-category.enum';
 import { AdminBannerChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
 import { AdminBannerCreateJobPostRequest } from './request/banner-admin-create-admin-jobpost.request';
 import { AdminBannerCreateGeneralRequest } from './request/banner-admin-create-general.request';
@@ -65,8 +67,6 @@ export class AdminBannerService {
         });
     }
     async getGeneralBanner(query: AdminBannerGetGeneralRequest): Promise<AdminBannerGetGeneralResponse> {
-        const take = query.pageSize === undefined ? undefined : parseInt(query.pageSize);
-        const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const search = (
             await this.prismaService.generalBanner.findMany({
                 where: {
@@ -74,8 +74,7 @@ export class AdminBannerService {
                         isActive: true,
                     },
                 },
-                skip: skip,
-                take: take,
+                ...QueryPagingHelper.queryPaging(query),
                 select: {
                     banner: {
                         select: {
@@ -127,14 +126,7 @@ export class AdminBannerService {
                 banner: {
                     select: {
                         status: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                type: true,
-                                size: true,
-                            },
-                        },
+                        file: true,
                     },
                 },
             },
@@ -202,8 +194,6 @@ export class AdminBannerService {
         });
     }
     async getAdminPostBanner(query: AdminBannerGetAdminJobPostRequest): Promise<AdminBannerGetAdminJobPostResponse> {
-        const take = query.pageSize === undefined ? undefined : parseInt(query.pageSize);
-        const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const search = (
             await this.prismaService.adminPostBanner.findMany({
                 where: {
@@ -213,8 +203,7 @@ export class AdminBannerService {
                         },
                     },
                 },
-                skip: skip,
-                take: take,
+                ...QueryPagingHelper.queryPaging(query),
                 select: {
                     id: true,
                     startDate: true,
@@ -311,11 +300,8 @@ export class AdminBannerService {
     }
     // COMPANY POST BANNER
     async getCompanyPostBanner(query: AdminBannerGetCompanyJobPostRequest): Promise<AdminBannerGetCompanyJobPostResponse> {
-        const take = query.pageSize === undefined ? undefined : parseInt(query.pageSize);
-        const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const querySearch = {
-            skip: skip,
-            take: take,
+            ...QueryPagingHelper.queryPaging(query),
             select: {
                 id: true,
                 requestDate: true,
@@ -501,16 +487,13 @@ export class AdminBannerService {
     }
     // SITE POST BANNER
     async getSiteBanner(query: AdminBannerGetSiteRequest): Promise<AdminBannerGetSiteResponse> {
-        const take = query.pageSize === undefined ? undefined : parseInt(query.pageSize);
-        const skip = query.pageNumber === undefined ? undefined : (parseInt(query.pageNumber) - 1) * take;
         const querySearch = {
             where: {
                 banner: {
                     isActive: true,
                 },
             },
-            skip: skip,
-            take: take,
+            ...QueryPagingHelper.queryPaging(query),
             select: {
                 id: true,
                 requestDate: true,
@@ -567,14 +550,14 @@ export class AdminBannerService {
                 }
             }
         }
-        if (query.requestStartDate !== undefined) {
-            querySearch['where']['requestDate'] = {
-                gt: new Date(query.requestStartDate),
+        if (query.startDate !== undefined) {
+            querySearch['where']['sate'] = {
+                gt: new Date(query.startDate),
             };
         }
-        if (query.requestEndDate !== undefined) {
-            querySearch['where']['requestDate'] = {
-                lt: new Date(query.requestEndDate),
+        if (query.endDate !== undefined) {
+            querySearch['where']['sate'] = {
+                lt: new Date(query.endDate),
             };
         }
         const search = (await this.prismaService.siteBanner.findMany(querySearch)).map((item) => {

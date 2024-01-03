@@ -9,7 +9,7 @@ export class PaginationRequest {
         type: Number,
         required: false,
     })
-    public pageSize: number;
+    pageSize: number;
 
     @Expose()
     @IsOptional()
@@ -18,5 +18,5 @@ export class PaginationRequest {
         type: Number,
         required: false,
     })
-    public pageNumber: number;
+    pageNumber: number;
 }

@@ -25,14 +25,13 @@ export class MemberSpecialLicenseController {
         @Body() request: SpecialLicenseMemberUpsertRequest,
         @Request() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        await this.specialLicenseService.create(req.user.accountId, request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.specialLicenseService.create(req.user.accountId, request));
     }
 
     @Get()
     async getSpecialLicenses(
         @Query() query: SpecialLicenseMemberGetListRequest,
-        @Request() req,
+        @Request() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<SpecialLicenseMemberGetListResponse>> {
         return BaseResponse.of(await this.specialLicenseService.getList(req.user.accountId, query));
     }
