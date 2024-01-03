@@ -167,7 +167,11 @@ export class RecommendationCompanyService {
                     },
                     specialLicenses: {
                         select: {
-                            name: true,
+                            code: {
+                                select: {
+                                    codeName: true,
+                                },
+                            },
                             licenseNumber: true,
                         },
                     },

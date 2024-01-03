@@ -338,7 +338,6 @@ model Certificate {
 
 model SpecialLicense {
   id              Int               @id @default(autoincrement())
-  name            String
   status          CertificateStatus @default(REQUESTING)
   licenseNumber   String            @map("license_number")
   acquisitionDate DateTime          @map("acquisition_date")

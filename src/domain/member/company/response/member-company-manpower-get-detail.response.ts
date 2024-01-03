@@ -34,8 +34,8 @@ class CertificateDetail {
 }
 
 class ConstrucionEquimentDetail {
-    deviceName: SpecialLicense['name'];
-    registrationNumber: SpecialLicense['licenseNumber'];
+    name: Code['codeName'];
+    licenseNumber: SpecialLicense['licenseNumber'];
 }
 
 export class MemberCompanyManpowerGetDetailResponse {

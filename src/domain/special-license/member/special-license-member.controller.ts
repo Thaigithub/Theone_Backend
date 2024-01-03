@@ -1,26 +1,14 @@
-import {
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Inject,
-    Param,
-    ParseIntPipe,
-    Post,
-    Put,
-    Query,
-    Request,
-    UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post, Put, Query, Req, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationResponse } from 'utils/generics/pagination.response';
+import { SpecialLicenseMemberGetListRequest } from './request/special-license-member-get-list.request';
 import { SpecialLicenseMemberUpsertRequest } from './request/special-license-member-upsert.request';
-import { SpecialLicenseMemberGetResponse } from './response/special-license-member.response';
+import { SpecialLicenseMemberGetDetailResponse } from './response/special-license-member-get-detail.response';
+import { SpecialLicenseMemberGetListResponse } from './response/special-license-member-get-list.response';
 import { SpecialLicenseService } from './special-license-member.service';
 
 @ApiTags('[MEMBER] Special License Management')
@@ -32,65 +20,35 @@ import { SpecialLicenseService } from './special-license-member.service';
 @ApiConsumes('application/json')
 export class MemberSpecialLicenseController {
     constructor(@Inject(SpecialLicenseService) private readonly specialLicenseService: SpecialLicenseService) {}
-    @Post('save')
-    @HttpCode(200)
-    @ApiOperation({
-        summary: 'Save a new special license',
-        description: 'This endpoint is provided for use to upload new special license',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async save(@Body() request: SpecialLicenseMemberUpsertRequest, @Request() req): Promise<BaseResponse<void>> {
-        await this.specialLicenseService.saveSpecialLicense(req.user.accountId, request);
+    @Post()
+    async create(
+        @Body() request: SpecialLicenseMemberUpsertRequest,
+        @Request() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.specialLicenseService.create(req.user.accountId, request);
         return BaseResponse.ok();
     }
 
-    @Get('')
-    @HttpCode(200)
-    @ApiOperation({
-        summary: 'Get all special licenses',
-        description: 'This endpoint get all special licenses that users currently have',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    @Get()
     async getSpecialLicenses(
-        @Query('page', ParseIntPipe) page: number, // Use @Query for query parameters
-        @Query('size', ParseIntPipe) size: number,
+        @Query() query: SpecialLicenseMemberGetListRequest,
         @Request() req,
-    ): Promise<BaseResponse<PaginationResponse<SpecialLicenseMemberGetResponse>>> {
-        const result = await this.specialLicenseService.getPaginatedSpecialLicenses({
-            accountId: req.user.accountId,
-            page: page,
-            size: size,
-        });
-        return BaseResponse.of(result);
+    ): Promise<BaseResponse<SpecialLicenseMemberGetListResponse>> {
+        return BaseResponse.of(await this.specialLicenseService.getList(req.user.accountId, query));
     }
 
-    @Get(':id')
-    @HttpCode(200)
-    @ApiOperation({
-        summary: 'Get special license details',
-        description: 'This endpoint get special license details',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getSpecialLicenseDetails(
+    @Get('/:id')
+    async getDetail(
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<SpecialLicenseMemberGetResponse>> {
-        return BaseResponse.of(await this.specialLicenseService.getSpecialLicenseDetails(id));
+    ): Promise<BaseResponse<SpecialLicenseMemberGetDetailResponse>> {
+        return BaseResponse.of(await this.specialLicenseService.getDetail(req.user.accountId, id));
     }
 
-    @Put(':id')
-    @HttpCode(200)
-    @ApiOperation({
-        summary: 'Update special license',
-        description: 'This endpoint update special license information',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async updateSpecialLicense(
+    @Put('/:id')
+    async update(
         @Param('id', ParseIntPipe) id: number,
-        @Request() req,
+        @Req() req: AccountIdExtensionRequest,
         @Body() request: SpecialLicenseMemberUpsertRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.specialLicenseService.update(req.user.accountId, id, request));

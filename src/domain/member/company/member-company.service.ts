@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
 import { ExperienceType, Prisma } from '@prisma/client';
-import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
-import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
-import { MemberCompanyManpowerGetDetailResponse } from './response/menber-company-manpower-get-detail.response';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
+import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
+import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
 
 @Injectable()
 export class MemberCompanyService {
@@ -178,7 +178,11 @@ export class MemberCompanyService {
                 },
                 specialLicenses: {
                     select: {
-                        name: true,
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
                         licenseNumber: true,
                     },
                 },
@@ -193,10 +197,17 @@ export class MemberCompanyService {
         });
 
         const district = application.district;
+        const specialLicense = application.specialLicenses;
         delete application.district;
-
+        delete application.specialLicenses;
         return {
             ...application,
+            specialLicenses: specialLicense.map((item) => {
+                return {
+                    name: item.code.codeName,
+                    licenseNumber: item.licenseNumber,
+                };
+            }),
             city: {
                 englishName: district?.city.englishName || null,
                 koreanName: district?.city.koreanName || null,
@@ -242,7 +253,16 @@ export class MemberCompanyService {
                         file: true,
                     },
                 },
-                specialLicenses: true,
+                specialLicenses: {
+                    select: {
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        licenseNumber: true,
+                    },
+                },
                 basicHealthSafetyCertificate: {
                     include: {
                         file: true,
@@ -317,8 +337,8 @@ export class MemberCompanyService {
                 list: member.specialLicenses
                     ? member.specialLicenses.map((item) => {
                           return {
-                              deviceName: item.name,
-                              registrationNumber: item.licenseNumber,
+                              name: item.code.codeName,
+                              licenseNumber: item.licenseNumber,
                           };
                       })
                     : null,

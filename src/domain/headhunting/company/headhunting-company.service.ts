@@ -49,7 +49,16 @@ export class HeadhuntingCompanyService {
                         contact: true,
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
-                        specialLicenses: true,
+                        specialLicenses: {
+                            select: {
+                                licenseNumber: true,
+                                code: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                            },
+                        },
                         desiredSalary: true,
                         district: {
                             select: {
@@ -74,7 +83,16 @@ export class HeadhuntingCompanyService {
                                 contact: true,
                                 totalExperienceMonths: true,
                                 totalExperienceYears: true,
-                                specialLicenses: true,
+                                specialLicenses: {
+                                    select: {
+                                        code: {
+                                            select: {
+                                                codeName: true,
+                                            },
+                                        },
+                                        licenseNumber: true,
+                                    },
+                                },
                                 desiredSalary: true,
                             },
                         },
@@ -98,8 +116,6 @@ export class HeadhuntingCompanyService {
             orderBy: {
                 assignedAt: 'desc',
             },
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
             ...QueryPagingHelper.queryPaging(query),
         });
 
@@ -107,11 +123,18 @@ export class HeadhuntingCompanyService {
             if (item.member) {
                 const district = item.member.district;
                 delete item.member.district;
+                const { specialLicenses, ...rest } = item.member;
                 return {
                     ...item,
                     team: null,
                     member: {
-                        ...item.member,
+                        ...rest,
+                        specialLicenses: specialLicenses.map((item) => {
+                            return {
+                                name: item.code.codeName,
+                                licenseNumber: item.licenseNumber,
+                            };
+                        }),
                         city: {
                             englishName: district?.city.englishName || null,
                             koreanName: district?.city.koreanName || null,
@@ -125,11 +148,24 @@ export class HeadhuntingCompanyService {
             } else {
                 const district = item.team.district;
                 delete item.team.district;
+                const { specialLicenses, ...restLeader } = item.team.leader;
+                const { leader, ...restTeam } = item.team;
                 return {
-                    ...item,
                     member: null,
                     team: {
-                        ...item.team,
+                        ...restTeam,
+                        leader: {
+                            ...leader,
+                            specialLicenses: {
+                                ...restLeader,
+                                specialLicenses: specialLicenses.map((item) => {
+                                    return {
+                                        name: item.code.codeName,
+                                        licenseNumber: item.licenseNumber,
+                                    };
+                                }),
+                            },
+                        },
                         city: {
                             englishName: district?.city.englishName || null,
                             koreanName: district?.city.koreanName || null,
@@ -144,7 +180,6 @@ export class HeadhuntingCompanyService {
         });
 
         const listCount = await this.prismaService.headhuntingRecommendation.count({
-            // Conditions based on request query
             where: queryFilter,
         });
 
