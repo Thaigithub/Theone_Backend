@@ -1,11 +1,25 @@
 import { SalaryType } from '@prisma/client';
-import { SalaryHistory } from '../dto/labor-company-salary.dto';
 import { LaborType } from '../enum/labor-company-labor-type.enum';
-class SalaryHistoryResponse extends SalaryHistory {
-    id: number;
+
+export class SalaryHistory {
+    base: number;
+    otherAllowance: number;
+    overtimePay: number;
+    meals: number;
+    totalPayment: number;
+    nationalPension: number;
+    healthInsurance: number;
+    longTermCare: number;
+    employmentInsurance: number;
+    retirementDeduction: number;
+    incomeTax: number;
+    residentTax: number;
+    totalDeductible: number;
+    actualPayment: number;
+    date: Date;
 }
+
 class WorkDate {
-    id: number;
     date: Date;
     hours: number;
 }
@@ -20,5 +34,5 @@ export class LaborCompanyGetDetailResponse {
     salaryType: SalaryType;
     amount: number;
     workDate: WorkDate[];
-    salaryHistory: SalaryHistoryResponse[];
+    salaryHistory: SalaryHistory[];
 }

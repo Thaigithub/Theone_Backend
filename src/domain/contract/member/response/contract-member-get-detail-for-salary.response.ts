@@ -1,6 +1,6 @@
 import { PaymentForm, SalaryType } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
-import { SalaryHistory } from '../dto/labor-company-salary.dto';
+import { SalaryHistory } from '../dto/contract-member-salary.dto';
 
 export class ContractMemberGetDetailForSalaryResponse {
     companyName: string;
