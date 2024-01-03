@@ -1,10 +1,10 @@
 import { Expose } from 'class-transformer';
-import { IsString, Matches } from 'class-validator';
+import { IsNumber, IsString, Matches } from 'class-validator';
 import { FileUploadRequest } from 'utils/generics/file.request';
 
 export class SpecialLicenseMemberUpsertRequest {
     @Expose()
-    @IsString()
+    @IsNumber()
     codeId: number;
 
     @Expose()
