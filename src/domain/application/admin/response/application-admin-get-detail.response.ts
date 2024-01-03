@@ -42,7 +42,7 @@ export class ApplicationAdminGetDetailResponse {
     @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
     public startDate: Date;
 
-    @ApiProperty({ type: Date, example: 'YYYY-MM-DD'})
+    @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
     public endDate: Date;
 
     @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
