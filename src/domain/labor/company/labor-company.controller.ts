@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -9,7 +9,7 @@ import { LaborCompanyService } from './labor-company.service';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
-import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-update-workdate.request';
+import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upsert-workdate.request';
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
@@ -21,31 +21,6 @@ import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-sa
 @ApiBearerAuth()
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
-    @Delete('/:id/workDate/:workDateId')
-    async deleteWorkDate(
-        @Param('id', ParseIntPipe) id: number,
-        @Param('workDateId', ParseIntPipe) workDateId: number,
-        @Req() req: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.laborCompanyService.deleteWorkDate(req.user.accountId, id, workDateId));
-    }
-    @Patch('/:id/workDate/:workDateId')
-    async updateWorkDate(
-        @Param('id', ParseIntPipe) id: number,
-        @Param('workDateId', ParseIntPipe) workDateId: number,
-        @Req() req: AccountIdExtensionRequest,
-        @Body() body: LaborCompanyUpsertWorkDateRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.laborCompanyService.updateWorkDate(req.user.accountId, id, workDateId, body));
-    }
-    @Post('/:id/workDate')
-    async createWorkDate(
-        @Param('id', ParseIntPipe) id: number,
-        @Req() req: AccountIdExtensionRequest,
-        @Body() body: LaborCompanyUpsertWorkDateRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.laborCompanyService.createWorkDate(req.user.accountId, id, body));
-    }
     @Get('/:id/salary/:salaryId')
     async getDetailSalary(
         @Param('id', ParseIntPipe) laborId: number,
@@ -61,6 +36,14 @@ export class LaborCompanyController {
         @Body() body: LaborCompanyCreateSalaryRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborCompanyService.createSalary(req.user.accountId, id, body));
+    }
+    @Put('/:id/workDate')
+    async update(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+        body: LaborCompanyUpsertWorkDateRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.updateWorkDate(req.user.accountId, id, body));
     }
     @Get('/:id')
     async getDetail(
