@@ -104,6 +104,7 @@ export class SpecialLicenseService {
         const code = await this.prismaService.code.findUnique({
             where: {
                 id: request.codeId,
+                codeType: CodeType.SPECIAL,
             },
             select: {
                 codeType: true,
@@ -111,23 +112,30 @@ export class SpecialLicenseService {
         });
         if (!code) throw new NotFoundException('CodeId not found');
         if (code.codeType !== CodeType.SPECIAL) throw new BadRequestException('Wrong code for special license');
-        await this.prismaService.file.update({
+        const file = await this.prismaService.specialLicense.update({
             where: {
                 id,
+            },
+            data: {
+                status: CertificateStatus.REQUESTING,
+                licenseNumber: request.licenseNumber,
+                acquisitionDate: new Date(request.acquisitionDate),
+                memberId: member.member.id,
+                codeId: request.codeId,
+            },
+            select: {
+                fileId: true,
+            },
+        });
+        await this.prismaService.file.update({
+            where: {
+                id: file.fileId,
             },
             data: {
                 fileName: request.file.fileName,
                 size: request.file.size,
                 type: request.file.type,
                 key: request.file.key,
-                specialLicense: {
-                    create: {
-                        status: CertificateStatus.REQUESTING,
-                        licenseNumber: request.licenseNumber,
-                        acquisitionDate: new Date(request.acquisitionDate),
-                        memberId: member.member.id,
-                    },
-                },
             },
         });
     }
@@ -145,6 +153,7 @@ export class SpecialLicenseService {
         return {
             id: result.id,
             codeName: result.code.codeName,
+            codeId: result.code.id,
             status: result.status,
             acquisitionDate: result.acquisitionDate,
             licenseNumber: result.licenseNumber,
