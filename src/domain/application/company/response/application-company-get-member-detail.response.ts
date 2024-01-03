@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationCompanyMemberDetailAccountDTO } from '../dto/member-detail/application-company-member-detail-account.dto';
 import { ApplicationCompanyMemberDetailBHSCerDTO } from '../dto/member-detail/application-company-member-detail-bhscer.dto';
 import { ApplicationCompanyMemberDetailCareerDTO } from '../dto/member-detail/application-company-member-detail-career.dto';
+import { ApplicationCompanyMemberDetailCertificatesDTO } from '../dto/member-detail/application-company-member-detail-certificates.dto';
 import { ApplicationCompanyMemberDetailSpecialDTO } from '../dto/member-detail/application-company-member-detail-special.dto';
-import { ApplicationCompanyMemberDetailCertificatesDTO } from '../dto/member-detail/applicationo-company-member-detail-certificates.dto';
 
 export class ApplicationCompanyGetMemberDetail {
     @ApiProperty({ example: 'Dewon Kim' })

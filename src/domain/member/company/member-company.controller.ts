@@ -10,8 +10,8 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { MemberCompanyService } from './member-company.service';
 import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
+import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
-import { MemberCompanyManpowerGetDetailResponse } from './response/menber-company-manpower-get-detail.response';
 
 @ApiTags('[COMPANY] Member Management')
 @Controller('/company/members')

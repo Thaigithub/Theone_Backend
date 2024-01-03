@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Member, SpecialLicense } from '@prisma/client';
+import { Code, Member, SpecialLicense } from '@prisma/client';
 
 export class ApplicationCompanyApplicantsSpecialDTO {
     @ApiProperty({ example: 'abc' })
-    public name: SpecialLicense['name'];
+    public name: Code['codeName'];
 
     @ApiProperty({ example: 'abc' })
     public licenseNumber: SpecialLicense['licenseNumber'];

@@ -7,10 +7,10 @@ import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
-import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
 import { InterviewProposalType } from './dto/interview-company-propose.enum';
+import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyProposeRequest } from './request/interview-company-propose.request';
+import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
 
 @Injectable()
 export class InterviewCompanyService {
@@ -84,7 +84,11 @@ export class InterviewCompanyService {
                                 contact: true,
                                 specialLicenses: {
                                     select: {
-                                        name: true,
+                                        code: {
+                                            select: {
+                                                codeName: true,
+                                            },
+                                        },
                                     },
                                 },
                                 certificates: {
@@ -102,7 +106,11 @@ export class InterviewCompanyService {
                                         contact: true,
                                         specialLicenses: {
                                             select: {
-                                                name: true,
+                                                code: {
+                                                    select: {
+                                                        codeName: true,
+                                                    },
+                                                },
                                             },
                                         },
                                         certificates: {

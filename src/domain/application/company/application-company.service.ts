@@ -5,9 +5,9 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
+import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
-import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -54,7 +54,16 @@ export class ApplicationCompanyService {
                         contact: true,
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
-                        specialLicenses: true,
+                        specialLicenses: {
+                            select: {
+                                code: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                                licenseNumber: true,
+                            },
+                        },
                         desiredSalary: true,
                         district: {
                             select: {
@@ -109,10 +118,17 @@ export class ApplicationCompanyService {
         const newApplicationList = applicationList.map((item) => {
             const district = item.member.district;
             delete item.member.district;
+            const { specialLicenses, ...rest } = item.member;
             return {
                 ...item,
                 member: {
-                    ...item.member,
+                    ...rest,
+                    specialLicenses: specialLicenses.map((item) => {
+                        return {
+                            name: item.code.codeName,
+                            licenseNumber: item.licenseNumber,
+                        };
+                    }),
                     city: {
                         englishName: district?.city.englishName || null,
                         koreanName: district?.city.koreanName || null,
