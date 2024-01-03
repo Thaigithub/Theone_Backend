@@ -186,16 +186,24 @@ export class EvaluationAdminService {
                         },
                     },
                 },
-                siteEvaluationByMember: {
+                siteEvaluationByContract: {
                     select: {
                         score: true,
-                        member: {
+                        contract: {
                             select: {
-                                name: true,
-                                contact: true,
-                                account: {
+                                application: {
                                     select: {
-                                        username: true,
+                                        member: {
+                                            select: {
+                                                name: true,
+                                                contact: true,
+                                                account: {
+                                                    select: {
+                                                        username: true,
+                                                    },
+                                                },
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -208,11 +216,11 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = siteEvaluation.siteEvaluationByMember.map((item) => {
+        const listOfEvaluators = siteEvaluation.siteEvaluationByContract.map((item) => {
             return {
-                name: item.member.name,
-                username: item.member.account.username,
-                contact: item.member.contact,
+                name: item.contract.application.member.name,
+                username: item.contract.application.member.account.username,
+                contact: item.contract.application.member.contact,
                 score: item.score,
             };
         });

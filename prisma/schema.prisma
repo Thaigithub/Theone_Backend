@@ -98,13 +98,13 @@ model Member {
   desiredOccupation            Code?                           @relation(fields: [codeId], references: [id])
   district                     District?                       @relation(fields: [districtId], references: [id])
   teams                        MembersOnTeams[]
-  siteEvaluationByMember       SiteEvaluationByMember[]
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
   point                        Point[]
-  totalPoint                   Int                          @default(0) @map("total_point")
+  totalPoint                   Int                             @default(0) @map("total_point")
   currencyExchange             CurrencyExchange[]
+
   @@map("members")
 }
 
@@ -209,6 +209,7 @@ model TeamMemberInvitation {
   invitationStatus InvitationStatus?
   member           Member            @relation(fields: [memberId], references: [id])
   team             Team              @relation(fields: [teamId], references: [id])
+
   @@map("team_member_invitations")
 }
 
@@ -578,32 +579,33 @@ model PostHistory {
 }
 
 model SiteEvaluation {
-  id                     Int                      @id @default(autoincrement())
-  isActive               Boolean                  @default(true) @map("is_active")
-  createdAt              DateTime                 @default(now()) @map("created_at")
-  updatedAt              DateTime                 @updatedAt @map("updated_at")
-  totalEvaluators        Int                      @default(0) @map("total_evaluator")
-  totalScore             Int?                     @map("total_score")
-  averageScore           Float?                   @map("average_score") @db.Real
-  siteId                 Int                      @unique @map("site_id")
-  site                   Site                     @relation(fields: [siteId], references: [id])
-  siteEvaluationByMember SiteEvaluationByMember[]
+  id                       Int                        @id @default(autoincrement())
+  isActive                 Boolean                    @default(true) @map("is_active")
+  createdAt                DateTime                   @default(now()) @map("created_at")
+  updatedAt                DateTime                   @updatedAt @map("updated_at")
+  totalEvaluators          Int                        @default(0) @map("total_evaluator")
+  totalScore               Int?                       @map("total_score")
+  averageScore             Float?                     @map("average_score") @db.Real
+  siteId                   Int                        @unique @map("site_id")
+  site                     Site                       @relation(fields: [siteId], references: [id])
+  siteEvaluationByContract SiteEvaluationByContract[]
 
   @@map("site_evaluations")
 }
 
-model SiteEvaluationByMember {
+model SiteEvaluationByContract {
+  id               Int            @id @default(autoincrement())
   isActive         Boolean        @default(true) @map("is_active")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   score            Int?           @db.SmallInt
   siteEvaluationId Int            @map("site_evaluation_id")
-  memberId         Int            @map("member_id")
-  member           Member         @relation(fields: [memberId], references: [id])
+  contractId       Int            @map("contract_id")
+  contract         Contract       @relation(fields: [contractId], references: [id])
   siteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
 
-  @@id([siteEvaluationId, memberId])
-  @@map("site_evaluations_by_member")
+  @@unique([siteEvaluationId, contractId])
+  @@map("site_evaluations_by_contract")
 }
 
 model Interest {
@@ -656,6 +658,7 @@ model TeamEvaluation {
 }
 
 model TeamEvaluationByCompany {
+  id               Int            @id @default(autoincrement())
   isActive         Boolean        @default(true) @map("is_active")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
@@ -665,7 +668,7 @@ model TeamEvaluationByCompany {
   site             Site           @relation(fields: [siteId], references: [id])
   teamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
 
-  @@id([teamEvaluationId, siteId])
+  @@unique([teamEvaluationId, siteId])
   @@map("team_evaluations_by_company")
 }
 
@@ -685,6 +688,7 @@ model MemberEvaluation {
 }
 
 model MemberEvaluationByCompany {
+  id                 Int              @id @default(autoincrement())
   isActive           Boolean          @default(true) @map("is_active")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
@@ -694,7 +698,7 @@ model MemberEvaluationByCompany {
   memberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
   site               Site             @relation(fields: [siteId], references: [id])
 
-  @@id([memberEvaluationId, siteId])
+  @@unique([memberEvaluationId, siteId])
   @@map("member_evaluations_by_company")
 }
 
@@ -748,19 +752,20 @@ model HeadhuntingRecommendation {
 }
 
 model Contract {
-  id            Int         @id @default(autoincrement())
-  paymentForm   PaymentForm @default(ON_SITE) @map("payment_form")
-  salaryType    SalaryType  @default(DAILY) @map("salary_type")
-  startDate     DateTime    @map("start_date") @db.Date
-  endDate       DateTime    @map("end_date") @db.Date
-  fileId        Int         @unique @map("file_id")
-  applicationId Int         @unique @map("application_id")
-  amount        Int         @default(0)
-  department    String      @default("")
-  application   Application @relation(fields: [applicationId], references: [id])
-  file          File        @relation(fields: [fileId], references: [id])
-  labor         Labor?
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Date
+  id                       Int                        @id @default(autoincrement())
+  paymentForm              PaymentForm                @default(ON_SITE) @map("payment_form")
+  salaryType               SalaryType                 @default(DAILY) @map("salary_type")
+  startDate                DateTime                   @map("start_date") @db.Date
+  endDate                  DateTime                   @map("end_date") @db.Date
+  fileId                   Int                        @unique @map("file_id")
+  applicationId            Int                        @unique @map("application_id")
+  amount                   Int                        @default(0)
+  department               String                     @default("")
+  application              Application                @relation(fields: [applicationId], references: [id])
+  file                     File                       @relation(fields: [fileId], references: [id])
+  labor                    Labor?
+  createdAt                DateTime                   @default(now()) @map("created_at") @db.Date
+  SiteEvaluationByContract SiteEvaluationByContract[]
 
   @@map("contracts")
 }
@@ -869,26 +874,26 @@ model SalaryHistory {
 }
 
 model Point {
-  id                      Int                   @id @default(autoincrement())
-  memberId                Int?                  @map("member_id")
-  member                  Member?               @relation(fields: [memberId], references: [id])
-  isActive                Boolean               @default(true) @map("is_active")
-  reasonEarn              String?               @map("reason_earn")
-  createdAt               DateTime              @default(now()) @map("created_at")
-  amount                  Int                   @default(0) @map("amount")
+  id         Int      @id @default(autoincrement())
+  memberId   Int?     @map("member_id")
+  member     Member?  @relation(fields: [memberId], references: [id])
+  isActive   Boolean  @default(true) @map("is_active")
+  reasonEarn String?  @map("reason_earn")
+  createdAt  DateTime @default(now()) @map("created_at")
+  amount     Int      @default(0) @map("amount")
 
   @@map("points")
 }
 
 model CurrencyExchange {
-  id                      Int                   @id @default(autoincrement())
-  memberId                Int?                  @map("member_id")
-  member                  Member?               @relation(fields: [memberId], references: [id])
-  isActive                Boolean               @default(true) @map("is_active")
-  createdAt               DateTime              @default(now()) @map("created_at")
-  updatedAt               DateTime?             @default(now()) @map("updated_at")
-  exchangeStatus          CurrencyExchangeStatus        @map("exchange_status")
-  amount                  Int                   @default(0) @map("amount")
+  id             Int                    @id @default(autoincrement())
+  memberId       Int?                   @map("member_id")
+  member         Member?                @relation(fields: [memberId], references: [id])
+  isActive       Boolean                @default(true) @map("is_active")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime?              @default(now()) @map("updated_at")
+  exchangeStatus CurrencyExchangeStatus @map("exchange_status")
+  amount         Int                    @default(0) @map("amount")
 
   @@map("currency_exchanges")
 }
