@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { InvitationStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class InvitationsResponse {
+export class TeamMemberInvitationResponse {
     @ApiProperty({ type: Number, example: 1 })
     teamId: number;
 
@@ -28,4 +28,4 @@ export class InvitationsResponse {
     invitationStatus: InvitationStatus;
 }
 
-export class GetInvitationsResponse extends PaginationResponse<InvitationsResponse> {}
+export class GetTeamMemberInvitationGetListResponse extends PaginationResponse<TeamMemberInvitationResponse> {}

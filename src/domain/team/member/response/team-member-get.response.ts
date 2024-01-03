@@ -135,6 +135,9 @@ export class GetTeamMemberInvitation {
     @ApiProperty({ type: Number, example: 'invited member id' })
     id: number;
 
+    @ApiProperty({ type: Number, example: 'invited member id' })
+    memberId: number;
+
     @ApiProperty({ type: 'string', example: 'invited member name' })
     name: string;
 

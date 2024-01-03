@@ -27,6 +27,7 @@ import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
 import { WorkDateModule } from 'domain/workdate/workdate.module';
 import { PointModule } from 'domain/point/point.module';
+import { TeamMemberInvitationModule } from 'domain/team-member-invitation/team-member-invitation.module';
 
 @Module({
     imports: [
@@ -58,6 +59,7 @@ import { PointModule } from 'domain/point/point.module';
         WorkModule,
         WorkDateModule,
         PointModule,
+        TeamMemberInvitationModule,
     ],
 })
 export class AppModule {}

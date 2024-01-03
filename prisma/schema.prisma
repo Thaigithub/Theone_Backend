@@ -200,6 +200,7 @@ model MembersOnTeams {
 }
 
 model TeamMemberInvitation {
+  id               Int               @id @default(autoincrement())
   teamId           Int               @map("team_id")
   memberId         Int               @map("member_id")
   isActive         Boolean           @default(true) @map("is_active")
@@ -208,8 +209,6 @@ model TeamMemberInvitation {
   invitationStatus InvitationStatus?
   member           Member            @relation(fields: [memberId], references: [id])
   team             Team              @relation(fields: [teamId], references: [id])
-
-  @@id([memberId, teamId])
   @@map("team_member_invitations")
 }
 

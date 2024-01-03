@@ -128,6 +128,7 @@ export class PostAdminService {
                         personInCharge: true,
                     },
                 },
+                isPulledUp: true,
                 isHidden: true,
             },
             where: queryFilter,
