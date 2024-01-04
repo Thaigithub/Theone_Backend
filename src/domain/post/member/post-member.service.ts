@@ -89,7 +89,7 @@ export class PostMemberService {
         return member.id;
     }
 
-    async getList(accountId: number, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
+    async getList(accountId: number | undefined, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
         if (siteId) {
             const siteExist = await this.prismaService.site.count({
                 where: {
@@ -186,7 +186,7 @@ export class PostMemberService {
         });
     }
 
-    async getDetail(id: number, accountId: number): Promise<PostMemberGetDetailResponse> {
+    async getDetail(id: number, accountId: number | undefined): Promise<PostMemberGetDetailResponse> {
         const postExist = await this.prismaService.post.count({
             where: {
                 isActive: true,
@@ -194,49 +194,51 @@ export class PostMemberService {
             },
         });
         if (!postExist) throw new NotFoundException('Post does not exist');
-
-        const memberSpecialLicenseList = await this.prismaService.member.findUnique({
-            select: {
-                specialLicenses: {
-                    select: {
-                        code: {
-                            select: {
-                                id: true,
+        let memberRegisteredCodeIdsList = null;
+        if (accountId) {
+            const memberSpecialLicenseList = await this.prismaService.member.findUnique({
+                select: {
+                    specialLicenses: {
+                        select: {
+                            code: {
+                                select: {
+                                    id: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            where: {
-                accountId,
-            },
-        });
-        const memberCertificatesList = await this.prismaService.member.findUnique({
-            select: {
-                certificates: {
-                    select: {
-                        code: {
-                            select: {
-                                id: true,
+                where: {
+                    accountId,
+                },
+            });
+            const memberCertificatesList = await this.prismaService.member.findUnique({
+                select: {
+                    certificates: {
+                        select: {
+                            code: {
+                                select: {
+                                    id: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            where: {
-                accountId,
-            },
-        });
-        const memberRegisteredCodeIdsList = [
-            ...new Set([
-                ...memberSpecialLicenseList.specialLicenses.map((item) => {
-                    return item.code.id;
-                }),
-                ...memberCertificatesList.certificates.map((item) => {
-                    return item.code.id;
-                }),
-            ]),
-        ];
+                where: {
+                    accountId,
+                },
+            });
+            memberRegisteredCodeIdsList = [
+                ...new Set([
+                    ...memberSpecialLicenseList.specialLicenses.map((item) => {
+                        return item.code.id;
+                    }),
+                    ...memberCertificatesList.certificates.map((item) => {
+                        return item.code.id;
+                    }),
+                ]),
+            ];
+        }
 
         const post = await this.prismaService.post.findUnique({
             select: {
@@ -317,10 +319,11 @@ export class PostMemberService {
                 experienceType: post.experienceType,
                 occupation: post.occupation ? post.occupation.codeName : null,
                 specialNote: post.specialOccupation ? post.specialOccupation.codeName : null,
-                isEligibleToApply:
-                    !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialOccupation?.id)
+                isEligibleToApply: memberRegisteredCodeIdsList
+                    ? !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialOccupation?.id)
                         ? true
-                        : false,
+                        : false
+                    : null,
             },
             workingCondition: {
                 salaryType: post.salaryType,
