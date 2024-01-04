@@ -2,16 +2,17 @@ import { SignupMethodType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class MemberAccountSignupSnsRequest {
+export class AccountMemberSignupSnsRequest {
     @Expose()
     @IsEnum(SignupMethodType)
-    readonly signupMethod: SignupMethodType;
+    signupMethod: SignupMethodType;
 
     @Expose()
     @IsString()
-    readonly idToken: string;
+    idToken: string;
 
     @Expose()
     @IsOptional()
-    readonly recommenderId?: string;
+    @IsString()
+    recommenderId?: string;
 }

@@ -19,17 +19,13 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
 import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract-site.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
-import {
-    GetListForContract,
-    SiteCompanyGetListForContractResponse,
-} from './response/site-company-get-list-contract-site.response';
-import { SiteCompanyGetListResponse, SiteResponse } from './response/site-company-get-list.response';
+import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract-site.response';
+import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
 import { SiteCompanyService } from './site-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -45,7 +41,6 @@ export class SiteCompanyController {
         summary: 'Get sites for contract site',
         description: 'Company retrieve information of the sites in contract site',
     })
-    @ApiOkResponsePaginated(GetListForContract)
     async getListForContractSite(
         @Req() req: any,
         @Query() query: SiteCompanyGetListForContractRequest,
@@ -122,7 +117,6 @@ export class SiteCompanyController {
         summary: 'Get list of sites',
         description: 'Company can get list for all created sites',
     })
-    @ApiOkResponsePaginated(SiteResponse)
     async getList(
         @Query() query: SiteCompanyGetListRequest,
         @Req() request: AccountIdExtensionRequest,

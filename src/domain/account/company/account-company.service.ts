@@ -3,27 +3,28 @@ import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
-import { CompanyCompanyGetDetail } from './response/account-company-get-detail.response';
+import { AccountCompanyCheckExistedResponse } from './response/account-company-check-registration-number.response';
+import { AccountCompanyGetDetailResponse } from './response/account-company-get-detail.response';
 @Injectable()
 export class AccountCompanyService {
     constructor(private prismaService: PrismaService) {}
-    async checkBusinessRegNum(businessRegNumber: string): Promise<boolean> {
+    async checkBusinessRegNum(businessRegNumber: string): Promise<AccountCompanyCheckExistedResponse> {
         const count = await this.prismaService.company.count({
             where: {
                 businessRegNumber: businessRegNumber,
             },
         });
-        if (count === 0) return true;
-        return false;
+        if (count === 0) return { isExist: true };
+        return { isExist: false };
     }
-    async accountCompanyCheck(username: string): Promise<boolean> {
+    async checkUsername(username: string): Promise<AccountCompanyCheckExistedResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
                 username: username,
             },
         });
-        if (accountNum === 0) return true;
-        return false;
+        if (accountNum === 0) return { isExist: true };
+        return { isExist: false };
     }
     async signup(request: AccountCompanySignupRequest): Promise<void> {
         const userIdcount = await this.prismaService.account.count({
@@ -73,7 +74,7 @@ export class AccountCompanyService {
                             create: {
                                 file: {
                                     create: {
-                                        fileName: request.logo.name,
+                                        fileName: request.logo.fileName,
                                         type: request.logo.type,
                                         size: request.logo.size,
                                         key: request.logo.key,
@@ -85,7 +86,7 @@ export class AccountCompanyService {
                             create: {
                                 file: {
                                     create: {
-                                        fileName: request.logo.name,
+                                        fileName: request.logo.fileName,
                                         type: request.logo.type,
                                         size: request.logo.size,
                                         key: request.logo.key,
@@ -98,7 +99,7 @@ export class AccountCompanyService {
             },
         });
     }
-    async getDetail(accountId: number): Promise<CompanyCompanyGetDetail> {
+    async getDetail(accountId: number): Promise<AccountCompanyGetDetailResponse> {
         const company = await this.prismaService.company.findUnique({
             where: {
                 accountId,
@@ -112,6 +113,7 @@ export class AccountCompanyService {
                                 fileName: true,
                                 key: true,
                                 type: true,
+                                size: true,
                             },
                         },
                     },
@@ -124,6 +126,7 @@ export class AccountCompanyService {
                 fileName: company.logo.file.fileName,
                 type: company.logo.file.type,
                 key: company.logo.file.key,
+                size: Number(company.logo.file.size),
             },
         };
     }

@@ -4,7 +4,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { HeadhuntingAdminService } from './headhunting-admin.service';
 import {
     HeadhuntingAdminAddMemberRecommendationRequest,
@@ -22,10 +21,7 @@ import { HeadhuntingAdminGetDetailRequestResponse } from './response/headhunting
 import { HeadhuntingGetDetailApprovalTeamResponse } from './response/headhunting-admin-get-detail-team-approval.response';
 import { HeadhuntingAdminGetListApprovalResponse } from './response/headhunting-admin-get-list-approval.response';
 import { HeadhuntingAdminGetListRecommendationResponse } from './response/headhunting-admin-get-list-recommendation.response';
-import {
-    HeadhuntingAdminGetItemRequestResponse,
-    HeadhuntingAdminGetListRequestResponse,
-} from './response/headhunting-admin-get-list-request.response';
+import { HeadhuntingAdminGetListRequestResponse } from './response/headhunting-admin-get-list-request.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -40,7 +36,6 @@ export class HeadhuntingAdminController {
         summary: 'Listing headhunting request',
         description: 'Admin can list headhunting request',
     })
-    @ApiOkResponsePaginated(HeadhuntingAdminGetItemRequestResponse)
     async getList(
         @Query() query: HeadhuntingAdminGetListRequestRequest,
     ): Promise<BaseResponse<HeadhuntingAdminGetListRequestResponse>> {
@@ -137,7 +132,6 @@ export class HeadhuntingAdminController {
         summary: 'Listing headhunting recommendation members',
         description: 'Admin can list headhunting recommendation members',
     })
-    @ApiOkResponsePaginated(HeadhuntingAdminGetItemRequestResponse)
     async getListMemberRecommendation(
         @Query() query: HeadhuntingAdminGetListMemberRecommendationRequest,
     ): Promise<BaseResponse<HeadhuntingAdminGetListRecommendationResponse>> {
@@ -164,7 +158,6 @@ export class HeadhuntingAdminController {
         summary: 'Listing headhunting recommendation teams',
         description: 'Admin can list headhunting recommendation teams',
     })
-    @ApiOkResponsePaginated(HeadhuntingAdminGetItemRequestResponse)
     async getListTeamRecommendation(
         @Query() query: HeadhuntingAdminGetListTeamRecommendationRequest,
     ): Promise<BaseResponse<HeadhuntingAdminGetListRecommendationResponse>> {

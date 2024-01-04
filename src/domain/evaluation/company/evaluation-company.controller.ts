@@ -17,21 +17,14 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { EvaluationStatus } from './dto/evaluation-company-get-list-request.enum';
 import { EvaluationCompanyService } from './evaluation-company.service';
 import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-company-create-evaluation.request';
 import { EvaluationCompanyGetListMembersRequest } from './request/evaluation-company-get-list-members.request';
 import { EvaluationCompanyGetListTeamsRequest } from './request/evaluation-company-get-list-teams.request';
-import {
-    EvaluationCompanyGetListMembersResponse,
-    MemberEvaluationByCompanyResponse,
-} from './response/evaluation-company-get-list-members.response';
-import {
-    EvaluationCompanyGetListTeamsResponse,
-    TeamEvaluationByCompanyResponse,
-} from './response/evaluation-company-get-list-teams.response';
+import { EvaluationCompanyGetListMembersResponse } from './response/evaluation-company-get-list-members.response';
+import { EvaluationCompanyGetListTeamsResponse } from './response/evaluation-company-get-list-teams.response';
 
 @ApiTags('[COMPANY] Evaluation Management')
 @Controller('/company/evaluations')
@@ -92,7 +85,6 @@ export class EvaluationCompanyController {
         summary: 'Get list of evaluation tickets for member',
         description: 'Company can retrieve all evaluation tickets for member, including incomplete & complete evaluation',
     })
-    @ApiOkResponsePaginated(MemberEvaluationByCompanyResponse)
     @ApiResponse({
         type: BaseResponse,
         status: HttpStatus.NOT_FOUND,
@@ -114,7 +106,6 @@ export class EvaluationCompanyController {
         summary: 'Get list of evaluation tickets for team',
         description: 'Company can retrieve all evaluation tickets for team, including incomplete & complete evaluation',
     })
-    @ApiOkResponsePaginated(TeamEvaluationByCompanyResponse)
     @ApiResponse({
         type: BaseResponse,
         status: HttpStatus.NOT_FOUND,

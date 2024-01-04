@@ -1,7 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
-
 export class PageInfo {
-    @ApiProperty({ type: 'number' })
     total: number;
     constructor(total: number) {
         this.total = total;
@@ -10,7 +7,6 @@ export class PageInfo {
 
 export class PaginationResponse<T> {
     data: T[];
-    @ApiProperty({ type: PageInfo })
     pageInfo: PageInfo;
     constructor(item: T[], pageInfo: PageInfo) {
         this.data = item;

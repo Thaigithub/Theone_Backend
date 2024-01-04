@@ -17,7 +17,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyService } from './post-company.service';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
@@ -27,14 +26,9 @@ import { PostCompanyGetListRequest } from './request/post-company-get-list.reque
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
-import { PostCompanyGetItemApplicantsResponse } from './response/post-company-get-item-applicants.response';
-import { PostCompanyGetItemListResponse } from './response/post-company-get-item-list.response';
 import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
-import {
-    PostCompanyGetItemHeadhuntingRequestResponse,
-    PostCompanyGetListHeadhuntingRequestResponse,
-} from './response/post-company-get-list-headhunting-request.response';
+import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
 @ApiTags('[COMPANY] Posts Management')
@@ -84,7 +78,6 @@ export class PostCompanyController {
         description: 'Search by category:' + Object.values(PostCompanyHeadhuntingRequestFilter),
     })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for category search' })
-    @ApiOkResponsePaginated(PostCompanyGetItemHeadhuntingRequestResponse)
     async getListHeadhuntingRequest(
         @Req() request: any,
         @Query() query: PostCompanyHeadhuntingRequestRequest,
@@ -104,7 +97,6 @@ export class PostCompanyController {
     @ApiQuery({ name: 'endDate', type: Date, required: false, description: 'End date period of post' })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
-    @ApiOkResponsePaginated(PostCompanyGetItemApplicantsResponse)
     async getListApplicantSite(
         @Req() request: any,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
@@ -190,7 +182,6 @@ export class PostCompanyController {
         required: false,
         description: 'Status for search: PREPARE,RECRUITING,DEADLINE',
     })
-    @ApiOkResponsePaginated(PostCompanyGetItemListResponse)
     async getList(
         @Req() request: any,
         @Query() query: PostCompanyGetListRequest,

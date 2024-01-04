@@ -4,4 +4,5 @@ export class FileResponse {
     fileName: string;
     type: FileType;
     key: string;
+    size: number;
 }

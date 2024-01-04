@@ -5,7 +5,6 @@ import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/re
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberCompanyService } from './member-company.service';
 import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
@@ -69,7 +68,6 @@ export class MemberCompanyController {
         summary: 'Get list of members in Manpower',
         description: 'Company can retrieve all members in Manpower',
     })
-    @ApiOkResponsePaginated(MemberCompanyManpowerGetListRequest)
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListMember(
         @Query() query: MemberCompanyManpowerGetListRequest,

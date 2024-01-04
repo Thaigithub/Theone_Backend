@@ -4,14 +4,13 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { ContractCompanyService } from './contract-company.service';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
-import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
-import { ContractCompanyGetListForSiteResponse, GetListForSite } from './response/contract-company-get-list-for-site.response';
 import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
+import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
+import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
 
 @ApiTags('[COMPANY] Contract Management')
 @Controller('/company/contracts')
@@ -39,7 +38,6 @@ export class ContractCompanyController {
         summary: 'Get contracts for specific site',
         description: 'Company retrieve information of the contract site',
     })
-    @ApiOkResponsePaginated(GetListForSite)
     async getContractOnSite(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: any,

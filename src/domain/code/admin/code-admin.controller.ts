@@ -17,7 +17,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { CodeAdminService } from './code-admin.service';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
@@ -48,7 +47,6 @@ export class CodeAdminController {
         required: false,
         description: 'Code type for filter: ALL, SPECIAL_NOTE, JOB',
     })
-    @ApiOkResponsePaginated(CodeAdminGetItemResponse)
     async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeAdminGetListResponse>> {
         const code = await this.codeAdminService.getList(query);
         return BaseResponse.of(code);

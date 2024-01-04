@@ -1,10 +1,7 @@
-import { FileType } from '@prisma/client';
+import { Company } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 
-export class CompanyCompanyGetDetail {
-    name: string;
-    logo: {
-        fileName: string;
-        type: FileType;
-        key: string;
-    };
+export class AccountCompanyGetDetailResponse {
+    name: Company['name'];
+    logo: FileResponse;
 }

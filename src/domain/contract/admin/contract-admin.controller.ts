@@ -4,12 +4,11 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { ContractAdminService } from './contract-admin.service';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';
 import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
-import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
+import { ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
 import { ContractAdminGetTotalContractsResponse } from './response/contract-admin-get-total-contracts.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -25,7 +24,6 @@ export class ContractAdminController {
         summary: 'Listing code',
         description: 'Admin can search code by code type',
     })
-    @ApiOkResponsePaginated(ContractAdminGetItemResponse)
     async getList(@Query() query: ContractAdminGetListRequest): Promise<BaseResponse<ContractAdminGetListResponse>> {
         const code = await this.contractAdminService.getList(query);
         return BaseResponse.of(code);

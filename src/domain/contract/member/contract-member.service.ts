@@ -48,13 +48,7 @@ export class ContractMemberService {
                                     select: {
                                         logo: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        type: true,
-                                                        key: true,
-                                                    },
-                                                },
+                                                file: true,
                                             },
                                         },
                                     },
@@ -76,7 +70,12 @@ export class ContractMemberService {
         };
         const contracts = (await this.prismaService.contract.findMany(search)).map((item) => {
             return {
-                companyLogo: item.application.post.company.logo.file,
+                companyLogo: {
+                    fileName: item.application.post.company.logo.file.fileName,
+                    type: item.application.post.company.logo.file.type,
+                    key: item.application.post.company.logo.file.key,
+                    size: Number(item.application.post.company.logo.file.size),
+                },
                 siteName: item.application.post.site.name,
                 siteStartDate: item.application.post.site.startDate,
                 siteEndDate: item.application.post.site.endDate,
@@ -149,12 +148,22 @@ export class ContractMemberService {
             },
         });
         return {
-            companyLogo: contract.application.post.company.logo.file,
+            companyLogo: {
+                fileName: contract.application.post.company.logo.file.fileName,
+                key: contract.application.post.company.logo.file.key,
+                type: contract.application.post.company.logo.file.type,
+                size: Number(contract.application.post.company.logo.file.size),
+            },
             siteName: contract.application.post.site.name,
             siteAddress: contract.application.post.site.address,
             siteStartDate: contract.application.post.site.startDate,
             siteEndDate: contract.application.post.site.endDate,
-            file: contract.file,
+            file: {
+                fileName: contract.file.fileName,
+                key: contract.file.key,
+                type: contract.file.type,
+                size: Number(contract.file.size),
+            },
             startDate: contract.startDate,
             endDate: contract.endDate,
             created: contract.createdAt,
@@ -271,7 +280,12 @@ export class ContractMemberService {
         const contracts = (await this.prismaService.contract.findMany(search)).map((item) => {
             return {
                 id: item.id,
-                companyLogo: item.application.post.company.logo.file,
+                companyLogo: {
+                    fileName: item.application.post.company.logo.file.fileName,
+                    type: item.application.post.company.logo.file.type,
+                    key: item.application.post.company.logo.file.key,
+                    size: Number(item.application.post.company.logo.file.size),
+                },
                 companyName: item.application.post.company.name,
                 startDate: item.startDate,
                 endDate: item.endDate,
@@ -390,7 +404,12 @@ export class ContractMemberService {
         return {
             companyName: contract.application.post.company.name,
             siteName: contract.application.post.site.name,
-            companyLogo: contract.application.post.company.logo.file,
+            companyLogo: {
+                fileName: contract.application.post.company.logo.file.fileName,
+                type: contract.application.post.company.logo.file.type,
+                key: contract.application.post.company.logo.file.key,
+                size: Number(contract.application.post.company.logo.file.size),
+            },
             name: contract.application.member ? contract.application.member.name : contract.application.team.name,
             paymentForm: contract.paymentForm,
             salaryType: contract.salaryType,
