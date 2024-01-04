@@ -1,37 +1,22 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { AdminLevel } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { AdminSearchCategories } from '../dto/admin-admin-search';
 import { PaginationRequest } from 'utils/generics/pagination.request';
+import { AdminAdminSearchCategories } from '../enum/admin-admin-search-category.enum';
 
 export class AdminAdminGetListRequest extends PaginationRequest {
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminLevel,
-        required: false,
-    })
     @Expose()
     @IsEnum(AdminLevel)
     @IsOptional()
-    public level: AdminLevel;
+    level: AdminLevel;
 
-    @ApiProperty({
-        type: 'enum',
-        enum: AdminSearchCategories,
-        required: false,
-    })
     @Expose()
-    @IsEnum(AdminSearchCategories)
+    @IsEnum(AdminAdminSearchCategories)
     @IsOptional()
-    public searchCategory: AdminSearchCategories;
+    searchCategory: AdminAdminSearchCategories;
 
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 }

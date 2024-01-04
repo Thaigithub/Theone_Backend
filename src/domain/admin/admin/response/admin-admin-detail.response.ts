@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { PermissionDTO } from '../dto/admin-admin-permission.dto';
-import { AdminAdminCreateAdminDTO } from '../request/admin-admin-create-admin.dto';
-import { AdminAdminResponse } from './admin-admin.response';
+import { AdminAdminGetResponse } from '../dto/admin-admin-response.dto';
 
-export class AdminAdminDetailResponse extends AdminAdminResponse {
-    @ApiProperty({ type: AdminAdminCreateAdminDTO })
-    account: AdminAdminCreateAdminDTO;
-
-    @ApiProperty({ type: [PermissionDTO] })
-    permissions: PermissionDTO[];
+export class AdminAdminGetDetailResponse extends AdminAdminGetResponse {
+    account: {
+        username: string;
+    };
+    permissions: {
+        function: {
+            name: string;
+        };
+    }[];
 }

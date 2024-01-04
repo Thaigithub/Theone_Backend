@@ -35,9 +35,9 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.usernameCheck(username));
     }
 
+    @Patch()
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Patch()
     async update(
         @Req() request: AccountIdExtensionRequest,
         @Body() body: AccountMemberUpdateRequest,
@@ -45,9 +45,9 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
     }
 
+    @Put('/bank-account')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Put('/bank-account')
     async upsertBankAccount(
         @Req() request: AccountIdExtensionRequest,
         @Body() bankAccount: AccountMemberUpsertBankAccountRequest,
@@ -55,16 +55,16 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.upsertBankAccount(request.user.accountId, bankAccount));
     }
 
+    @Get('/bank-account')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Get('/bank-account')
     async getBankAccount(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountMemberGetBankDetailResponse>> {
         return BaseResponse.of(await this.accountMemberService.getBankAccount(request.user.accountId));
     }
 
+    @Put('/hst-certificate')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Put('/hst-certificate')
     async upsertHSTCertificate(
         @Req() request: AccountIdExtensionRequest,
         @Body() hstCertificate: AccountMemberUpsertHSTCertificateRequest,
@@ -72,9 +72,9 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.upsertHSTCertificate(request.user.accountId, hstCertificate));
     }
 
+    @Put('/foreign-worker')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Put('/foreign-worker')
     async upsertForeignWorker(
         @Req() request: AccountIdExtensionRequest,
         @Body() foreigWworker: AccountMemberUpsertForeignWorkerRequest,
@@ -82,9 +82,9 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.upsertForeignWorker(request.user.accountId, foreigWworker));
     }
 
+    @Put('/disability')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Put('/disability')
     async upsertDisability(
         @Req() request: AccountIdExtensionRequest,
         @Body() disability: AccountMemberUpsertDisabilityRequest,
@@ -92,16 +92,16 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.upsertDisability(request.user.accountId, disability));
     }
 
+    @Get()
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Get()
     async getDetail(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountMemberGetDetailResponse>> {
         return BaseResponse.of(await this.accountMemberService.getDetail(request.user.accountId));
     }
 
+    @Patch('cancel-membership')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Patch('cancel-membership')
     async cancelMembership(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.cancelMembership(request.user.accountId));
     }

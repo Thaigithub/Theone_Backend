@@ -5,12 +5,12 @@ import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { AdminSearchCategories } from './dto/admin-admin-search';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';
 import { AdminAdminUpsertRequest } from './request/admin-admin-upsert.request';
-import { AdminAdminDetailResponse } from './response/admin-admin-detail.response';
 import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
-import { AdminAdminResponse } from './response/admin-admin.response';
+import { AdminAdminGetDetailResponse } from './response/admin-admin-detail.response';
+import { AdminAdminSearchCategories } from './enum/admin-admin-search-category.enum';
+import { AdminAdminGetResponse } from './dto/admin-admin-response.dto';
 
 @Injectable()
 export class AdminAdminService {
@@ -29,7 +29,7 @@ export class AdminAdminService {
         await this.createAdmin(request);
     }
 
-    async getMemberDetails(id: number): Promise<AdminAdminDetailResponse> {
+    async getMemberDetails(id: number): Promise<AdminAdminGetDetailResponse> {
         return await this.findById(id);
     }
 
@@ -45,10 +45,10 @@ export class AdminAdminService {
         return {
             isActive: true,
             ...(query.level && { level: AdminLevel[query.level] }),
-            ...(query.searchCategory === AdminSearchCategories.ID && {
+            ...(query.searchCategory === AdminAdminSearchCategories.ID && {
                 account: { username: { contains: query.keyword, mode: 'insensitive' } },
             }),
-            ...(query.searchCategory === AdminSearchCategories.ADMIN_NAME && {
+            ...(query.searchCategory === AdminAdminSearchCategories.ADMIN_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
         };
@@ -91,7 +91,7 @@ export class AdminAdminService {
         });
     }
 
-    async findByQuery(query: AdminAdminGetListRequest): Promise<AdminAdminResponse[]> {
+    async findByQuery(query: AdminAdminGetListRequest): Promise<AdminAdminGetResponse[]> {
         return await this.prismaService.admin.findMany({
             select: {
                 id: true,
@@ -108,21 +108,17 @@ export class AdminAdminService {
             orderBy: {
                 createdAt: 'desc',
             },
-
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
             ...QueryPagingHelper.queryPaging(query),
         });
     }
 
     async countByQuery(query: AdminAdminGetListRequest): Promise<number> {
         return await this.prismaService.admin.count({
-            // Conditions based on request query
             where: this.parseConditionsFromQuery(query),
         });
     }
 
-    async findById(id: number): Promise<AdminAdminDetailResponse> {
+    async findById(id: number): Promise<AdminAdminGetDetailResponse> {
         return await this.prismaService.admin.findUnique({
             where: {
                 id,
