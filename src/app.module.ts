@@ -28,6 +28,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
 import { WorkDateModule } from 'domain/workdate/workdate.module';
 import { PointModule } from 'domain/point/point.module';
 import { TeamMemberInvitationModule } from 'domain/team-member-invitation/team-member-invitation.module';
+import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchange.module';
 
 @Module({
     imports: [
@@ -60,6 +61,7 @@ import { TeamMemberInvitationModule } from 'domain/team-member-invitation/team-m
         WorkDateModule,
         PointModule,
         TeamMemberInvitationModule,
+        CurrencyExchangeModule,
     ],
 })
 export class AppModule {}

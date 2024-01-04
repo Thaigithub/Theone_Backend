@@ -874,13 +874,14 @@ model SalaryHistory {
 }
 
 model Point {
-  id         Int      @id @default(autoincrement())
-  memberId   Int?     @map("member_id")
-  member     Member?  @relation(fields: [memberId], references: [id])
-  isActive   Boolean  @default(true) @map("is_active")
-  reasonEarn String?  @map("reason_earn")
-  createdAt  DateTime @default(now()) @map("created_at")
-  amount     Int      @default(0) @map("amount")
+  id           Int      @id @default(autoincrement())
+  memberId     Int      @map("member_id")
+  member       Member   @relation(fields: [memberId], references: [id])
+  isActive     Boolean  @default(true) @map("is_active")
+  reasonEarn   String?  @map("reason_earn")
+  createdAt    DateTime @default(now()) @map("created_at")
+  amount       Int      @default(0) @map("amount")
+  remainAmount Int      @default(0) @map("remain_amount")
 
   @@map("points")
 }
@@ -901,6 +902,7 @@ model CurrencyExchange {
 enum CurrencyExchangeStatus {
   REQUESTED
   COMPLETE
+  DENY
 }
 
 enum BannerStatus {
