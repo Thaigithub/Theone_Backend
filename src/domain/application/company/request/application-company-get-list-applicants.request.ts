@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApplicationCompanyApplicantsSearch } from '../dto/applicants/application-company-applicants-search.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class ApplicationCompanyGetListApplicantsRequest {
+export class ApplicationCompanyGetListApplicantsRequest extends PaginationRequest {
     @ApiProperty({
         type: 'enum',
         enum: ApplicationCompanyApplicantsSearch,
@@ -22,26 +23,6 @@ export class ApplicationCompanyGetListApplicantsRequest {
     @IsString()
     @IsOptional()
     public keyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 
     @Expose()
     @IsString()

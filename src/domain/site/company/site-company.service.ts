@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
@@ -146,24 +146,10 @@ export class SiteCompanyService {
         const companyId = await this.getCompanyId(accountId);
         body.startDate = new Date(body.startDate).toISOString();
         body.endDate = new Date(body.endDate).toISOString();
-        const { regionId, ...rest } = body;
-        const [cityId, districtId] = regionId.split('-').map(Number);
-        const idNationWide = (
-            await this.prismaService.city.findMany({
-                where: {
-                    englishName: 'Nationwide',
-                },
-                select: {
-                    id: true,
-                },
-            })
-        ).map((item) => item.id);
-        if (idNationWide.includes(cityId)) throw new BadRequestException('City Id must not be nationwide');
         await this.prismaService.site.create({
             data: {
-                ...rest,
+                ...body,
                 companyId,
-                districtId,
             },
         });
     }
@@ -180,19 +166,6 @@ export class SiteCompanyService {
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
 
-        const { regionId, ...rest } = body;
-        const [cityId, districtId] = regionId.split('-').map(Number);
-        const idNationWide = (
-            await this.prismaService.city.findMany({
-                where: {
-                    englishName: 'Nationwide',
-                },
-                select: {
-                    id: true,
-                },
-            })
-        ).map((item) => item.id);
-        if (idNationWide.includes(cityId)) throw new BadRequestException('City Id must not be nationwide');
         if (body.startDate) body.startDate = new Date(body.startDate).toISOString();
         if (body.endDate) body.endDate = new Date(body.endDate).toISOString();
         await this.prismaService.site.update({
@@ -202,8 +175,7 @@ export class SiteCompanyService {
                 companyId,
             },
             data: {
-                ...rest,
-                districtId,
+                ...body,
             },
         });
     }

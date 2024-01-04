@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional } from 'class-validator';
 import { CodeAdminFilter } from '../dto/code-admin-filter.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class CodeAdminGetListRequest {
+export class CodeAdminGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'enum',
         enum: CodeAdminFilter,
@@ -13,24 +14,4 @@ export class CodeAdminGetListRequest {
     @IsEnum(CodeAdminFilter)
     @IsOptional()
     public codeType: CodeAdminFilter;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }

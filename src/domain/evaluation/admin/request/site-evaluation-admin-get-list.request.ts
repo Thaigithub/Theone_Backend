@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
-import { IsBooleanString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsBooleanString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export enum SiteEvaluationSearchCategory {
     COMPANY_NAME = 'COMPANY_NAME',
     SITE_NAME = 'SITE_NAME',
 }
 
-export class SiteEvaluationAdminGetListRequest {
+export class SiteEvaluationAdminGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'boolean',
         required: false,
@@ -35,24 +36,4 @@ export class SiteEvaluationAdminGetListRequest {
     @IsString()
     @IsOptional()
     public keyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }

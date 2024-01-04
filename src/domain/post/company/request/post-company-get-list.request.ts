@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PostStatus, PostType } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class PostCompanyGetListRequest {
+export class PostCompanyGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
@@ -26,24 +27,4 @@ export class PostCompanyGetListRequest {
         enum: PostStatus,
     })
     public status: PostStatus;
-
-    @Expose()
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }

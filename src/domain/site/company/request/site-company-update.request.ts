@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ContractStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEmail, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
 export class SiteCompanyUpdateRequest {
     @ApiProperty({
@@ -23,12 +23,9 @@ export class SiteCompanyUpdateRequest {
     public address: string;
 
     @Expose()
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    @Matches(/^\d+-\d+$/, {
-        message: 'Invalid format. Please use the format: "123-456".',
-    })
-    public regionId: string;
+    public districtId: number;
 
     @ApiProperty({
         type: 'string',

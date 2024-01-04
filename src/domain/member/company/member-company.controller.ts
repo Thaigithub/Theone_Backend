@@ -7,7 +7,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberCompanyService } from './member-company.service';
-import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { MemberCompanyManpowerGetListRequest } from './request/member-company-manpower-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
@@ -73,9 +73,9 @@ export class MemberCompanyController {
         @Query() query: MemberCompanyManpowerGetListRequest,
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
-        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
+        @Query('districtList', new ParseArrayPipe({ optional: true })) districtList: [string] | undefined,
     ): Promise<BaseResponse<MemberCompanyManpowerGetListResponse>> {
-        query = { ...query, experienceTypeList, occupationList, regionList };
+        query = { ...query, experienceTypeList, occupationList, districtList };
         const list = await this.memberCompanyService.getList(query);
         const total = await this.memberCompanyService.getTotal(query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));

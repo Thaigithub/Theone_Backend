@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import {
     ApplicationAdminSearchCategoryFilter,
@@ -9,8 +9,9 @@ import {
     PostAdminPostTypeFilter,
     PostAdminSearchCategoryFilter,
 } from '../dto/post-admin-filter';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-class BaseListRequest {
+class BaseListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
@@ -19,24 +20,6 @@ class BaseListRequest {
         required: false,
     })
     public searchTerm: string;
-
-    @Expose()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    public pageSize: number;
-
-    @Expose()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    public pageNumber: number;
 }
 
 export class ApplicationAdminGetListRequest extends BaseListRequest {

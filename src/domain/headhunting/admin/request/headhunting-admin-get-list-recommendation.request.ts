@@ -7,8 +7,9 @@ import {
     HeadhuntingAdminGetListTeamApprovalCategory,
 } from '../dto/headhunting-admin-get-list-approval-category.enum';
 import { HeadhuntinAdminGetListRecommendationSort } from '../dto/headhunting-admin-get-list-recommendation-sort.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-class HeadhuntingAdminGetListRecommendationRequest {
+class HeadhuntingAdminGetListRecommendationRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsNumber()
@@ -44,26 +45,6 @@ class HeadhuntingAdminGetListRecommendationRequest {
         required: false,
     })
     public keyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }
 
 export class HeadhuntingAdminGetListMemberRecommendationRequest extends HeadhuntingAdminGetListRecommendationRequest {

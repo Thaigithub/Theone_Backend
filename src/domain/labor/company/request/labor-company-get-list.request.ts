@@ -1,8 +1,9 @@
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { LaborType } from '../enum/labor-company-labor-type.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class LaborCompanyGetListRequest {
+export class LaborCompanyGetListRequest extends PaginationRequest {
     @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
@@ -26,16 +27,4 @@ export class LaborCompanyGetListRequest {
     @Expose()
     @IsString()
     public keyword: string;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }

@@ -11,20 +11,29 @@ import { PostMemberUpdateInterestResponse } from './response/post-member-update-
 export class PostMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    protected parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Prisma.PostWhereInput {
-        if (query.regionList) {
-            (query.regionList as string[]).map(async (region) => {
-                const [cityCode] = region.split('-');
-                const isNationwide = await this.prismaService.city.count({
-                    where: {
-                        isActive: true,
-                        id: parseInt(cityCode),
-                        englishName: 'Nationwide',
-                    },
-                });
-                if (isNationwide) query.regionList = undefined;
-            });
-        }
+    protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
+        const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
+        const occupationList = query.occupationList?.map((item) => parseInt(item));
+        const constructionMachineryList = query.constructionMachineryList?.map((item) => parseInt(item));
+        let districtList = query.regionList.map((item) => {
+            return parseInt(item.split('-')[1]);
+        });
+        console.log(districtList);
+        const districtEntireCitiesList = await this.prismaService.district.findMany({
+            where: {
+                id: { in: districtList },
+                englishName: 'All',
+            },
+        });
+        const districtEntireCitiesIdList = districtEntireCitiesList?.map((item) => {
+            return item.id;
+        });
+        districtList = districtList?.filter((item) => {
+            return !districtEntireCitiesIdList.includes(item);
+        });
+        const cityList = districtEntireCitiesList?.map((item) => {
+            return item.cityId;
+        });
 
         return {
             isActive: true,
@@ -42,28 +51,29 @@ export class PostMemberService {
                     ],
                 },
                 {
-                    OR:
-                        query.regionList &&
-                        (query.regionList as string[]).map((region) => {
-                            const [cityCode, districtCode] = region.split('-');
-                            return {
-                                site: {
-                                    district: {
-                                        id: parseInt(districtCode),
-                                        city: {
-                                            id: parseInt(cityCode),
-                                        },
-                                    },
-                                },
-                            };
-                        }),
+                    OR: [
+                        query.regionList
+                            ? {
+                                  site: {
+                                      district: { id: { in: districtList } },
+                                  },
+                              }
+                            : {},
+                        districtEntireCitiesList
+                            ? {
+                                  site: {
+                                      district: { cityId: { in: cityList } },
+                                  },
+                              }
+                            : {},
+                    ],
                 },
             ],
             siteId,
             type: query.postType,
-            experienceType: { in: query.experienceTypeList as ExperienceType[] },
-            occupationId: { in: query.occupationList as number[] },
-            specialOccupationId: { in: query.constructionMachineryList as number[] },
+            experienceType: query.experienceTypeList && { in: experienceTypeList },
+            occupationId: query.occupationList && { in: occupationList },
+            specialOccupationId: query.constructionMachineryList && { in: constructionMachineryList },
         };
     }
 
@@ -138,7 +148,7 @@ export class PostMemberService {
                     },
                 },
             },
-            where: this.parseConditionFromQuery(query, siteId),
+            where: await this.parseConditionFromQuery(query, siteId),
             orderBy: {
                 createdAt: 'desc',
             },
@@ -173,7 +183,7 @@ export class PostMemberService {
 
     async getTotal(query: PostMemberGetListRequest, siteId: number): Promise<number> {
         return await this.prismaService.post.count({
-            where: this.parseConditionFromQuery(query, siteId),
+            where: await this.parseConditionFromQuery(query, siteId),
         });
     }
 

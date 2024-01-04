@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminLevel } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { AdminSearchCategories } from '../dto/admin-admin-search';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class AdminAdminGetListRequest {
+export class AdminAdminGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'enum',
         enum: AdminLevel,
@@ -33,24 +34,4 @@ export class AdminAdminGetListRequest {
     @IsString()
     @IsOptional()
     public keyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }
