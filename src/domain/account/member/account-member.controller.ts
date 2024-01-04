@@ -12,7 +12,7 @@ import { AccountMemberUpsertBankAccountRequest } from './request/account-member-
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
-import { AccountMemberCheckExistedResponse } from './response/account-member-check-exist-accountId.response';
+import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 

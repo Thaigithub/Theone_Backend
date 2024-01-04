@@ -21,7 +21,7 @@ export class ContractMemberService {
                     gte: query.startDate && new Date(query.startDate),
                 },
                 endDate: {
-                    gte: query.startDate && new Date(query.startDate),
+                    lte: query.endDate && new Date(query.endDate),
                 },
                 application: {
                     OR: [
@@ -44,6 +44,26 @@ export class ContractMemberService {
                     select: {
                         post: {
                             select: {
+                                interested: {
+                                    where: {
+                                        member: {
+                                            accountId,
+                                        },
+                                    },
+                                },
+                                occupation: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                                specialOccupation: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                                endDate: true,
+                                name: true,
+                                id: true,
                                 company: {
                                     select: {
                                         logo: {
@@ -58,6 +78,7 @@ export class ContractMemberService {
                                         name: true,
                                         startDate: true,
                                         endDate: true,
+                                        address: true,
                                     },
                                 },
                             },
@@ -68,6 +89,13 @@ export class ContractMemberService {
                 endDate: true,
             },
         };
+        if (query.status) {
+            if (query.status === ContractStatus.ON_DUTY) {
+                search.where.endDate['gte'] = new Date();
+            } else {
+                search.where.endDate['lt'] = new Date();
+            }
+        }
         const contracts = (await this.prismaService.contract.findMany(search)).map((item) => {
             return {
                 companyLogo: {
@@ -82,6 +110,14 @@ export class ContractMemberService {
                 contractId: item.id,
                 startDate: item.startDate,
                 endDate: item.endDate,
+                postId: item.application.post.id,
+                postName: item.application.post.name,
+                postEndDate: item.application.post.endDate,
+                siteAddress: item.application.post.site.address,
+                codeNameGeneral: item.application.post.occupation?.codeName || null,
+                codeNameSpecial: item.application.post.specialOccupation?.codeName || null,
+                isInterested: item.application.post.interested.length === 0 ? false : true,
+                status: item.endDate < new Date() ? ContractStatus.END_OF_DUTY : ContractStatus.ON_DUTY,
             };
         });
         const total = await this.prismaService.contract.count({ where: search.where });

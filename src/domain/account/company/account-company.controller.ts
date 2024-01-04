@@ -5,7 +5,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountCompanyService } from './account-company.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
-import { AccountCompanyCheckExistedResponse } from './response/account-company-check-registration-number.response';
+import { AccountCompanyCheckExistedResponse } from './response/account-company-check-existed.response';
 import { AccountCompanyGetDetailResponse } from './response/account-company-get-detail.response';
 
 @Controller('/company/accounts')
