@@ -71,23 +71,19 @@ export class SiteMemberService {
         }
     }
     async getSiteList(query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
-        const idNationWide = (
-            await this.prismaService.city.findMany({
-                where: {
-                    englishName: 'Nationwide',
-                },
-                select: {
-                    id: true,
-                },
-            })
-        ).map((item) => item.id);
-        const [cityId, districtId] = query.regionId.split('-').map(Number);
+        const entireCity = await this.prismaService.district.findUnique({
+            where: {
+                id: query.districtId,
+                englishName: 'All',
+            },
+        });
+
         const queryFilter: Prisma.SiteWhereInput = {
             ...(query.name && { name: { contains: query.name, mode: 'insensitive' } }),
             district: {
-                id: idNationWide.includes(cityId) ? undefined : districtId,
+                id: !entireCity ? query.districtId : undefined,
                 city: {
-                    id: cityId,
+                    id: entireCity && entireCity.cityId,
                 },
             },
             isActive: true,
@@ -152,7 +148,6 @@ export class SiteMemberService {
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
     }
-
     async getSiteDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
         await this.checkExistSite(id);
         const siteRecord = await this.prismaService.site.findUnique({

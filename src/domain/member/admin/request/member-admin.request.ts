@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AccountStatus, MemberLevel } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { ArrayNotEmpty, IsArray, IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { searchCategory } from '../dto/member-admin-search-category.request.dto';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-class GetMembersListRequest {
+class GetMembersListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'enum',
         enum: AccountStatus,
@@ -43,26 +44,6 @@ class GetMembersListRequest {
     @IsString()
     @IsOptional()
     public searchKeyword: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }
 
 class ChangeMemberRequest {

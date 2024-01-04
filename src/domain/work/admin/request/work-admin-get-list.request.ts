@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { WorkAdminGetListCategory } from '../dto/work-admin-get-list-category.enum';
 import { WorkAdminGetListSort } from '../dto/work-admin-get-list-sort.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class WorkAdminGetListRequest {
+export class WorkAdminGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'enum',
         enum: WorkAdminGetListCategory,
@@ -44,24 +45,4 @@ export class WorkAdminGetListRequest {
     @IsEnum(SitePeriodStatus)
     @IsOptional()
     public siteStatus: SitePeriodStatus;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 }

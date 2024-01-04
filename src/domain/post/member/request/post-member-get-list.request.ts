@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExperienceType, PostType } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { PostType } from '@prisma/client';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class PostMemberGetListRequest {
+export class PostMemberGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'string',
         required: false,
@@ -31,7 +32,7 @@ export class PostMemberGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public occupationList: string | number[];
+    public occupationList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -41,7 +42,7 @@ export class PostMemberGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public constructionMachineryList: string | number[];
+    public constructionMachineryList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -51,7 +52,7 @@ export class PostMemberGetListRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public experienceTypeList: string | ExperienceType[];
+    public experienceTypeList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -64,25 +65,5 @@ export class PostMemberGetListRequest {
         message: 'The regionList must be in format 00-000 or 00-000,00-000...(5 times)',
     })
     @IsOptional()
-    public regionList: string | string[];
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
+    public regionList: string[];
 }

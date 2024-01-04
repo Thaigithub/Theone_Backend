@@ -59,9 +59,9 @@ export class TeamCompanyController {
         @Query() query: TeamCompanyManpowerGetListRequest,
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
-        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
+        @Query('districtList', new ParseArrayPipe({ optional: true })) districtList: [string] | undefined,
     ): Promise<BaseResponse<TeamCompanyManpowerGetListResponse>> {
-        query = { ...query, experienceTypeList, occupationList, regionList };
+        query = { ...query, experienceTypeList, occupationList, districtList };
         const list = await this.teamCompanyService.getList(query);
         const total = await this.teamCompanyService.getTotal(query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { IsNumber, IsOptional, Max } from 'class-validator';
-import { MemberCompanyManpowerGetListRequest } from 'domain/member/company/request/menber-company-manpower-get-list.request';
+import { MemberCompanyManpowerGetListRequest } from 'domain/member/company/request/member-company-manpower-get-list.request';
 
 export class TeamCompanyManpowerGetListRequest extends MemberCompanyManpowerGetListRequest {
     @ApiProperty({

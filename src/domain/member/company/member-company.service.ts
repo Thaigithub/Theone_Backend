@@ -3,7 +3,7 @@ import { ExperienceType, Prisma } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { MemberCompanyManpowerGetListRequest } from './request/menber-company-manpower-get-list.request';
+import { MemberCompanyManpowerGetListRequest } from './request/member-company-manpower-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
@@ -12,10 +12,25 @@ import { ManpowerListMembersResponse } from './response/member-company-manpower-
 export class MemberCompanyService {
     constructor(private prismaService: PrismaService) {}
 
-    private parseConditionFromQuery(query: MemberCompanyManpowerGetListRequest): Prisma.MemberWhereInput {
+    private async parseConditionFromQuery(query: MemberCompanyManpowerGetListRequest): Promise<Prisma.MemberWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupationList?.map((item) => parseInt(item));
-        const regionList = query.regionList?.map((item) => parseInt(item));
+        let districtList = query.districtList?.map((item) => parseInt(item));
+        const districtEntireCitiesList = await this.prismaService.district.findMany({
+            where: {
+                id: { in: districtList },
+                englishName: 'All',
+            },
+        });
+        const districtEntireCitiesIdList = districtEntireCitiesList?.map((item) => {
+            return item.id;
+        });
+        districtList = districtList?.filter((item) => {
+            return !districtEntireCitiesIdList.includes(item);
+        });
+        const cityList = districtEntireCitiesList?.map((item) => {
+            return item.cityId;
+        });
 
         return {
             isActive: true,
@@ -68,7 +83,22 @@ export class MemberCompanyService {
                     desiredOccupation: query.occupationList && { id: { in: occupationList } },
                 },
                 {
-                    district: query.regionList && { id: { in: regionList } },
+                    OR: [
+                        query.districtList
+                            ? {
+                                  district: {
+                                      id: { in: districtList },
+                                  },
+                              }
+                            : {},
+                        districtEntireCitiesList
+                            ? {
+                                  district: {
+                                      cityId: { in: cityList },
+                                  },
+                              }
+                            : {},
+                    ],
                 },
             ],
         };
@@ -96,7 +126,7 @@ export class MemberCompanyService {
                     },
                 },
             },
-            where: this.parseConditionFromQuery(query),
+            where: await this.parseConditionFromQuery(query),
             ...QueryPagingHelper.queryPaging(query),
         });
 
@@ -125,7 +155,7 @@ export class MemberCompanyService {
 
     async getTotal(query: MemberCompanyManpowerGetListRequest): Promise<number> {
         return await this.prismaService.member.count({
-            where: this.parseConditionFromQuery(query),
+            where: await this.parseConditionFromQuery(query),
         });
     }
 

@@ -1,31 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AccountStatus, CertificateStatus, FileType } from '@prisma/client';
-import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from 'class-validator';
+import { CertificateStatus, FileType } from '@prisma/client';
+import { Expose } from 'class-transformer';
+import { IsEnum, IsISO8601, IsNumber, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class GetMemberCertificateRequest {
-    @ApiProperty({
-        example: 1,
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
-
-    @ApiProperty({
-        example: 20,
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsNumber()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-}
+export class GetMemberCertificateRequest extends PaginationRequest {}
 
 export class UpsertMemberCertificateRequest {
     @Expose()

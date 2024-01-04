@@ -1,18 +1,6 @@
-import {
-    BadRequestException,
-    Controller,
-    Get,
-    HttpStatus,
-    Param,
-    ParseArrayPipe,
-    ParseIntPipe,
-    Post,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AccountType, ExperienceType } from '@prisma/client';
+import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
@@ -43,30 +31,7 @@ export class PostMemberController {
         regionList: [string] | undefined,
         siteId: number,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
-        // Check validation
-        const parsedOccupationList = occupationList?.map((item) => {
-            const parsedItem = parseInt(item);
-            if (isNaN(parsedItem)) throw new BadRequestException('Occupation list item must be in type number');
-            return parsedItem;
-        });
-        const parsedConstructionMachineryList = constructionMachineryList?.map((item) => {
-            const parsedItem = parseInt(item);
-            if (isNaN(parsedItem)) throw new BadRequestException('ConstructionMachinary list item must be in type number');
-            return parsedItem;
-        });
-        const parsedExperienceTypeList = experienceTypeList?.map((item) => {
-            const parsedItem = ExperienceType[item];
-            if (parsedItem === undefined)
-                throw new BadRequestException(
-                    'ExperienceType list item must be in following values: SHORT, MEDIUM, LONG, REGARDLESS',
-                );
-            return parsedItem;
-        });
-        query.occupationList = parsedOccupationList;
-        query.constructionMachineryList = parsedConstructionMachineryList;
-        query.experienceTypeList = parsedExperienceTypeList;
-        query.regionList = regionList;
-
+        query = { ...query, occupationList, constructionMachineryList, experienceTypeList, regionList };
         const list = await this.postMemberService.getList(request.user.accountId, query, siteId);
         const total = await this.postMemberService.getTotal(query, siteId);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));

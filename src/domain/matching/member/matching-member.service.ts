@@ -46,7 +46,6 @@ export class MatchingMemberService {
                 },
             },
         });
-        console.log(careerExist);
         if (!careerExist) throw new BadRequestException('You need to create a career first');
 
         const matchingPostToday = await this.prismaService.memberMatching.findFirst({

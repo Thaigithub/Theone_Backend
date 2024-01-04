@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export enum InterviewStatus {
     INTERVIEW_PROPOSAL = 'INTERVIEW_PROPOSAL',
@@ -10,21 +11,11 @@ export enum InterviewStatus {
     DEADLINE = 'DEADLINE',
 }
 
-export class InterviewMemberGetListRequest {
+export class InterviewMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsEnum(InterviewStatus)
     public status: InterviewStatus;
-
-    @Expose()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @Expose()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
 
     @Expose()
     @IsString()

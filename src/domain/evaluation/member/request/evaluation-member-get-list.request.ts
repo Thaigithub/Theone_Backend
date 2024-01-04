@@ -40,7 +40,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'string',
         format: 'date',
-        required: true,
+        required: false,
     })
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
@@ -53,7 +53,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @ApiProperty({
         type: 'string',
         format: 'date',
-        required: true,
+        required: false,
     })
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',

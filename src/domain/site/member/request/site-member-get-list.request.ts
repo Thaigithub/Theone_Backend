@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Length } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class SiteMemberGetListRequest {
+export class SiteMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsString()
@@ -14,28 +15,8 @@ export class SiteMemberGetListRequest {
     name: string;
 
     @Expose()
-    @IsString()
-    @IsOptional()
-    @Matches(/^\d+-\d+$/, {
-        message: 'Invalid format. Please use the format: "123-456".',
-    })
-    public regionId: string;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
+    @IsNumber()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
-    public pageSize: number;
-
-    @ApiProperty({
-        type: 'number',
-        required: false,
-    })
-    @Expose()
-    @IsOptional()
-    @Transform(({ value }) => value && parseInt(value))
-    public pageNumber: number;
+    public districtId: number;
 }
