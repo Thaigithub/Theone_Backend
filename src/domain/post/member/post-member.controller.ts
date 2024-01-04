@@ -14,8 +14,6 @@ import { PostMemberUpdateInterestResponse } from './response/post-member-update-
 
 @Controller('/member/posts')
 @ApiTags('[MEMBER] Post management')
-@Roles(AccountType.MEMBER)
-@UseGuards(AuthJwtGuard, AuthRoleGuard)
 @ApiBearerAuth()
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
@@ -32,7 +30,7 @@ export class PostMemberController {
         siteId: number,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         query = { ...query, occupationList, constructionMachineryList, experienceTypeList, regionList };
-        const list = await this.postMemberService.getList(request.user.accountId, query, siteId);
+        const list = await this.postMemberService.getList(request.user?.accountId, query, siteId);
         const total = await this.postMemberService.getTotal(query, siteId);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));
         return BaseResponse.of(paginationResponse);
@@ -103,10 +101,13 @@ export class PostMemberController {
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<PostMemberGetDetailResponse>> {
-        return BaseResponse.of(await this.postMemberService.getDetail(id, request.user.accountId));
+        return BaseResponse.of(await this.postMemberService.getDetail(id, request.user?.accountId));
     }
 
     // Apply
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/:id/apply')
     @ApiOperation({
         summary: 'Apply a post',
@@ -119,6 +120,9 @@ export class PostMemberController {
     }
 
     // Interest
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/:id/interest')
     @ApiOperation({
         summary: 'Add interest post',
