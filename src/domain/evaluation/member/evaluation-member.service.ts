@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
 import { EvaluationMemberCreateEvaluationRequest } from './request/evaluation-member-create-evaluation.request';
 import { EvaluationMemberGetListRequest } from './request/evaluation-member-get-list.request';
-import { Prisma } from '@prisma/client';
-import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteEvaluationByContractResponse } from './response/evaluation-member-get-list.response';
 
 @Injectable()
@@ -150,9 +150,10 @@ export class EvaluationMemberService {
                 endWorkDate: item.contract.endDate,
                 score: item.score,
                 logo: {
-                    fileName: item.siteEvaluation.site.company.logo ? item.siteEvaluation.site.company.logo.file.fileName : null,
-                    type: item.siteEvaluation.site.company.logo ? item.siteEvaluation.site.company.logo.file.type : null,
-                    key: item.siteEvaluation.site.company.logo ? item.siteEvaluation.site.company.logo.file.key : null,
+                    fileName: item.siteEvaluation.site.company.logo.file.fileName,
+                    type: item.siteEvaluation.site.company.logo.file.type,
+                    key: item.siteEvaluation.site.company.logo.file.key,
+                    size: Number(item.siteEvaluation.site.company.logo.file.size),
                 },
             };
         });

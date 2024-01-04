@@ -1,12 +1,14 @@
 import { FileType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 
-export class FileUploadRequest {
+export class FileRequest {
     @Expose()
+    @IsString()
     fileName: string;
 
     @Expose()
+    @IsString()
     size: number;
 
     @Expose()
@@ -14,5 +16,6 @@ export class FileUploadRequest {
     type: FileType;
 
     @Expose()
+    @IsString()
     key: string;
 }

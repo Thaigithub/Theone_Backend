@@ -4,15 +4,11 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 
 import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
 
 import { HeadhuntingCompanyService } from './headhunting-company.service';
-import {
-    RecommendationCompanyGetItemHeadhuntingApprovedResponse,
-    RecommendationCompanyGetListHeadhuntingApprovedResponse,
-} from './response/headhunting-company-get-list-recommendation.response';
+import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/headhunting-company-get-list-recommendation.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -27,7 +23,6 @@ export class HeadhuntingCompanyController {
         summary: 'Listing recommendation applicants',
         description: 'Company can view list applicants recommended by Admin',
     })
-    @ApiOkResponsePaginated(RecommendationCompanyGetItemHeadhuntingApprovedResponse)
     async getListRecommendation(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: any,

@@ -4,15 +4,11 @@ import { AccountType, PostApplicationStatus, SupportCategory } from '@prisma/cli
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { ApplicationCompanyService } from './application-company.service';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
-import {
-    ApplicationCompanyGetListApplicantsItemResponse,
-    ApplicationCompanyGetListApplicantsResponse,
-} from './response/application-company-get-list-applicants.response';
-import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
+import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
+import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
 
 @ApiTags('[COMPANY] Application Management')
 @Controller('/company/applications')
@@ -47,7 +43,6 @@ export class ApplicationCompanyController {
         summary: 'Listing post applicants',
         description: 'Company can search/filter post applicants',
     })
-    @ApiOkResponsePaginated(ApplicationCompanyGetListApplicantsItemResponse)
     async getListApplicantSite(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: any,

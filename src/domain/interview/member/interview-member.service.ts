@@ -92,13 +92,7 @@ export class InterviewMemberService {
                                 name: true,
                                 logo: {
                                     select: {
-                                        file: {
-                                            select: {
-                                                fileName: true,
-                                                key: true,
-                                                type: true,
-                                            },
-                                        },
+                                        file: true,
                                     },
                                 },
                             },
@@ -178,7 +172,12 @@ export class InterviewMemberService {
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
                 applicationId: item.id,
-                companyLogo: item.post.company.logo.file,
+                companyLogo: {
+                    fileName: item.post.company.logo.file.fileName,
+                    type: item.post.company.logo.file.type,
+                    key: item.post.company.logo.file.key,
+                    size: Number(item.post.company.logo.file.size),
+                },
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,

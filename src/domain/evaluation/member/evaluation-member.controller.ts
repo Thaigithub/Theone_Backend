@@ -13,20 +13,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
-import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { EvaluationMemberService } from './evaluation-member.service';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
-import { BaseResponse } from 'utils/generics/base.response';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
-import { EvaluationMemberCreateEvaluationRequest } from './request/evaluation-member-create-evaluation.request';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
-import {
-    EvaluationMemberGetListResponse,
-    SiteEvaluationByContractResponse,
-} from './response/evaluation-member-get-list.response';
-import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
-import { EvaluationMemberGetListRequest } from './request/evaluation-member-get-list.request';
+import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
+import { EvaluationMemberService } from './evaluation-member.service';
+import { EvaluationMemberCreateEvaluationRequest } from './request/evaluation-member-create-evaluation.request';
+import { EvaluationMemberGetListRequest } from './request/evaluation-member-get-list.request';
+import { EvaluationMemberGetListResponse } from './response/evaluation-member-get-list.response';
 
 @ApiTags('[MEMBER] Evaluation Management')
 @Controller('/member/site-evaluations')
@@ -66,7 +62,6 @@ export class EvaluationMemberController {
         summary: 'Get list of evaluation tickets for sites',
         description: 'Member can retrieve all evaluation tickets for site, including incomplete & complete evaluation',
     })
-    @ApiOkResponsePaginated(SiteEvaluationByContractResponse)
     @ApiResponse({
         type: BaseResponse,
         status: HttpStatus.NOT_FOUND,

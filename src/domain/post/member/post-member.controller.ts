@@ -18,11 +18,10 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { PostMemberService } from './post-member.service';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
-import { PostMemberGetListResponse, PostResponse } from './response/post-member-get-list.response';
+import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
 @Controller('/member/posts')
@@ -80,7 +79,6 @@ export class PostMemberController {
         summary: 'Get list of posts',
         description: 'Member can retrieve all posts',
     })
-    @ApiOkResponsePaginated(PostResponse)
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getList(
         @Query() query: PostMemberGetListRequest,
@@ -107,7 +105,6 @@ export class PostMemberController {
         summary: 'Get list of posts by siteId',
         description: 'Member can retrieve all posts related to a site',
     })
-    @ApiOkResponsePaginated(PostResponse)
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListPostsBySite(
         @Param('id', ParseIntPipe) siteId: number,

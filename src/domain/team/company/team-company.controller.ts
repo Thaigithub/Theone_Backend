@@ -4,7 +4,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { TeamCompanyGetTeamDetailApplicants } from './response/team-company-get-team-detail.response';
 import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
 import { TeamCompanyManpowerGetListResponse } from './response/team-company-manpower-get-list.response';
@@ -55,7 +54,6 @@ export class TeamCompanyController {
         summary: 'Get list of teams in Manpower',
         description: 'Company can retrieve all teams in Manpower',
     })
-    @ApiOkResponsePaginated(TeamCompanyManpowerGetListResponse)
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListTeams(
         @Query() query: TeamCompanyManpowerGetListRequest,

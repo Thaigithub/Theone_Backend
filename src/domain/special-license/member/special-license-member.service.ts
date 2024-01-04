@@ -83,6 +83,7 @@ export class SpecialLicenseService {
                 fileName: item.file.fileName,
                 key: item.file.key,
                 type: item.file.type,
+                size: Number(item.file.size),
             },
         }));
         const total = await this.prismaService.specialLicense.count({ where: search.where });
@@ -161,6 +162,7 @@ export class SpecialLicenseService {
                 fileName: result.file.fileName,
                 key: result.file.key,
                 type: result.file.type,
+                size: Number(result.file.size),
             },
         };
     }

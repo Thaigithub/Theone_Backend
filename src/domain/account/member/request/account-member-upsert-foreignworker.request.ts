@@ -1,50 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { FileType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsISO8601, IsNumber, IsString } from 'class-validator';
+import { IsString, Matches } from 'class-validator';
+import { FileRequest } from 'utils/generics/file.request';
 
-export class UpsertForeignWorkerRequest {
+export class AccountMemberUpsertForeignWorkerRequest {
     @Expose()
     @IsString()
-    @ApiProperty({ example: 'The One' })
-    public englishName: string;
-
-    @Expose()
-    @IsString()
-    @ApiProperty({ example: '123456' })
-    public registrationNumber: string;
+    englishName: string;
 
     @Expose()
     @IsString()
-    @ApiProperty({ example: '123456' })
-    public serialNumber: string;
-
-    @Expose()
-    @IsISO8601()
-    @ApiProperty({ example: '2020-10-10T00:00:00Z' })
-    public dateOfIssue: string;
+    registrationNumber: string;
 
     @Expose()
     @IsString()
-    @ApiProperty({ example: 'asdfhjawbecqertq' })
-    public fileKey: string;
+    serialNumber: string;
 
     @Expose()
-    @IsString()
-    @ApiProperty({ example: 'basic.pdf' })
-    public fileName: string;
-
-    @Expose()
-    @IsEnum(FileType)
-    @ApiProperty({
-        type: 'enum',
-        enum: FileType,
-        example: FileType.PDF,
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
     })
-    public fileType: FileType;
+    dateOfIssue: string;
 
     @Expose()
-    @IsNumber()
-    @ApiProperty({ example: 100 })
-    public fileSize: number;
+    file: FileRequest;
 }

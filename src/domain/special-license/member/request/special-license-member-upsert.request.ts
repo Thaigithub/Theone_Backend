@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { IsNumber, IsString, Matches } from 'class-validator';
-import { FileUploadRequest } from 'utils/generics/file.request';
+import { FileRequest } from 'utils/generics/file.request';
 
 export class SpecialLicenseMemberUpsertRequest {
     @Expose()
@@ -18,5 +18,5 @@ export class SpecialLicenseMemberUpsertRequest {
     acquisitionDate: string;
 
     @Expose()
-    file: FileUploadRequest;
+    file: FileRequest;
 }

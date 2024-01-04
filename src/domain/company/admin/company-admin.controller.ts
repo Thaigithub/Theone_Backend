@@ -4,7 +4,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
-import { ApiOkResponsePaginated } from 'utils/generics/pagination.decorator';
 import { BaseResponse } from '../../../utils/generics/base.response';
 import { AdminCompanyService } from './company-admin.service';
 import { AdminCompanyDownloadListRequest, AdminCompanyDownloadRequest } from './request/company-admin-download-list.request';
@@ -12,7 +11,7 @@ import { AdminCompanyGetListRequest } from './request/company-admin-get-list.req
 import { AdminCompanyUpdateEmailRequest } from './request/company-admin-update-email.request';
 import { AdminCompanyUpdateStatusRequest } from './request/company-admin-update-status.request';
 import { AdminCompanyGetDetailsResponse } from './response/company-admin-get-detail.response';
-import { AdminCompanyGetListResponse, CompanyResponse } from './response/company-admin-get-list.response';
+import { AdminCompanyGetListResponse } from './response/company-admin-get-list.response';
 @ApiTags('[ADMIN] Company Management')
 @Controller('/admin/companies')
 @Roles(AccountType.ADMIN)
@@ -82,7 +81,6 @@ export class AdminCompanyController {
         summary: 'Find companies list',
         description: 'This endpoint retrieves comapnies list in the system.',
     })
-    @ApiOkResponsePaginated(CompanyResponse)
     async getCompanies(@Query() request: AdminCompanyGetListRequest): Promise<BaseResponse<AdminCompanyGetListResponse>> {
         return BaseResponse.of(await this.adminCompanyService.getCompanies(request));
     }

@@ -98,7 +98,7 @@ export class AdminBannerService {
                 bannerFile: {
                     key: item.banner.file.key,
                     fileName: item.banner.file.fileName,
-                    size: item.banner.file.size,
+                    size: Number(item.banner.file.size),
                     type: item.banner.file.type,
                 },
                 startDate: item.startDate,
@@ -136,6 +136,7 @@ export class AdminBannerService {
                 key: banner.banner.file.key,
                 fileName: banner.banner.file.fileName,
                 type: banner.banner.file.type,
+                size: Number(banner.banner.file.size),
             },
             status: banner.banner.status,
             title: banner.title,
@@ -237,7 +238,7 @@ export class AdminBannerService {
                 bannerFile: {
                     key: item.postBanner.banner.file.key,
                     fileName: item.postBanner.banner.file.fileName,
-                    size: item.postBanner.banner.file.size,
+                    size: Number(item.postBanner.banner.file.size),
                     type: item.postBanner.banner.file.type,
                 },
                 status: item.postBanner.banner.status,
@@ -290,7 +291,12 @@ export class AdminBannerService {
             id: id,
             postName: banner.post.name,
             postId: banner.postId,
-            bannerFile: banner.banner.file,
+            bannerFile: {
+                fileName: banner.banner.file.fileName,
+                type: banner.banner.file.type,
+                key: banner.banner.file.key,
+                size: Number(banner.banner.file.size),
+            },
             status: banner.banner.status,
             startDate: banner.adminPostBanner.startDate,
             endDate: banner.adminPostBanner.endDate,
@@ -409,7 +415,7 @@ export class AdminBannerService {
                 bannerFile: {
                     key: item.postBanner.banner.file.key,
                     fileName: item.postBanner.banner.file.fileName,
-                    size: item.postBanner.banner.file.size,
+                    size: Number(item.postBanner.banner.file.size),
                     type: item.postBanner.banner.file.type,
                 },
                 status: item.postBanner.banner.status,
@@ -470,7 +476,12 @@ export class AdminBannerService {
             },
         });
         return {
-            bannerFile: banner.banner.file,
+            bannerFile: {
+                fileName: banner.banner.file.fileName,
+                key: banner.banner.file.key,
+                type: banner.banner.file.type,
+                size: Number(banner.banner.file.size),
+            },
             status: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
@@ -568,7 +579,7 @@ export class AdminBannerService {
                 bannerFile: {
                     key: item.banner.file.key,
                     fileName: item.banner.file.fileName,
-                    size: item.banner.file.size,
+                    size: Number(item.banner.file.size),
                     type: item.banner.file.type,
                 },
                 status: item.banner.status,
@@ -620,7 +631,12 @@ export class AdminBannerService {
             },
         });
         return {
-            bannerFile: banner.file,
+            bannerFile: {
+                fileName: banner.file.fileName,
+                key: banner.file.key,
+                type: banner.file.type,
+                size: Number(banner.file.size),
+            },
             status: banner.status,
             siteId: banner.siteBanner.siteId,
             siteName: banner.siteBanner.site.name,

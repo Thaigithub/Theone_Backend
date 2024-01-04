@@ -1,3 +1,3 @@
-import { FileUploadRequest } from 'utils/generics/file.request';
+import { FileRequest } from 'utils/generics/file.request';
 
-export class ContractAdminRegistrationRequest extends FileUploadRequest {}
+export class ContractAdminRegistrationRequest extends FileRequest {}

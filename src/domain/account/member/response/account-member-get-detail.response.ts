@@ -1,83 +1,58 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
-    $Enums,
+    Account,
     BankAccount,
     BasicHealthSafetyCertificate,
     Code,
-    File,
+    DisabledLevel,
+    DisabledType,
     ForeignWorker,
     Member,
     MemberLevel,
     SignupMethodType,
 } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 
 class BankAccountType {
-    @ApiProperty({ type: String })
     accountHolder: BankAccount['accountHolder'];
-    @ApiProperty({ type: String })
     accountNumber: BankAccount['accountNumber'];
-    @ApiProperty({ type: String })
     bankName: BankAccount['bankName'];
 }
-class FileType {
-    @ApiProperty({ type: String })
-    key: File['key'];
-    @ApiProperty({ type: String })
-    fileName: File['fileName'];
-    @ApiProperty({ type: Number })
-    size: File['size'];
-    @ApiProperty({ type: 'enum', enum: $Enums.FileType })
-    type: File['type'];
-}
 class ForeignWorkerType {
-    @ApiProperty({ type: String })
     englishName: ForeignWorker['englishName'];
-    @ApiProperty({ type: String })
     registrationNumber: ForeignWorker['registrationNumber'];
-    @ApiProperty({ type: String })
     serialNumber: ForeignWorker['serialNumber'];
-    @ApiProperty({ type: String })
     dateOfIssue: ForeignWorker['dateOfIssue'];
-    @ApiProperty({ type: FileType })
-    file: FileType;
+    file: FileResponse;
 }
 class DisabilityType {
-    @ApiProperty({ type: 'enum', enum: $Enums.DisabledType })
-    disableType: $Enums.DisabledType;
-    @ApiProperty({ type: 'enum', enum: $Enums.DisabledLevel })
-    disableLevel: $Enums.DisabledLevel;
-    @ApiProperty({ type: FileType })
-    file: FileType;
+    disableType: DisabledType;
+    disableLevel: DisabledLevel;
+    file: FileResponse;
 }
 class BasicHealthSafetyCertificateType {
-    @ApiProperty({ type: String })
     registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
-    @ApiProperty({ type: String })
     dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
-    @ApiProperty({ type: FileType })
-    file: FileType;
+    file: FileResponse;
 }
-export class MemberDetailResponse {
-    @ApiProperty({ type: String })
+export class AccountMemberGetDetailResponse {
     name: Member['name'];
-    @ApiProperty({ type: String })
     contact: Member['contact'];
-    @ApiProperty({ type: String })
     email: Member['email'];
-    @ApiProperty({ type: String })
+    account: {
+        username: Account['username'];
+        status: Account['status'];
+    };
     desiredOccupation: {
         codeName: Code['codeName'];
+        id: Code['id'];
     };
-    @ApiProperty({ type: 'enum', enum: MemberLevel })
-    level: Member['level'];
-    @ApiProperty({ type: 'enum', enum: SignupMethodType })
-    signupMethod: Member['signupMethod'];
-    @ApiProperty({ type: BankAccountType })
+    createdAt: Member['createdAt'];
+    level: MemberLevel;
+    signupMethod: SignupMethodType;
+    totalExperienceMonths: Member['totalExperienceMonths'];
+    totalExperienceYears: Member['totalExperienceYears'];
     bankAccount: BankAccountType;
-    @ApiProperty({ type: ForeignWorkerType })
     foreignWorker: ForeignWorkerType;
-    @ApiProperty({ type: DisabilityType })
     disability: DisabilityType;
-    @ApiProperty({ type: BasicHealthSafetyCertificateType })
     basicHealthSafetyCertificate: BasicHealthSafetyCertificateType;
 }
