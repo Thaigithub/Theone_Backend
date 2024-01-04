@@ -3,7 +3,7 @@ import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
-import { AccountCompanyCheckExistedResponse } from './response/account-company-check-registration-number.response';
+import { AccountCompanyCheckExistedResponse } from './response/account-company-check-existed.response';
 import { AccountCompanyGetDetailResponse } from './response/account-company-get-detail.response';
 @Injectable()
 export class AccountCompanyService {
