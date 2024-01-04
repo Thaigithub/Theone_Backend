@@ -8,6 +8,5 @@ import { AdminAdminService } from './admin/admin-admin.service';
     imports: [PrismaModule],
     controllers: [AdminAdminController],
     providers: [AdminAdminService, ExcelService],
-    exports: [AdminAdminService],
 })
 export class AdminModule {}

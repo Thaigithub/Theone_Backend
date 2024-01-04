@@ -126,13 +126,25 @@ model Company {
   updatedAt              DateTime                 @updatedAt @map("updated_at")
   presentativeName       String                   @map("presentative_name")
   account                Account                  @relation(fields: [accountId], references: [id])
+  insurance              String?
   contactCard            ContactCard?
   logo                   Logo?
   matchingRecommendation MatchingRecommendation[]
   posts                  Post[]
   sites                  Site[]
+  attachments            Attachment[]
 
   @@map("companies")
+}
+
+model Attachment {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+  fileId    Int     @unique
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("attachments")
 }
 
 model Logo {
@@ -292,6 +304,7 @@ model File {
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   logo                         Logo?
   specialLicense               SpecialLicense?
+  attachment                   Attachment?
 
   @@map("files")
 }
