@@ -15,10 +15,9 @@ export class PostMemberService {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupationList?.map((item) => parseInt(item));
         const constructionMachineryList = query.constructionMachineryList?.map((item) => parseInt(item));
-        let districtList = query.regionList.map((item) => {
+        let districtList = query.regionList?.map((item) => {
             return parseInt(item.split('-')[1]);
         });
-        console.log(districtList);
         const districtEntireCitiesList = await this.prismaService.district.findMany({
             where: {
                 id: { in: districtList },
