@@ -213,6 +213,9 @@ export class ContractMemberService {
         const search = {
             ...QueryPagingHelper.queryPaging(query),
             where: {
+                NOT: {
+                    labor: null,
+                },
                 OR: [
                     {
                         application: {
@@ -220,11 +223,11 @@ export class ContractMemberService {
                                 accountId,
                             },
                         },
-                        startDate: query.startDate && {
-                            gte: new Date(query.startDate),
+                        startDate: {
+                            gte: query.startDate && new Date(query.startDate),
                         },
-                        endDate: query.endDate && {
-                            lte: new Date(query.endDate),
+                        endDate: {
+                            lte: query.endDate && new Date(query.endDate),
                         },
                     },
                     {
@@ -239,11 +242,11 @@ export class ContractMemberService {
                                 },
                             },
                         },
-                        startDate: query.startDate && {
-                            gte: new Date(query.startDate),
+                        startDate: {
+                            gte: query.startDate && new Date(query.startDate),
                         },
-                        endDate: query.endDate && {
-                            lte: new Date(query.endDate),
+                        endDate: {
+                            lte: query.endDate && new Date(query.endDate),
                         },
                     },
                 ],
@@ -261,6 +264,11 @@ export class ContractMemberService {
                                                 file: true,
                                             },
                                         },
+                                        name: true,
+                                    },
+                                },
+                                site: {
+                                    select: {
                                         name: true,
                                     },
                                 },
@@ -287,32 +295,20 @@ export class ContractMemberService {
                 salaryType: true,
             },
         };
-        if (query.status === ContractStatus.END_OF_DUTY) {
-            search.where.OR.map((item) => {
-                delete item.endDate;
-                return {
-                    ...item,
-                    endDate: {
-                        lte: new Date(),
-                    },
-                };
-            });
+        if (query.status) {
+            if (query.status === ContractStatus.ON_DUTY) {
+                search.where.OR.map((item) => {
+                    item.endDate['gte'] = new Date();
+                    return item;
+                });
+            } else {
+                search.where.OR.map((item) => {
+                    item.endDate['lt'] = new Date();
+                    return item;
+                });
+            }
         }
-        if (query.status === ContractStatus.ON_DUTY) {
-            search.where.OR.map((item) => {
-                delete item.startDate;
-                delete item.endDate;
-                return {
-                    ...item,
-                    endDate: {
-                        gte: new Date(),
-                    },
-                    startDate: {
-                        lte: new Date(),
-                    },
-                };
-            });
-        }
+
         const contracts = (await this.prismaService.contract.findMany(search)).map((item) => {
             return {
                 id: item.id,
@@ -326,13 +322,18 @@ export class ContractMemberService {
                 startDate: item.startDate,
                 endDate: item.endDate,
                 salaryType: item.salaryType,
-                amount: item.labor.salaryHistories.reduce((accum, curent) => {
-                    return accum + curent.actualPayment;
-                }, 0),
+                amount:
+                    item.labor.salaryHistories.length !== 0
+                        ? item.labor.salaryHistories.reduce((accum, curent) => {
+                              return accum + curent.actualPayment;
+                          }, 0)
+                        : 0,
                 totalDays: item.labor.workDates.length,
                 totalHours: item.labor.workDates.reduce((accum, current) => {
                     return accum + current.hours;
                 }, 0),
+                siteName: item.application.post.site.name,
+                status: item.endDate < new Date() ? ContractStatus.END_OF_DUTY : ContractStatus.ON_DUTY,
             };
         });
         const total = await this.prismaService.contract.count({ where: search.where });
@@ -396,8 +397,6 @@ export class ContractMemberService {
                                 hours: true,
                             },
                         },
-                    },
-                    include: {
                         salaryHistories: true,
                     },
                 },
