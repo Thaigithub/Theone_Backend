@@ -364,22 +364,23 @@ model SpecialLicense {
 }
 
 model Career {
-  id                Int        @id @default(autoincrement())
-  companyName       String     @map("company_name")
-  siteName          String     @map("site_name")
-  startDate         DateTime   @map("start_date")
-  endDate           DateTime   @map("end_date")
+  id                Int                      @id @default(autoincrement())
+  companyName       String                   @map("company_name")
+  siteName          String                   @map("site_name")
+  startDate         DateTime                 @map("start_date")
+  endDate           DateTime                 @map("end_date")
   type              CareerType
-  isExperienced     Boolean    @map("is_experienced")
-  experiencedYears  Int        @default(0)
-  experiencedMonths Int        @default(0)
+  certificationType CareerCertificationType?
+  isExperienced     Boolean                  @map("is_experienced")
+  experiencedYears  Int                      @default(0)
+  experiencedMonths Int                      @default(0)
   occupationId      Int?
-  isActive          Boolean    @default(true) @map("is_active")
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime   @updatedAt @map("updated_at")
-  memberId          Int        @map("member_id")
-  member            Member     @relation(fields: [memberId], references: [id])
-  occupation        Code?      @relation(fields: [occupationId], references: [id])
+  isActive          Boolean                  @default(true) @map("is_active")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  memberId          Int                      @map("member_id")
+  member            Member                   @relation(fields: [memberId], references: [id])
+  occupation        Code?                    @relation(fields: [occupationId], references: [id])
 
   @@map("careers")
 }
@@ -1046,6 +1047,13 @@ enum SignupMethodType {
 enum CareerType {
   GENERAL
   CERTIFICATION
+}
+
+enum CareerCertificationType {
+  NONE
+  HEALTH_INSURANCE
+  EMPLOYMENT_INSURANCE
+  THE_ONE_SITE
 }
 
 enum OtpType {
