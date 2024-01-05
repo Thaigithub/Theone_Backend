@@ -24,7 +24,10 @@ export class ApplicationMemberController {
     constructor(private applicationMemberService: ApplicationMemberService) {}
 
     @Patch('/:id/accept')
-    async acceptApplicationStatus(@Param('id', ParseIntPipe) id: number, @Req() request: any): Promise<BaseResponse<void>> {
+    async acceptApplicationStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(
             await this.applicationMemberService.changeApplicationStatus(
                 id,
@@ -35,7 +38,10 @@ export class ApplicationMemberController {
     }
 
     @Patch('/:id/reject')
-    async rejectApplicationStatus(@Param('id', ParseIntPipe) id: number, @Req() request: any): Promise<BaseResponse<void>> {
+    async rejectApplicationStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(
             await this.applicationMemberService.changeApplicationStatus(
                 id,
@@ -48,7 +54,7 @@ export class ApplicationMemberController {
     @Get('/offer')
     async getApplicationOfferList(
         @Query() body: ApplicationMemberGetListOfferRequest,
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ApplicationMemberGetListOfferResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getApplicationOfferList(request.user.accountId, body));
     }
@@ -66,14 +72,14 @@ export class ApplicationMemberController {
     @Get('/:id')
     async getDetailApplication(
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ApplicationMemberGetDetailResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getDetailApplication(id, req.user.accountId));
     }
 
     @Get()
     async getApplicationList(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: ApplicationMemberGetListRequest,
     ): Promise<BaseResponse<ApplicationMemberGetListResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getApplicationList(request.user.accountId, query));

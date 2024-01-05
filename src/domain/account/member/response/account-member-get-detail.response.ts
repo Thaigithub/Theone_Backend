@@ -37,6 +37,7 @@ export class AccountMemberGetDetailResponse {
     name: Member['name'];
     contact: Member['contact'];
     email: Member['email'];
+    desiredSalary: Member['desiredSalary'];
     account: {
         username: Account['username'];
         status: Account['status'];

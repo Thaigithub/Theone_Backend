@@ -9,6 +9,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { MatchingCompanyService } from './matching-company.service';
 import { MatchingCompanyGetListRecommendationRequest } from './request/matching-company-get-list-recommendation.request';
 import { MatchingCompanyGetListRecommendation } from './response/matching-company-get-list-recommendation.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -23,7 +24,7 @@ export class MatchingCompanyController {
 
     @Get()
     async getList(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Query() query: MatchingCompanyGetListRecommendationRequest,
     ): Promise<BaseResponse<MatchingCompanyGetListRecommendation>> {
         const code = await this.matchingCompanyService.getList(req.user.accountId, query);
@@ -38,7 +39,7 @@ export class MatchingCompanyController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async proposeInteview(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('applicantId', ParseIntPipe) applicationId: number,
         @Body() body: RecommendationCompanyInterviewProposeRequest,
     ): Promise<BaseResponse<void>> {

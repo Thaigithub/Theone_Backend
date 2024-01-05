@@ -360,7 +360,7 @@ model SpecialLicense {
   file            File              @relation(fields: [fileId], references: [id])
   member          Member            @relation(fields: [memberId], references: [id])
 
-  @@map("special_license")
+  @@map("special_licenses")
 }
 
 model Career {

@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { RecommendationCompanyService } from './recommendation.service';
 import { RecommendationCompanyInterviewProposeRequest } from './request/recommendaation-company-interview-proposed.request';
 import { RecommendationCompanyGetDetailApplicantResponse } from './response/recommendation-company-get-detail-applicants.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -24,7 +25,7 @@ export class RecommendationCompanyController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async proposeInteview(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('applicantId', ParseIntPipe) applicationId: number,
         @Body() body: RecommendationCompanyInterviewProposeRequest,
     ): Promise<BaseResponse<void>> {
@@ -45,7 +46,7 @@ export class RecommendationCompanyController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getDetail(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('applicantId', ParseIntPipe) applicationId: number,
         @Body() body: RecommendationCompanyInterviewProposeRequest,
     ): Promise<BaseResponse<RecommendationCompanyGetDetailApplicantResponse>> {

@@ -30,6 +30,7 @@ import { PostCompanyGetListApplicantsResponse } from './response/post-company-ge
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Posts Management')
 @Controller('/company/posts')
@@ -43,7 +44,7 @@ export class PostCompanyController {
 
     @Get('/site/:id')
     async getListBySite(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) siteId: number,
     ): Promise<BaseResponse<PostCompanyGetListBySite>> {
         return BaseResponse.of(await this.postCompanyService.getListBySite(req.user.accountId, siteId));
@@ -57,7 +58,7 @@ export class PostCompanyController {
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async createHeadhuntingRequest(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<void>> {
@@ -79,7 +80,7 @@ export class PostCompanyController {
     })
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for category search' })
     async getListHeadhuntingRequest(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyHeadhuntingRequestRequest,
     ): Promise<BaseResponse<PostCompanyGetListHeadhuntingRequestResponse>> {
         const posts = await this.postCompanyService.getListHeadhuntingRequest(request.user.accountId, query);
@@ -98,7 +99,7 @@ export class PostCompanyController {
     @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
     @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
     async getListApplicantSite(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
     ): Promise<BaseResponse<PostCompanyGetListApplicantsResponse>> {
         const posts = await this.postCompanyService.getListApplicantSite(request.user.accountId, query);
@@ -108,7 +109,7 @@ export class PostCompanyController {
     @Get('/count')
     @ApiResponse({ status: HttpStatus.ACCEPTED, type: PostCompanyCountPostsResponse })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
-    async countPosts(@Req() req: any): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
+    async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
         return BaseResponse.of(await this.postCompanyService.countPosts(req.user.accountId));
     }
 
@@ -119,7 +120,10 @@ export class PostCompanyController {
     })
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async create(@Req() userRequest: any, @Body() request: PostCompanyCreateRequest): Promise<BaseResponse<void>> {
+    async create(
+        @Req() userRequest: AccountIdExtensionRequest,
+        @Body() request: PostCompanyCreateRequest,
+    ): Promise<BaseResponse<void>> {
         await this.postCompanyService.create(userRequest.user.accountId, request);
         return BaseResponse.ok();
     }
@@ -135,7 +139,7 @@ export class PostCompanyController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getDetail(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<PostCompanyDetailResponse>> {
         return BaseResponse.of(await this.postCompanyService.getPostDetails(request.user.accountId, id));
@@ -149,7 +153,7 @@ export class PostCompanyController {
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async changePageInfo(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() payload: PostCompanyCreateRequest,
     ): Promise<BaseResponse<void>> {
@@ -163,7 +167,10 @@ export class PostCompanyController {
         description: 'Company can delete a job post',
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    async deletePost(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async deletePost(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postCompanyService.deletePost(request.user.accountId, id));
     }
 
@@ -183,7 +190,7 @@ export class PostCompanyController {
         description: 'Status for search: PREPARE,RECRUITING,DEADLINE',
     })
     async getList(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListRequest,
     ): Promise<BaseResponse<PostCompanyGetListResponse>> {
         const posts = await this.postCompanyService.getList(request.user.accountId, query);

@@ -184,7 +184,7 @@ export class ApplicationCompanyService {
         }
     }
 
-    async proposeInterview(accountId: any, applicationId: number, supportCategory: SupportCategory) {
+    async proposeInterview(accountId: number, applicationId: number, supportCategory: SupportCategory) {
         const application = await this.prismaService.application.findUnique({
             where: {
                 id: applicationId,

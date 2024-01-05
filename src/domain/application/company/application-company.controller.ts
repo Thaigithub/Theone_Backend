@@ -9,6 +9,7 @@ import { ApplicationCompanyGetListApplicantsRequest } from './request/applicatio
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Application Management')
 @Controller('/company/applications')
@@ -22,7 +23,7 @@ export class ApplicationCompanyController {
     @Get('/offer-by-post/:id')
     async getApplicationOfferByPost(
         @Param('id', ParseIntPipe) postId: number,
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListOfferByPost>> {
         return BaseResponse.of(await this.applicationCompanyService.getListOfferByPost(req.user.accountId, postId));
     }
@@ -34,7 +35,9 @@ export class ApplicationCompanyController {
     })
     @ApiResponse({ status: HttpStatus.ACCEPTED, type: ApplicationCompanyCountApplicationsResponse })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
-    async countApplications(@Req() req: any): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
+    async countApplications(
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.countApplications(req.user.accountId));
     }
 
@@ -45,7 +48,7 @@ export class ApplicationCompanyController {
     })
     async getListApplicantSite(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
         const posts = await this.applicationCompanyService.getListApplicant(request.user.accountId, query, postId);
@@ -59,7 +62,10 @@ export class ApplicationCompanyController {
     })
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async proposeInteview(@Req() request: any, @Param('id', ParseIntPipe) applicationId: number): Promise<BaseResponse<void>> {
+    async proposeInteview(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) applicationId: number,
+    ): Promise<BaseResponse<void>> {
         const posts = await this.applicationCompanyService.proposeInterview(
             request.user.accountId,
             applicationId,
@@ -75,7 +81,10 @@ export class ApplicationCompanyController {
     })
     @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async reject(@Req() request: any, @Param('id', ParseIntPipe) applicationId: number): Promise<BaseResponse<void>> {
+    async reject(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) applicationId: number,
+    ): Promise<BaseResponse<void>> {
         const posts = await this.applicationCompanyService.updateApplicationStatus(
             request.user.accountId,
             applicationId,

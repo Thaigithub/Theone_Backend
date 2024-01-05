@@ -133,6 +133,7 @@ export class AccountMemberService {
                 name: true,
                 contact: true,
                 email: true,
+                desiredSalary: true,
                 desiredOccupation: {
                     select: {
                         codeName: true,

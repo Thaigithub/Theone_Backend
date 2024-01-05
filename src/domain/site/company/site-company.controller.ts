@@ -22,7 +22,7 @@ export class SiteCompanyController {
 
     @Get('contract-site')
     async getListForContractSite(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Query() query: SiteCompanyGetListForContractRequest,
     ): Promise<BaseResponse<SiteCompanyGetListForContractResponse>> {
         return BaseResponse.of(await this.siteCompanyService.getListForContractSite(req.user.accountId, query));

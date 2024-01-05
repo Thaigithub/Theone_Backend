@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -159,7 +159,7 @@ export class PostAdminController {
         type: PostAdminDetailResponse,
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getDetail(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<PostAdminDetailResponse>> {
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<PostAdminDetailResponse>> {
         return BaseResponse.of(await this.postAdminService.getPostDetails(id));
     }
 

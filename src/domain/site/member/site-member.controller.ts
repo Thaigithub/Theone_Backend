@@ -9,6 +9,7 @@ import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.r
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 import { SiteMemberService } from './site-member.service';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[MEMBER] Sites Management')
 @Controller('/member/sites')
@@ -27,7 +28,7 @@ export class SiteMemberController {
     @ApiResponse({ status: HttpStatus.OK, type: SiteMemberUpdateInterestResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async addInterestSite(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<SiteMemberUpdateInterestResponse>> {
         return BaseResponse.of(await this.siteMemberService.updateInterestSite(request.user.accountId, id));
@@ -59,7 +60,7 @@ export class SiteMemberController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getDetail(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<SiteMemberGetDetailResponse>> {
         return BaseResponse.of(await this.siteMemberService.getSiteDetail(request.user.accountId, id));

@@ -32,6 +32,7 @@ import {
     TeamsResponse,
 } from './response/team-member-get.response';
 import { MemberTeamService } from './team-member.service';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[Member] Team Management')
 @Controller('member/teams')
@@ -115,7 +116,7 @@ export class MemberTeamController {
     @ApiResponse({ status: HttpStatus.OK, description: 'declined successfully' })
     @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
     async cancelInvitation(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Param('inviteId', ParseIntPipe) inviteId: number,
     ): Promise<BaseResponse<void>> {
@@ -177,7 +178,7 @@ export class MemberTeamController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'declined successfully' })
     @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
-    async deleteTeam(@Req() req: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async deleteTeam(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         await this.memberTeamService.deleteTeam(req.user.accountId, id);
         return BaseResponse.ok();
     }

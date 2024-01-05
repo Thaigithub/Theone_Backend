@@ -11,6 +11,7 @@ import { ContractCompanyUpdateRequest } from './request/contract-company-update.
 import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Contract Management')
 @Controller('/company/contracts')
@@ -29,7 +30,7 @@ export class ContractCompanyController {
     })
     @ApiResponse({ status: HttpStatus.ACCEPTED, type: ContractCompanyCountContractsResponse })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
-    async countPosts(@Req() req: any): Promise<BaseResponse<ContractCompanyCountContractsResponse>> {
+    async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<ContractCompanyCountContractsResponse>> {
         return BaseResponse.of(await this.contractCompanyService.countContracts(req.user.accountId));
     }
 
@@ -40,7 +41,7 @@ export class ContractCompanyController {
     })
     async getContractOnSite(
         @Param('id', ParseIntPipe) id: number,
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: ContractCompanyGetListForSiteRequest,
     ): Promise<BaseResponse<ContractCompanyGetListForSiteResponse>> {
         return BaseResponse.of(await this.contractCompanyService.getContractOnSite(id, request.user.accountId, query));
@@ -49,7 +50,7 @@ export class ContractCompanyController {
     @Get('/:id')
     async getDetailContract(
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ContractCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.contractCompanyService.getDetail(id, req.user.accountId));
     }
@@ -57,14 +58,17 @@ export class ContractCompanyController {
     @Patch('/:id')
     async updateContract(
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Body() body: ContractCompanyUpdateRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.update(id, req.user.accountId, body));
     }
 
     @Put()
-    async createContract(@Body() body: ContractCompanyCreateRequest, @Req() request: any): Promise<BaseResponse<void>> {
+    async createContract(
+        @Body() body: ContractCompanyCreateRequest,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.contractCompanyService.createContract(request.user.accountId, body));
     }
 }
