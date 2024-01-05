@@ -1,5 +1,5 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AdminAuthService } from './auth-admin.service';
 import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request';
@@ -9,15 +9,9 @@ import { AuthAdminLoginResponse } from './response/auth-admin-login.response';
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class AdminAuthController {
-    constructor(private readonly adminAuthService: AdminAuthService) {}
+    constructor(private adminAuthService: AdminAuthService) {}
     // Normal
     @Post('/login')
-    @ApiOperation({
-        summary: 'Login',
-        description: 'This endpoint to login normally.',
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully', type: AuthAdminLoginResponse })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials', type: BaseResponse })
     async login(@Body() authUserDto: AuthAdminLoginRequest): Promise<BaseResponse<AuthAdminLoginResponse>> {
         return BaseResponse.of(await this.adminAuthService.login(authUserDto));
     }

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType } from '@prisma/client';
 import { compare } from 'bcrypt';
@@ -17,15 +17,13 @@ import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify
 
 @Injectable()
 export class CompanyAuthService {
-    private readonly logger = new Logger(CompanyAuthService.name);
     constructor(
         private prismaService: PrismaService,
-        private readonly jwtService: JwtService,
-        private readonly otpService: OtpService,
+        private jwtService: JwtService,
+        private otpService: OtpService,
     ) {}
 
     async login(loginData: AuthCompanyLoginRequest): Promise<AuthCompanyLoginResponse> {
-        this.logger.log('Login account');
         const account = await this.prismaService.account.findUnique({
             where: {
                 username: loginData.username,

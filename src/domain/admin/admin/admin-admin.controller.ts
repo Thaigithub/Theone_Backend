@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AccountType, AdminLevel } from '@prisma/client';
 import { AdminLevelPermissions, AuthAdminLevelGuard } from 'domain/auth/auth-admin-level.guard';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -7,15 +7,15 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { AdminAdminService } from './admin-admin.service';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';
 import { AdminAdminUpsertRequest } from './request/admin-admin-upsert.request';
-import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
 import { AdminAdminGetDetailResponse } from './response/admin-admin-detail.response';
+import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
 
 @Controller('/admin/admins')
 @Roles(AccountType.ADMIN)
 @AdminLevelPermissions(AdminLevel.SUPERADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard, AuthAdminLevelGuard)
 export class AdminAdminController {
-    constructor(@Inject(AdminAdminService) private readonly adminService: AdminAdminService) {}
+    constructor(private adminService: AdminAdminService) {}
 
     @Get()
     async getList(@Query() query: AdminAdminGetListRequest): Promise<BaseResponse<AdminAdminGetListResponse>> {

@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType } from '@prisma/client';
 import { compare } from 'bcrypt';
@@ -11,13 +11,11 @@ import { AuthAdminLoginResponse } from './response/auth-admin-login.response';
 
 @Injectable()
 export class AdminAuthService {
-    private readonly logger = new Logger(AdminAuthService.name);
     constructor(
         private prismaService: PrismaService,
-        private readonly jwtService: JwtService,
+        private jwtService: JwtService,
     ) {}
     async login(loginData: AuthAdminLoginRequest): Promise<AuthAdminLoginResponse> {
-        this.logger.log('Login account');
         const account = await this.prismaService.account.findUnique({
             where: {
                 username: loginData.username,
