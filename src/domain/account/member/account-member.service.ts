@@ -371,11 +371,11 @@ export class AccountMemberService {
                     upsert: {
                         update: {
                             disableLevel: request.disabledLevel,
-                            disableType: request.disabledType,
+                            disableType: request.disabledTypeList,
                         },
                         create: {
                             disableLevel: request.disabledLevel,
-                            disableType: request.disabledType,
+                            disableType: request.disabledTypeList,
                         },
                     },
                 },

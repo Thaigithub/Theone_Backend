@@ -25,7 +25,7 @@ class ForeignWorkerType {
     file: FileResponse;
 }
 class DisabilityType {
-    disableType: DisabledType;
+    disableType: DisabledType[];
     disableLevel: DisabledLevel;
 }
 class BasicHealthSafetyCertificateType {

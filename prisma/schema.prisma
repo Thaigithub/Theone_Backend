@@ -257,14 +257,14 @@ model BankAccount {
 }
 
 model Disability {
-  id           Int           @id @default(autoincrement())
-  disableType  DisabledType  @map("disable_type")
-  disableLevel DisabledLevel
-  memberId     Int           @unique @map("member_id")
-  isActive     Boolean       @default(true) @map("is_active")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  member       Member        @relation(fields: [memberId], references: [id])
+  id           Int            @id @default(autoincrement())
+  disableType  DisabledType[] @map("disable_type")
+  disableLevel DisabledLevel  @map("disable_level")
+  memberId     Int            @unique @map("member_id")
+  isActive     Boolean        @default(true) @map("is_active")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  member       Member         @relation(fields: [memberId], references: [id])
 
   @@map("disabilities")
 }
