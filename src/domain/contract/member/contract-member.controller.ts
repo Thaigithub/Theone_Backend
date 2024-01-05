@@ -22,7 +22,8 @@ import { ContractMemberGetListResponse } from './response/contract-member-get-li
 @ApiConsumes('application/json')
 export class ContractMemberController {
     constructor(private contractMemberService: ContractMemberService) {}
-    @Get('/:id/salary-site')
+
+    @Get(':id/salary-site')
     async geDetailForSalary(
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -30,7 +31,7 @@ export class ContractMemberController {
         return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
     }
 
-    @Get('/salary-site')
+    @Get('salary-site')
     async getListForSalary(
         @Query() query: ContractMemberGetListForSalaryRequest,
         @Req() req: AccountIdExtensionRequest,
@@ -38,7 +39,12 @@ export class ContractMemberController {
         return BaseResponse.of(await this.contractMemberService.getListForSalary(req.user.accountId, query));
     }
 
-    @Get('/:id')
+    @Get('count')
+    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.contractMemberService.getTotal(request.user.accountId));
+    }
+
+    @Get(':id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: AccountIdExtensionRequest,
@@ -52,10 +58,5 @@ export class ContractMemberController {
         @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ContractMemberGetListResponse>> {
         return BaseResponse.of(await this.contractMemberService.getList(req.user.accountId, query));
-    }
-
-    @Get('count')
-    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
-        return BaseResponse.of(await this.contractMemberService.getTotal(request.user.accountId));
     }
 }

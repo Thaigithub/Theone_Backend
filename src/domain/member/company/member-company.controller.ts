@@ -43,11 +43,8 @@ export class MemberCompanyController {
         type: ApplicationCompanyGetMemberDetail,
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getMemberDetail(
-        @Req() request: any,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
-        return BaseResponse.of(await this.memberCompanyService.getMemberDetail(request.user.accountId, id));
+    async getMemberDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
+        return BaseResponse.of(await this.memberCompanyService.getMemberDetail(id));
     }
 
     @Get(':id/manpower')

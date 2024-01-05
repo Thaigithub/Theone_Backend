@@ -116,7 +116,7 @@ export class TeamCompanyService {
         });
     }
 
-    async getTeamDetail(accountId: any, id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
+    async getTeamDetail(id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
         const application = await this.prismaService.team.findUniqueOrThrow({
             where: {
                 id,
