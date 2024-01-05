@@ -385,6 +385,15 @@ export class AccountMemberService {
     }
 
     async cancelMembership(accountId: number): Promise<void> {
+        await this.prismaService.account.update({
+            data: {
+                isActive: false,
+            },
+            where: {
+                id: accountId,
+            },
+        });
+
         await this.prismaService.member.update({
             data: {
                 isActive: false,
