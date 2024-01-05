@@ -454,8 +454,8 @@ model AdminPostBanner {
   urlLink    String     @map("url_link")
   startDate  DateTime   @map("start_date") @db.Date
   endDate    DateTime   @map("end_date") @db.Date
-  regDate    DateTime   @map("register_date") @db.Date
-  priority   Int?       @unique
+  regDate    DateTime   @default(now()) @map("register_date") @db.Date
+  priority   Int?
   postBanner PostBanner @relation(fields: [id], references: [id])
 
   @@map("admin_post_banners")
@@ -469,7 +469,7 @@ model SiteBanner {
   acceptDate       DateTime?           @map("accept_date") @db.Date
   desiredStartDate DateTime            @map("desired_start_date") @db.Date
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date
-  priority         Int?                @unique
+  priority         Int?
   status           RequestBannerStatus
   banner           Banner              @relation(fields: [id], references: [id])
   site             Site                @relation(fields: [siteId], references: [id])

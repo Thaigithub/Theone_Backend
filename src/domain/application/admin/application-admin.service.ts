@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -9,9 +9,9 @@ import { ApplicationAdminGetResponse } from './response/application-admin-get-li
 @Injectable()
 export class ApplicationAdminService {
     constructor(private prismaService: PrismaService) {}
-    async getApplicationList(id: number, query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetResponse> {
+    async getListForPost(postId: number, query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetResponse> {
         const applications = await this.prismaService.application.findMany({
-            where: { postId: id, post: { isActive: true } },
+            where: { postId, post: { isActive: true } },
             select: {
                 id: true,
                 member: {
@@ -82,11 +82,11 @@ export class ApplicationAdminService {
             };
         });
         const applicationListCount = await this.prismaService.application.count({
-            where: { postId: id, post: { isActive: true } },
+            where: { postId, post: { isActive: true } },
         });
         return new PaginationResponse(applicationList, new PageInfo(applicationListCount));
     }
-    async getApplicationInfor(id: number): Promise<ApplicationAdminGetDetailResponse> {
+    async getDetail(id: number): Promise<ApplicationAdminGetDetailResponse> {
         const application = await this.prismaService.application.findUnique({
             where: { id: id, post: { isActive: true } },
             select: {
@@ -130,7 +130,7 @@ export class ApplicationAdminService {
             },
         });
         if (!application) {
-            throw new HttpException('The Application Id is not found', HttpStatus.NOT_FOUND);
+            throw new NotFoundException('Application not found');
         }
         const applicationInfor = {
             status: application.status,

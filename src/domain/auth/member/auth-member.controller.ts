@@ -16,7 +16,7 @@ import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.r
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class MemberAuthController {
-    constructor(private readonly memberAuthService: MemberAuthService) {}
+    constructor(private memberAuthService: MemberAuthService) {}
     // GOOGLE
     @Post('/login/google')
     async googlelogin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {

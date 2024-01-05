@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InterviewStatus, PostApplicationStatus, Prisma, SupportCategory } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
+import { ApplicationCompanyStatus } from './enum/application-company-update-status.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
+import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
@@ -13,7 +15,7 @@ import { ApplicationCompanyGetListOfferByPost } from './response/application-com
 export class ApplicationCompanyService {
     constructor(private prismaService: PrismaService) {}
 
-    async getListApplicant(
+    async getListForPost(
         accountId: number,
         query: ApplicationCompanyGetListApplicantsRequest,
         postId: number,
@@ -42,7 +44,6 @@ export class ApplicationCompanyService {
                 ],
             }),
         };
-
         const applicationList = await this.prismaService.application.findMany({
             select: {
                 id: true,
@@ -110,11 +111,8 @@ export class ApplicationCompanyService {
             orderBy: {
                 assignedAt: 'desc',
             },
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
             ...QueryPagingHelper.queryPaging(query),
         });
-
         const newApplicationList = applicationList.map((item) => {
             const district = item.member.district;
             delete item.member.district;
@@ -140,19 +138,14 @@ export class ApplicationCompanyService {
                 },
             };
         });
-
         const applicationListCount = await this.prismaService.application.count({
-            // Conditions based on request query
             where: queryFilter,
         });
-
         return new PaginationResponse(newApplicationList, new PageInfo(applicationListCount));
     }
 
-    async countApplications(accountId: number): Promise<ApplicationCompanyCountApplicationsResponse> {
-        /* Count all active applications that company reposible for.*/
+    async count(accountId: number): Promise<ApplicationCompanyCountApplicationsResponse> {
         const applications = await this.prismaService.application.count({
-            // Conditions based on request query
             where: {
                 post: {
                     company: {
@@ -164,8 +157,19 @@ export class ApplicationCompanyService {
         return { countApplications: applications };
     }
 
-    async updateApplicationStatus(accountId: number, applicationId: number, status: PostApplicationStatus) {
-        try {
+    async updateStatus(accountId: number, applicationId: number, body: ApplicationCompanyUpdateStatusRequest) {
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                id: applicationId,
+                post: {
+                    company: {
+                        accountId,
+                    },
+                },
+            },
+        });
+        if (!application) throw new NotFoundException('Application not found');
+        if (body.status === ApplicationCompanyStatus.REJECT) {
             await this.prismaService.application.update({
                 where: {
                     id: applicationId,
@@ -176,45 +180,36 @@ export class ApplicationCompanyService {
                     },
                 },
                 data: {
-                    status: status,
+                    status: PostApplicationStatus.REJECT_BY_COMPANY,
                 },
             });
-        } catch (error) {
-            throw new BadRequestException('No application found');
-        }
-    }
-
-    async proposeInterview(accountId: number, applicationId: number, supportCategory: SupportCategory) {
-        const application = await this.prismaService.application.findUnique({
-            where: {
-                id: applicationId,
-                post: {
-                    company: {
-                        accountId: accountId,
-                    },
-                },
-            },
-        });
-
-        if (!application) throw new BadRequestException('No application found');
-
-        try {
+        } else {
             await this.prismaService.$transaction(async (tx) => {
                 await tx.interview.create({
                     data: {
                         interviewStatus: InterviewStatus.INTERVIEWING,
-                        supportCategory: supportCategory,
+                        supportCategory: SupportCategory.MANPOWER,
                         applicationId,
                     },
                 });
-
-                await this.updateApplicationStatus(accountId, applicationId, PostApplicationStatus.PROPOSAL_INTERVIEW);
             });
-        } catch (error) {
-            throw new InternalServerErrorException(error);
+            await this.prismaService.application.update({
+                where: {
+                    id: applicationId,
+                    post: {
+                        company: {
+                            accountId: accountId,
+                        },
+                    },
+                },
+                data: {
+                    status: PostApplicationStatus.REJECT_BY_COMPANY,
+                },
+            });
         }
     }
-    async getListOfferByPost(accountId, postId): Promise<ApplicationCompanyGetListOfferByPost> {
+
+    async getListOfferForPost(accountId: number, postId: number): Promise<ApplicationCompanyGetListOfferByPost> {
         const offer = (
             await this.prismaService.application.findMany({
                 where: {

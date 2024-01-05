@@ -15,7 +15,7 @@ import { AdminAdminGetResponse } from './dto/admin-admin-response.dto';
 @Injectable()
 export class AdminAdminService {
     constructor(
-        private readonly excelService: ExcelService,
+        private excelService: ExcelService,
         private prismaService: PrismaService,
     ) {}
     async getList(query: AdminAdminGetListRequest): Promise<AdminAdminGetListResponse> {

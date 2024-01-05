@@ -5,5 +5,5 @@ import { AuthCompanyUserIdRequest } from './auth-company-otp-send-username.reque
 export class AuthCompanyPasswordRequest extends AuthCompanyUserIdRequest {
     @Expose()
     @IsString()
-    public username: string;
+    username: string;
 }

@@ -15,7 +15,7 @@ import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify
 @ApiProduces('application/json')
 @ApiConsumes('application/json')
 export class CompanyAuthController {
-    constructor(private readonly companyAuthService: CompanyAuthService) {}
+    constructor(private companyAuthService: CompanyAuthService) {}
     // Normal
     @Post('/login')
     async login(@Body() authUserDto: AuthCompanyLoginRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType, SignupMethodType } from '@prisma/client';
 import { APPLE_OAUTH_RESTAPI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_VERIFY_URL, NAVER_VERIFY_URL } from 'app.config';
@@ -28,11 +28,10 @@ const appleClient = new JwksClient({
 
 @Injectable()
 export class MemberAuthService {
-    private readonly logger = new Logger(MemberAuthService.name);
     constructor(
         private prismaService: PrismaService,
-        private readonly jwtService: JwtService,
-        private readonly otpService: OtpService,
+        private jwtService: JwtService,
+        private otpService: OtpService,
     ) {}
     async sendOtp(request: AuthMemberUserIdRequest | AuthMemberPasswordRequest, ip: string): Promise<AuthMemberOtpSendResponse> {
         const passwordRequest = request as AuthMemberPasswordRequest;
@@ -56,7 +55,6 @@ export class MemberAuthService {
         return await this.otpService.checkValidOtp(request, ip);
     }
     async login(loginData: AuthMemberLoginRequest): Promise<AuthMemberLoginResponse> {
-        this.logger.log('Login account');
         const account = await this.prismaService.account.findUnique({
             where: {
                 username: loginData.username,

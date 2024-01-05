@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { BannerStatus, PostBannerType, Prisma } from '@prisma/client';
+import { PostBannerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -28,10 +28,13 @@ export class BannerAdminService {
 
     // GENERAL BANNER
     async createGeneralBanner(request: BannerAdminUpsertGeneralRequest): Promise<void> {
-        const startDate = new Date(request.generalBanner.startDate);
-        const endDate = new Date(request.generalBanner.endDate);
-        const now = new Date();
-        const count = await this.prismaService.generalBanner.count();
+        const count = await this.prismaService.generalBanner.count({
+            where: {
+                banner: {
+                    isActive: true,
+                },
+            },
+        });
         await this.prismaService.banner.create({
             data: {
                 status: request.status,
@@ -42,9 +45,8 @@ export class BannerAdminService {
                     create: {
                         urlLink: request.generalBanner.urlLink,
                         title: request.generalBanner.title,
-                        startDate: startDate,
-                        endDate: endDate,
-                        regDate: now,
+                        startDate: new Date(request.generalBanner.startDate),
+                        endDate: new Date(request.generalBanner.endDate),
                         priority: count + 1,
                     },
                 },
@@ -100,7 +102,7 @@ export class BannerAdminService {
         return new PaginationResponse(banners, new PageInfo(total));
     }
     async getDetailGeneralBanner(id: number): Promise<BannerAdminGetDetailGeneralResponse> {
-        const count = await this.prismaService.generalBanner.count({ where: { id } });
+        const count = await this.prismaService.generalBanner.count({ where: { id, banner: { isActive: true } } });
         if (count === 0) throw new NotFoundException('Banner not found');
         const banner = await this.prismaService.generalBanner.findUnique({
             where: { id },
@@ -134,7 +136,7 @@ export class BannerAdminService {
         };
     }
     async updateGeneralBanner(id: number, body: BannerAdminUpsertGeneralRequest): Promise<void> {
-        const count = await this.prismaService.generalBanner.count({ where: { id } });
+        const count = await this.prismaService.generalBanner.count({ where: { id, banner: { isActive: true } } });
         if (count === 0) throw new NotFoundException('Banner not found');
         const { startDate, endDate, ...rest } = body.generalBanner;
         await this.prismaService.banner.update({
@@ -192,31 +194,18 @@ export class BannerAdminService {
     }
     // ADMIN POST BANNER
     async createAdminPostBanner(request: BannerAdminUpsertJobPostRequest): Promise<void> {
-        const startDate = new Date(request.postBanner.adminPostBannner.startDate);
-        const endDate = new Date(request.postBanner.adminPostBannner.endDate);
-        const now = new Date();
-        request.postBanner.adminPostBannner['priority'] = null;
-        if (now >= startDate && now <= endDate) {
-            const count = await this.prismaService.adminPostBanner.count({
-                where: {
-                    postBanner: {
-                        banner: {
-                            status: BannerStatus.EXPOSE,
-                        },
-                    },
-                    priority: {
-                        not: null,
+        const count = await this.prismaService.adminPostBanner.count({
+            where: {
+                postBanner: {
+                    banner: {
+                        isActive: true,
                     },
                 },
-            });
-            request.postBanner.adminPostBannner['priority'] = count + 1;
-            request['status'] = BannerStatus.EXPOSE;
-        } else {
-            request['status'] = BannerStatus.HIDE;
-        }
+            },
+        });
         await this.prismaService.banner.create({
             data: {
-                status: request['status'],
+                status: request.status,
                 file: {
                     create: request.file,
                 },
@@ -227,10 +216,9 @@ export class BannerAdminService {
                         adminPostBanner: {
                             create: {
                                 urlLink: request.postBanner.adminPostBannner.urlLink,
-                                endDate: endDate,
-                                startDate: startDate,
-                                priority: request.postBanner.adminPostBannner['priority'],
-                                regDate: now,
+                                endDate: new Date(request.postBanner.adminPostBannner.endDate),
+                                startDate: new Date(request.postBanner.adminPostBannner.startDate),
+                                priority: count + 1,
                             },
                         },
                     },
@@ -299,7 +287,9 @@ export class BannerAdminService {
         return new PaginationResponse(result, new PageInfo(total));
     }
     async getDetailAdminPostBanner(id: number): Promise<BannerAdminGetDetailAdminJobPostResponse> {
-        const count = await this.prismaService.adminPostBanner.count({ where: { id } });
+        const count = await this.prismaService.adminPostBanner.count({
+            where: { id, postBanner: { banner: { isActive: true } } },
+        });
         if (count === 0) throw new NotFoundException('Banner not found');
         const banner = await this.prismaService.postBanner.findUnique({
             where: { id },
@@ -831,18 +821,10 @@ export class BannerAdminService {
     }
     // COMMON ACTION
     async deleteBanner(id: number): Promise<void> {
-        const count = await this.prismaService.banner.count({
-            where: {
-                id,
-            },
-        });
-        if (count === 0) throw new NotFoundException('Banner not found');
-        const banner = await this.prismaService.banner.update({
+        const banner = await this.prismaService.banner.findUnique({
             where: {
                 id: id,
-            },
-            data: {
-                isActive: false,
+                isActive: true,
             },
             select: {
                 generalBanner: {
@@ -871,11 +853,14 @@ export class BannerAdminService {
                 },
             },
         });
+        if (!banner) throw new NotFoundException('Banner not found');
         if (banner.generalBanner) {
+            await this.prismaService.generalBanner.update({ where: { id }, data: { priority: null } });
             const list = await this.prismaService.generalBanner.findMany({
                 where: {
                     priority: {
-                        lt: banner.generalBanner.priority,
+                        gt: banner.generalBanner.priority,
+                        not: null,
                     },
                 },
                 select: {
@@ -897,10 +882,12 @@ export class BannerAdminService {
             );
         }
         if (banner.siteBanner) {
+            await this.prismaService.siteBanner.update({ where: { id }, data: { priority: null } });
             const list = await this.prismaService.siteBanner.findMany({
                 where: {
                     priority: {
-                        lt: banner.siteBanner.priority,
+                        gt: banner.siteBanner.priority,
+                        not: null,
                     },
                 },
                 select: {
@@ -922,10 +909,13 @@ export class BannerAdminService {
             );
         }
         if (banner.postBanner && banner.postBanner.adminPostBanner) {
+            await this.prismaService.adminPostBanner.update({ where: { id }, data: { priority: null } });
+            console.log(banner.postBanner.adminPostBanner.priority);
             const list = await this.prismaService.adminPostBanner.findMany({
                 where: {
                     priority: {
-                        lt: banner.postBanner.adminPostBanner.priority,
+                        gt: banner.postBanner.adminPostBanner.priority,
+                        not: null,
                     },
                 },
                 select: {
@@ -947,10 +937,12 @@ export class BannerAdminService {
             );
         }
         if (banner.postBanner && banner.postBanner.companyPostBanner) {
+            await this.prismaService.companyPostBanner.update({ where: { id }, data: { priority: null } });
             const list = await this.prismaService.companyPostBanner.findMany({
                 where: {
                     priority: {
-                        lt: banner.postBanner.companyPostBanner.priority,
+                        gt: banner.postBanner.companyPostBanner.priority,
+                        not: null,
                     },
                 },
                 select: {
@@ -980,21 +972,37 @@ export class BannerAdminService {
         const count = await this.prismaService.banner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner Id not found');
         if (isPost) {
+            const count = await this.prismaService.companyPostBanner.count({
+                where: {
+                    priority: {
+                        not: null,
+                    },
+                },
+            });
             await this.prismaService.companyPostBanner.update({
                 where: {
                     id: id,
                 },
                 data: {
                     status: body.status,
+                    priority: count + 1,
                 },
             });
         } else {
+            const count = await this.prismaService.siteBanner.count({
+                where: {
+                    priority: {
+                        not: null,
+                    },
+                },
+            });
             await this.prismaService.siteBanner.update({
                 where: {
                     id: id,
                 },
                 data: {
                     status: body.status,
+                    priority: count + 1,
                 },
             });
         }
