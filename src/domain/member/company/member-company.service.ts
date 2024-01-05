@@ -232,7 +232,7 @@ export class MemberCompanyService {
 
         const district = application.district;
         const specialLicense = application.specialLicenses;
-        const occupation = application.desiredOccupation?.codeName;
+        const occupation = application.desiredOccupation ? application.desiredOccupation.codeName : null;
         delete application.district;
         delete application.specialLicenses;
         delete application.desiredOccupation;

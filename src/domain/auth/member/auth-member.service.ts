@@ -64,6 +64,7 @@ export class MemberAuthService {
                 member: {
                     signupMethod: SignupMethodType.GENERAL,
                 },
+                isActive: true,
             },
         });
 

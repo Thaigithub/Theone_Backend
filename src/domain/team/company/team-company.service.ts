@@ -155,18 +155,6 @@ export class TeamCompanyService {
                                 desiredOccupation: true,
                                 totalExperienceYears: true,
                                 totalExperienceMonths: true,
-                                certificates: {
-                                    select: {
-                                        certificateNumber: true,
-                                        status: true,
-                                    },
-                                },
-                                specialLicenses: {
-                                    select: {
-                                        licenseNumber: true,
-                                        status: true,
-                                    },
-                                },
                             },
                         },
                     },
