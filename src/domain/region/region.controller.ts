@@ -1,11 +1,9 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { Controller, Get } from '@nestjs/common';
 import { BaseResponse } from 'utils/generics/base.response';
 import { RegionService } from './region.service';
 import { RegionGetListResponse } from './response/region-get-list.response';
 
-@Controller('/regions')
-@UseGuards(AuthJwtGuard)
+@Controller('regions')
 export class RegionController {
     constructor(private regionService: RegionService) {}
 

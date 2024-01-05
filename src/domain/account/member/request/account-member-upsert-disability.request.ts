@@ -1,6 +1,6 @@
 import { DisabledLevel, DisabledType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum } from 'class-validator';
+import { ArrayUnique, IsArray, IsEnum } from 'class-validator';
 
 export class AccountMemberUpsertDisabilityRequest {
     @Expose()
@@ -8,6 +8,8 @@ export class AccountMemberUpsertDisabilityRequest {
     disabledLevel: DisabledLevel;
 
     @Expose()
-    @IsEnum(DisabledType)
-    disabledType: DisabledType;
+    @IsEnum(DisabledType, { each: true })
+    @IsArray()
+    @ArrayUnique()
+    disabledTypeList: DisabledType[];
 }
