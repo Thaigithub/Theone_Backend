@@ -1,18 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ContentType } from 'services/storage/storage.service';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { ContentType } from 'services/storage/storage.service';
 
 export class FileUploadRequest {
-    @ApiProperty({ required: true })
     @Expose()
     @IsEnum(ContentType)
     @IsNotEmpty()
-    public contentType: ContentType;
+    contentType: ContentType;
 
-    @ApiProperty({ required: true })
     @Expose()
     @IsString()
     @IsNotEmpty()
-    public fileName: string;
+    fileName: string;
 }

@@ -1,17 +1,12 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { FileUploadRequest } from 'domain/file/request/file-upload.request';
 import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.response';
 import { StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 
-@ApiTags('[USER] File Management')
 @UseGuards(AuthJwtGuard)
-@ApiBearerAuth()
-@Controller('files')
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
+@Controller('/user/files')
 export class FileUserController {
     constructor(private readonly storageService: StorageService) {}
 

@@ -26,4 +26,4 @@ export class AdminJobPostBannerResponse {
     priority: AdminPostBanner['priority'];
 }
 
-export class AdminBannerGetAdminJobPostResponse extends PaginationResponse<AdminJobPostBannerResponse> {}
+export class BannerAdminGetAdminJobPostResponse extends PaginationResponse<AdminJobPostBannerResponse> {}

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AdminPostBanner, Banner, BannerStatus, Post, PostBanner } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
-export class AdminBannerGetDetailAdminJobPostResponse {
+export class BannerAdminGetDetailAdminJobPostResponse {
     @ApiProperty({ type: Number })
     id: Banner['id'];
     @ApiProperty({ type: FileResponse })

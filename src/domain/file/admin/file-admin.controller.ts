@@ -1,5 +1,4 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -8,13 +7,9 @@ import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.r
 import { DomainType, StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 
-@ApiTags('[ADMIN] File Management')
+@Controller('/admin/files')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
-@Controller('/admin/files')
 export class FileAdminController {
     constructor(private readonly storageService: StorageService) {}
 
@@ -28,6 +23,7 @@ export class FileAdminController {
             return BaseResponse.error(exception);
         }
     }
+
     @Get('/get-signed-url-to-download')
     async generateSignedUrlToDownloadForAdmin(@Query('key') key: string): Promise<BaseResponse<string>> {
         try {

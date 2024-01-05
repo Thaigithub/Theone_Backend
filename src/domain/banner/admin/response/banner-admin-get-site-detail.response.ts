@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Banner, BannerStatus, Company, RequestBannerStatus, Site, SiteBanner } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
-export class AdminBannerGetDetailSiteResponse {
+export class BannerAdminGetDetailSiteResponse {
     @ApiProperty({ type: Number })
     siteId: Site['id'];
     @ApiProperty({ type: String })
@@ -16,9 +16,9 @@ export class AdminBannerGetDetailSiteResponse {
     @ApiProperty({ type: FileResponse })
     bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })
-    status: Banner['status'];
+    bannerStatus: Banner['status'];
     @ApiProperty({ type: 'enum', enum: RequestBannerStatus })
-    requestBannerStatus: SiteBanner['status'];
+    requestStatus: SiteBanner['status'];
     @ApiProperty({ type: Date })
     requestDate: SiteBanner['requestDate'];
     @ApiProperty({ type: Date })

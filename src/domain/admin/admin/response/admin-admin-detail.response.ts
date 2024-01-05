@@ -1,12 +1,13 @@
+import { Account, FunctionName } from '@prisma/client';
 import { AdminAdminGetResponse } from '../dto/admin-admin-response.dto';
 
 export class AdminAdminGetDetailResponse extends AdminAdminGetResponse {
     account: {
-        username: string;
+        username: Account['username'];
     };
     permissions: {
         function: {
-            name: string;
+            name: FunctionName;
         };
     }[];
 }

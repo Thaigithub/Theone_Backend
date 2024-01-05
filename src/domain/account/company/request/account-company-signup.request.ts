@@ -1,6 +1,6 @@
 import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEmail, IsEnum, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class AccountCompanySignupRequest {
@@ -29,6 +29,7 @@ export class AccountCompanySignupRequest {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
+    @IsDateString()
     estDate: string;
 
     @Expose()
