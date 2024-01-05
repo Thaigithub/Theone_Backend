@@ -6,9 +6,10 @@ import { PostCompanyController } from './company/post-company.controller';
 import { PostCompanyService } from './company/post-company.service';
 import { PostMemberController } from './member/post-member.controller';
 import { PostMemberService } from './member/post-member.service';
+import { TeamModule } from 'domain/team/team.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, TeamModule],
     controllers: [PostAdminController, PostCompanyController, PostMemberController],
     providers: [PostAdminService, PostCompanyService, PostMemberService],
     exports: [PostAdminService, PostCompanyService, PostMemberService],

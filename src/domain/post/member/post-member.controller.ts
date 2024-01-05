@@ -108,15 +108,26 @@ export class PostMemberController {
 
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Post('/:id/apply')
+    @Post('/:id/apply/member')
     @ApiOperation({
         summary: 'Apply a post',
         description: "This endpoint add a post to request's member apply list in the system.",
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async addApplyPost(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.postMemberService.addApplyPost(request.user.accountId, id));
+    async addApplyPostMember(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.postMemberService.addApplyPostMember(request.user.accountId, id));
+    }
+
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    @Post(':id/apply/team/:teamId')
+    async addApplyPost(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+        @Param('teamId', ParseIntPipe) teamId: number,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.postMemberService.addApplyPostTeam(request.user.accountId, id, teamId));
     }
 
     // Interest

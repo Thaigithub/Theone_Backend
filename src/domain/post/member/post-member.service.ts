@@ -6,10 +6,14 @@ import { PostMemberGetListRequest } from './request/post-member-get-list.request
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 import { PostResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { MemberTeamService } from 'domain/team/member/team-member.service';
 
 @Injectable()
 export class PostMemberService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly memberTeamService: MemberTeamService,
+    ) {}
 
     protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
@@ -318,7 +322,7 @@ export class PostMemberService {
         };
     }
 
-    async addApplyPost(accountId: number, id: number) {
+    async addApplyPostMember(accountId: number, id: number) {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
@@ -355,6 +359,41 @@ export class PostMemberService {
             data: {
                 member: { connect: { id: account.member.id } },
                 post: { connect: { id: id } },
+            },
+        });
+    }
+
+    async addApplyPostTeam(accountId: number, postId: number, teamId: number) {
+        await this.memberTeamService.checkTeamPermission(accountId, teamId, true);
+        //Check exist post
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                id: postId,
+                isActive: true,
+            },
+        });
+
+        if (!post) {
+            throw new BadRequestException('Post does not exist');
+        }
+
+        //Check exist team - post
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                teamId_postId: {
+                    teamId: teamId,
+                    postId: post.id,
+                },
+            },
+        });
+        if (application) {
+            throw new BadRequestException('This job post is already applied');
+        }
+
+        await this.prismaService.application.create({
+            data: {
+                team: { connect: { id: teamId } },
+                post: { connect: { id: postId } },
             },
         });
     }

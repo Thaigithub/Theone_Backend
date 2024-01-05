@@ -177,14 +177,6 @@ export class AccountMemberService {
                     select: {
                         disableType: true,
                         disableLevel: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
                     },
                 },
                 basicHealthSafetyCertificate: {
@@ -237,12 +229,6 @@ export class AccountMemberService {
             disability: {
                 disableType: disability ? disability.disableType : null,
                 disableLevel: disability ? disability.disableLevel : null,
-                file: {
-                    fileName: disability ? disability.file.fileName : null,
-                    type: disability ? disability.file.type : null,
-                    key: disability ? disability.file.key : null,
-                    size: disability ? Number(disability.file.size) : null,
-                },
             },
             basicHealthSafetyCertificate: {
                 registrationNumber: basicHealthSafetyCertificate ? basicHealthSafetyCertificate.registrationNumber : null,
@@ -386,16 +372,10 @@ export class AccountMemberService {
                         update: {
                             disableLevel: request.disabledLevel,
                             disableType: request.disabledType,
-                            file: {
-                                update: request.file,
-                            },
                         },
                         create: {
                             disableLevel: request.disabledLevel,
                             disableType: request.disabledType,
-                            file: {
-                                create: request.file,
-                            },
                         },
                     },
                 },

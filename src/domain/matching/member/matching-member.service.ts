@@ -288,7 +288,7 @@ export class MatchingMemberService {
 
         if (!matchingPost) throw new NotFoundException('No matching post found');
 
-        await this.postMemberService.addApplyPost(accountId, matchingPost.postId);
+        await this.postMemberService.addApplyPostMember(accountId, matchingPost.postId);
     }
     async teamApplyPost(accountId: number, id: number, body: MatchingMemberTeamApplyRequest): Promise<void> {
         const account = await this.prismaService.account.findUnique({
@@ -321,11 +321,7 @@ export class MatchingMemberService {
 
         if (team.leaderId !== account.member.id) throw new BadRequestException('You are not allow to do this');
 
-        const payload = {
-            teamId: body.teamId,
-            postId: matchingPost.postId,
-        };
-        await this.memberTeamService.addApplyPost(accountId, payload);
+        await this.postMemberService.addApplyPostTeam(accountId, matchingPost.postId, body.teamId);
     }
 
     async interestPost(accountId: number, id: number): Promise<MatchingMemberInterestPostResponse> {
