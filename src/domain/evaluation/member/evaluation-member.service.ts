@@ -164,4 +164,20 @@ export class EvaluationMemberService {
             where: this.parseConditionFromQuery(accountId, query),
         });
     }
+
+    async getTotalCompletedEvaluation(accountId: number): Promise<number> {
+        return await this.prismaService.siteEvaluationByContract.count({
+            where: {
+                isActive: true,
+                contract: {
+                    application: {
+                        member: {
+                            accountId,
+                        },
+                    },
+                },
+                score: { not: null },
+            },
+        });
+    }
 }

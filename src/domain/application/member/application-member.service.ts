@@ -649,7 +649,7 @@ export class ApplicationMemberService {
         });
         return new PaginationResponse(offer, new PageInfo(total));
     }
-    async getTotal(accountId: number): Promise<number> {
+    async getTotal(accountId: number, isInProgress: boolean = false): Promise<number> {
         const memberExist = await this.prismaService.member.count({
             where: {
                 isActive: true,
@@ -663,6 +663,7 @@ export class ApplicationMemberService {
                 member: {
                     accountId,
                 },
+                contract: isInProgress ? null : undefined,
             },
         });
     }

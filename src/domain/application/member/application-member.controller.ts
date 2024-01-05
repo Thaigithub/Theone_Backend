@@ -1,5 +1,5 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -24,18 +24,6 @@ export class ApplicationMemberController {
     constructor(private applicationMemberService: ApplicationMemberService) {}
 
     @Patch('/:id/accept')
-    @ApiOperation({
-        summary: 'Accept offer',
-        description: 'Member can accept offer',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: BaseResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: BaseResponse,
-    })
     async acceptApplicationStatus(@Param('id', ParseIntPipe) id: number, @Req() request: any): Promise<BaseResponse<void>> {
         return BaseResponse.of(
             await this.applicationMemberService.changeApplicationStatus(
@@ -45,23 +33,8 @@ export class ApplicationMemberController {
             ),
         );
     }
+
     @Patch('/:id/reject')
-    @ApiOperation({
-        summary: 'Reject offer',
-        description: 'Member can reject offer',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: BaseResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: BaseResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        type: BaseResponse,
-    })
     async rejectApplicationStatus(@Param('id', ParseIntPipe) id: number, @Req() request: any): Promise<BaseResponse<void>> {
         return BaseResponse.of(
             await this.applicationMemberService.changeApplicationStatus(
@@ -71,23 +44,8 @@ export class ApplicationMemberController {
             ),
         );
     }
+
     @Get('/offer')
-    @ApiOperation({
-        summary: 'Reject offer',
-        description: 'Member can reject offer',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: BaseResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: BaseResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        type: BaseResponse,
-    })
     async getApplicationOfferList(
         @Query() body: ApplicationMemberGetListOfferRequest,
         @Req() request: any,
@@ -96,50 +54,24 @@ export class ApplicationMemberController {
     }
 
     @Get('count')
-    @ApiOperation({
-        summary: 'Get total applications',
-        description: 'Member can retrive total applications',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: BaseResponse<number>,
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: BaseResponse,
-    })
     async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
         return BaseResponse.of(await this.applicationMemberService.getTotal(request.user.accountId));
     }
 
+    @Get('count-in-progress')
+    async getTotalInProgress(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.applicationMemberService.getTotal(request.user.accountId, true));
+    }
+
     @Get('/:id')
-    @ApiOperation({
-        summary: 'Listing post applied',
-        description: 'Member can search/filter post applied',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: ApplicationMemberGetDetailResponse,
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: BaseResponse,
-    })
     async getDetailApplication(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: any,
     ): Promise<BaseResponse<ApplicationMemberGetDetailResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getDetailApplication(id, req.user.accountId));
     }
+
     @Get()
-    @ApiOperation({
-        summary: 'Listing post applied',
-        description: 'Member can search/filter post applied',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: ApplicationMemberGetListResponse,
-    })
     async getApplicationList(
         @Req() request: any,
         @Query() query: ApplicationMemberGetListRequest,
