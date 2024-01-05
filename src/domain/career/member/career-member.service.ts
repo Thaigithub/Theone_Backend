@@ -1,13 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerType, CareerCertificationApplicationStatus, CodeType } from '@prisma/client';
+import { CareerCertificationApplicationStatus, CareerType, CodeType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
+import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
-import { CareerMemberCreateRequest } from './request/career-member-create.request';
 import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberUpdateRequest } from './request/career-member-update.request';
-import { CareerResponse } from './response/career-member-get-list.response';
+import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
+import { CareerMemberUpsertRequest } from './request/career-member-upsert.request';
 
 @Injectable()
 export class CareerMemberService {
@@ -20,16 +20,18 @@ export class CareerMemberService {
         return {
             isActive: true,
             type: query.type,
+            certificationType: query.certificationType,
             memberId,
         };
     }
 
-    async getList(query: CareerMemberGetListRequest, accountId: number): Promise<CareerResponse[]> {
+    async getList(query: CareerMemberGetListRequest, accountId: number): Promise<CareerMemberGetListResponse> {
         const memberId = await this.getMemberId(accountId);
-        return this.prismaService.career.findMany({
+        const careers = await this.prismaService.career.findMany({
             select: {
                 id: true,
                 type: true,
+                certificationType: true,
                 companyName: true,
                 siteName: true,
                 startDate: true,
@@ -43,6 +45,12 @@ export class CareerMemberService {
             },
             ...QueryPagingHelper.queryPaging(query),
         });
+
+        const total = await this.prismaService.career.count({
+            where: this.parseConditionsFromQuery(query, memberId),
+        });
+
+        return new PaginationResponse(careers, new PageInfo(total));
     }
 
     async getDetail(id: number, accountId: number): Promise<CareerResponse> {
@@ -76,7 +84,7 @@ export class CareerMemberService {
         });
     }
 
-    async createCareer(body: CareerMemberCreateRequest, accountId: number): Promise<void> {
+    async createCareer(body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
         const memberId = await this.getMemberId(accountId);
 
         const occupation = await this.prismaService.code.findUnique({
@@ -101,7 +109,7 @@ export class CareerMemberService {
         });
     }
 
-    async updateCareer(id: number, body: CareerMemberUpdateRequest, accountId: number): Promise<void> {
+    async updateCareer(id: number, body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
         const memberId = await this.getMemberId(accountId);
         const career = await this.prismaService.career.findUnique({
             where: {
@@ -161,9 +169,17 @@ export class CareerMemberService {
     async applyCertificate(accountId: number): Promise<void> {
         const memberId = await this.getMemberId(accountId);
         if (!memberId) throw new NotFoundException('Member not found');
+        const request = await this.prismaService.careerCertificationApplication.count({
+            where: {
+                memberId,
+                status: CareerCertificationApplicationStatus.APPROVED,
+            },
+        });
+        if (request < 1) throw new BadRequestException('Request already approved');
+
         await this.prismaService.careerCertificationApplication.upsert({
             where: {
-                memberId: memberId,
+                memberId,
             },
             create: {
                 memberId,

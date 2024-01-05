@@ -4,23 +4,22 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { BannerAdminService } from './banner-admin.service';
-import { BannerAdminBannerType } from './enum/banner-admin-banner-type.enum';
-import { BannerAdminUpdatePriority } from './request/banner-admin-update-priority.request';
-import { BannerAdminUpsertGeneralRequest } from './request/banner-admin-upsert-general.request';
-import { BannerAdminGetGeneralRequest } from './request/banner-admin-get-general.request';
-import { BannerAdminGetGeneralResponse } from './response/banner-admin-get-general.response';
-import { BannerAdminUpsertJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
-import { BannerAdminGetAdminJobPostRequest } from './request/banner-admin-get-admin-jobpost.request';
-import { BannerAdminGetAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost.response';
-import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost-detail.response';
-import { BannerAdminGetCompanyJobPostRequest } from './request/banner-admin-get-company-jobpost.request';
-import { BannerAdminGetCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost.response';
 import { BannerAdminChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
-import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost-detail.response';
+import { BannerAdminGetAdminJobPostRequest } from './request/banner-admin-get-admin-jobpost.request';
+import { BannerAdminGetCompanyJobPostRequest } from './request/banner-admin-get-company-jobpost.request';
+import { BannerAdminGetGeneralRequest } from './request/banner-admin-get-general.request';
 import { BannerAdminGetSiteRequest } from './request/banner-admin-get-site.request';
-import { BannerAdminGetSiteResponse } from './response/banner-admin-get-site.response';
-import { BannerAdminGetDetailSiteResponse } from './response/banner-admin-get-site-detail.response';
+import { BannerAdminUpdatePriority } from './request/banner-admin-update-priority.request';
+import { BannerAdminUpsertJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
+import { BannerAdminUpsertGeneralRequest } from './request/banner-admin-upsert-general.request';
+import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost-detail.response';
+import { BannerAdminGetAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost.response';
+import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost-detail.response';
+import { BannerAdminGetCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost.response';
 import { BannerAdminGetDetailGeneralResponse } from './response/banner-admin-get-general-detail.response';
+import { BannerAdminGetGeneralResponse } from './response/banner-admin-get-general.response';
+import { BannerAdminGetDetailSiteResponse } from './response/banner-admin-get-site-detail.response';
+import { BannerAdminGetSiteResponse } from './response/banner-admin-get-site.response';
 
 @Controller('/admin/banners')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -144,11 +143,8 @@ export class BannerAdminController {
     }
 
     // COMMON ACTION
-    @Delete('/:type/:id')
-    async deleteBanner(
-        @Param('id', ParseIntPipe) id: number,
-        @Param('type') type: BannerAdminBannerType,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerAdminService.deleteBanner(id, type));
+    @Delete('/:id')
+    async deleteBanner(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.deleteBanner(id));
     }
 }
