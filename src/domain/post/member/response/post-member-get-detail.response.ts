@@ -27,6 +27,7 @@ export class PostMemberGetDetailResponse {
         startDate: string;
         endDate: string;
         originalBuilding: Site['originalBuilding'];
+        originalContractor: Site['contractStatus'];
         isInterest: boolean;
     };
 

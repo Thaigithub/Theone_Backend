@@ -316,6 +316,7 @@ export class PostMemberService {
                 startDate: post.site.startDate ? post.site.startDate.toISOString().split('T')[0] : null,
                 endDate: post.site.endDate ? post.site.endDate.toISOString().split('T')[0] : null,
                 originalBuilding: post.site ? post.site.originalBuilding : null,
+                originalContractor: post.site ? post.site.contractStatus : null,
                 isInterest: siteIsInterested,
             },
             workLocation: post.workLocation,
