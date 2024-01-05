@@ -5,7 +5,6 @@ import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { MemberCreateTeamRequest, MemberUpdateExposureStatusTeamRequest } from './request/member-upsert-team.request';
-import { TeamMemberApplyPost } from './request/team-member-apply-post.request';
 import { TeamGetMemberRequest } from './request/team-member-get-member.request';
 import {
     GetTeamMemberDetail,
@@ -18,6 +17,7 @@ import {
 @Injectable()
 export class MemberTeamService {
     constructor(private readonly prismaService: PrismaService) {}
+
     getCurrentDateAsString(): string {
         const currentDate = new Date();
         const year = currentDate.getFullYear().toString().slice(0, 2);
@@ -26,9 +26,11 @@ export class MemberTeamService {
 
         return `${year}${month}${day}`;
     }
+
     isStringFiveDigitNumber(str: string): boolean {
         return /^\d{5}$/.test(str);
     }
+
     async checkExistMember(accountId: number) {
         const member = await this.prismaService.member.findFirst({
             where: {
@@ -46,6 +48,7 @@ export class MemberTeamService {
         }
         return member;
     }
+
     async checkTeamPermission(accountId: number, teamId: number, isTeamLeader: boolean) {
         const member = await this.checkExistMember(accountId);
         const team = await this.prismaService.team.findUnique({
@@ -66,6 +69,7 @@ export class MemberTeamService {
         }
         return member;
     }
+
     async saveTeam(accountId: number, request: MemberCreateTeamRequest): Promise<void> {
         const member = await this.checkExistMember(accountId);
         if (!this.isStringFiveDigitNumber(request.sequenceDigit)) {
@@ -97,6 +101,7 @@ export class MemberTeamService {
             });
         });
     }
+
     async getTeams(accountId: number, query: PaginationRequest): Promise<GetTeamsResponse> {
         const member = await this.checkExistMember(accountId);
         const teams = await this.prismaService.team.findMany({
@@ -143,6 +148,7 @@ export class MemberTeamService {
         });
         return new PaginationResponse(result, new PageInfo(teamListCount));
     }
+
     async getTeamDetails(id: number): Promise<TeamMemberDetailResponse> {
         /*
             Get from a team:
@@ -269,6 +275,7 @@ export class MemberTeamService {
             ),
         };
     }
+
     async update(accountId: number, teamId: number, request: MemberCreateTeamRequest): Promise<void> {
         this.checkTeamPermission(accountId, teamId, true);
         await this.prismaService.team.update({
@@ -323,41 +330,6 @@ export class MemberTeamService {
                 HttpStatus.OK,
             );
         }
-    }
-
-    async addApplyPost(accountId: number, payload: TeamMemberApplyPost) {
-        await this.checkTeamPermission(accountId, payload.teamId, true);
-        //Check exist post
-        const post = await this.prismaService.post.findUnique({
-            where: {
-                id: payload.postId,
-                isActive: true,
-            },
-        });
-
-        if (!post) {
-            throw new BadRequestException('Post does not exist');
-        }
-
-        //Check exist team - post
-        const application = await this.prismaService.application.findUnique({
-            where: {
-                teamId_postId: {
-                    teamId: payload.teamId,
-                    postId: post.id,
-                },
-            },
-        });
-        if (application) {
-            throw new BadRequestException('This job post is already applied');
-        }
-
-        await this.prismaService.application.create({
-            data: {
-                team: { connect: { id: payload.teamId } },
-                post: { connect: { id: payload.postId } },
-            },
-        });
     }
 
     async searchMember(query: TeamGetMemberRequest): Promise<GetTeamMemberDetail> {

@@ -23,7 +23,6 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { MemberCreateTeamRequest, MemberUpdateExposureStatusTeamRequest } from './request/member-upsert-team.request';
-import { TeamMemberApplyPost } from './request/team-member-apply-post.request';
 import { TeamMemberGetInviteRequest } from './request/team-member-get-invite.request';
 import { TeamGetMemberRequest } from './request/team-member-get-member.request';
 import {
@@ -88,17 +87,6 @@ export class MemberTeamController {
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
     async getMember(@Query() query: TeamGetMemberRequest): Promise<BaseResponse<GetTeamMemberDetail>> {
         return BaseResponse.of(await this.memberTeamService.searchMember(query));
-    }
-
-    @Post('/apply-post')
-    @ApiOperation({
-        summary: 'Apply a post',
-        description: "This endpoint add a post to request's team apply list in the system.",
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async addApplyPost(@Req() request: any, @Body() payload: TeamMemberApplyPost): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberTeamService.addApplyPost(request.user.accountId, payload));
     }
 
     @Put('/:id/invitations/invite')

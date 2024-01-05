@@ -27,7 +27,6 @@ class ForeignWorkerType {
 class DisabilityType {
     disableType: DisabledType;
     disableLevel: DisabledLevel;
-    file: FileResponse;
 }
 class BasicHealthSafetyCertificateType {
     registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];

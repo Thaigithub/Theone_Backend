@@ -261,11 +261,9 @@ model Disability {
   disableType  DisabledType  @map("disable_type")
   disableLevel DisabledLevel
   memberId     Int           @unique @map("member_id")
-  fileId       Int           @unique @map("file_id")
   isActive     Boolean       @default(true) @map("is_active")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
-  file         File          @relation(fields: [fileId], references: [id])
   member       Member        @relation(fields: [memberId], references: [id])
 
   @@map("disabilities")
@@ -299,7 +297,6 @@ model File {
   certificate                  Certificate?
   contactCard                  ContactCard?
   contract                     Contract?
-  disability                   Disability?
   foreignWorker                ForeignWorker?
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   logo                         Logo?
