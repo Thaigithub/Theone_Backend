@@ -121,11 +121,11 @@ export class AccountMemberService {
         return result.id;
     }
 
-    async getDetail(id: number): Promise<AccountMemberGetDetailResponse> {
+    async getDetail(accountId: number): Promise<AccountMemberGetDetailResponse> {
         const member = await this.prismaService.member.findUnique({
             where: {
                 isActive: true,
-                id,
+                accountId,
             },
             select: {
                 totalExperienceMonths: true,

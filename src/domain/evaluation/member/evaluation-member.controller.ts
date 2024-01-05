@@ -1,17 +1,5 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    HttpStatus,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -36,18 +24,6 @@ export class EvaluationMemberController {
     constructor(private readonly evaluationMemberService: EvaluationMemberService) {}
 
     @Patch(':id')
-    @ApiOperation({
-        summary: 'Evaluate site',
-        description: 'Member can evaluate site',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.OK,
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async evaluateSite(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -57,15 +33,12 @@ export class EvaluationMemberController {
         return BaseResponse.ok();
     }
 
+    @Get('count-completed')
+    async getTotalCompletedEvaluation(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.evaluationMemberService.getTotalCompletedEvaluation(request.user.accountId));
+    }
+
     @Get()
-    @ApiOperation({
-        summary: 'Get list of evaluation tickets for sites',
-        description: 'Member can retrieve all evaluation tickets for site, including incomplete & complete evaluation',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async getMemberEvaluations(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: EvaluationMemberGetListRequest,
