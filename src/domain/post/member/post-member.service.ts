@@ -194,6 +194,7 @@ export class PostMemberService {
             },
         });
         if (!postExist) throw new NotFoundException('Post does not exist');
+
         let memberRegisteredCodeIdsList = null;
         if (accountId) {
             const memberSpecialLicenseList = await this.prismaService.member.findUnique({
@@ -241,65 +242,27 @@ export class PostMemberService {
         }
 
         const post = await this.prismaService.post.findUnique({
-            select: {
-                name: true,
-                startDate: true,
-                endDate: true,
-                experienceType: true,
-                numberOfPeople: true,
-                workLocation: true,
-                occupation: {
-                    select: {
-                        codeName: true,
-                    },
-                },
-                specialOccupation: {
-                    select: {
-                        id: true,
-                        codeName: true,
-                    },
-                },
-                salaryType: true,
-                salaryAmount: true,
-                startWorkDate: true,
-                endWorkDate: true,
-                workday: true,
-                startWorkTime: true,
-                endWorkTime: true,
-                postEditor: true,
+            include: {
                 company: {
-                    select: {
+                    include: {
                         logo: {
-                            select: {
-                                file: {
-                                    select: {
-                                        key: true,
-                                    },
-                                },
+                            include: {
+                                file: true,
                             },
                         },
                     },
                 },
                 site: {
-                    select: {
-                        name: true,
-                        contact: true,
-                        personInCharge: true,
-                        personInChargeContact: true,
-                        address: true,
+                    include: {
                         district: {
-                            select: {
-                                englishName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                    },
-                                },
+                            include: {
+                                city: true,
                             },
                         },
-                        originalBuilding: true,
                     },
                 },
+                occupation: true,
+                specialOccupation: true,
             },
             where: {
                 isActive: true,
@@ -307,43 +270,49 @@ export class PostMemberService {
             },
         });
 
+        let siteIsInterested: boolean = false;
+        if (accountId) {
+            const memberId = await this.getMemberId(accountId);
+            const interest = await this.prismaService.interest.findUnique({
+                where: {
+                    memberId_siteId: {
+                        memberId,
+                        siteId: post.siteId,
+                    },
+                },
+            });
+            if (interest) siteIsInterested = true;
+        }
+
         return {
             postInformation: {
                 name: post.name,
                 startDate: post.startDate.toISOString().split('T')[0],
                 endDate: post.endDate.toISOString().split('T')[0],
                 numberOfPeople: post.numberOfPeople,
-                description: post.postEditor,
+                personInCharge: post.company.presentativeName,
             },
             eligibility: {
                 experienceType: post.experienceType,
                 occupation: post.occupation ? post.occupation.codeName : null,
                 specialNote: post.specialOccupation ? post.specialOccupation.codeName : null,
+                otherInformation: post.otherInformation,
                 isEligibleToApply: memberRegisteredCodeIdsList
                     ? !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialOccupation?.id)
                         ? true
                         : false
-                    : null,
+                    : false,
             },
-            workingCondition: {
-                salaryType: post.salaryType,
-                salaryAmount: post.salaryAmount,
-                startWorkDate: post.startWorkDate.toISOString().split('T')[0],
-                endWorkDate: post.endWorkDate.toISOString().split('T')[0],
-                workday: post.workday,
-                startWorkTime: post.startWorkTime.toISOString().split('T')[1],
-                endWorkTime: post.endWorkTime.toISOString().split('T')[1],
-            },
+            detail: post.postEditor,
             siteInformation: {
+                id: post.site.id,
                 companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
                 siteName: post.site ? post.site.name : null,
                 siteAddress: post.site ? post.site.address : null,
-                siteAddressCity: post.site ? post.site.district.city.englishName : null,
-                siteAddressDistrict: post.site ? post.site.district.englishName : null,
-                personInCharge: post.site ? post.site.personInCharge : null,
-                personInChargeContact: post.site ? post.site.personInChargeContact : null,
-                contact: post.site ? post.site.contact : null,
+                startDate: post.site.startDate ? post.site.startDate.toISOString().split('T')[0] : null,
+                endDate: post.site.endDate ? post.site.endDate.toISOString().split('T')[0] : null,
                 originalBuilding: post.site ? post.site.originalBuilding : null,
+                isInterest: siteIsInterested,
             },
             workLocation: post.workLocation,
         };
