@@ -3,7 +3,7 @@ import { RequestBannerStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum } from 'class-validator';
 
-export class AdminBannerChangeStatusCompanyBannerRequest {
+export class BannerAdminChangeStatusCompanyBannerRequest {
     @Expose()
     @ApiProperty({ type: 'enum', enum: RequestBannerStatus })
     @IsEnum(RequestBannerStatus)

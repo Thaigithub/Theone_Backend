@@ -25,7 +25,7 @@ class GeneralBanner {
     endDate: string;
 }
 
-export class AdminBannerCreateGeneralRequest extends Banner {
+export class BannerAdminUpsertGeneralRequest extends Banner {
     @Expose()
     generalBanner: GeneralBanner;
 }

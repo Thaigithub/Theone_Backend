@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteCompanyCreateRequest } from './request/site-company-create.request';
-import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract-site.request';
+import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
 import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
-import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract-site.response';
+import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract.response';
 import { SiteResponse } from './response/site-company-get-list.response';
 
 @Injectable()
@@ -28,7 +29,6 @@ export class SiteCompanyService {
 
     async getTotal(query: SiteCompanyGetListRequest, accountId: number): Promise<number> {
         const companyId = await this.getCompanyId(accountId);
-
         return await this.prismaService.site.count({
             where: {
                 isActive: true,
@@ -40,7 +40,6 @@ export class SiteCompanyService {
 
     async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteResponse[]> {
         const companyId = await this.getCompanyId(accountId);
-
         const companies = await this.prismaService.site.findMany({
             include: {
                 district: {
@@ -224,8 +223,7 @@ export class SiteCompanyService {
                 endDate: true,
                 numberOfContract: true,
             },
-            skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
-            take: request.pageSize && parseInt(request.pageSize),
+            ...QueryPagingHelper.queryPaging(request),
         };
         const sites = (await this.prismaService.site.findMany(query)).map((item) => {
             return {

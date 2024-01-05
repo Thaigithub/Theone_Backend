@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BannerStatus, GeneralBanner } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
-export class AdminBannerGetDetailGeneralResponse {
+export class BannerAdminGetDetailGeneralResponse {
     @ApiProperty({ type: FileResponse })
     bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })

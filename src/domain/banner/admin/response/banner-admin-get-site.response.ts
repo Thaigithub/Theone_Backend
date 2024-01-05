@@ -13,13 +13,14 @@ class SiteBannerResponse {
     @ApiProperty({ type: FileResponse })
     bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })
-    status: Banner['status'];
+    bannerStatus: Banner['status'];
     @ApiProperty({ type: Date })
     requestDate: CompanyPostBanner['requestDate'];
     @ApiProperty({ type: Date })
     acceptDate: CompanyPostBanner['acceptDate'];
     @ApiProperty({ type: Number })
     priority: CompanyPostBanner['priority'];
+    requestStatus: SiteBanner['status'];
 }
 
-export class AdminBannerGetSiteResponse extends PaginationResponse<SiteBannerResponse> {}
+export class BannerAdminGetSiteResponse extends PaginationResponse<SiteBannerResponse> {}

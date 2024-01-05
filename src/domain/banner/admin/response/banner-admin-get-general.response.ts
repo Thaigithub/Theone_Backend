@@ -24,4 +24,4 @@ export class GeneralBannerResponse {
     regDate: GeneralBanner['regDate'];
 }
 
-export class AdminBannerGetGeneralResponse extends PaginationResponse<GeneralBannerResponse> {}
+export class BannerAdminGetGeneralResponse extends PaginationResponse<GeneralBannerResponse> {}

@@ -1,5 +1,4 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -8,13 +7,9 @@ import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.r
 import { DomainType, StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 
-@ApiTags('[MEMBER] File Management')
+@Controller('/member/files')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
-@Controller('/member/files')
 export class FileMemberController {
     constructor(private readonly storageService: StorageService) {}
 

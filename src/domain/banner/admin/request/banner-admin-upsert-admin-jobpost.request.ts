@@ -41,7 +41,7 @@ class AdPostBanner extends PostBanner {
     @Expose()
     adminPostBannner: AdminPostBanner;
 }
-export class AdminBannerCreateJobPostRequest extends Banner {
+export class BannerAdminUpsertJobPostRequest extends Banner {
     @Expose()
     postBanner: AdPostBanner;
 }

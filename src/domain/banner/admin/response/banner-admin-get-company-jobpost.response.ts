@@ -15,13 +15,14 @@ class CompanyJobPostBannerResponse {
     @ApiProperty({ type: FileResponse })
     bannerFile: FileResponse;
     @ApiProperty({ type: 'enum', enum: BannerStatus })
-    status: Banner['status'];
+    bannerStatus: Banner['status'];
     @ApiProperty({ type: Date })
     requestDate: CompanyPostBanner['requestDate'];
     @ApiProperty({ type: Date })
     acceptDate: CompanyPostBanner['acceptDate'];
+    requestStatus: CompanyPostBanner['status'];
     @ApiProperty({ type: Number })
     priority: CompanyPostBanner['priority'];
 }
 
-export class AdminBannerGetCompanyJobPostResponse extends PaginationResponse<CompanyJobPostBannerResponse> {}
+export class BannerAdminGetCompanyJobPostResponse extends PaginationResponse<CompanyJobPostBannerResponse> {}
