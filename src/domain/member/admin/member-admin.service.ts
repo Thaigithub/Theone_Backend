@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Member as MemberPrisma } from '@prisma/client';
+import { CareerType, Member as MemberPrisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -92,95 +92,112 @@ export class MemberAdminService {
                 isActive: true,
                 id,
             },
-            select: {
-                name: true,
-                contact: true,
-                email: true,
-                desiredOccupation: true,
-                level: true,
-                signupMethod: true,
-                createdAt: true,
-                withdrawnDate: true,
-                account: {
-                    select: {
-                        username: true,
-                        status: true,
-                    },
-                },
-                bankAccount: {
-                    select: {
-                        bankName: true,
-                        accountNumber: true,
-                        createdAt: true,
-                    },
-                },
-                foreignWorker: {
-                    select: {
-                        registrationNumber: true,
-                        serialNumber: true,
-                        dateOfIssue: true,
-                    },
-                },
-                disability: {
-                    select: {
-                        disableType: true,
-                    },
-                },
+            include: {
+                account: true,
+                disability: true,
+                bankAccount: true,
+                foreignWorker: true,
                 teams: {
-                    select: {
+                    include: {
                         team: {
-                            select: {
-                                id: true,
-                                name: true,
-                                code: {
-                                    select: {
-                                        id: true,
-                                        code: true,
-                                        codeName: true,
+                            include: {
+                                code: true,
+                            },
+                        },
+                    },
+                },
+                career: true,
+                applyPosts: {
+                    include: {
+                        contract: true,
+                        post: {
+                            include: {
+                                site: {
+                                    include: {
+                                        company: true,
                                     },
                                 },
                             },
                         },
                     },
                 },
+                specialLicenses: {
+                    include: {
+                        code: true,
+                    },
+                },
+                basicHealthSafetyCertificate: true,
             },
         });
 
-        const teamList = member.teams.map((item) => {
-            return {
-                id: item.team.id,
-                name: item.team.name,
-                occupation: item.team.code.codeName,
-            };
-        });
-
-        const { account, disability, createdAt, bankAccount, foreignWorker, ...newMember } = member;
-
-        delete newMember.email;
-        delete newMember.desiredOccupation;
-        delete newMember.signupMethod;
-
-        const newBankAccount = {
-            bankName: bankAccount?.bankName,
-            accountNumber: bankAccount?.accountNumber,
-            registrationDate: bankAccount?.createdAt,
-        };
-
-        const newForeignWorker = {
-            registrationNumber: foreignWorker?.registrationNumber,
-            serialNumber: foreignWorker?.serialNumber,
-            dateOfIssue: foreignWorker?.dateOfIssue,
-        };
-
         return {
-            ...newMember,
-            bankAccount: newBankAccount,
-            foreignWorker: newForeignWorker,
-            joinDate: createdAt,
-            obstacle: disability ? disability.disableType : null,
-            username: account.username,
-            status: account.status,
-            teams: teamList,
+            name: member.name,
+            contact: member.contact,
+            username: member.account.username,
+            status: member.account.status,
+            obstacle: member.disability ? member.disability.disableType : null,
+            joinDate: member.createdAt.toISOString().split('T')[0],
+            level: member.level,
+            bankAccount: {
+                bankName: member.bankAccount ? member.bankAccount.bankName : null,
+                accountNumber: member.bankAccount ? member.bankAccount.accountNumber : null,
+                registrationDate: member.bankAccount ? member.bankAccount.createdAt : null,
+            },
+            foreignWorker: {
+                registrationNumber: member.foreignWorker ? member.foreignWorker.registrationNumber : null,
+                serialNumber: member.foreignWorker ? member.foreignWorker.serialNumber : null,
+                dateOfIssue: member.foreignWorker ? member.foreignWorker.dateOfIssue : null,
+            },
+            teams: member.teams
+                ? member.teams.map((item) => {
+                      return {
+                          id: item.teamId,
+                          name: item.team.name,
+                          occupation: item.team.code.codeName,
+                      };
+                  })
+                : [],
+            registeredExperienceList: member.career
+                ? member.career.map((item) => {
+                      if (item.type === CareerType.GENERAL) {
+                          return {
+                              companyName: item.companyName,
+                              startDate: item.startDate.toISOString().split('T')[0],
+                              endDate: item.endDate.toISOString().split('T')[0],
+                          };
+                      }
+                  })
+                : [],
+            contractHistoryList: member.applyPosts
+                ? member.applyPosts
+                      .filter((item) => {
+                          return item.contract;
+                      })
+                      .map((item) => {
+                          return {
+                              companyName: item.post.site.company.name,
+                              startDate: item.contract.startDate.toISOString().split('T')[0],
+                              endDate: item.contract.endDate.toISOString().split('T')[0],
+                          };
+                      })
+                : [],
+            specialLicenseList: member.specialLicenses
+                ? member.specialLicenses.map((item) => {
+                      return {
+                          codeName: item.code.codeName,
+                          acquisitionDate: item.acquisitionDate.toISOString().split('T')[0],
+                          status: item.status,
+                      };
+                  })
+                : [],
+            basicHealthSafetyCertificateList: {
+                registrationNumber: member.basicHealthSafetyCertificate
+                    ? member.basicHealthSafetyCertificate.registrationNumber
+                    : null,
+                dateOfCompletion: member.basicHealthSafetyCertificate
+                    ? member.basicHealthSafetyCertificate.dateOfCompletion
+                    : null,
+            },
         };
     }
 

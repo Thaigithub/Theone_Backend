@@ -9,6 +9,7 @@ import { PointMemberService } from './point-member.service';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
 import { PointMemberGetExchangePointListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetPointListResponse } from './response/point-member-get-list.response.ts';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[MEMBER] Point Management')
 @Controller('/member/points')
@@ -20,7 +21,7 @@ export class PointMemberController {
     constructor(private pointMemberService: PointMemberService) {}
     @Get('/accumulations')
     async getPointList(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
     ): Promise<BaseResponse<PointMemberGetPointListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getPointList(req.user.accountId, query));
@@ -28,7 +29,7 @@ export class PointMemberController {
 
     @Get('/exchanges')
     async getExchangePointList(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
     ): Promise<BaseResponse<PointMemberGetExchangePointListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getExchangePointList(req.user.accountId, query));
@@ -37,7 +38,7 @@ export class PointMemberController {
     @Post('/exchanges')
     async createCurrencyExchange(
         @Body() body: PointMemberCreateCurrencyExchangeRequest,
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.pointMemberService.createCurrencyExchange(request.user.accountId, body));
     }

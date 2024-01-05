@@ -149,11 +149,24 @@ export class TeamCompanyService {
                     select: {
                         member: {
                             select: {
+                                id: true,
                                 name: true,
                                 contact: true,
                                 desiredOccupation: true,
                                 totalExperienceYears: true,
                                 totalExperienceMonths: true,
+                                certificates: {
+                                    select: {
+                                        certificateNumber: true,
+                                        status: true,
+                                    },
+                                },
+                                specialLicenses: {
+                                    select: {
+                                        licenseNumber: true,
+                                        status: true,
+                                    },
+                                },
                             },
                         },
                     },

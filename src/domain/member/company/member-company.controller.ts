@@ -11,6 +11,7 @@ import { MemberCompanyManpowerGetListRequest } from './request/member-company-ma
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Member Management')
 @Controller('/company/members')
@@ -29,7 +30,7 @@ export class MemberCompanyController {
     })
     @ApiResponse({ status: HttpStatus.ACCEPTED, type: MemberCompanyCountWorkersResponse })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
-    async countPosts(@Req() req: any): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
+    async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
         return BaseResponse.of(await this.memberCompanyService.countWorkers(req.user.accountId));
     }
 

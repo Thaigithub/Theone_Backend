@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { GetTeamMemberInvitationGetListResponse } from './response/team-member-invitation-member-get-list.response';
 import { MemberTeamMemberInvitationService } from './team-member-invitation-member.service';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[Member] Team-Member Invitation Management')
 @Controller('member/invitations')
@@ -33,7 +34,7 @@ export class MemberTeamMemberInvitationController {
     @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
     @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
     async getInvitationList(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
     ): Promise<BaseResponse<GetTeamMemberInvitationGetListResponse>> {
         const invitationList = await this.memberTeamMemberInvitationService.getInvitations(request.user.accountId, query);
@@ -47,7 +48,10 @@ export class MemberTeamMemberInvitationController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'accepted successfully' })
     @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'accept failed' })
-    async acceptInvitation(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async acceptInvitation(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         await this.memberTeamMemberInvitationService.accept(request.user.accountId, id);
         return BaseResponse.ok();
     }
@@ -59,7 +63,10 @@ export class MemberTeamMemberInvitationController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'declined successfully' })
     @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'decline failed' })
-    async declineInvitation(@Req() req: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async declineInvitation(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         await this.memberTeamMemberInvitationService.decline(req.user.accountId, id);
         return BaseResponse.ok();
     }

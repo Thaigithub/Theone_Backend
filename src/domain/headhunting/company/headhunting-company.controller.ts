@@ -9,6 +9,7 @@ import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-c
 
 import { HeadhuntingCompanyService } from './headhunting-company.service';
 import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/headhunting-company-get-list-recommendation.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -25,7 +26,7 @@ export class HeadhuntingCompanyController {
     })
     async getListRecommendation(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: HeadhuntingGetListRecommendationRequest,
     ): Promise<BaseResponse<RecommendationCompanyGetListHeadhuntingApprovedResponse>> {
         const recommendationApplicants = await this.headhuntingCompanyService.getListRecommendation(
@@ -41,7 +42,10 @@ export class HeadhuntingCompanyController {
         summary: 'Detail of Headhunting request of a post',
         description: 'Company can view detail of Headhunting request of a post',
     })
-    async getDetailRequest(@Param('postId', ParseIntPipe) postId: number, @Req() request: any): Promise<BaseResponse<any>> {
+    async getDetailRequest(
+        @Param('postId', ParseIntPipe) postId: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<any>> {
         const recommendationApplicants = await this.headhuntingCompanyService.getDetailRequest(request.user.accountId, postId);
         return BaseResponse.of(recommendationApplicants);
     }

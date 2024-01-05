@@ -10,6 +10,7 @@ import { MatchingMemberTeamApplyRequest } from './request/matching-member-team-a
 import { MatchingMemberGetDetailResponse } from './response/matching-member-get-detail.response';
 import { MatchingMemberGetListResponse } from './response/matching-member-get-list.response';
 import { MatchingMemberInterestPostResponse } from './response/matching-member-interest-post.response';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
@@ -21,7 +22,7 @@ export class MatchingMemberController {
 
     @Get()
     async getList(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Query() query: MatchingMemberGetListRequest,
     ): Promise<BaseResponse<MatchingMemberGetListResponse>> {
         return BaseResponse.of(await this.matchingMemberService.getList(req.user.accountId, query));
@@ -29,33 +30,36 @@ export class MatchingMemberController {
 
     @Get(':id')
     async detailPost(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<MatchingMemberGetDetailResponse>> {
         return BaseResponse.of(await this.matchingMemberService.detailPost(req.user.accountId, id));
     }
 
     @Put(':id/refuse')
-    async refusePost(@Req() req: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async refusePost(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.matchingMemberService.refusePost(req.user.accountId, id));
     }
 
     @Put(':id/interest')
     async interestPost(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<MatchingMemberInterestPostResponse>> {
         return BaseResponse.of(await this.matchingMemberService.interestPost(req.user.accountId, id));
     }
 
     @Post(':id/individual-apply')
-    async individualApplyPost(@Req() req: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async individualApplyPost(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.matchingMemberService.individualApplyPost(req.user.accountId, id));
     }
 
     @Post(':id/team-apply')
     async teamApplyPost(
-        @Req() req: any,
+        @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: MatchingMemberTeamApplyRequest,
     ): Promise<BaseResponse<void>> {

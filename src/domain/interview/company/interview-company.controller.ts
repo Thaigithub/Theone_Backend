@@ -11,6 +11,7 @@ import { InterviewCompanyService } from './interview-company.service';
 import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
 import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
 import { InterviewCompanyProposeRequest } from './request/interview-company-propose.request';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Interview Management')
 @Controller('/company/interviews')
@@ -31,7 +32,7 @@ export class InterviewCompanyController {
         type: InterviewCompanyGetItemResponse,
     })
     async getList(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Query() query: InterviewCompantGetListRequest,
     ): Promise<BaseResponse<InterviewCompanyGetItemResponse>> {
         const interviews = await this.interviewCompanyService.getList(request.user.accountId, query);
@@ -49,7 +50,7 @@ export class InterviewCompanyController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getMemberDetail(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
         return BaseResponse.of(await this.interviewCompanyService.getMemberDetail(request.user.accountId, id));
@@ -66,7 +67,7 @@ export class InterviewCompanyController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getTeamDetail(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
         return BaseResponse.of(await this.interviewCompanyService.getTeamDetail(request.user.accountId, id));
@@ -79,7 +80,10 @@ export class InterviewCompanyController {
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async passInteview(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async passInteview(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         const posts = await this.interviewCompanyService.resultInterview(request.user.accountId, id, InterviewStatus.PASS);
         return BaseResponse.of(posts);
     }
@@ -91,7 +95,10 @@ export class InterviewCompanyController {
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async failInteview(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async failInteview(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         const posts = await this.interviewCompanyService.resultInterview(request.user.accountId, id, InterviewStatus.FAIL);
         return BaseResponse.of(posts);
     }

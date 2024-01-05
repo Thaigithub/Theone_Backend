@@ -115,7 +115,10 @@ export class PostMemberController {
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async addApplyPostMember(@Req() request: any, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async addApplyPostMember(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postMemberService.addApplyPostMember(request.user.accountId, id));
     }
 
@@ -142,7 +145,7 @@ export class PostMemberController {
     @ApiResponse({ status: HttpStatus.OK, type: PostMemberUpdateInterestResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async addInterestPost(
-        @Req() request: any,
+        @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<PostMemberUpdateInterestResponse>> {
         return BaseResponse.of(await this.postMemberService.updateInterestPost(request.user.accountId, id));
