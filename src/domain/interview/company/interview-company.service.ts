@@ -172,7 +172,7 @@ export class InterviewCompanyService {
 
         if (!interview) throw new BadRequestException('No interview found');
 
-        return await this.memberCompanyService.getMemberDetail(accountId, interview.applicationId);
+        return await this.memberCompanyService.getMemberDetail(interview.applicationId);
     }
 
     async getTeamDetail(accountId: number, id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
@@ -199,7 +199,7 @@ export class InterviewCompanyService {
 
         if (!interview) throw new BadRequestException('No interview found');
 
-        return await this.teamCompanyService.getTeamDetail(accountId, interview.applicationId);
+        return await this.teamCompanyService.getTeamDetail(interview.applicationId);
     }
 
     async resultInterview(accountId: number, id: number, result: InterviewStatus) {

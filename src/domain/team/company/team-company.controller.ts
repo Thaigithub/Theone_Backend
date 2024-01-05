@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -29,11 +29,8 @@ export class TeamCompanyController {
         type: TeamCompanyGetTeamDetailApplicants,
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getTeamDetail(
-        @Req() request: any,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
-        return BaseResponse.of(await this.teamCompanyService.getTeamDetail(request.user.accountId, id));
+    async getTeamDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
+        return BaseResponse.of(await this.teamCompanyService.getTeamDetail(id));
     }
 
     @Get(':id/manpower')

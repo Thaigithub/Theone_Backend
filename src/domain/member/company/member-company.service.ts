@@ -159,11 +159,10 @@ export class MemberCompanyService {
         });
     }
 
-    async getMemberDetail(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
+    async getMemberDetail(id: number): Promise<ApplicationCompanyGetMemberDetail> {
         const application = await this.prismaService.member.findUniqueOrThrow({
             where: {
                 id,
-                accountId: accountId,
             },
             select: {
                 name: true,
@@ -223,13 +222,20 @@ export class MemberCompanyService {
                         file: true,
                     },
                 },
+                desiredOccupation: {
+                    select: {
+                        codeName: true,
+                    },
+                },
             },
         });
 
         const district = application.district;
         const specialLicense = application.specialLicenses;
+        const occupation = application.desiredOccupation?.codeName;
         delete application.district;
         delete application.specialLicenses;
+        delete application.desiredOccupation;
         return {
             ...application,
             specialLicenses: specialLicense.map((item) => {
@@ -238,6 +244,7 @@ export class MemberCompanyService {
                     licenseNumber: item.licenseNumber,
                 };
             }),
+            occupation,
             city: {
                 englishName: district?.city.englishName || null,
                 koreanName: district?.city.koreanName || null,
