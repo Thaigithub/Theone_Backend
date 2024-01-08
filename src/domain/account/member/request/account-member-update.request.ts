@@ -1,7 +1,12 @@
 import { Expose } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AccountMemberUpdateRequest {
+    @IsString()
+    @IsOptional()
+    @Expose()
+    name: string;
+
     @IsNumber()
     @IsOptional()
     @Expose()

@@ -230,39 +230,41 @@ export class MemberCompanyService {
             },
         });
 
-        const district = application.district;
-        const specialLicense = application.specialLicenses;
-        const occupation = application.desiredOccupation ? application.desiredOccupation.codeName : null;
-        delete application.district;
-        delete application.specialLicenses;
-        delete application.desiredOccupation;
         return {
             ...application,
-            specialLicenses: specialLicense.map((item) => {
-                return {
-                    name: item.code.codeName,
-                    licenseNumber: item.licenseNumber,
-                };
-            }),
-            occupation,
-            basicHealthSafetyCertificate: {
-                file: {
-                    fileName: application.basicHealthSafetyCertificate.file.fileName,
-                    type: application.basicHealthSafetyCertificate.file.type,
-                    key: application.basicHealthSafetyCertificate.file.key,
-                    size: Number(application.basicHealthSafetyCertificate.file.size),
-                },
-                dateOfCompletion: application.basicHealthSafetyCertificate.dateOfCompletion,
-                registrationNumber: application.basicHealthSafetyCertificate.registrationNumber,
-            },
-            city: {
-                englishName: district?.city.englishName || null,
-                koreanName: district?.city.koreanName || null,
-            },
-            district: {
-                englishName: district?.englishName || null,
-                koreanName: district?.koreanName || null,
-            },
+            specialLicenses: application.specialLicenses
+                ? application.specialLicenses.map((item) => {
+                      return {
+                          name: item.code.codeName,
+                          licenseNumber: item.licenseNumber,
+                      };
+                  })
+                : [],
+            occupation: application.desiredOccupation ? application.desiredOccupation.codeName : null,
+            basicHealthSafetyCertificate: application.basicHealthSafetyCertificate
+                ? {
+                      file: {
+                          fileName: application.basicHealthSafetyCertificate.file.fileName,
+                          type: application.basicHealthSafetyCertificate.file.type,
+                          key: application.basicHealthSafetyCertificate.file.key,
+                          size: Number(application.basicHealthSafetyCertificate.file.size),
+                      },
+                      dateOfCompletion: application.basicHealthSafetyCertificate.dateOfCompletion,
+                      registrationNumber: application.basicHealthSafetyCertificate.registrationNumber,
+                  }
+                : null,
+            city: application.district
+                ? {
+                      englishName: application.district.city.englishName,
+                      koreanName: application.district.city.koreanName,
+                  }
+                : null,
+            district: application.district
+                ? {
+                      englishName: application.district.englishName,
+                      koreanName: application.district.koreanName,
+                  }
+                : null,
         };
     }
 

@@ -1,10 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Code } from '@prisma/client';
 
-export class CodeResponse {
-    @ApiProperty({ type: 'number' })
+export class FilterGetCodeResponse {
     id: Code['id'];
 
-    @ApiProperty({ type: 'string' })
     codeName: Code['codeName'];
 }
