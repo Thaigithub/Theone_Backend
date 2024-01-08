@@ -437,16 +437,17 @@ model PostBanner {
 }
 
 model CompanyPostBanner {
-  id               Int                 @unique
-  requestDate      DateTime            @default(now()) @map("request_date") @db.Date
-  acceptDate       DateTime?           @map("accept_date") @db.Date
-  desiredStartDate DateTime            @map("desired_start_date") @db.Date
-  desiredEndDate   DateTime            @map("desired_end_date") @db.Date
-  priority         Int?
-  status           RequestBannerStatus
-  postBanner       PostBanner          @relation(fields: [id], references: [id])
-  title            String?
-  detail           String?
+  id                     Int                    @unique
+  requestDate            DateTime               @default(now()) @map("request_date") @db.Date
+  acceptDate             DateTime?              @map("accept_date") @db.Date
+  desiredStartDate       DateTime               @map("desired_start_date") @db.Date
+  desiredEndDate         DateTime               @map("desired_end_date") @db.Date
+  priority               Int?
+  status                 RequestBannerStatus
+  postBanner             PostBanner             @relation(fields: [id], references: [id])
+  title                  String?
+  detail                 String?
+  companyBannerHistories CompanyBannerHistory[]
 
   @@map("company_post_banners")
 }
@@ -464,20 +465,34 @@ model AdminPostBanner {
 }
 
 model SiteBanner {
-  id               Int                 @unique
-  siteId           Int                 @map("site_id")
-  title            String
-  detail           String
-  requestDate      DateTime            @map("request_date") @db.Date
-  acceptDate       DateTime?           @map("accept_date") @db.Date
-  desiredStartDate DateTime            @map("desired_start_date") @db.Date
-  desiredEndDate   DateTime            @map("desired_end_date") @db.Date
-  priority         Int?
-  status           RequestBannerStatus
-  banner           Banner              @relation(fields: [id], references: [id])
-  site             Site                @relation(fields: [siteId], references: [id])
+  id                     Int                    @unique
+  siteId                 Int                    @map("site_id")
+  title                  String?
+  detail                 String?
+  requestDate            DateTime               @map("request_date") @db.Date
+  acceptDate             DateTime?              @map("accept_date") @db.Date
+  desiredStartDate       DateTime               @map("desired_start_date") @db.Date
+  desiredEndDate         DateTime               @map("desired_end_date") @db.Date
+  priority               Int?
+  status                 RequestBannerStatus
+  banner                 Banner                 @relation(fields: [id], references: [id])
+  site                   Site                   @relation(fields: [siteId], references: [id])
+  companyBannerHistories CompanyBannerHistory[]
 
   @@map("site_banners")
+}
+
+model CompanyBannerHistory {
+  id                  Int                 @id @default(autoincrement())
+  siteBanner          SiteBanner?         @relation(fields: [siteBannerId], references: [id])
+  companyPostBanner   CompanyPostBanner?  @relation(fields: [companyPostBannerId], references: [id])
+  status              RequestBannerStatus
+  reason              String?
+  createdAt           DateTime            @default(now()) @map("created_at")
+  siteBannerId        Int?
+  companyPostBannerId Int?
+
+  @@map("company_banner_status")
 }
 
 model Code {
