@@ -20,6 +20,7 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, Api
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { MemberCreateTeamRequest, MemberUpdateExposureStatusTeamRequest } from './request/member-upsert-team.request';
@@ -32,7 +33,6 @@ import {
     TeamsResponse,
 } from './response/team-member-get.response';
 import { MemberTeamService } from './team-member.service';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[Member] Team Management')
 @Controller('member/teams')
@@ -133,8 +133,11 @@ export class MemberTeamController {
     })
     @ApiResponse({ status: HttpStatus.OK, description: 'Result of teams', type: TeamMemberDetailResponse })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Search failed' })
-    async getTeamDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamMemberDetailResponse>> {
-        return BaseResponse.of(await this.memberTeamService.getTeamDetails(id));
+    async getTeamDetails(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<TeamMemberDetailResponse>> {
+        return BaseResponse.of(await this.memberTeamService.getTeamDetails(req.user.accountId, id));
     }
 
     @Put('/:id/update')

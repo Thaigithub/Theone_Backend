@@ -10,6 +10,7 @@ import {
     GetTeamMemberDetail,
     GetTeamMemberInvitation,
     GetTeamsResponse,
+    MemberResponse,
     TeamMemberDetailResponse,
     TeamsResponse,
 } from './response/team-member-get.response';
@@ -106,7 +107,19 @@ export class MemberTeamService {
         const member = await this.checkExistMember(accountId);
         const teams = await this.prismaService.team.findMany({
             where: {
-                leaderId: member.id,
+                OR: [
+                    {
+                        leaderId: member.id,
+                    },
+                    {
+                        members: {
+                            some: {
+                                memberId: member.id,
+                                isActive: true,
+                            },
+                        },
+                    },
+                ],
                 isActive: true,
             },
             include: {
@@ -116,6 +129,18 @@ export class MemberTeamService {
                         id: true,
                         codeName: true,
                         code: true,
+                    },
+                },
+                members: {
+                    select: {
+                        member: {
+                            select: {
+                                id: true,
+                                isActive: true,
+                                name: true,
+                                contact: true,
+                            },
+                        },
                     },
                 },
             },
@@ -138,6 +163,20 @@ export class MemberTeamService {
                     isLeader: accountId === team.leader.id ? true : false,
                     totalMembers: team.totalMembers,
                     createdAt: team.createdAt,
+                    memberInfors: team.members
+                        .filter((item) => item.member.isActive)
+                        .map((item) => {
+                            return {
+                                id: item.member.id,
+                                name: item.member.name,
+                                contact: item.member.contact,
+                            } as MemberResponse;
+                        })
+                        .concat({
+                            id: team.leaderId,
+                            name: team.leader.name,
+                            contact: team.leader.contact,
+                        } as MemberResponse),
                 }) as TeamsResponse,
         );
         const teamListCount = await this.prismaService.team.count({
@@ -149,7 +188,7 @@ export class MemberTeamService {
         return new PaginationResponse(result, new PageInfo(teamListCount));
     }
 
-    async getTeamDetails(id: number): Promise<TeamMemberDetailResponse> {
+    async getTeamDetails(accountId: number, id: number): Promise<TeamMemberDetailResponse> {
         /*
             Get from a team:
             - team name, activity area, team creation date, code, introduction
@@ -159,10 +198,22 @@ export class MemberTeamService {
             Get fromt team invitations:
             - member id, Invitation status, member name, member contact
          */
+        const member = await this.checkExistMember(accountId);
         const team = await this.prismaService.team.findUnique({
             where: {
                 id,
                 isActive: true,
+                OR: [
+                    { leaderId: member.id },
+                    {
+                        members: {
+                            some: {
+                                memberId: member.id,
+                                isActive: true,
+                            },
+                        },
+                    },
+                ],
             },
             select: {
                 code: {
