@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, CodeType, MemberLevel, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
@@ -14,6 +14,7 @@ import { AccountMemberUpsertHSTCertificateRequest } from './request/account-memb
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
+import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -260,6 +261,7 @@ export class AccountMemberService {
 
         await this.prismaService.member.update({
             data: {
+                name: body.name,
                 desiredSalary: body.desiredSalary,
                 codeId: body.occupation,
             },
@@ -269,7 +271,37 @@ export class AccountMemberService {
         });
     }
 
+    async changePassword(accountId: number, body: AccountMemberChangePasswordRequest): Promise<void> {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                isActive: true,
+                id: accountId,
+            },
+        });
+        if (!account) throw new BadRequestException('Account does not exist');
+
+        const passwordMatch = await compare(account.password, account.password);
+        if (!passwordMatch) throw new BadRequestException('Current password does not match');
+        await this.prismaService.account.update({
+            data: {
+                password: await hash(body.newPassword, 10),
+            },
+            where: {
+                isActive: true,
+                id: accountId,
+            },
+        });
+    }
+
     async upsertBankAccount(id: number, request: AccountMemberUpsertBankAccountRequest): Promise<void> {
+        const bankNameExist = await this.prismaService.bank.count({
+            where: {
+                isActive: true,
+                name: request.bankName,
+            },
+        });
+        if (!bankNameExist) throw new BadRequestException('Bank name does not exist');
+
         await this.prismaService.member.update({
             where: { accountId: id },
             data: {

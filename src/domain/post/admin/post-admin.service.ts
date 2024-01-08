@@ -128,6 +128,7 @@ export class PostAdminService {
                         personInCharge: true,
                     },
                 },
+                status: true,
                 isPulledUp: true,
                 isHidden: true,
             },

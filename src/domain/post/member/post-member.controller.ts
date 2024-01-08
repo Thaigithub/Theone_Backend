@@ -1,5 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -13,10 +12,6 @@ import { PostMemberGetListResponse } from './response/post-member-get-list.respo
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
 @Controller('/member/posts')
-@ApiTags('[MEMBER] Post management')
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class PostMemberController {
     constructor(private postMemberService: PostMemberService) {}
 
@@ -38,11 +33,6 @@ export class PostMemberController {
 
     // Get list all
     @Get()
-    @ApiOperation({
-        summary: 'Get list of posts',
-        description: 'Member can retrieve all posts',
-    })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getList(
         @Query() query: PostMemberGetListRequest,
         @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
@@ -64,11 +54,6 @@ export class PostMemberController {
 
     // Get list by site id
     @Get('sites/:id')
-    @ApiOperation({
-        summary: 'Get list of posts by siteId',
-        description: 'Member can retrieve all posts related to a site',
-    })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListPostsBySite(
         @Param('id', ParseIntPipe) siteId: number,
         @Query() query: PostMemberGetListRequest,
@@ -91,12 +76,6 @@ export class PostMemberController {
 
     // Get detail
     @Get(':id')
-    @ApiOperation({
-        summary: 'Get post information detail',
-        description: 'Member can retrieve information detail of certain post',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: PostMemberGetDetailResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
@@ -105,16 +84,9 @@ export class PostMemberController {
     }
 
     // Apply
-
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    @Post('/:id/apply/member')
-    @ApiOperation({
-        summary: 'Apply a post',
-        description: "This endpoint add a post to request's member apply list in the system.",
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
+    @Post(':id/apply/member')
     async addApplyPostMember(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -138,12 +110,6 @@ export class PostMemberController {
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/:id/interest')
-    @ApiOperation({
-        summary: 'Add interest post',
-        description: "This endpoint add a post to request's member interest list in the system.",
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: PostMemberUpdateInterestResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async addInterestPost(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,

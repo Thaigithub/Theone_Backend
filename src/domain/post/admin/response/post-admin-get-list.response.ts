@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Post, PostStatus, PostType } from '@prisma/client';
+import { Post } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class PostAdminSiteResponse {
@@ -19,34 +19,22 @@ export class PostAdminSiteResponse {
     address: string;
 }
 export class PostAdminResponse {
-    @ApiProperty({ type: 'string' })
     name: Post['name'];
-    @ApiProperty({ type: 'enum', enum: PostType })
     type: Post['type'];
-    @ApiProperty({ type: 'boolean' })
     isHidden: Post['isHidden'];
-    @ApiProperty({ type: PostAdminSiteResponse })
     site: PostAdminSiteResponse;
+    status: Post['status'];
+    isPulledUp: Post['isPulledUp'];
 }
 
 export class ApplicationAdminSiteResponse {
-    @ApiProperty({ type: 'string' })
     name: string;
 }
 export class ApplicationAdminResponse {
-    @ApiProperty({ type: ApplicationAdminSiteResponse })
     site: ApplicationAdminSiteResponse;
-
-    @ApiProperty({ type: 'string' })
     name: Post['name'];
-
-    @ApiProperty({ type: Number })
     countApplication: number;
-
-    @ApiProperty({ type: Date })
     startDate: Post['startDate'];
-
-    @ApiProperty({ type: 'enum', enum: PostStatus })
     status: Post['status'];
 }
 

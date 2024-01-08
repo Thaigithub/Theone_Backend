@@ -15,6 +15,7 @@ import { AccountMemberUpsertHSTCertificateRequest } from './request/account-memb
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
+import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
@@ -43,6 +44,16 @@ export class AccountMemberController {
         @Body() body: AccountMemberUpdateRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
+    }
+
+    @Patch('password')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    async changePassword(
+        @Req() request: AccountIdExtensionRequest,
+        @Body() body: AccountMemberChangePasswordRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.accountMemberService.changePassword(request.user.accountId, body));
     }
 
     @Put('/bank-account')
