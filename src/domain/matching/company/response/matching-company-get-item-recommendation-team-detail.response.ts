@@ -4,7 +4,7 @@ export class TeamMemberDetail {
     contact: string;
     totalYears: number;
     totalMonths: number;
-    occupation: string;
+    desiredOccupations: string[];
     workingStatus: string;
 }
 

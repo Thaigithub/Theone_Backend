@@ -52,7 +52,7 @@ export class MemberCompanyManpowerGetDetailResponse {
     email: Member['email'];
 
     @ApiProperty({ type: 'string' })
-    occupation: Code['codeName'];
+    desiredOccupations: Code['codeName'][];
 
     @ApiProperty({ type: 'string' })
     desiredSalary: Member['desiredSalary'];

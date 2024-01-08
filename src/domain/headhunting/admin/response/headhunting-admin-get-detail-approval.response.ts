@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HeadhuntingAdminGetDetailApprovalRank } from '../dto/headhunting-admin-get-detail-approval-rank.enum';
 import { HeadhuntingAdminGetDetailApprovalGeneral } from './headhunting-admin-get-detail-approval-general.response';
+import { Code } from '@prisma/client';
 
 export class HeadhuntingGetDetailApprovalMemberResponse {
     @ApiProperty()
@@ -16,7 +17,7 @@ export class HeadhuntingGetDetailApprovalMemberResponse {
     contact: string;
 
     @ApiProperty()
-    occupation: string;
+    desiredOccupations: Code['codeName'][];
 
     @ApiProperty()
     address: string;

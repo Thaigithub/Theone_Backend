@@ -17,7 +17,7 @@ export class ApplicationCompanyGetMemberDetail {
         englishName: string;
         koreanName: string;
     };
-    occupation: Code['codeName'];
+    desiredOccupations: Code['codeName'][];
     account: ApplicationCompanyMemberDetailAccountDTO;
     career: ApplicationCompanyMemberDetailCareerDTO[];
     certificates: ApplicationCompanyMemberDetailCertificatesDTO[];

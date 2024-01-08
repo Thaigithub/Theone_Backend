@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ArrayUnique, IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AccountMemberUpdateRequest {
     @IsString()
@@ -12,8 +12,10 @@ export class AccountMemberUpdateRequest {
     @Expose()
     desiredSalary: number;
 
-    @IsNumber()
+    @IsArray()
+    @ArrayUnique()
+    @IsNumber({}, { each: true })
     @IsOptional()
     @Expose()
-    occupation: number;
+    desiredOccupations: number[];
 }

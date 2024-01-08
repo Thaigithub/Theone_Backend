@@ -196,7 +196,7 @@ export class RecommendationCompanyService {
 
             if (!applicant) throw new BadRequestException('No applicant found');
 
-            return await this.prismaService.team.findUnique({
+            const team = await this.prismaService.team.findUnique({
                 where: {
                     id: applicantId,
                     isActive: true,
@@ -229,7 +229,15 @@ export class RecommendationCompanyService {
                                 select: {
                                     name: true,
                                     contact: true,
-                                    desiredOccupation: true,
+                                    desiredOccupations: {
+                                        select: {
+                                            code: {
+                                                select: {
+                                                    codeName: true,
+                                                },
+                                            },
+                                        },
+                                    },
                                     totalExperienceYears: true,
                                     totalExperienceMonths: true,
                                 },
@@ -250,6 +258,25 @@ export class RecommendationCompanyService {
                     },
                 },
             });
+
+            const { members, ...rest } = team;
+            return {
+                ...rest,
+                members: members.map((item) => {
+                    const desiredOccupations = item.member.desiredOccupations;
+                    return {
+                        name: item.member.name,
+                        contact: item.member.contact,
+                        totalExperienceYears: item.member.totalExperienceYears,
+                        totalExperienceMonths: item.member.totalExperienceMonths,
+                        desiredOccupations: desiredOccupations
+                            ? desiredOccupations.map((item) => {
+                                  return item.code.codeName;
+                              })
+                            : [],
+                    };
+                }),
+            };
         }
     }
 }

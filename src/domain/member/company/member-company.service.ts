@@ -38,8 +38,12 @@ export class MemberCompanyService {
                 {
                     OR: query.keyword && [
                         {
-                            desiredOccupation: {
-                                codeName: { contains: query.keyword, mode: 'insensitive' },
+                            desiredOccupations: {
+                                some: {
+                                    code: {
+                                        codeName: { contains: query.keyword, mode: 'insensitive' },
+                                    },
+                                },
                             },
                         },
                         {
@@ -80,7 +84,11 @@ export class MemberCompanyService {
                     ],
                 },
                 {
-                    desiredOccupation: query.occupationList && { id: { in: occupationList } },
+                    desiredOccupations: {
+                        some: {
+                            code: query.occupationList && { id: { in: occupationList } },
+                        },
+                    },
                 },
                 {
                     OR: [
@@ -107,7 +115,11 @@ export class MemberCompanyService {
     async getList(query: MemberCompanyManpowerGetListRequest): Promise<ManpowerListMembersResponse[]> {
         const members = await this.prismaService.member.findMany({
             include: {
-                desiredOccupation: true,
+                desiredOccupations: {
+                    include: {
+                        code: true,
+                    },
+                },
                 certificates: true,
                 specialLicenses: true,
                 applyPosts: {
@@ -142,7 +154,11 @@ export class MemberCompanyService {
                 name: item.name,
                 contact: item.contact,
                 desiredSalary: item.desiredSalary,
-                occupation: item.desiredOccupation && item.desiredOccupation.codeName,
+                desiredOccupations: item.desiredOccupations
+                    ? item.desiredOccupations.map((item) => {
+                          return item.code.codeName;
+                      })
+                    : [],
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
                 isWorking,
@@ -222,9 +238,13 @@ export class MemberCompanyService {
                         file: true,
                     },
                 },
-                desiredOccupation: {
+                desiredOccupations: {
                     select: {
-                        codeName: true,
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
                     },
                 },
             },
@@ -240,7 +260,11 @@ export class MemberCompanyService {
                       };
                   })
                 : [],
-            occupation: application.desiredOccupation ? application.desiredOccupation.codeName : null,
+            desiredOccupations: application.desiredOccupations
+                ? application.desiredOccupations.map((item) => {
+                      return item.code.codeName;
+                  })
+                : [null],
             basicHealthSafetyCertificate: application.basicHealthSafetyCertificate
                 ? {
                       file: {
@@ -294,7 +318,11 @@ export class MemberCompanyService {
                         },
                     },
                 },
-                desiredOccupation: true,
+                desiredOccupations: {
+                    include: {
+                        code: true,
+                    },
+                },
                 career: true,
                 certificates: {
                     include: {
@@ -329,7 +357,11 @@ export class MemberCompanyService {
             username: member.account.username,
             contact: member.contact,
             email: member.email,
-            occupation: member.desiredOccupation ? member.desiredOccupation.codeName : null,
+            desiredOccupations: member.desiredOccupations
+                ? member.desiredOccupations.map((item) => {
+                      return item.code.codeName;
+                  })
+                : [],
             desiredSalary: member.desiredSalary,
             districtEnglishName: member.district ? member.district.englishName : null,
             districtKoreanName: member.district ? member.district.koreanName : null,

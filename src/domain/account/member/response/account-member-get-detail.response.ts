@@ -42,10 +42,10 @@ export class AccountMemberGetDetailResponse {
         username: Account['username'];
         status: Account['status'];
     };
-    desiredOccupation: {
+    desiredOccupations: {
         codeName: Code['codeName'];
         id: Code['id'];
-    };
+    }[];
     createdAt: Member['createdAt'];
     level: MemberLevel;
     signupMethod: SignupMethodType;
