@@ -521,7 +521,7 @@ export class BannerAdminService {
         return new PaginationResponse(search, new PageInfo(total));
     }
     async getDetailCompanyPostBanner(id: number): Promise<BannerAdminGetDetailCompanyJobPostResponse> {
-        const count = await this.prismaService.banner.count({ where: { id } });
+        const count = await this.prismaService.companyPostBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
         const banner = await this.prismaService.postBanner.findUnique({
             where: { id },
@@ -532,13 +532,13 @@ export class BannerAdminService {
                         site: {
                             select: {
                                 name: true,
+                                personInCharge: true,
                             },
                         },
                         company: {
                             select: {
                                 id: true,
                                 name: true,
-                                presentativeName: true,
                             },
                         },
                     },
@@ -559,6 +559,8 @@ export class BannerAdminService {
                 },
                 companyPostBanner: {
                     select: {
+                        title: true,
+                        detail: true,
                         desiredStartDate: true,
                         desiredEndDate: true,
                         requestDate: true,
@@ -575,13 +577,15 @@ export class BannerAdminService {
                 type: banner.banner.file.type,
                 size: Number(banner.banner.file.size),
             },
+            title: banner.companyPostBanner.title,
+            detail: banner.companyPostBanner.detail,
             bannerStatus: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
             siteName: banner.post.site ? banner.post.site.name : null,
             companyId: banner.post.company.id,
             companyName: banner.post.company.name,
-            presentativeName: banner.post.company.presentativeName,
+            personInCharge: banner.post.site.personInCharge,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,
@@ -720,7 +724,7 @@ export class BannerAdminService {
         return new PaginationResponse(search, new PageInfo(total));
     }
     async getDetailSiteBanner(id: number): Promise<BannerAdminGetDetailSiteResponse> {
-        const count = await this.prismaService.banner.count({ where: { id } });
+        const count = await this.prismaService.siteBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
         const banner = await this.prismaService.banner.findUnique({
             where: { id },
@@ -744,16 +748,18 @@ export class BannerAdminService {
                         siteId: true,
                         site: {
                             select: {
+                                personInCharge: true,
                                 name: true,
                                 companyId: true,
                                 company: {
                                     select: {
                                         name: true,
-                                        presentativeName: true,
                                     },
                                 },
                             },
                         },
+                        title: true,
+                        detail: true,
                     },
                 },
             },
@@ -770,12 +776,14 @@ export class BannerAdminService {
             siteName: banner.siteBanner.site.name,
             companyId: banner.siteBanner.site.companyId,
             companyName: banner.siteBanner.site.company.name,
-            presentativeName: banner.siteBanner.site.company.presentativeName,
+            personInCharge: banner.siteBanner.site.personInCharge,
             desiredStartDate: banner.siteBanner.desiredStartDate,
             desiredEndDate: banner.siteBanner.desiredEndDate,
             acceptDate: banner.siteBanner.acceptDate,
             requestDate: banner.siteBanner.requestDate,
             requestStatus: banner.siteBanner.status,
+            title: banner.siteBanner.title,
+            detail: banner.siteBanner.detail,
         };
     }
     async updateSiteBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
