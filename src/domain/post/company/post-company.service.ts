@@ -84,7 +84,7 @@ export class PostCompanyService {
             throw new BadRequestException('Site does not found');
         }
 
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
+        await this.checkCodeType(request.specialOccupationId, CodeType.SPECIAL);
         await this.checkCodeType(request.occupationId, CodeType.GENERAL);
 
         //Modified Time to timestampz
@@ -102,7 +102,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeople: request.numberOfPeople,
-                ...(request.specialNoteId && { specialNoteId: request.specialNoteId }),
+                ...(request.specialOccupationId && { specialOccupationId: request.specialOccupationId }),
                 ...(request.occupationId && { occupationId: request.occupationId }),
                 otherInformation: request.otherInformation || '',
                 salaryType: request.salaryType,
@@ -164,7 +164,7 @@ export class PostCompanyService {
             throw new BadRequestException('Site does not found');
         }
 
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
+        await this.checkCodeType(request.specialOccupationId, CodeType.SPECIAL);
         await this.checkCodeType(request.occupationId, CodeType.GENERAL);
 
         //Modified Time to timestampz
@@ -187,7 +187,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeople: request.numberOfPeople,
-                specialOccupationId: request.specialNoteId || null,
+                specialOccupationId: request.specialOccupationId || null,
                 occupationId: request.occupationId || null,
                 otherInformation: request.otherInformation,
                 salaryType: request.salaryType,

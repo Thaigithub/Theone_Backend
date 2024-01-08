@@ -2,9 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InterviewStatus, PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { ChangeApplicationStatus } from './enum/application-member-change-status.enum';
 import { ApplicationMemberGetListOfferFilter } from './enum/application-member-get-list-offer-filter.enum';
 import { OfferType } from './enum/application-member-get-list-offer-type.enum';
+import { ApplicationMemberStatus } from './enum/application-member-status.enum';
 import { ApplicationMemberGetListOfferRequest } from './request/application-member-get-list-offer.request';
 import { ApplicationMemberGetListRequest } from './request/application-member-get-list.request';
 import { ApplicationMemberGetDetailResponse } from './response/application-member-get-detail.response';
@@ -30,9 +32,39 @@ export class ApplicationMemberService {
                 },
             })
         ).teams.map((item) => item.teamId);
+        const status =
+            query.status === ApplicationMemberStatus.FAIL
+                ? {
+                      status: PostApplicationStatus.REJECT_BY_COMPANY,
+                      interview: {
+                          interviewStatus: InterviewStatus.FAIL,
+                      },
+                  }
+                : query.status === ApplicationMemberStatus.PASS
+                  ? {
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                        interview: {
+                            interviewStatus: InterviewStatus.PASS,
+                        },
+                    }
+                  : query.status === ApplicationMemberStatus.APPLY
+                    ? {
+                          status: PostApplicationStatus.APPLY,
+                          interview: null,
+                      }
+                    : query.status === ApplicationMemberStatus.PROPOSAL_INTERVIEW
+                      ? {
+                            status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            interview: {
+                                isNot: null,
+                            },
+                        }
+                      : {
+                            status: undefined,
+                            interview: undefined,
+                        };
         const search = {
-            skip: query.pageNumber && (parseInt(query.pageNumber) - 1) * parseInt(query.pageSize),
-            take: query.pageSize && parseInt(query.pageSize),
+            ...QueryPagingHelper.queryPaging(query),
             where: {
                 OR: [
                     {
@@ -41,7 +73,7 @@ export class ApplicationMemberService {
                                 id,
                             },
                         },
-                        status: query.status,
+                        ...status,
                         assignedAt: {
                             gt: query.startDate && new Date(query.startDate),
                             lt: query.endDate && new Date(query.endDate),
@@ -53,7 +85,11 @@ export class ApplicationMemberService {
                                 in: teams,
                             },
                         },
-                        status: query.status,
+                        ...status,
+                        assignedAt: {
+                            gt: query.startDate && new Date(query.startDate),
+                            lt: query.endDate && new Date(query.endDate),
+                        },
                     },
                 ],
             },
