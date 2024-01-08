@@ -58,6 +58,13 @@ export class BannerAdminService {
             where: {
                 banner: {
                     isActive: true,
+                    status: query.status,
+                },
+                startDate: query.startDate && new Date(query.startDate),
+                endDate: query.endDate && new Date(query.endDate),
+                title: {
+                    contains: query.keyword,
+                    mode: Prisma.QueryMode.insensitive,
                 },
             },
             ...QueryPagingHelper.queryPaging(query),
@@ -232,8 +239,17 @@ export class BannerAdminService {
                 postBanner: {
                     banner: {
                         isActive: true,
+                        status: query.status,
+                    },
+                    post: {
+                        name: {
+                            contains: query.keyword,
+                            mode: Prisma.QueryMode.insensitive,
+                        },
                     },
                 },
+                startDate: query.startDate && new Date(query.startDate),
+                endDate: query.endDate && new Date(query.endDate),
             },
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -403,6 +419,7 @@ export class BannerAdminService {
     }
     // COMPANY POST BANNER
     async getCompanyPostBanner(query: BannerAdminGetCompanyJobPostRequest): Promise<BannerAdminGetCompanyJobPostResponse> {
+        console.log(query);
         const querySearch = {
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -436,78 +453,50 @@ export class BannerAdminService {
             orderBy: {
                 priority: Prisma.SortOrder.asc,
             },
+            where: {
+                postBanner: {
+                    banner: {
+                        isActive: true,
+                    },
+                },
+                requestDate: query.requestDate && new Date(query.requestDate),
+            },
         };
         if (query.searchKeyword !== undefined) {
             switch (query.searchCategory) {
                 case PostSearchCaterory.COMPANY: {
-                    query['where'] = {
-                        postBanner: {
-                            post: {
-                                company: {
-                                    name: {
-                                        contains: query.searchKeyword,
-                                    },
-                                },
-                            },
-                            banner: {
-                                isActive: true,
+                    querySearch.where.postBanner['post'] = {
+                        company: {
+                            name: {
+                                contains: query.searchKeyword,
+                                mode: Prisma.QueryMode.insensitive,
                             },
                         },
                     };
                     break;
                 }
                 case PostSearchCaterory.POST: {
-                    query['where'] = {
-                        postBanner: {
-                            post: {
-                                name: {
-                                    contains: query.searchKeyword,
-                                },
-                            },
-                            banner: {
-                                isActive: true,
-                            },
+                    querySearch.where.postBanner['post'] = {
+                        name: {
+                            contains: query.searchKeyword,
+                            mode: Prisma.QueryMode.insensitive,
                         },
                     };
                     break;
                 }
                 case PostSearchCaterory.SITE: {
-                    query['where'] = {
-                        postBanner: {
-                            post: {
-                                site: {
-                                    name: {
-                                        contains: query.searchKeyword,
-                                    },
-                                },
-                            },
-                            banner: {
-                                isActive: true,
+                    querySearch.where.postBanner['post'] = {
+                        site: {
+                            name: {
+                                contains: query.searchKeyword,
+                                mode: Prisma.QueryMode.insensitive,
+                                not: null,
                             },
                         },
                     };
                     break;
                 }
-                default: {
-                    querySearch['where'] = {
-                        postbanner: {
-                            banner: {
-                                isActive: true,
-                            },
-                        },
-                    };
-                }
             }
-        }
-        if (query.requestStartDate !== undefined) {
-            querySearch['where']['requestDate'] = {
-                gt: new Date(query.requestStartDate),
-            };
-        }
-        if (query.requestEndDate !== undefined) {
-            querySearch['where']['requestDate'] = {
-                lt: new Date(query.requestEndDate),
-            };
         }
         const search = (await this.prismaService.companyPostBanner.findMany(querySearch)).map((item) => {
             return {
@@ -543,13 +532,13 @@ export class BannerAdminService {
                         site: {
                             select: {
                                 name: true,
-                                company: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        presentativeName: true,
-                                    },
-                                },
+                            },
+                        },
+                        company: {
+                            select: {
+                                id: true,
+                                name: true,
+                                presentativeName: true,
                             },
                         },
                     },
@@ -589,10 +578,10 @@ export class BannerAdminService {
             bannerStatus: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
-            siteName: banner.post.site.name,
-            companyId: banner.post.site.company.id,
-            companyName: banner.post.site.company.name,
-            presentativeName: banner.post.site.company.presentativeName,
+            siteName: banner.post.site ? banner.post.site.name : null,
+            companyId: banner.post.company.id,
+            companyName: banner.post.company.name,
+            presentativeName: banner.post.company.presentativeName,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,

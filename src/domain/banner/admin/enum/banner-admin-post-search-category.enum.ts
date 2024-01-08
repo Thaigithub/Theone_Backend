@@ -1,5 +1,5 @@
 export enum PostSearchCaterory {
-    COMPANY,
-    SITE,
-    POST,
+    COMPANY = 'COMPANY',
+    SITE = 'SITE',
+    POST = 'POST',
 }
