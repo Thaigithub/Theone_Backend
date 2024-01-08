@@ -1,4 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { AccountType } from '@prisma/client';
+import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
+import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { FileUploadRequest } from 'domain/file/request/file-upload.request';
 import { GetSignedUrlResponse } from 'services/storage/response/get-signed-url.response';
 import { DomainType, StorageService } from 'services/storage/storage.service';
@@ -8,6 +11,8 @@ import { BaseResponse } from 'utils/generics/base.response';
 export class FileMemberController {
     constructor(private readonly storageService: StorageService) {}
 
+    @Roles(AccountType.COMPANY)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Get('/get-signed-url-to-upload')
     async generateSignedUrlToUploadForMember(@Query() query: FileUploadRequest): Promise<BaseResponse<GetSignedUrlResponse>> {
         try {
