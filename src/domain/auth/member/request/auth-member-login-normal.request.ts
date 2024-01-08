@@ -4,9 +4,9 @@ import { IsString } from 'class-validator';
 export class AuthMemberLoginRequest {
     @Expose()
     @IsString()
-    public username: string;
+    username: string;
 
     @Expose()
     @IsString()
-    public password: string;
+    password: string;
 }

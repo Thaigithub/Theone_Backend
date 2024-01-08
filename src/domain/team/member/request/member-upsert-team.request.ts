@@ -6,32 +6,32 @@ export class MemberCreateTeamRequest {
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: 'Team A' })
-    public teamName: string;
+    teamName: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: 'Team A introduction' })
-    public introduction: string;
+    introduction: string;
 
     @Expose()
     @IsNumber()
     @ApiProperty({ type: Number })
-    public codeId: number;
+    codeId: number;
 
     @Expose()
     @IsNumber()
     @ApiProperty({ type: Number, example: 1 })
-    public dictrictId: number;
+    dictrictId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: '12345' })
-    public sequenceDigit: string;
+    sequenceDigit: string;
 }
 
 export class MemberUpdateExposureStatusTeamRequest {
     @Expose()
     @IsBoolean()
     @ApiProperty({ type: Boolean, example: true })
-    public exposureStatus: boolean;
+    exposureStatus: boolean;
 }

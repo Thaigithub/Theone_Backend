@@ -16,7 +16,7 @@ export class SiteEvaluationAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsBooleanString()
     @IsOptional()
-    public isHighestRating: string;
+    isHighestRating: string;
 
     @ApiProperty({
         type: 'enum',
@@ -26,7 +26,7 @@ export class SiteEvaluationAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(SiteEvaluationSearchCategory)
     @IsOptional()
-    public searchCategory: SiteEvaluationSearchCategory;
+    searchCategory: SiteEvaluationSearchCategory;
 
     @ApiProperty({
         type: 'string',
@@ -35,5 +35,5 @@ export class SiteEvaluationAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 }

@@ -15,6 +15,7 @@ export class AdminAuthService {
         private prismaService: PrismaService,
         private jwtService: JwtService,
     ) {}
+
     async login(loginData: AuthAdminLoginRequest): Promise<AuthAdminLoginResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {

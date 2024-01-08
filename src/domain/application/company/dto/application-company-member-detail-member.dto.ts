@@ -7,13 +7,13 @@ import { ApplicationCompanyMemberDetailSpecialDTO } from './application-company-
 
 export class ApplicationCompantMemberDetailMemberDTO {
     @ApiProperty({ example: 'Dewon Kim' })
-    public name: string;
+    name: string;
 
     @ApiProperty({ example: '010-0000-0000' })
-    public contact: string;
+    contact: string;
 
     @ApiProperty({ example: 'theone@gmail.com' })
-    public email: string;
+    email: string;
 
     @ApiProperty({
         type: 'object',
@@ -22,7 +22,7 @@ export class ApplicationCompantMemberDetailMemberDTO {
             koreanName: '근무지원내역',
         },
     })
-    public city: {
+    city: {
         englishName: string;
         koreanName: string;
     };
@@ -34,23 +34,23 @@ export class ApplicationCompantMemberDetailMemberDTO {
             koreanName: '근무지원내역',
         },
     })
-    public district: {
+    district: {
         englishName: string;
         koreanName: string;
     };
 
     @ApiProperty({ type: ApplicationCompanyMemberDetailAccountDTO })
-    public account: ApplicationCompanyMemberDetailAccountDTO;
+    account: ApplicationCompanyMemberDetailAccountDTO;
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailCareerDTO] })
-    public career: ApplicationCompanyMemberDetailCareerDTO[];
+    career: ApplicationCompanyMemberDetailCareerDTO[];
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailCertificatesDTO] })
-    public certificates: ApplicationCompanyMemberDetailCertificatesDTO[];
+    certificates: ApplicationCompanyMemberDetailCertificatesDTO[];
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailSpecialDTO] })
-    public specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];
+    specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];
 
     @ApiProperty({ type: ApplicationCompanyMemberDetailBHSCerDTO })
-    public basicHealthSafetyCertificate: ApplicationCompanyMemberDetailBHSCerDTO;
+    basicHealthSafetyCertificate: ApplicationCompanyMemberDetailBHSCerDTO;
 }

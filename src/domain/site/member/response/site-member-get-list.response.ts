@@ -28,16 +28,16 @@ export class SiteResponse {
     countPost: number;
 
     @ApiProperty({ type: 'string', example: 'File name' })
-    public logoFileName: string;
+    logoFileName: string;
 
     @ApiProperty({ type: 'string', example: 'File key' })
-    public logoFileKey: string;
+    logoFileKey: string;
 
     @ApiProperty({ type: 'string', example: 'File type' })
-    public logoFileType: string;
+    logoFileType: string;
 
     @ApiProperty({ type: BigInt, example: 'File size' })
-    public logoFileSize: bigint;
+    logoFileSize: bigint;
 }
 
 export class SiteMemberGetListResponse extends PaginationResponse<SiteResponse> {}

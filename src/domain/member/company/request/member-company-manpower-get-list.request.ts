@@ -11,7 +11,7 @@ export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'array',
@@ -24,7 +24,7 @@ export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public experienceTypeList: string[];
+    experienceTypeList: string[];
 
     @ApiProperty({
         type: 'array',
@@ -37,7 +37,7 @@ export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public occupationList: string[];
+    occupationList: string[];
 
     @ApiProperty({
         type: 'array',
@@ -50,5 +50,5 @@ export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public districtList: string[];
+    districtList: string[];
 }

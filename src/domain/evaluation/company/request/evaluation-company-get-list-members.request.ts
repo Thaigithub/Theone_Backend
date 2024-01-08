@@ -13,5 +13,5 @@ export class EvaluationCompanyGetListMembersRequest extends EvaluationCompanyGet
     @Expose()
     @IsEnum(MemberSearchCategory)
     @IsOptional()
-    public searchCategory: MemberSearchCategory;
+    searchCategory: MemberSearchCategory;
 }

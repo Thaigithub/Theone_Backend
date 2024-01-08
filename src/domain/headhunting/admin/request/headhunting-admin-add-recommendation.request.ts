@@ -6,22 +6,22 @@ export class HeadhuntingAdminAddMemberRecommendationRequest {
     @ApiProperty({})
     @IsNumber()
     @Expose()
-    public requestId: number;
+    requestId: number;
 
     @ApiProperty({})
     @IsNumber()
     @Expose()
-    public memberId: number;
+    memberId: number;
 }
 
 export class HeadhuntingAdminAddTeamRecommendationRequest {
     @ApiProperty({})
     @IsNumber()
     @Expose()
-    public requestId: number;
+    requestId: number;
 
     @ApiProperty({})
     @IsNumber()
     @Expose()
-    public teamId: number;
+    teamId: number;
 }

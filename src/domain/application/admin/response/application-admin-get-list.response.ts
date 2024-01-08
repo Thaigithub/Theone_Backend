@@ -1,23 +1,23 @@
-import { InterviewStatus, Member } from '@prisma/client';
+import { Application, City, District, InterviewStatus, Member } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ApplicationAdminResponse {
     name: string;
-    contact: string;
+    contact: Member['contact'];
     isTeam: boolean;
     city: {
-        englishName: string;
-        koreanName: string;
+        englishName: City['englishName'];
+        koreanName: City['koreanName'];
     };
     district: {
-        englishName: string;
-        koreanName: string;
+        englishName: District['englishName'];
+        koreanName: District['koreanName'];
     };
     address: string;
-    totalExperienceYears: number;
-    totalExperienceMonths: number;
+    totalExperienceYears: Member['totalExperienceYears'];
+    totalExperienceMonths: Member['totalExperienceMonths'];
     desiredSalary: Member['desiredSalary'];
-    assignedAt: Date;
+    assignedAt: Application['assignedAt'];
     interviewStatus: InterviewStatus;
 }
 

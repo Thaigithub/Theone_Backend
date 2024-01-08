@@ -18,12 +18,12 @@ export class PostAdminModifyPullUpRequest {
     @Expose()
     @IsBoolean()
     @ApiProperty({ type: Boolean, example: true })
-    public isPulledUp: boolean;
+    isPulledUp: boolean;
 
     @Expose()
     @IsArray()
     @ApiProperty({ type: Array })
-    public ids: number[];
+    ids: number[];
 }
 
 export class PostAdminModifyHiddenRequest {
@@ -31,7 +31,7 @@ export class PostAdminModifyHiddenRequest {
     @IsBoolean()
     @ApiProperty({ type: Boolean })
     @IsOptional()
-    public isHidden: boolean;
+    isHidden: boolean;
 }
 
 export class PostAdminModifyPostTypeRequest {
@@ -43,12 +43,12 @@ export class PostAdminModifyPostTypeRequest {
         enum: PostType,
         example: PostType.PREMIUM,
     })
-    public type: PostType;
+    type: PostType;
 
     @Expose()
     @IsArray()
     @ApiProperty({ type: Array })
-    public ids: number[];
+    ids: number[];
 }
 
 export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
@@ -60,7 +60,7 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
         example: PostCategory.GENERAL,
     })
     @IsOptional()
-    public category: PostCategory;
+    category: PostCategory;
 
     @Expose()
     @IsEnum(PostStatus)
@@ -71,7 +71,7 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
         example: PostStatus.PREPARE,
     })
     @IsOptional()
-    public status: PostStatus;
+    status: PostStatus;
 
     @Expose()
     @IsString()
@@ -79,34 +79,34 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
     @Length(1, 50, { message: 'Post name should be maximum 50 characters' })
     @IsNotEmpty({ message: 'Name is required' })
     @IsOptional()
-    public name: string;
+    name: string;
 
     @Expose()
     @IsBoolean()
     @ApiProperty({ type: Boolean })
     @IsOptional()
-    public isHidden: boolean;
+    isHidden: boolean;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: '101-dong, 42 Seolleung-ro 90-gil, Gangnam-gu, Seoul' })
     @IsNotEmpty({ message: 'Work Location is required' })
     @IsOptional()
-    public workLocation: string;
+    workLocation: string;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })
     @IsDateString({ strict: true }, { message: 'Invalid date format' })
     @IsNotEmpty({ message: 'startDate is required' })
     @IsOptional()
-    public startDate: Date;
+    startDate: Date;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })
     @IsDateString({ strict: true }, { message: 'Invalid date format' })
     @IsNotEmpty({ message: 'endDate is required' })
     @IsOptional()
-    public endDate: Date;
+    endDate: Date;
 
     @Expose()
     @IsEnum(ExperienceType)
@@ -116,33 +116,33 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
         example: ExperienceType.REGARDLESS,
     })
     @IsOptional()
-    public experienceType: ExperienceType;
+    experienceType: ExperienceType;
 
     @Expose()
     @ApiProperty({ type: Number, example: 3 })
     @IsNotEmpty({ message: 'Number of people recruited is required' })
     @IsNumber()
     @IsOptional()
-    public numberOfPeople: number;
+    numberOfPeople: number;
 
     @Expose()
     @ApiProperty({ type: Number, example: 1 })
     @IsNumber()
     @IsOptional()
-    public specialNoteId: number;
+    specialNoteId: number;
 
     @Expose()
     @ApiProperty({ type: Number, example: 1 })
     @IsNumber()
     @IsOptional()
-    public occupationId: number;
+    occupationId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: 'abc' })
     @MaxLength(100, { message: 'Other information should have maximum 100 characters' })
     @IsOptional()
-    public otherInformation: string;
+    otherInformation: string;
 
     @Expose()
     @IsEnum(SalaryType)
@@ -151,28 +151,28 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
         enum: SalaryType,
     })
     @IsOptional()
-    public salaryType: SalaryType;
+    salaryType: SalaryType;
 
     @Expose()
     @ApiProperty({ example: 1000 })
     @IsNotEmpty({ message: 'Amount of salary is required' })
     @IsNumber()
     @IsOptional()
-    public salaryAmount: number;
+    salaryAmount: number;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })
     @IsDateString({ strict: true }, { message: 'Invalid date format' })
     @IsNotEmpty({ message: 'Start working date is required' })
     @IsOptional()
-    public startWorkDate: Date;
+    startWorkDate: Date;
 
     @Expose()
     @ApiProperty({ example: 'YYYY-MM-DD' })
     @IsDateString({ strict: true }, { message: 'Invalid date format' })
     @IsNotEmpty({ message: 'End working date is required' })
     @IsOptional()
-    public endWorkDate: Date;
+    endWorkDate: Date;
 
     @Expose()
     @ApiProperty({
@@ -183,68 +183,68 @@ export class PostAdminModifyRequest extends PostAdminModifyPostTypeRequest {
     })
     @IsEnum(Workday, { each: true })
     @IsOptional()
-    public workday: Workday[];
+    workday: Workday[];
 
     @Expose()
     @ApiProperty({ example: '09:00:00', format: 'time' })
     @IsNotEmpty({ message: 'Start working time is required' })
     @IsOptional()
-    public startWorkTime: string;
+    startWorkTime: string;
 
     @Expose()
     @ApiProperty({ example: '18:00:00', format: 'time' })
     @IsNotEmpty({ message: 'End working time is required' })
     @IsOptional()
-    public endWorkTime: string;
+    endWorkTime: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Name of Site' })
     @IsOptional()
-    public siteName: string;
+    siteName: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Ho Chi Minh city' })
     @IsOptional()
-    public siteContact: string;
+    siteContact: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Joe Doe' })
     @IsOptional()
-    public sitePersonInCharge: string;
+    sitePersonInCharge: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @Length(1, 100, { message: 'Original Building name should be maximum 50 characters' })
     @IsOptional()
-    public originalBuilding: string;
+    originalBuilding: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Distric 1, Ho Chi Minh city' })
     @IsOptional()
-    public siteAddress: string;
+    siteAddress: string;
 
     @Expose()
     @ApiProperty({ type: Number, example: 1 })
     @IsNumber()
     @IsOptional()
-    public siteId: number;
+    siteId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Notice Editor' })
     @MaxLength(1000, { message: 'Post name should be maximum 1000 characters' })
     @IsOptional()
-    public postEditor: string;
+    postEditor: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: 'Reason to update notice' })
     @MaxLength(500, { message: 'The reason for updating notice should be maximun 500 characters' })
     @IsOptional()
-    public updateReason: string;
+    updateReason: string;
 }

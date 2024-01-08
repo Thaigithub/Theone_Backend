@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { HeadhuntingAdminGetListApprovalCategory } from '../dto/headhunting-admin-get-list-approval-category.enum';
 import { HeadhuntingAdminGetListApprovalMatching } from '../dto/headhunting-admin-get-list-approval-matching.enum';
 import { HeadhuntingAdminGetListApprovalPayment } from '../dto/headhunting-admin-get-list-approval-payment.enum';
 import { HeadhuntingAdminGetListApprovalStatus } from '../dto/headhunting-admin-get-list-approval-status.enum';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
     @Expose()
@@ -15,7 +15,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public startRecommendationDate: string;
+    startRecommendationDate: string;
 
     @Expose()
     @IsString()
@@ -24,7 +24,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public endRecommendationDate: string;
+    endRecommendationDate: string;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListApprovalStatus)
@@ -34,7 +34,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListApprovalStatus,
         required: false,
     })
-    public requestStatus: HeadhuntingAdminGetListApprovalStatus;
+    requestStatus: HeadhuntingAdminGetListApprovalStatus;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListApprovalMatching)
@@ -44,7 +44,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListApprovalMatching,
         required: false,
     })
-    public matchingStatus: HeadhuntingAdminGetListApprovalMatching;
+    matchingStatus: HeadhuntingAdminGetListApprovalMatching;
 
     @Expose()
     @IsString()
@@ -53,7 +53,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public startMatchingDate: string;
+    startMatchingDate: string;
 
     @Expose()
     @IsString()
@@ -62,7 +62,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public endMatchingDate: string;
+    endMatchingDate: string;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListApprovalPayment)
@@ -72,7 +72,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListApprovalPayment,
         required: false,
     })
-    public paymentStatus: HeadhuntingAdminGetListApprovalPayment;
+    paymentStatus: HeadhuntingAdminGetListApprovalPayment;
 
     @Expose()
     @IsString()
@@ -81,7 +81,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public startPaymentDate: string;
+    startPaymentDate: string;
 
     @Expose()
     @IsString()
@@ -90,7 +90,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public endPaymentDate: string;
+    endPaymentDate: string;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListApprovalCategory)
@@ -100,7 +100,7 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListApprovalCategory,
         required: false,
     })
-    public category: HeadhuntingAdminGetListApprovalCategory;
+    category: HeadhuntingAdminGetListApprovalCategory;
 
     @Expose()
     @IsString()
@@ -109,5 +109,5 @@ export class HeadhuntingAdminGetListApprovalRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public keyword: string;
+    keyword: string;
 }

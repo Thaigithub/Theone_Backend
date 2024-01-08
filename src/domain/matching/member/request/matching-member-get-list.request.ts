@@ -12,5 +12,5 @@ export class MatchingMemberGetListRequest extends PaginationRequest {
         required: false,
     })
     @IsEnum(MatchingMemberGetListCategory)
-    public category: MatchingMemberGetListCategory;
+    category: MatchingMemberGetListCategory;
 }

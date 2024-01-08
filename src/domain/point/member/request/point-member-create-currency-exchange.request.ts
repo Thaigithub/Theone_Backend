@@ -6,15 +6,15 @@ export class PointMemberCreateCurrencyExchangeRequest {
     @Expose()
     @IsNumber()
     @ApiProperty({ type: Number, example: 1 })
-    public bankId: number;
+    bankId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ type: 'string', example: '000-000-000000000' })
-    public bankAccountNumber: string;
+    bankAccountNumber: string;
 
     @Expose()
     @IsNumber()
     @ApiProperty({ type: Number, example: 1 })
-    public currencyExchangePoint: number;
+    currencyExchangePoint: number;
 }

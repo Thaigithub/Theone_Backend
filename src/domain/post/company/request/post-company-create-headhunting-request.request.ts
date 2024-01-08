@@ -11,11 +11,11 @@ export class PostCompanyCreateHeadhuntingRequestRequest {
         enum: RequestObject,
         example: RequestObject.INDIVIDUAL,
     })
-    public object: RequestObject;
+    object: RequestObject;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @IsOptional()
-    public detail: string;
+    detail: string;
 }

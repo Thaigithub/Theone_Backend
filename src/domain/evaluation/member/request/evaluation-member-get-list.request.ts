@@ -13,7 +13,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'enum',
@@ -23,7 +23,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(EvaluationStatus)
     @IsOptional()
-    public status: EvaluationStatus;
+    status: EvaluationStatus;
 
     @ApiProperty({
         type: 'number',
@@ -35,7 +35,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @Min(1)
     @Transform(({ value }) => value && parseInt(value))
     @IsOptional()
-    public score: number;
+    score: number;
 
     @ApiProperty({
         type: 'string',
@@ -48,7 +48,7 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @IsDateString()
     @IsOptional()
     @Expose()
-    public startWorkDate: string;
+    startWorkDate: string;
 
     @ApiProperty({
         type: 'string',
@@ -61,5 +61,5 @@ export class EvaluationMemberGetListRequest extends PaginationRequest {
     @IsDateString()
     @IsOptional()
     @Expose()
-    public endWorkDate: string;
+    endWorkDate: string;
 }

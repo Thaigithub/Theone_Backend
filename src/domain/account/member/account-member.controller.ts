@@ -99,7 +99,7 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.getDetail(request.user.accountId));
     }
 
-    @Patch('cancel-membership')
+    @Patch('/cancel-membership')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async cancelMembership(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {

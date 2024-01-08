@@ -8,14 +8,15 @@ import { ApplicationCompanyService } from './application-company.service';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
-import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
-import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
+import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
+import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-for-post.response';
 
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class ApplicationCompanyController {
     constructor(private applicationCompanyService: ApplicationCompanyService) {}
+
     @Get('/offer/post/:postId')
     async getListOfferForPost(
         @Param('postId', ParseIntPipe) postId: number,
@@ -39,7 +40,7 @@ export class ApplicationCompanyController {
     }
 
     @Patch('/:id/status')
-    async proposeInteview(
+    async updateStatus(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) applicationId: number,
         @Body() body: ApplicationCompanyUpdateStatusRequest,

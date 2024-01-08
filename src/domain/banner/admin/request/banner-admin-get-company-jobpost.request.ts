@@ -13,7 +13,7 @@ export class BannerAdminGetCompanyJobPostRequest extends PaginationRequest {
         type: PostSearchCaterory,
         example: PostSearchCaterory.COMPANY,
     })
-    public searchCategory: PostSearchCaterory;
+    searchCategory: PostSearchCaterory;
 
     @Expose()
     @IsOptional()
@@ -22,7 +22,7 @@ export class BannerAdminGetCompanyJobPostRequest extends PaginationRequest {
         required: false,
         example: 'The one',
     })
-    public searchKeyword: string;
+    searchKeyword: string;
 
     @Expose()
     @IsOptional()

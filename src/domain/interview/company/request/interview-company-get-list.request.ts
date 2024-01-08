@@ -13,7 +13,7 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     })
     @Expose()
     @IsEnum(RequestObject)
-    public object: RequestObject;
+    object: RequestObject;
 
     @ApiProperty({
         type: 'enum',
@@ -24,7 +24,7 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(SupportCategory)
     @IsOptional()
-    public supportCategory: SupportCategory;
+    supportCategory: SupportCategory;
 
     @ApiProperty({
         type: 'string',
@@ -33,7 +33,7 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'string',
@@ -42,7 +42,7 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public interviewRequestStartDate: string;
+    interviewRequestStartDate: string;
 
     @ApiProperty({
         type: 'string',
@@ -51,7 +51,7 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public interviewRequestEndDate: string;
+    interviewRequestEndDate: string;
 
     @ApiProperty({
         type: 'enum',
@@ -62,5 +62,5 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(InterviewStatus)
     @IsOptional()
-    public interviewResult: InterviewStatus;
+    interviewResult: InterviewStatus;
 }

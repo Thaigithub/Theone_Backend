@@ -14,7 +14,7 @@ export class PointAdminGetListRequest extends PaginationRequest {
         required: false,
     })
     @IsOptional()
-    public pointHeld: PointAdminSortCategoryFilter;
+    pointHeld: PointAdminSortCategoryFilter;
 
     @Expose()
     @ApiProperty()
@@ -25,7 +25,7 @@ export class PointAdminGetListRequest extends PaginationRequest {
         enum: PointAdminSearchCategoryFilter,
         required: false,
     })
-    public searchCategory: PointAdminSearchCategoryFilter;
+    searchCategory: PointAdminSearchCategoryFilter;
 
     @Expose()
     @ApiProperty()
@@ -36,5 +36,5 @@ export class PointAdminGetListRequest extends PaginationRequest {
         required: false,
         example: 'Please enter your search term',
     })
-    public searchTerm: string;
+    searchTerm: string;
 }

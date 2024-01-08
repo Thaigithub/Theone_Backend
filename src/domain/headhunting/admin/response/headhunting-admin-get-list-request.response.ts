@@ -4,19 +4,19 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class HeadhuntingAdminGetItemRequestResponse {
     @ApiProperty({ example: 1 })
-    public id: number;
+    id: number;
     @ApiProperty({ example: 'Company name' })
-    public companyName: string;
+    companyName: string;
     @ApiProperty({ example: 'Site name' })
-    public siteName: string;
+    siteName: string;
     @ApiProperty({ example: 'Post name' })
-    public postName: string;
+    postName: string;
     @ApiProperty({ example: 'Object' })
-    public object: string;
+    object: string;
     @ApiProperty({ example: RequestStatus.APPLY })
-    public status: RequestStatus;
+    status: RequestStatus;
     @ApiProperty({ example: '2023-12-18T00:00:00.000Z' })
-    public date: Date;
+    date: Date;
 }
 
 export class HeadhuntingAdminGetListRequestResponse extends PaginationResponse<HeadhuntingAdminGetItemRequestResponse> {}

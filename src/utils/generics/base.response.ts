@@ -7,15 +7,15 @@ export class BaseResponse<T> {
         this.error = error;
     }
 
-    public static of<T>(data: T): BaseResponse<T> {
+    static of<T>(data: T): BaseResponse<T> {
         return new BaseResponse(data, null);
     }
 
-    public static error<T>(error: any): BaseResponse<Nullable<T>> {
+    static error<T>(error: any): BaseResponse<Nullable<T>> {
         return new BaseResponse(null, error);
     }
 
-    public static ok<T>(): BaseResponse<Nullable<T>> {
+    static ok<T>(): BaseResponse<Nullable<T>> {
         return new BaseResponse(null, null);
     }
 }

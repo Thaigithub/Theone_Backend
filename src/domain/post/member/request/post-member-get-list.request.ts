@@ -12,7 +12,7 @@ export class PostMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'enum',
@@ -22,7 +22,7 @@ export class PostMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(PostType)
     @IsOptional()
-    public postType: PostType;
+    postType: PostType;
 
     @ApiProperty({
         type: 'string',
@@ -32,7 +32,7 @@ export class PostMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public occupationList: string[];
+    occupationList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -42,7 +42,7 @@ export class PostMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public constructionMachineryList: string[];
+    constructionMachineryList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -52,7 +52,7 @@ export class PostMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public experienceTypeList: string[];
+    experienceTypeList: string[];
 
     @ApiProperty({
         type: 'string',
@@ -65,5 +65,5 @@ export class PostMemberGetListRequest extends PaginationRequest {
         message: 'The regionList must be in format 00-000 or 00-000,00-000...(5 times)',
     })
     @IsOptional()
-    public regionList: string[];
+    regionList: string[];
 }

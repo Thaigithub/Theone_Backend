@@ -8,29 +8,29 @@ export class AdminCompanyGetListRequest {
     @ApiProperty({ description: 'Company type', example: CompanyType.CORPORATION, type: 'enum', enum: CompanyType })
     @IsEnum(CompanyType)
     @IsOptional()
-    public type: CompanyType;
+    type: CompanyType;
 
     @Expose()
     @IsOptional()
     @IsEnum(SearchCategory)
     @ApiProperty({ description: 'Search Keyword', example: 'NAME', type: 'enum', enum: SearchCategory })
-    public searchCategory: SearchCategory;
+    searchCategory: SearchCategory;
 
     @Expose()
     @IsOptional()
     @IsString()
     @ApiProperty({ description: 'Company name', example: 'TheOne' })
-    public searchKeyword: string;
+    searchKeyword: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
     @ApiProperty({ description: 'Page number', example: '1' })
-    public pageNumber: string;
+    pageNumber: string;
 
     @Expose()
     @IsOptional()
     @IsNumberString()
     @ApiProperty({ description: 'Page size', example: '1' })
-    public pageSize: string;
+    pageSize: string;
 }

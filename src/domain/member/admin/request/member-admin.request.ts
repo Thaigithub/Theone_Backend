@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AccountStatus, MemberLevel } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
-import { searchCategory } from '../dto/member-admin-search-category.request.dto';
 import { PaginationRequest } from 'utils/generics/pagination.request';
+import { searchCategory } from '../dto/member-admin-search-category.request.dto';
 
 class GetMembersListRequest extends PaginationRequest {
     @ApiProperty({
@@ -14,7 +14,7 @@ class GetMembersListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(AccountStatus)
     @IsOptional()
-    public status: AccountStatus;
+    status: AccountStatus;
 
     @ApiProperty({
         type: 'enum',
@@ -24,7 +24,7 @@ class GetMembersListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(MemberLevel)
     @IsOptional()
-    public level: MemberLevel;
+    level: MemberLevel;
 
     @ApiProperty({
         type: 'enum',
@@ -34,7 +34,7 @@ class GetMembersListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(searchCategory)
     @IsOptional()
-    public searchCategory: searchCategory;
+    searchCategory: searchCategory;
 
     @ApiProperty({
         type: 'string',
@@ -43,7 +43,7 @@ class GetMembersListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public searchKeyword: string;
+    searchKeyword: string;
 }
 
 class ChangeMemberRequest {
@@ -55,7 +55,7 @@ class ChangeMemberRequest {
     @Expose()
     @IsOptional()
     @IsEnum(MemberLevel)
-    public level: MemberLevel;
+    level: MemberLevel;
 
     @ApiProperty({
         type: 'enum',
@@ -65,7 +65,7 @@ class ChangeMemberRequest {
     @Expose()
     @IsOptional()
     @IsEnum(AccountStatus)
-    public status: AccountStatus;
+    status: AccountStatus;
 
     @ApiProperty({
         type: 'string',
@@ -74,7 +74,7 @@ class ChangeMemberRequest {
     @Expose()
     @IsOptional()
     @IsString()
-    public message: string;
+    message: string;
 }
 
 class DownloadMembersRequest {
@@ -82,13 +82,13 @@ class DownloadMembersRequest {
     @IsArray({ message: 'memberIds must be an array' })
     @ArrayNotEmpty({ message: 'The array must not be empty' })
     @IsNumberString({}, { each: true, message: 'Each element of the array must be a number' })
-    public memberId: string[];
+    memberId: string[];
 }
 
 class DownloadSingleMemberRequest {
     @Expose()
     @IsNumberString({}, { message: 'Each element of the array must be a number' })
-    public memberId: string;
+    memberId: string;
 }
 
 export { ChangeMemberRequest, DownloadMembersRequest, DownloadSingleMemberRequest, GetMembersListRequest };

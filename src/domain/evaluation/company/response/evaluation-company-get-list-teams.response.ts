@@ -4,25 +4,25 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class TeamEvaluationByCompanyResponse {
     @ApiProperty({ type: 'number' })
-    public id: TeamEvaluationByCompany['id'];
+    id: TeamEvaluationByCompany['id'];
 
     @ApiProperty({ type: 'string' })
-    public teamName: Team['name'];
+    teamName: Team['name'];
 
     @ApiProperty({ type: 'string' })
-    public leaderName: Member['name'];
+    leaderName: Member['name'];
 
     @ApiProperty({ type: 'string' })
-    public leaderContact: Member['contact'];
+    leaderContact: Member['contact'];
 
     @ApiProperty({ type: 'string' })
-    public siteName: Site['name'];
+    siteName: Site['name'];
 
     @ApiProperty({
         type: 'number',
         description: "If score value is null, it means company didn't evaluate that team yet",
     })
-    public score: TeamEvaluationByCompany['score'];
+    score: TeamEvaluationByCompany['score'];
 }
 
 export class EvaluationCompanyGetListTeamsResponse extends PaginationResponse<TeamEvaluationByCompanyResponse> {}

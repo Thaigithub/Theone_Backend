@@ -6,32 +6,32 @@ import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list
 
 export class PostCompanyGetItemHeadhuntingRequestResponse {
     @ApiProperty({ example: 'string' })
-    public name: string;
+    name: string;
 
     @ApiProperty({
         type: 'enum',
         enum: PostStatus,
         example: PostStatus.PREPARE,
     })
-    public status: PostStatus;
+    status: PostStatus;
 
     @ApiProperty({
         type: 'Date',
         example: '2023-12-31T23:59:59Z',
     })
-    public startDate: Post['startDate'];
+    startDate: Post['startDate'];
 
     @ApiProperty({
         type: 'Date',
         example: '2023-12-31T23:59:59Z',
     })
-    public endDate: Post['endDate'];
+    endDate: Post['endDate'];
 
     @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
-    public site: PostCompanyGetItemListSiteResponse;
+    site: PostCompanyGetItemListSiteResponse;
 
     @ApiProperty({ type: [PostCompanyGetListHeadhuntingRequestDTO] })
-    public headhuntingRequest: PostCompanyGetListHeadhuntingRequestDTO;
+    headhuntingRequest: PostCompanyGetListHeadhuntingRequestDTO;
 }
 
 export class PostCompanyGetListHeadhuntingRequestResponse extends PaginationResponse<PostCompanyGetItemHeadhuntingRequestResponse> {}

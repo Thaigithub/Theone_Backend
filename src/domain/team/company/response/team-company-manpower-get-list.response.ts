@@ -4,31 +4,31 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ManpowerListTeamsResponse {
     @ApiProperty({ type: 'number' })
-    public id: Team['id'];
+    id: Team['id'];
 
     @ApiProperty({ type: 'string' })
-    public name: Team['name'];
+    name: Team['name'];
 
     @ApiProperty({ type: 'string' })
-    public leaderName: Member['name'];
+    leaderName: Member['name'];
 
     @ApiProperty({ type: 'string' })
-    public leaderContact: Member['contact'];
+    leaderContact: Member['contact'];
 
     @ApiProperty({ type: 'string' })
-    public desiredSalary: Member['desiredSalary'];
+    desiredSalary: Member['desiredSalary'];
 
     @ApiProperty({ type: 'number' })
-    public totalExperienceYears: Member['totalExperienceYears'];
+    totalExperienceYears: Member['totalExperienceYears'];
 
     @ApiProperty({ type: 'number' })
-    public totalExperienceMonths: Member['totalExperienceMonths'];
+    totalExperienceMonths: Member['totalExperienceMonths'];
 
     @ApiProperty({ type: 'string' })
-    public totalMembers: Team['totalMembers'];
+    totalMembers: Team['totalMembers'];
 
     @ApiProperty({ type: 'boolean' })
-    public isWorking: boolean;
+    isWorking: boolean;
 }
 
 export class TeamCompanyManpowerGetListResponse extends PaginationResponse<ManpowerListTeamsResponse> {}

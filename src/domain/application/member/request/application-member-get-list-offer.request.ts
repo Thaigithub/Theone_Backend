@@ -10,7 +10,7 @@ export class ApplicationMemberGetListOfferRequest {
     @ApiProperty({
         type: String,
     })
-    public postName: string;
+    postName: string;
     @IsEnum(ApplicationMemberGetListOfferFilter)
     @Expose()
     @IsOptional()
@@ -18,19 +18,19 @@ export class ApplicationMemberGetListOfferRequest {
         type: 'enum',
         enum: ApplicationMemberGetListOfferFilter,
     })
-    public filter: ApplicationMemberGetListOfferFilter;
+    filter: ApplicationMemberGetListOfferFilter;
 
     @IsNumberString()
     @IsOptional()
     @ApiProperty({
         type: String,
     })
-    public pageSize: string;
+    pageSize: string;
 
     @IsNumberString()
     @IsOptional()
     @ApiProperty({
         type: String,
     })
-    public pageNumber: string;
+    pageNumber: string;
 }

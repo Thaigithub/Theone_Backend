@@ -6,13 +6,13 @@ import { WorkDate } from '../dto/labor-company-workdate.dto';
 export class LaborCompanyCreateRequest {
     @Expose()
     @IsNumber()
-    public contractId: number;
+    contractId: number;
 
     @Expose()
     @IsArray()
-    public workDate: WorkDate[];
+    workDate: WorkDate[];
 
     @Expose()
     @IsArray()
-    public salaryHistory: SalaryHistory[];
+    salaryHistory: SalaryHistory[];
 }

@@ -7,5 +7,5 @@ export class AdminCompanyUpdateStatusRequest {
     @Expose()
     @IsEnum(AccountStatus)
     @ApiProperty({ description: 'Company Status', example: AccountStatus.APPROVED })
-    public status: AccountStatus;
+    status: AccountStatus;
 }

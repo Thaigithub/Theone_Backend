@@ -16,7 +16,7 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
         type: 'string',
         required: false,
     })
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @IsDateString()
@@ -28,14 +28,14 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
         type: Date,
         required: false,
     })
-    public endDate: string;
+    endDate: string;
 
     @Expose()
     @ApiProperty()
     @IsEnum(CurrencyExchangeStatus)
     @ApiProperty({ type: 'enum', enum: CurrencyExchangeStatus, required: false })
     @IsOptional()
-    public refundStatus: CurrencyExchangeStatus;
+    refundStatus: CurrencyExchangeStatus;
 
     @Expose()
     @ApiProperty()
@@ -46,7 +46,7 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
         enum: CurrencyExchangeAdminSearchCategoryFilter,
         required: false,
     })
-    public searchCategory: CurrencyExchangeAdminSearchCategoryFilter;
+    searchCategory: CurrencyExchangeAdminSearchCategoryFilter;
 
     @Expose()
     @ApiProperty()
@@ -57,5 +57,5 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
         required: false,
         example: 'Please enter your search term',
     })
-    public searchTerm: string;
+    searchTerm: string;
 }

@@ -8,7 +8,7 @@ export class PostCompanyGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public name: string;
+    name: string;
 
     @Expose()
     @IsEnum(PostType)
@@ -17,7 +17,7 @@ export class PostCompanyGetListRequest extends PaginationRequest {
         type: 'enum',
         enum: PostType,
     })
-    public type: PostType;
+    type: PostType;
 
     @Expose()
     @IsEnum(PostStatus)
@@ -26,5 +26,5 @@ export class PostCompanyGetListRequest extends PaginationRequest {
         type: 'enum',
         enum: PostStatus,
     })
-    public status: PostStatus;
+    status: PostStatus;
 }

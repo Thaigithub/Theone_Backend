@@ -8,5 +8,5 @@ export class EvaluationMemberCreateEvaluationRequest {
     @Min(1)
     @Max(5)
     @Expose()
-    public score: number;
+    score: number;
 }

@@ -4,37 +4,37 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ManpowerListMembersResponse {
     @ApiProperty({ type: 'number' })
-    public id: Member['id'];
+    id: Member['id'];
 
     @ApiProperty({ type: 'string' })
-    public name: Member['name'];
+    name: Member['name'];
 
     @ApiProperty({ type: 'string' })
-    public contact: Member['contact'];
+    contact: Member['contact'];
 
     @ApiProperty({ type: 'string' })
-    public desiredSalary: Member['desiredSalary'];
+    desiredSalary: Member['desiredSalary'];
 
     @ApiProperty({ type: 'number' })
-    public totalExperienceYears: Member['totalExperienceYears'];
+    totalExperienceYears: Member['totalExperienceYears'];
 
     @ApiProperty({ type: 'number' })
-    public totalExperienceMonths: Member['totalExperienceMonths'];
+    totalExperienceMonths: Member['totalExperienceMonths'];
 
     @ApiProperty({ type: 'array' })
-    public certificates: Certificate[];
+    certificates: Certificate[];
 
     @ApiProperty({ type: 'array' })
-    public specialLicenses: SpecialLicense[];
+    specialLicenses: SpecialLicense[];
 
     @ApiProperty({ type: 'string' })
-    public occupation: Code['codeName'];
+    occupation: Code['codeName'];
 
     @ApiProperty({ type: 'boolean' })
-    public isWorking: boolean;
+    isWorking: boolean;
 
     @ApiProperty({ type: 'number' })
-    public numberOfTeams: number;
+    numberOfTeams: number;
 }
 
 export class MemberCompanyManpowerGetListResponse extends PaginationResponse<ManpowerListMembersResponse> {}

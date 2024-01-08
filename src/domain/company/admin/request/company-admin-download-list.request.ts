@@ -8,12 +8,12 @@ export class AdminCompanyDownloadListRequest {
     @ArrayNotEmpty({ message: 'The array must not be empty' })
     @IsNumber({}, { each: true, message: 'Each element of the array must be a number' })
     @ApiProperty({ example: [1, 2, 3] })
-    public companyIds: string[];
+    companyIds: string[];
 }
 
 export class AdminCompanyDownloadRequest {
     @Expose()
     @IsNumberString()
     @ApiProperty({ example: '1' })
-    public companyIds: string;
+    companyIds: string;
 }

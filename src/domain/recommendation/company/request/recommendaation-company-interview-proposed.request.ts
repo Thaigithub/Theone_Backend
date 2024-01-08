@@ -6,10 +6,10 @@ import { IsNumber } from 'class-validator';
 export class RecommendationCompanyInterviewProposeRequest {
     @Expose()
     @ApiProperty({ type: 'enum', enum: RequestObject, example: RequestObject.INDIVIDUAL })
-    public object: RequestObject;
+    object: RequestObject;
 
     @Expose()
     @ApiProperty({ type: 'number' })
     @IsNumber()
-    public postId: number;
+    postId: number;
 }
