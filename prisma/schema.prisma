@@ -445,6 +445,8 @@ model CompanyPostBanner {
   priority         Int?
   status           RequestBannerStatus
   postBanner       PostBanner          @relation(fields: [id], references: [id])
+  title            String?
+  detail           String?
 
   @@map("company_post_banners")
 }
@@ -465,6 +467,7 @@ model SiteBanner {
   id               Int                 @unique
   siteId           Int                 @map("site_id")
   title            String
+  detail           String
   requestDate      DateTime            @map("request_date") @db.Date
   acceptDate       DateTime?           @map("accept_date") @db.Date
   desiredStartDate DateTime            @map("desired_start_date") @db.Date
