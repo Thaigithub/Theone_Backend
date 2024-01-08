@@ -121,40 +121,30 @@ export class TeamCompanyService {
             where: {
                 id,
             },
-            select: {
-                name: true,
+            include: {
                 district: {
-                    select: {
-                        englishName: true,
-                        koreanName: true,
-                        city: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
+                    include: {
+                        city: true,
+                    },
+                },
+                leader: {
+                    include: {
+                        desiredOccupations: {
+                            include: {
+                                code: true,
                             },
                         },
                     },
                 },
-                leader: {
-                    select: {
-                        contact: true,
-                        totalExperienceYears: true,
-                        totalExperienceMonths: true,
-                        desiredSalary: true,
-                        desiredOccupation: true,
-                        name: true,
-                    },
-                },
                 members: {
-                    select: {
+                    include: {
                         member: {
-                            select: {
-                                id: true,
-                                name: true,
-                                contact: true,
-                                desiredOccupation: true,
-                                totalExperienceYears: true,
-                                totalExperienceMonths: true,
+                            include: {
+                                desiredOccupations: {
+                                    include: {
+                                        code: true,
+                                    },
+                                },
                             },
                         },
                     },
@@ -174,18 +164,45 @@ export class TeamCompanyService {
             },
         });
 
-        const district = application.district;
-        delete application.district;
+        const { leader, members, ...rest } = application;
 
         return {
-            ...application,
+            ...rest,
+            leader: {
+                name: leader.name,
+                contact: leader.contact,
+                totalExperienceYears: leader.totalExperienceYears,
+                totalExperienceMonths: leader.totalExperienceMonths,
+                desiredSalary: leader.desiredSalary,
+                desiredOccupations: leader.desiredOccupations
+                    ? leader.desiredOccupations.map((item) => {
+                          return item.code.codeName;
+                      })
+                    : [],
+            },
+            members: members
+                ? members.map((item) => {
+                      return {
+                          id: item.memberId,
+                          name: item.member.name,
+                          contact: item.member.contact,
+                          totalExperienceYears: item.member.totalExperienceYears,
+                          totalExperienceMonths: item.member.totalExperienceMonths,
+                          desiredOccupations: item.member.desiredOccupations
+                              ? item.member.desiredOccupations.map((item) => {
+                                    return item.code.codeName;
+                                })
+                              : [],
+                      };
+                  })
+                : [],
             city: {
-                englishName: district?.city.englishName || null,
-                koreanName: district?.city.koreanName || null,
+                englishName: application.district ? application.district.city.englishName : null,
+                koreanName: application.district ? application.district.city.koreanName : null,
             },
             district: {
-                englishName: district?.englishName || null,
-                koreanName: district?.koreanName || null,
+                englishName: application.district ? application.district.englishName : null,
+                koreanName: application.district ? application.district.koreanName : null,
             },
         };
     }
@@ -203,7 +220,11 @@ export class TeamCompanyService {
             include: {
                 leader: {
                     include: {
-                        desiredOccupation: true,
+                        desiredOccupations: {
+                            include: {
+                                code: true,
+                            },
+                        },
                         district: {
                             include: {
                                 city: true,
@@ -220,7 +241,11 @@ export class TeamCompanyService {
                     include: {
                         member: {
                             include: {
-                                desiredOccupation: true,
+                                desiredOccupations: {
+                                    include: {
+                                        code: true,
+                                    },
+                                },
                                 district: {
                                     include: {
                                         city: true,
@@ -269,11 +294,15 @@ export class TeamCompanyService {
                     contact: item.contact,
                     totalExperienceYears: item.totalExperienceYears,
                     totalExperienceMonths: item.totalExperienceMonths,
-                    occupation: item.desiredOccupation ? item.desiredOccupation.codeName : null,
                     districtEnglishName: item.district ? item.district.englishName : null,
                     districtKoreanName: item.district ? item.district.koreanName : null,
                     cityEnglishName: item.district ? item.district.city.englishName : null,
                     cityKoreanName: item.district ? item.district.city.koreanName : null,
+                    desiredOccupations: item.desiredOccupations
+                        ? item.desiredOccupations.map((item) => {
+                              return item.code.codeName;
+                          })
+                        : [],
                 };
             }),
         };

@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccountStatus, AccountType, CodeType, MemberLevel, SignupMethodType } from '@prisma/client';
+import { AccountStatus, AccountType, MemberLevel, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
 import { hash, compare } from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
@@ -129,94 +129,47 @@ export class AccountMemberService {
                 isActive: true,
                 accountId,
             },
-            select: {
-                totalExperienceMonths: true,
-                totalExperienceYears: true,
-                name: true,
-                contact: true,
-                email: true,
-                desiredSalary: true,
-                desiredOccupation: {
-                    select: {
-                        codeName: true,
-                        id: true,
+            include: {
+                desiredOccupations: {
+                    include: {
+                        code: true,
                     },
                 },
-                level: true,
-                signupMethod: true,
-                createdAt: true,
-                withdrawnDate: true,
-                account: {
-                    select: {
-                        username: true,
-                        status: true,
-                    },
-                },
-                bankAccount: {
-                    select: {
-                        accountHolder: true,
-                        accountNumber: true,
-                        bankName: true,
-                        createdAt: true,
-                    },
-                },
+                account: true,
+                bankAccount: true,
                 foreignWorker: {
-                    select: {
-                        englishName: true,
-                        registrationNumber: true,
-                        serialNumber: true,
-                        dateOfIssue: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
+                    include: {
+                        file: true,
                     },
                 },
-                disability: {
-                    select: {
-                        disableType: true,
-                        disableLevel: true,
-                    },
-                },
+                disability: true,
                 basicHealthSafetyCertificate: {
-                    select: {
-                        registrationNumber: true,
-                        dateOfCompletion: true,
-                        file: {
-                            select: {
-                                key: true,
-                                fileName: true,
-                                size: true,
-                                type: true,
-                            },
-                        },
+                    include: {
+                        file: true,
                     },
                 },
                 teams: {
-                    select: {
+                    include: {
                         team: {
-                            select: {
-                                name: true,
-                                code: {
-                                    select: {
-                                        id: true,
-                                        codeName: true,
-                                        code: true,
-                                    },
-                                },
+                            include: {
+                                code: true,
                             },
                         },
                     },
                 },
             },
         });
-        const { foreignWorker, disability, basicHealthSafetyCertificate, ...rest } = member;
+        const { desiredOccupations, foreignWorker, disability, basicHealthSafetyCertificate, ...rest } = member;
         return {
             ...rest,
+            desiredOccupations: desiredOccupations
+                ? desiredOccupations.map((item) => {
+                      return {
+                          id: item.codeId,
+                          codeName: item.code.codeName,
+                      };
+                  })
+                : [],
             foreignWorker: {
                 englishName: foreignWorker ? foreignWorker.englishName : null,
                 registrationNumber: foreignWorker ? foreignWorker.registrationNumber : null,
@@ -247,23 +200,65 @@ export class AccountMemberService {
     }
 
     async update(accountId: number, body: AccountMemberUpdateRequest): Promise<void> {
-        if (body.occupation) {
-            const validCode = await this.prismaService.code.findUnique({
-                where: {
-                    isActive: true,
-                    id: body.occupation,
-                    codeType: CodeType.GENERAL,
-                },
+        if (body.desiredOccupations) {
+            await Promise.all(
+                body.desiredOccupations.map(async (item) => {
+                    const codeExist = await this.prismaService.code.findUnique({
+                        where: {
+                            isActive: true,
+                            id: item,
+                        },
+                    });
+                    if (!codeExist) throw new BadRequestException(`Occupation code number: ${item} does not exist`);
+                }),
+            );
+
+            const memberId = await this.findIdByAccountId(accountId);
+
+            const currentDesiredOccupations = (
+                await this.prismaService.membersOnCodes.findMany({
+                    where: {
+                        isActive: true,
+                        memberId,
+                    },
+                })
+            ).map((item) => {
+                return item.codeId;
             });
 
-            if (!validCode) throw new BadRequestException('Occupation (Code Number) is invalid');
+            await Promise.all(
+                body.desiredOccupations.map(async (item) => {
+                    if (!currentDesiredOccupations.includes(item)) {
+                        await this.prismaService.membersOnCodes.create({
+                            data: {
+                                memberId,
+                                codeId: item,
+                            },
+                        });
+                    }
+                }),
+            );
+
+            await Promise.all(
+                currentDesiredOccupations.map(async (item) => {
+                    if (!body.desiredOccupations.includes(item)) {
+                        await this.prismaService.membersOnCodes.delete({
+                            where: {
+                                memberId_codeId: {
+                                    memberId,
+                                    codeId: item,
+                                },
+                            },
+                        });
+                    }
+                }),
+            );
         }
 
         await this.prismaService.member.update({
             data: {
                 name: body.name,
                 desiredSalary: body.desiredSalary,
-                codeId: body.occupation,
             },
             where: {
                 accountId,

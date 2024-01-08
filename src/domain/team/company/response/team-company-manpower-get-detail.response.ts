@@ -7,7 +7,7 @@ class MemberDetail {
     contact: Member['contact'];
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
-    occupation: Code['codeName'];
+    desiredOccupations: Code['codeName'][];
     districtEnglishName: District['englishName'];
     districtKoreanName: District['koreanName'];
     cityEnglishName: City['englishName'];

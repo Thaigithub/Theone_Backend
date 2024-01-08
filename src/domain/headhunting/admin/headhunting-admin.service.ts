@@ -251,7 +251,15 @@ export class HeadhuntingAdminService {
                 name: true,
                 level: true,
                 contact: true,
-                desiredOccupation: true,
+                desiredOccupations: {
+                    select: {
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                    },
+                },
                 specialLicenses: true,
                 certificates: true,
                 account: {
@@ -293,8 +301,15 @@ export class HeadhuntingAdminService {
         });
 
         const responseList = list.map((item) => {
+            const desiredOccupations = item.desiredOccupations;
+            delete item.desiredOccupations;
             const response: HeadhuntingAdminGetListRecommendationResponse = {
                 ...item,
+                desiredOccupations: desiredOccupations
+                    ? desiredOccupations.map((item) => {
+                          return item.code.codeName;
+                      })
+                    : [],
                 isSuggest: item.headhuntingRecommendation
                     .map((recommend) => recommend.postId)
                     .includes(headhuntingRequest.postId),
@@ -362,7 +377,15 @@ export class HeadhuntingAdminService {
                     select: {
                         name: true,
                         contact: true,
-                        desiredOccupation: true,
+                        desiredOccupations: {
+                            select: {
+                                code: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                            },
+                        },
                         specialLicenses: true,
                         certificates: true,
                         level: true,
@@ -411,8 +434,18 @@ export class HeadhuntingAdminService {
         });
 
         const responseList = list.map((item) => {
+            const { leader, ...rest } = item;
+            const { desiredOccupations, ...restLeader } = leader;
             const response: HeadhuntingAdminGetListRecommendationResponse = {
-                ...item,
+                ...rest,
+                leader: {
+                    ...restLeader,
+                    desiredOccupations: desiredOccupations
+                        ? desiredOccupations.map((item) => {
+                              return item.code.codeName;
+                          })
+                        : [],
+                },
                 isSuggest: item.headhuntingRecommendation
                     .map((recommend) => recommend.postId)
                     .includes(headhuntingRequest.postId),
@@ -549,7 +582,11 @@ export class HeadhuntingAdminService {
                 member: {
                     include: {
                         account: true,
-                        desiredOccupation: true,
+                        desiredOccupations: {
+                            include: {
+                                code: true,
+                            },
+                        },
                         specialLicenses: {
                             include: {
                                 code: true,
@@ -591,7 +628,11 @@ export class HeadhuntingAdminService {
                 name: detail.member.name,
                 contact: detail.member.contact,
                 username: detail.member.account.username,
-                occupation: detail.member.desiredOccupation?.codeName || null,
+                desiredOccupations: detail.member.desiredOccupations
+                    ? detail.member.desiredOccupations.map((item) => {
+                          return item.code.codeName;
+                      })
+                    : [],
                 address: detail.member.address,
                 certificate: detail.member.certificates.map((cer) => cer.name),
                 specialOccupation: detail.member.specialLicenses.map((special) => special.code.codeName),
@@ -617,7 +658,11 @@ export class HeadhuntingAdminService {
                                 member: {
                                     include: {
                                         account: true,
-                                        desiredOccupation: true,
+                                        desiredOccupations: {
+                                            include: {
+                                                code: true,
+                                            },
+                                        },
                                         specialLicenses: {
                                             include: {
                                                 code: true,
@@ -670,7 +715,11 @@ export class HeadhuntingAdminService {
                     name: member.name,
                     contact: member.contact,
                     username: member.account.username,
-                    occupation: member.desiredOccupation?.codeName,
+                    desiredOccupations: member.desiredOccupations
+                        ? member.desiredOccupations.map((item) => {
+                              return item.code.codeName;
+                          })
+                        : [],
                     address: member.address,
                     certificate: member.certificates.map((cer) => cer.name),
                     specialOccupation: member.specialLicenses.map((special) => special.code.codeName),

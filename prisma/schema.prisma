@@ -78,7 +78,6 @@ model Member {
   signupMethod                 SignupMethodType                @map("signup_method")
   level                        MemberLevel
   withdrawnDate                DateTime?                       @map("withdrawn_date") @db.Date
-  codeId                       Int?                            @map("code_id")
   districtId                   Int?                            @map("district_id")
   address                      String?
   desiredSalary                Int?                            @map("desired_salary")
@@ -98,13 +97,13 @@ model Member {
   memberEvaluation             MemberEvaluation?
   memberMatching               MemberMatching[]
   account                      Account                         @relation(fields: [accountId], references: [id])
-  desiredOccupation            Code?                           @relation(fields: [codeId], references: [id])
   district                     District?                       @relation(fields: [districtId], references: [id])
   teams                        MembersOnTeams[]
   point                        Point[]
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
+  desiredOccupations           MembersOnCodes[]
 
   @@map("members")
 }
@@ -506,11 +505,11 @@ model Code {
   codeType       CodeType         @map("code_type")
   career         Career[]
   certificate    Certificate[]
-  member         Member[]
   asGeneral      Post[]           @relation("post_occupation")
   asSpecial      Post[]           @relation("post_special")
   specialLicense SpecialLicense[]
   team           Team[]
+  membersOnCodes MembersOnCodes[]
 
   @@map("codes")
 }
@@ -951,6 +950,19 @@ model Bank {
   name      String
 
   @@map("banks")
+}
+
+model MembersOnCodes {
+  codeId    Int      @map("code_id")
+  memberId  Int      @map("member_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  member    Member   @relation(fields: [memberId], references: [id])
+  code      Code     @relation(fields: [codeId], references: [id])
+
+  @@id([memberId, codeId])
+  @@map("members_on_codes")
 }
 
 enum CurrencyExchangeStatus {

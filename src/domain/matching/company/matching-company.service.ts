@@ -75,7 +75,11 @@ export class MatchingCompanyService {
                                     include: {
                                         specialLicenses: true,
                                         certificates: true,
-                                        desiredOccupation: true,
+                                        desiredOccupations: {
+                                            include: {
+                                                code: true,
+                                            },
+                                        },
                                         applyPosts: {
                                             include: {
                                                 contract: true,
@@ -122,7 +126,11 @@ export class MatchingCompanyService {
                                 include: {
                                     specialLicenses: true,
                                     certificates: true,
-                                    desiredOccupation: true,
+                                    desiredOccupations: {
+                                        include: {
+                                            code: true,
+                                        },
+                                    },
                                     applyPosts: {
                                         include: {
                                             contract: true,
@@ -241,7 +249,11 @@ export class MatchingCompanyService {
                                     contact: member.contact,
                                     totalYears: member.totalExperienceYears,
                                     totalMonths: member.totalExperienceMonths,
-                                    occupation: member.desiredOccupation?.codeName || null,
+                                    desiredOccupations: member.desiredOccupations
+                                        ? member.desiredOccupations.map((item) => {
+                                              return item.code.codeName;
+                                          })
+                                        : [],
                                     workingStatus: member.applyPosts?.some(
                                         (application) => application.contract?.endDate > new Date(),
                                     )

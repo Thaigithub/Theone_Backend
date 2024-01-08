@@ -28,7 +28,7 @@ export class ManpowerListMembersResponse {
     specialLicenses: SpecialLicense[];
 
     @ApiProperty({ type: 'string' })
-    occupation: Code['codeName'];
+    desiredOccupations: Code['codeName'][];
 
     @ApiProperty({ type: 'boolean' })
     isWorking: boolean;
