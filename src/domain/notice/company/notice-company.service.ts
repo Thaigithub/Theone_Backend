@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PrismaService } from '../../../services/prisma/prisma.service';

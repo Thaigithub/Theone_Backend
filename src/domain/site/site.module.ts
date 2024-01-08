@@ -8,5 +8,6 @@ import { SiteMemberService } from './member/site-member.service';
     imports: [PrismaModule],
     controllers: [SiteCompanyController, SiteMemberController],
     providers: [SiteCompanyService, SiteMemberService],
+    exports: [SiteMemberService],
 })
 export class SiteModule {}
