@@ -2,6 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { InvitationStatus, Team, TeamStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
+export class MemberResponse {
+    id: number;
+    name: string;
+    contact: string;
+}
+
 export class TeamsResponse {
     // @ApiProperty({ type: Number, example: 1 })
     // id: Team['id'];
@@ -52,6 +58,8 @@ export class TeamsResponse {
 
     @ApiProperty({ type: Number, example: 1 })
     totalMembers: number;
+
+    memberInfors: MemberResponse[];
 }
 export class GetTeamsResponse extends PaginationResponse<TeamsResponse> {}
 
