@@ -21,6 +21,7 @@ model Account {
   admin                  Admin?
   company                Company?
   member                 Member?
+  notices                Notice[]
 
   @@map("accounts")
 }
@@ -902,6 +903,20 @@ model SalaryHistory {
   @@map("salary_histories")
 }
 
+model Notice {
+  id        Int        @id @default(autoincrement())
+  title     String
+  content   String?
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  type      NoticeType
+  accountId Int        @map("account_id")
+  account   Account    @relation(fields: [accountId], references: [id])
+
+  @@map("notices")
+}
+
 model Point {
   id           Int      @id @default(autoincrement())
   memberId     Int      @map("member_id")
@@ -947,6 +962,19 @@ enum CurrencyExchangeStatus {
 enum BannerStatus {
   HIDE
   EXPOSE
+}
+
+enum NoticeType {
+  ON_SITE_APPROVAL
+  ON_SITE_STOP
+  FIELD_REFUSAL
+  ANNOUNCEMENT_SUPPORT
+  HEADHUNTING_APPROVED
+  HEADHUNTING_PETITION
+  NOTICE_REJECTION
+  ACCEPT_INTERVIEW
+  REJECTION_INTERVIEW
+  CHANGE_PAYMENT_PRODUCT
 }
 
 enum RequestBannerStatus {
