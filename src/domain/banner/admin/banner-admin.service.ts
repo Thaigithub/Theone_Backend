@@ -983,6 +983,12 @@ export class BannerAdminService {
                 data: {
                     status: body.status,
                     priority: count + 1,
+                    companyBannerHistories: {
+                        create: {
+                            reason: body.reason,
+                            status: body.status,
+                        },
+                    },
                 },
             });
         } else {
