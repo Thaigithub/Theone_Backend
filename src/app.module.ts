@@ -29,6 +29,7 @@ import { WorkDateModule } from 'domain/workdate/workdate.module';
 import { PointModule } from 'domain/point/point.module';
 import { TeamMemberInvitationModule } from 'domain/team-member-invitation/team-member-invitation.module';
 import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchange.module';
+import { NoticeModule } from './domain/notice/notice.module';
 
 @Module({
     imports: [
@@ -62,6 +63,7 @@ import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchan
         PointModule,
         TeamMemberInvitationModule,
         CurrencyExchangeModule,
+        NoticeModule,
     ],
 })
 export class AppModule {}

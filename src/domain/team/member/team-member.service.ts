@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { InvitationStatus, TeamStatus } from '@prisma/client';
+import { InvitationStatus, Prisma, TeamStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -105,23 +105,24 @@ export class MemberTeamService {
 
     async getTeams(accountId: number, query: PaginationRequest): Promise<GetTeamsResponse> {
         const member = await this.checkExistMember(accountId);
-        const teams = await this.prismaService.team.findMany({
-            where: {
-                OR: [
-                    {
-                        leaderId: member.id,
-                    },
-                    {
-                        members: {
-                            some: {
-                                memberId: member.id,
-                                isActive: true,
-                            },
+        const queryFilter: Prisma.TeamWhereInput = {
+            OR: [
+                {
+                    leaderId: member.id,
+                },
+                {
+                    members: {
+                        some: {
+                            memberId: member.id,
+                            isActive: true,
                         },
                     },
-                ],
-                isActive: true,
-            },
+                },
+            ],
+            isActive: true,
+        };
+        const teams = await this.prismaService.team.findMany({
+            where: queryFilter,
             include: {
                 leader: true,
                 code: {
@@ -180,10 +181,7 @@ export class MemberTeamService {
                 }) as TeamsResponse,
         );
         const teamListCount = await this.prismaService.team.count({
-            where: {
-                leaderId: member.id,
-                isActive: true,
-            },
+            where: queryFilter,
         });
         return new PaginationResponse(result, new PageInfo(teamListCount));
     }
@@ -199,22 +197,23 @@ export class MemberTeamService {
             - member id, Invitation status, member name, member contact
          */
         const member = await this.checkExistMember(accountId);
-        const team = await this.prismaService.team.findUnique({
-            where: {
-                id,
-                isActive: true,
-                OR: [
-                    { leaderId: member.id },
-                    {
-                        members: {
-                            some: {
-                                memberId: member.id,
-                                isActive: true,
-                            },
+        const queryFilter: Prisma.TeamWhereUniqueInput = {
+            id: id,
+            isActive: true,
+            OR: [
+                { leaderId: member.id },
+                {
+                    members: {
+                        some: {
+                            memberId: member.id,
+                            isActive: true,
                         },
                     },
-                ],
-            },
+                },
+            ],
+        };
+        const team = await this.prismaService.team.findUnique({
+            where: queryFilter,
             select: {
                 code: {
                     select: {
