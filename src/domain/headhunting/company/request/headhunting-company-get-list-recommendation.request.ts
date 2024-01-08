@@ -11,5 +11,5 @@ export class HeadhuntingGetListRecommendationRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public name: string;
+    name: string;
 }

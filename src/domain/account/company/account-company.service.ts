@@ -10,6 +10,7 @@ import { AccountCompanyGetDetailResponse } from './response/account-company-get-
 @Injectable()
 export class AccountCompanyService {
     constructor(private prismaService: PrismaService) {}
+
     async checkBusinessRegNum(businessRegNumber: string): Promise<AccountCompanyCheckExistedResponse> {
         const count = await this.prismaService.company.count({
             where: {
@@ -19,6 +20,7 @@ export class AccountCompanyService {
         if (count === 0) return { isExist: true };
         return { isExist: false };
     }
+
     async checkUsername(username: string): Promise<AccountCompanyCheckExistedResponse> {
         const accountNum = await this.prismaService.account.count({
             where: {
@@ -28,6 +30,7 @@ export class AccountCompanyService {
         if (accountNum === 0) return { isExist: true };
         return { isExist: false };
     }
+
     async signup(request: AccountCompanySignupRequest): Promise<void> {
         const userIdCount = await this.prismaService.account.count({
             where: {
@@ -101,6 +104,7 @@ export class AccountCompanyService {
             },
         });
     }
+
     async getDetail(accountId: number): Promise<AccountCompanyGetDetailResponse> {
         const company = await this.prismaService.company.findUnique({
             where: {
@@ -167,6 +171,7 @@ export class AccountCompanyService {
                 : null,
         };
     }
+
     async update(accountId: number, body: AccountCompanyUpdateRequest): Promise<void> {
         const companyEmailCount = await this.prismaService.company.count({
             where: {

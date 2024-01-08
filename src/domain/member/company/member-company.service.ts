@@ -245,6 +245,16 @@ export class MemberCompanyService {
                 };
             }),
             occupation,
+            basicHealthSafetyCertificate: {
+                file: {
+                    fileName: application.basicHealthSafetyCertificate.file.fileName,
+                    type: application.basicHealthSafetyCertificate.file.type,
+                    key: application.basicHealthSafetyCertificate.file.key,
+                    size: Number(application.basicHealthSafetyCertificate.file.size),
+                },
+                dateOfCompletion: application.basicHealthSafetyCertificate.dateOfCompletion,
+                registrationNumber: application.basicHealthSafetyCertificate.registrationNumber,
+            },
             city: {
                 englishName: district?.city.englishName || null,
                 koreanName: district?.city.koreanName || null,

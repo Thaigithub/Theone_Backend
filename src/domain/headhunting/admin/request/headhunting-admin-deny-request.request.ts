@@ -6,5 +6,5 @@ export class HeadhuntingAdminDenyRequestRequest {
     @Expose()
     @ApiProperty({ example: 'deny reason' })
     @MaxLength(500)
-    public denyReason: string;
+    denyReason: string;
 }

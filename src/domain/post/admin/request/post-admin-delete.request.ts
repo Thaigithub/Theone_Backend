@@ -12,5 +12,5 @@ export class PostAdminDeleteRequest {
         example: 'The reason for deleting notice',
     })
     @MaxLength(500, { message: 'The reason for deleting notice should be maximun 500 characters' })
-    public deleteReason: string;
+    deleteReason: string;
 }

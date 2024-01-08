@@ -6,29 +6,29 @@ import { HeadhuntingAdminGetListApprovalPayment } from '../dto/headhunting-admin
 
 export class HeadhuntingAdminGetItemApprovalResponse {
     @ApiProperty({ example: 1 })
-    public id: number;
+    id: number;
     @ApiProperty({ example: 'Site name' })
-    public siteName: string;
+    siteName: string;
     @ApiProperty({ example: 'Post name' })
-    public postName: string;
+    postName: string;
     @ApiProperty()
-    public recommendationDate: Date;
+    recommendationDate: Date;
     @ApiProperty()
-    public workername: string;
+    workername: string;
     @ApiProperty()
-    public tier: MemberLevel;
+    tier: MemberLevel;
     @ApiProperty()
-    public requestStatus: RequestStatus;
+    requestStatus: RequestStatus;
     @ApiProperty()
-    public matchingStatus: HeadhuntingAdminGetListApprovalMatching;
+    matchingStatus: HeadhuntingAdminGetListApprovalMatching;
     @ApiProperty()
-    public matchingDay: Date;
+    matchingDay: Date;
     @ApiProperty()
-    public paymentStatus: HeadhuntingAdminGetListApprovalPayment;
+    paymentStatus: HeadhuntingAdminGetListApprovalPayment;
     @ApiProperty()
-    public paymentDate: Date;
+    paymentDate: Date;
     @ApiProperty()
-    public object: RequestObject;
+    object: RequestObject;
 }
 
 export class HeadhuntingAdminGetListApprovalResponse extends PaginationResponse<HeadhuntingAdminGetItemApprovalResponse> {}

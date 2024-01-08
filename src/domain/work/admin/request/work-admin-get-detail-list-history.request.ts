@@ -10,5 +10,5 @@ export class WorkAdminGetDetailListHistoryRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public date: string;
+    date: string;
 }

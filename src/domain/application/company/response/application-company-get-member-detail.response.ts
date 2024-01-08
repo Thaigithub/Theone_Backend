@@ -1,26 +1,26 @@
-import { ApplicationCompanyMemberDetailAccountDTO } from '../dto/member-detail/application-company-member-detail-account.dto';
-import { ApplicationCompanyMemberDetailBHSCerDTO } from '../dto/member-detail/application-company-member-detail-bhscer.dto';
-import { ApplicationCompanyMemberDetailCareerDTO } from '../dto/member-detail/application-company-member-detail-career.dto';
-import { ApplicationCompanyMemberDetailCertificatesDTO } from '../dto/member-detail/application-company-member-detail-certificates.dto';
-import { ApplicationCompanyMemberDetailSpecialDTO } from '../dto/member-detail/application-company-member-detail-special.dto';
 import { Code } from '@prisma/client';
+import { ApplicationCompanyMemberDetailAccountDTO } from '../dto/application-company-member-detail-account.dto';
+import { ApplicationCompanyMemberDetailBHSCerDTO } from '../dto/application-company-member-detail-bhscer.dto';
+import { ApplicationCompanyMemberDetailCareerDTO } from '../dto/application-company-member-detail-career.dto';
+import { ApplicationCompanyMemberDetailCertificatesDTO } from '../dto/application-company-member-detail-certificates.dto';
+import { ApplicationCompanyMemberDetailSpecialDTO } from '../dto/application-company-member-detail-special.dto';
 
 export class ApplicationCompanyGetMemberDetail {
-    public name: string;
-    public contact: string;
-    public email: string;
-    public city: {
+    name: string;
+    contact: string;
+    email: string;
+    city: {
         englishName: string;
         koreanName: string;
     };
-    public district: {
+    district: {
         englishName: string;
         koreanName: string;
     };
-    public occupation: Code['codeName'];
-    public account: ApplicationCompanyMemberDetailAccountDTO;
-    public career: ApplicationCompanyMemberDetailCareerDTO[];
-    public certificates: ApplicationCompanyMemberDetailCertificatesDTO[];
-    public specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];
-    public basicHealthSafetyCertificate: ApplicationCompanyMemberDetailBHSCerDTO;
+    occupation: Code['codeName'];
+    account: ApplicationCompanyMemberDetailAccountDTO;
+    career: ApplicationCompanyMemberDetailCareerDTO[];
+    certificates: ApplicationCompanyMemberDetailCertificatesDTO[];
+    specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];
+    basicHealthSafetyCertificate: ApplicationCompanyMemberDetailBHSCerDTO;
 }

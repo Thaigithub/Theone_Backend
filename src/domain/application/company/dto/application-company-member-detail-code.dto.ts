@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ApplicationCompanyMemberDetailCodeDTO {
     @ApiProperty({ example: 'code' })
-    public code: string;
+    code: string;
 
     @ApiProperty({ example: 'codeName' })
-    public codeName: string;
+    codeName: string;
 }

@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { SitePeriodStatus } from 'utils/enum/site-status.enum';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { ContractAdminGetListCategory } from '../dto/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from '../dto/contract-admin-get-list-sort.enum';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export class ContractAdminGetListRequest extends PaginationRequest {
     @ApiProperty({
@@ -15,7 +15,7 @@ export class ContractAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(ContractAdminGetListCategory)
     @IsOptional()
-    public category: ContractAdminGetListCategory;
+    category: ContractAdminGetListCategory;
 
     @ApiProperty({
         type: 'string',
@@ -24,7 +24,7 @@ export class ContractAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'enum',
@@ -34,7 +34,7 @@ export class ContractAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(SitePeriodStatus)
     @IsOptional()
-    public siteStatus: SitePeriodStatus;
+    siteStatus: SitePeriodStatus;
 
     @ApiProperty({
         type: 'enum',
@@ -44,5 +44,5 @@ export class ContractAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(ContractAdminGetListSort)
     @IsOptional()
-    public numberOfContracts: ContractAdminGetListSort;
+    numberOfContracts: ContractAdminGetListSort;
 }

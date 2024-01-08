@@ -4,5 +4,5 @@ import { IsString } from 'class-validator';
 export class AuthMemberLoginSocialRequest {
     @Expose()
     @IsString()
-    public idToken: string;
+    idToken: string;
 }

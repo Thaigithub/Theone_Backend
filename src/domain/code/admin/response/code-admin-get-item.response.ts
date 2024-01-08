@@ -9,13 +9,13 @@ export class CodeAdminGetItemResponse {
         enum: CodeType,
         example: CodeType.GENERAL,
     })
-    public codeType: CodeType;
+    codeType: CodeType;
 
     @IsString()
     @ApiProperty({ example: 'abc' })
-    public code: string;
+    code: string;
 
     @IsString()
     @ApiProperty({ example: 'abc' })
-    public codeName: string;
+    codeName: string;
 }

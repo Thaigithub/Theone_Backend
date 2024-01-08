@@ -14,6 +14,7 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 @Injectable()
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
+
     async getApplicationList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
         const teams = (
             await this.prismaService.member.findUnique({
@@ -95,13 +96,7 @@ export class ApplicationMemberService {
                                 name: true,
                                 logo: {
                                     select: {
-                                        file: {
-                                            select: {
-                                                fileName: true,
-                                                key: true,
-                                                type: true,
-                                            },
-                                        },
+                                        file: true,
                                     },
                                 },
                             },
@@ -113,7 +108,12 @@ export class ApplicationMemberService {
         const application = (await this.prismaService.application.findMany(search)).map((item) => {
             return {
                 applicationId: item.id,
-                companyLogo: item.post.company.logo.file,
+                companyLogo: {
+                    fileName: item.post.company.logo.file.fileName,
+                    type: item.post.company.logo.file.type,
+                    key: item.post.company.logo.file.key,
+                    size: Number(item.post.company.logo.file.size),
+                },
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
@@ -130,6 +130,7 @@ export class ApplicationMemberService {
         const total = await this.prismaService.application.count({ where: search.where });
         return new PaginationResponse(application, new PageInfo(total));
     }
+
     async getDetailApplication(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
         const teams = (
             await this.prismaService.member.findUnique({
@@ -231,7 +232,7 @@ export class ApplicationMemberService {
                                                 key: true,
                                                 fileName: true,
                                                 type: true,
-                                                // size: true,
+                                                size: true,
                                             },
                                         },
                                     },
@@ -244,7 +245,12 @@ export class ApplicationMemberService {
         });
         if (!application) throw new NotFoundException('Application not found');
         return {
-            companyLogo: application.post.company.logo.file,
+            companyLogo: {
+                fileName: application.post.company.logo.file.fileName,
+                type: application.post.company.logo.file.type,
+                key: application.post.company.logo.file.key,
+                size: Number(application.post.company.logo.file.size),
+            },
             companyName: application.post.company.name,
             companyId: application.post.company.id,
             postId: application.post.id,
@@ -279,6 +285,7 @@ export class ApplicationMemberService {
                 : null,
         };
     }
+
     async changeApplicationStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
         const application = await this.prismaService.application.findFirst({
             where: {
@@ -324,6 +331,7 @@ export class ApplicationMemberService {
             },
         });
     }
+
     async getApplicationOfferList(
         accountId: number,
         body: ApplicationMemberGetListOfferRequest,
@@ -634,7 +642,7 @@ export class ApplicationMemberService {
                     key: item.post.company.logo.file.key,
                     fileName: item.post.company.logo.file.fileName,
                     type: item.post.company.logo.file.type,
-                    // size: item.post.site.Company.logo.file.size,
+                    size: Number(item.post.company.logo.file.size),
                 },
                 postName: item.post.name,
                 siteName: item.post.site ? item.post.site.name : '',
@@ -649,6 +657,7 @@ export class ApplicationMemberService {
         });
         return new PaginationResponse(offer, new PageInfo(total));
     }
+
     async getTotal(accountId: number, isInProgress: boolean = false): Promise<number> {
         const memberExist = await this.prismaService.member.count({
             where: {

@@ -3,13 +3,13 @@ import { InterviewStatus, PostApplicationStatus, Prisma, SupportCategory } from 
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ApplicationCompanyApplicantsSearch } from './dto/applicants/application-company-applicants-search.enum';
+import { ApplicationCompanyApplicantsSearch } from './enum/application-company-applicants-search.enum';
 import { ApplicationCompanyStatus } from './enum/application-company-update-status.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
-import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-applicants.response';
-import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-by-post.response';
+import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
+import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-for-post.response';
 
 @Injectable()
 export class ApplicationCompanyService {

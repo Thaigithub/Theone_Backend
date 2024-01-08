@@ -13,6 +13,7 @@ import { ApplicationAdminGetResponse } from './response/application-admin-get-li
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class ApplicationAdminController {
     constructor(private applicationAdminService: ApplicationAdminService) {}
+
     @Get('/post/:postId')
     async getListForPost(
         @Param('postId', ParseIntPipe) id: number,

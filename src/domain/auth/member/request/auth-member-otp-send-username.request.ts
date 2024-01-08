@@ -3,8 +3,8 @@ import { IsString } from 'class-validator';
 export class AuthMemberUserIdRequest {
     @Expose()
     @IsString()
-    public name: string;
+    name: string;
     @Expose()
     @IsString()
-    public phoneNumber: string;
+    phoneNumber: string;
 }

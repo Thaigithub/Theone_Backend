@@ -6,5 +6,5 @@ export class TeamMemberGetInviteRequest {
     @Expose()
     @IsNumber()
     @ApiProperty({ type: Number, example: 1 })
-    public id: number;
+    id: number;
 }

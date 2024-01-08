@@ -10,69 +10,69 @@ export class PostCompanyDetailResponse {
         enum: PostType,
         example: PostType.COMMON,
     })
-    public type: PostType;
+    type: PostType;
 
     @ApiProperty({
         type: 'enum',
         enum: PostCategory,
         example: PostCategory.GENERAL,
     })
-    public category: PostCategory;
+    category: PostCategory;
 
     @ApiProperty({
         type: 'enum',
         enum: PostStatus,
         example: PostStatus.PREPARE,
     })
-    public status: PostStatus;
+    status: PostStatus;
 
     @ApiProperty({ example: 'string' })
-    public name: string;
+    name: string;
 
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
-    public startDate: Date;
+    startDate: Date;
 
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
-    public endDate: Date;
+    endDate: Date;
 
     @ApiProperty({
         type: 'enum',
         enum: ExperienceType,
         example: ExperienceType.REGARDLESS,
     })
-    public experienceType: ExperienceType;
+    experienceType: ExperienceType;
 
     @ApiProperty({ example: '1000' })
-    public numberOfPeople: number;
+    numberOfPeople: number;
 
     @ApiProperty({
         type: PostCompanyCodeDTO,
     })
-    public specialOccupation: PostCompanyCodeDTO;
+    specialOccupation: PostCompanyCodeDTO;
 
     @ApiProperty({
         type: PostCompanyCodeDTO,
     })
-    public occupation: PostCompanyCodeDTO;
+    occupation: PostCompanyCodeDTO;
 
     @ApiProperty({ example: 'string' })
-    public otherInformation: string;
+    otherInformation: string;
 
     @IsEnum(SalaryType)
     @ApiProperty({
         type: 'enum',
         enum: SalaryType,
     })
-    public salaryType: SalaryType;
+    salaryType: SalaryType;
 
     @ApiProperty({ example: '1000000' })
-    public salaryAmount: number;
+    salaryAmount: number;
 
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
-    public startWorkDate: Date;
+    startWorkDate: Date;
 
     @ApiProperty({ type: Date, example: '2023-12-31T23:59:59Z' })
-    public endWorkDate: Date;
+    endWorkDate: Date;
 
     @ApiProperty({
         description: 'List of Workday',
@@ -80,17 +80,17 @@ export class PostCompanyDetailResponse {
         isArray: true,
         enum: Workday,
     })
-    public workday: Workday[];
+    workday: Workday[];
 
     @ApiProperty({ example: '09:00:00', format: 'time' })
-    public startWorkTime: Date;
+    startWorkTime: Date;
 
     @ApiProperty({ example: '09:00:00', format: 'time' })
-    public endWorkTime: Date;
+    endWorkTime: Date;
 
     @ApiProperty({ type: PostCompanyGetItemListSiteResponse })
-    public site: PostCompanyGetItemListSiteResponse;
+    site: PostCompanyGetItemListSiteResponse;
 
     @ApiProperty({ example: 'string' })
-    public postEditor: string;
+    postEditor: string;
 }

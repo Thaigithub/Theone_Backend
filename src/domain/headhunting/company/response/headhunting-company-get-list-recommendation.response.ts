@@ -1,35 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Member } from '@prisma/client';
-import { ApplicationCompanyApplicantsSpecialDTO } from 'domain/application/company/dto/applicants/application-company-applicants-member.dto';
+import { ApplicationCompanyApplicantsSpecialDTO } from 'domain/application/company/dto/application-company-applicants-member.dto';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO {
     @ApiProperty({ example: 'abc' })
-    public name: Member['name'];
+    name: Member['name'];
 
     @ApiProperty({ example: 'abc' })
-    public contact: Member['contact'];
+    contact: Member['contact'];
 
     @ApiProperty({ example: 'abc' })
-    public totalExperienceMonths: Member['totalExperienceMonths'];
+    totalExperienceMonths: Member['totalExperienceMonths'];
 
     @ApiProperty({ example: 'abc' })
-    public totalExperienceYears: Member['totalExperienceYears'];
+    totalExperienceYears: Member['totalExperienceYears'];
 
     @ApiProperty({ type: [ApplicationCompanyApplicantsSpecialDTO] })
-    public specialLicenses: ApplicationCompanyApplicantsSpecialDTO[];
+    specialLicenses: ApplicationCompanyApplicantsSpecialDTO[];
 
     @ApiProperty({ example: 'abc' })
-    public desiredSalary: Member['desiredSalary'];
+    desiredSalary: Member['desiredSalary'];
 
     @ApiProperty()
-    public city: {
+    city: {
         englishName: string;
         koreanName: string;
     };
 
     @ApiProperty()
-    public district: {
+    district: {
         englishName: string;
         koreanName: string;
     };
@@ -37,43 +37,43 @@ export class RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO {
 
 export class RecommendationCompanyGetItemHeadhuntingApprovedLeaderDTO {
     @ApiProperty({ example: 'abc' })
-    public contact: string;
+    contact: string;
 
     @ApiProperty({ example: 'abc' })
-    public totalExperienceMonths: Member['totalExperienceMonths'];
+    totalExperienceMonths: Member['totalExperienceMonths'];
 
     @ApiProperty({ example: 'abc' })
-    public totalExperienceYears: Member['totalExperienceYears'];
+    totalExperienceYears: Member['totalExperienceYears'];
 
     @ApiProperty({ example: 'abc' })
-    public desiredSalary: Member['desiredSalary'];
+    desiredSalary: Member['desiredSalary'];
 }
 
 export class RecommendationCompanyGetItemHeadhuntingApprovedTeamDTO {
     @ApiProperty({ example: 'abc' })
-    public name: string;
+    name: string;
 
     @ApiProperty()
-    public district: {
+    district: {
         englishName: string;
         koreanName: string;
     };
 
     @ApiProperty()
-    public city: {
+    city: {
         englishName: string;
         koreanName: string;
     };
 
     @ApiProperty()
-    public leader: RecommendationCompanyGetItemHeadhuntingApprovedLeaderDTO;
+    leader: RecommendationCompanyGetItemHeadhuntingApprovedLeaderDTO;
 }
 export class RecommendationCompanyGetItemHeadhuntingApprovedResponse {
     @ApiProperty()
-    public member: RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO;
+    member: RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO;
 
     @ApiProperty()
-    public team: RecommendationCompanyGetItemHeadhuntingApprovedTeamDTO;
+    team: RecommendationCompanyGetItemHeadhuntingApprovedTeamDTO;
 }
 
 export class RecommendationCompanyGetListHeadhuntingApprovedResponse extends PaginationResponse<RecommendationCompanyGetItemHeadhuntingApprovedResponse> {}

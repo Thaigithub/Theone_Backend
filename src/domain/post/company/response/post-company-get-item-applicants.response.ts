@@ -3,8 +3,8 @@ import { PostCompanyGetItemListResponse } from './post-company-get-item-list.res
 
 export class PostCompanyGetItemApplicantsResponse extends PostCompanyGetItemListResponse {
     @ApiProperty({ example: 1 })
-    public teamCount: number;
+    teamCount: number;
 
     @ApiProperty({ example: 2 })
-    public memberCount: number;
+    memberCount: number;
 }

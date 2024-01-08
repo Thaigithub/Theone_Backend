@@ -215,9 +215,9 @@ export class BannerAdminService {
                         type: PostBannerType.ADMIN,
                         adminPostBanner: {
                             create: {
-                                urlLink: request.postBanner.adminPostBannner.urlLink,
-                                endDate: new Date(request.postBanner.adminPostBannner.endDate),
-                                startDate: new Date(request.postBanner.adminPostBannner.startDate),
+                                urlLink: request.postBanner.adminPostBanner.urlLink,
+                                endDate: new Date(request.postBanner.adminPostBanner.endDate),
+                                startDate: new Date(request.postBanner.adminPostBanner.startDate),
                                 priority: count + 1,
                             },
                         },
@@ -343,8 +343,8 @@ export class BannerAdminService {
     async updateAdminPostBanner(id: number, body: BannerAdminUpsertJobPostRequest) {
         const count = await this.prismaService.adminPostBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const { adminPostBannner, ...rest } = body.postBanner;
-        const { startDate, endDate, ...other } = adminPostBannner;
+        const { adminPostBanner, ...rest } = body.postBanner;
+        const { startDate, endDate, ...other } = adminPostBanner;
         await this.prismaService.banner.update({
             where: { id },
             data: {

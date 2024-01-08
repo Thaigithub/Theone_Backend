@@ -39,7 +39,7 @@ class AdminPostBanner {
 
 class AdPostBanner extends PostBanner {
     @Expose()
-    adminPostBannner: AdminPostBanner;
+    adminPostBanner: AdminPostBanner;
 }
 export class BannerAdminUpsertJobPostRequest extends Banner {
     @Expose()

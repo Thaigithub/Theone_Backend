@@ -11,7 +11,7 @@ export class UID {
         this.shardID = shardID;
     }
 
-    public toString(): string {
+    toString(): string {
         const val =
             (BigInt(this.localID) << BigInt(28)) | (BigInt(this.objectType) << BigInt(18)) | (BigInt(this.shardID) << BigInt(0));
 
@@ -21,19 +21,19 @@ export class UID {
         return base58.encode(buffer);
     }
 
-    public getLocalID(): number {
+    getLocalID(): number {
         return this.localID;
     }
 
-    public getObjectType(): number {
+    getObjectType(): number {
         return this.objectType;
     }
 
-    public getShardID(): number {
+    getShardID(): number {
         return this.shardID;
     }
 
-    public static decomposeUID(s: string): UID | null {
+    static decomposeUID(s: string): UID | null {
         try {
             const decodedBuffer = base58.decode(s);
             // Parse the BigInt from the decodedBuffer
@@ -53,7 +53,7 @@ export class UID {
         }
     }
 
-    public static fromBase58(s: string): UID | null {
+    static fromBase58(s: string): UID | null {
         return UID.decomposeUID(s);
     }
 }

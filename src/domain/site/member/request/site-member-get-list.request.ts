@@ -18,5 +18,5 @@ export class SiteMemberGetListRequest extends PaginationRequest {
     @IsNumber()
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
-    public districtId: number;
+    districtId: number;
 }

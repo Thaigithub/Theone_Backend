@@ -12,7 +12,7 @@ export class PaginationResponse<T> {
         this.data = item;
         this.pageInfo = pageInfo;
     }
-    public static of<T>(pagination: PaginationResponse<T>): PaginationResponse<T> {
+    static of<T>(pagination: PaginationResponse<T>): PaginationResponse<T> {
         return new PaginationResponse(pagination.data, pagination.pageInfo);
     }
 }

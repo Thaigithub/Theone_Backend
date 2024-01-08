@@ -5,22 +5,22 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class SiteEvaluationByContractResponse {
     @ApiProperty({ type: 'number' })
-    public id: SiteEvaluationByContract['id'];
+    id: SiteEvaluationByContract['id'];
 
     @ApiProperty({ type: 'string' })
-    public siteName: Site['name'];
+    siteName: Site['name'];
 
     @ApiProperty({ type: 'string' })
-    public startWorkDate: Contract['startDate'];
+    startWorkDate: Contract['startDate'];
 
     @ApiProperty({ type: 'string' })
-    public endWorkDate: Contract['endDate'];
+    endWorkDate: Contract['endDate'];
 
     @ApiProperty({
         type: 'number',
         description: "If score value is null, it means member didn't evaluate that site yet",
     })
-    public score: SiteEvaluationByContract['score'];
+    score: SiteEvaluationByContract['score'];
 
     @ApiProperty({
         type: 'object',
@@ -36,7 +36,7 @@ export class SiteEvaluationByContractResponse {
             },
         },
     })
-    public logo: FileResponse;
+    logo: FileResponse;
 }
 
 export class EvaluationMemberGetListResponse extends PaginationResponse<SiteEvaluationByContractResponse> {}

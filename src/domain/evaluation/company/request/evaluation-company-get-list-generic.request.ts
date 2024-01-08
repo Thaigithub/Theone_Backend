@@ -12,7 +12,7 @@ export class EvaluationCompanyGetListGenericRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @ApiProperty({
         type: 'enum',
@@ -22,7 +22,7 @@ export class EvaluationCompanyGetListGenericRequest extends PaginationRequest {
     @Expose()
     @IsEnum(EvaluationStatus)
     @IsOptional()
-    public status: EvaluationStatus;
+    status: EvaluationStatus;
 
     @ApiProperty({
         type: 'number',
@@ -34,5 +34,5 @@ export class EvaluationCompanyGetListGenericRequest extends PaginationRequest {
     @Min(1)
     @Transform(({ value }) => value && parseInt(value))
     @IsOptional()
-    public score: number;
+    score: number;
 }

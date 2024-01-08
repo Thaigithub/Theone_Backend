@@ -11,7 +11,7 @@ export class PostCompanyCreateRequest {
         enum: PostType,
         example: PostType.COMMON,
     })
-    public type: PostType;
+    type: PostType;
 
     @Expose()
     @IsEnum(PostCategory)
@@ -20,7 +20,7 @@ export class PostCompanyCreateRequest {
         enum: PostCategory,
         example: PostCategory.GENERAL,
     })
-    public category: PostCategory;
+    category: PostCategory;
 
     @Expose()
     @IsEnum(PostStatus)
@@ -29,24 +29,24 @@ export class PostCompanyCreateRequest {
         enum: PostStatus,
         example: PostStatus.PREPARE,
     })
-    public status: PostStatus;
+    status: PostStatus;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @Length(1, 50, { message: 'Post name should be maximum 50 characters' })
     @IsNotEmpty({ message: 'Name is required' })
-    public name: string;
+    name: string;
 
     @Expose()
     @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'startDate is required' })
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'endDate is required' })
-    public endDate: string;
+    endDate: string;
 
     @Expose()
     @IsEnum(ExperienceType)
@@ -55,32 +55,32 @@ export class PostCompanyCreateRequest {
         enum: ExperienceType,
         example: ExperienceType.REGARDLESS,
     })
-    public experienceType: ExperienceType;
+    experienceType: ExperienceType;
 
     @Expose()
     @ApiProperty({ example: '1000' })
     @IsNotEmpty({ message: 'Number of people recruited is required' })
     @IsNumber()
-    public numberOfPeople: number;
+    numberOfPeople: number;
 
     @Expose()
     @ApiProperty({ type: 'number' })
     @IsNumber()
     @IsOptional()
-    public specialNoteId: number;
+    specialNoteId: number;
 
     @Expose()
     @ApiProperty({ type: 'number' })
     @IsNumber()
     @IsOptional()
-    public occupationId: number;
+    occupationId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @MaxLength(100, { message: 'Post name should be maximum 50 characters' })
     @IsOptional()
-    public otherInformation: string;
+    otherInformation: string;
 
     @Expose()
     @IsEnum(SalaryType)
@@ -89,26 +89,26 @@ export class PostCompanyCreateRequest {
         enum: SalaryType,
     })
     @IsOptional()
-    public salaryType: SalaryType;
+    salaryType: SalaryType;
 
     @Expose()
     @ApiProperty({ example: '1000000' })
     @IsNotEmpty({ message: 'Amount of salary is required' })
     @IsNumber()
     @IsOptional()
-    public salaryAmount: number;
+    salaryAmount: number;
 
     @Expose()
     @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'Start working date is required' })
     @IsOptional()
-    public startWorkDate: string;
+    startWorkDate: string;
 
     @Expose()
     @ApiProperty({ example: '2023-12-31' })
     @IsNotEmpty({ message: 'End working date is required' })
     @IsOptional()
-    public endWorkDate: string;
+    endWorkDate: string;
 
     @Expose()
     @ApiProperty({
@@ -119,36 +119,36 @@ export class PostCompanyCreateRequest {
     })
     @IsEnum(Workday, { each: true })
     @IsOptional()
-    public workday: Workday[];
+    workday: Workday[];
 
     @Expose()
     @ApiProperty({ example: '09:00:00', format: 'time' })
     @IsNotEmpty({ message: 'Start working time is required' })
     @IsOptional()
-    public startWorkTime: string;
+    startWorkTime: string;
 
     @Expose()
     @ApiProperty({ example: '09:00:00', format: 'time' })
     @IsNotEmpty({ message: 'End working time is required' })
     @IsOptional()
-    public endWorkTime: string;
+    endWorkTime: string;
 
     @Expose()
     @IsNumber()
     @ApiProperty({ example: 1 })
     @IsOptional()
-    public siteId: number;
+    siteId: number;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @MaxLength(1000, { message: 'Post name should be maximum 1000 characters' })
     @IsOptional()
-    public postEditor: string;
+    postEditor: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'abc' })
     @IsOptional()
-    public workLocation: string;
+    workLocation: string;
 }

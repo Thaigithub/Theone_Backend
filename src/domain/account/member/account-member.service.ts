@@ -19,6 +19,7 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 @Injectable()
 export class AccountMemberService {
     constructor(private prismaService: PrismaService) {}
+
     async signup(request: AccountMemberSignupRequest): Promise<void> {
         if (request.recommenderId !== undefined) {
             const numRecommender = await this.prismaService.account.count({

@@ -14,5 +14,5 @@ export class TeamCompanyManpowerGetListRequest extends MemberCompanyManpowerGetL
     @Max(1000)
     @IsOptional()
     @Transform(({ value }) => value && parseInt(value))
-    public numberOfMembers: number;
+    numberOfMembers: number;
 }

@@ -1,7 +1,7 @@
 import { Code, Company, File, Post, Site } from '@prisma/client';
 
 export class PostMemberGetDetailResponse {
-    public postInformation: {
+    postInformation: {
         name: Post['name'];
         startDate: string;
         endDate: string;
@@ -9,7 +9,7 @@ export class PostMemberGetDetailResponse {
         personInCharge: Company['presentativeName'];
     };
 
-    public eligibility: {
+    eligibility: {
         experienceType: Post['experienceType'];
         occupation: Code['codeName'];
         specialNote: Code['codeName'];
@@ -17,9 +17,9 @@ export class PostMemberGetDetailResponse {
         isEligibleToApply: boolean;
     };
 
-    public detail: Post['postEditor'];
+    detail: Post['postEditor'];
 
-    public siteInformation: {
+    siteInformation: {
         id: Site['id'];
         companyLogoKey: File['key'];
         siteName: Site['name'];
@@ -31,5 +31,5 @@ export class PostMemberGetDetailResponse {
         isInterest: boolean;
     };
 
-    public workLocation: Post['workLocation'];
+    workLocation: Post['workLocation'];
 }

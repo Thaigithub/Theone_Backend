@@ -10,27 +10,27 @@ export class UpsertMemberCertificateRequest {
     @Expose()
     @IsString()
     @ApiProperty({ example: 'Certificate 1' })
-    public name: string;
+    name: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: '000-111-222' })
-    public certificateNumber: string;
+    certificateNumber: string;
 
     @Expose()
     @IsISO8601()
     @ApiProperty({ example: '2020-10-10T00:00:00Z' })
-    public acquisitionDate: string;
+    acquisitionDate: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'asdfhjawbecqertq' })
-    public fileKey: string;
+    fileKey: string;
 
     @Expose()
     @IsString()
     @ApiProperty({ example: 'basic.pdf' })
-    public fileName: string;
+    fileName: string;
 
     @Expose()
     @IsEnum(FileType)
@@ -39,12 +39,12 @@ export class UpsertMemberCertificateRequest {
         enum: FileType,
         example: FileType.PDF,
     })
-    public fileType: FileType;
+    fileType: FileType;
 
     @Expose()
     @IsNumber()
     @ApiProperty({ example: 100 })
-    public fileSize: number;
+    fileSize: number;
 }
 
 export class PartialUpdateMemberCertificateRequest {
@@ -55,5 +55,5 @@ export class PartialUpdateMemberCertificateRequest {
         enum: CertificateStatus,
         example: CertificateStatus.APPROVED,
     })
-    public certificationStatus: CertificateStatus;
+    certificationStatus: CertificateStatus;
 }

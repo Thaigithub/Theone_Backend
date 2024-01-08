@@ -67,7 +67,7 @@ export class GetTeamDetail {
             koreanName: '근무지원내역',
         },
     })
-    public city: {
+    city: {
         id: number;
         englishName: string;
         koreanName: string;
@@ -81,7 +81,7 @@ export class GetTeamDetail {
             koreanName: '근무지원내역',
         },
     })
-    public district: {
+    district: {
         id: number;
         englishName: string;
         koreanName: string;

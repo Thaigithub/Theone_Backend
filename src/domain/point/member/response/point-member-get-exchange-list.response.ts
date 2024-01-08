@@ -4,16 +4,16 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class PointMemberExchangePointResponse {
     @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
-    public createdAt: Date;
+    createdAt: Date;
 
     @ApiProperty({ type: Date, example: 'YYYY-MM-DD' })
-    public updatedAt: Date;
+    updatedAt: Date;
 
     @ApiProperty({ type: Number, example: 1 })
-    public amount: number;
+    amount: number;
 
     @ApiProperty({ type: 'enum', enum: CurrencyExchangeStatus, example: true })
-    public exchangeStatus: CurrencyExchangeStatus;
+    exchangeStatus: CurrencyExchangeStatus;
 }
 
 export class PointMemberGetExchangePointListResponse extends PaginationResponse<PointMemberExchangePointResponse> {}

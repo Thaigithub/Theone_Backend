@@ -15,7 +15,7 @@ export class InterviewMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsEnum(InterviewStatus)
-    public status: InterviewStatus;
+    status: InterviewStatus;
 
     @Expose()
     @IsString()
@@ -27,7 +27,7 @@ export class InterviewMemberGetListRequest extends PaginationRequest {
         description: 'Start date',
         example: '2023-05-10',
     })
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @IsString()
@@ -39,5 +39,5 @@ export class InterviewMemberGetListRequest extends PaginationRequest {
         description: 'End date',
         example: '2023-05-10',
     })
-    public endDate: string;
+    endDate: string;
 }

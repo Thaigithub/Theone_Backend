@@ -8,17 +8,17 @@ export class PostCompanyGetListApplicantSiteRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public endDate: string;
+    endDate: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 
     @Expose()
     @IsEnum(PostType)
@@ -27,5 +27,5 @@ export class PostCompanyGetListApplicantSiteRequest extends PaginationRequest {
         type: 'enum',
         enum: PostType,
     })
-    public type: PostType;
+    type: PostType;
 }

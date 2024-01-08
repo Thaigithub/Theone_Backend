@@ -1,5 +1,4 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
-import { ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { CompanyAuthService } from './auth-company.service';
@@ -10,13 +9,11 @@ import { AuthCompanyOtpVerifyRequest } from './request/auth-company-otp-verify.r
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
-@ApiTags('[COMPANY] Authenticate')
+
 @Controller('/company/auth')
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class CompanyAuthController {
     constructor(private companyAuthService: CompanyAuthService) {}
-    // Normal
+
     @Post('/login')
     async login(@Body() authUserDto: AuthCompanyLoginRequest): Promise<BaseResponse<AuthCompanyLoginResponse>> {
         return BaseResponse.of(await this.companyAuthService.login(authUserDto));

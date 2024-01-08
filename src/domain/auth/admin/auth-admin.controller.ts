@@ -1,16 +1,13 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AdminAuthService } from './auth-admin.service';
 import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request';
 import { AuthAdminLoginResponse } from './response/auth-admin-login.response';
-@ApiTags('[ADMIN] Authenticate')
+
 @Controller('/admin/auth')
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class AdminAuthController {
     constructor(private adminAuthService: AdminAuthService) {}
-    // Normal
+
     @Post('/login')
     async login(@Body() authUserDto: AuthAdminLoginRequest): Promise<BaseResponse<AuthAdminLoginResponse>> {
         return BaseResponse.of(await this.adminAuthService.login(authUserDto));

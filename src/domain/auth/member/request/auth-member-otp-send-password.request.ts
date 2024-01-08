@@ -5,5 +5,5 @@ import { AuthMemberUserIdRequest } from './auth-member-otp-send-username.request
 export class AuthMemberPasswordRequest extends AuthMemberUserIdRequest {
     @Expose()
     @IsString()
-    public username: string;
+    username: string;
 }

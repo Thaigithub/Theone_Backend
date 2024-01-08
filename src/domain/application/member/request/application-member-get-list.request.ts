@@ -6,7 +6,7 @@ import { IsEnum, IsNumberString, IsOptional, IsString, Matches } from 'class-val
 export class ApplicationMemberGetListRequest {
     @IsOptional()
     @IsEnum(PostApplicationStatus)
-    public status: PostApplicationStatus;
+    status: PostApplicationStatus;
 
     @ApiProperty({
         type: 'string',
@@ -15,7 +15,7 @@ export class ApplicationMemberGetListRequest {
     @Expose()
     @IsNumberString()
     @IsOptional()
-    public pageSize: string;
+    pageSize: string;
 
     @ApiProperty({
         type: 'string',
@@ -24,7 +24,7 @@ export class ApplicationMemberGetListRequest {
     @Expose()
     @IsNumberString()
     @IsOptional()
-    public pageNumber: string;
+    pageNumber: string;
 
     @Expose()
     @IsString()
@@ -36,7 +36,7 @@ export class ApplicationMemberGetListRequest {
         description: 'Start date',
         example: '2023-05-10',
     })
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @IsString()
@@ -48,5 +48,5 @@ export class ApplicationMemberGetListRequest {
         description: 'End date',
         example: '2023-05-10',
     })
-    public endDate: string;
+    endDate: string;
 }

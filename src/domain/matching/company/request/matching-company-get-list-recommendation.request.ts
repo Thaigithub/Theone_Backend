@@ -7,30 +7,30 @@ export class MatchingCompanyGetListRecommendationRequest {
     @Expose()
     @IsEnum(ExperienceType)
     @IsOptional()
-    public career: ExperienceType;
+    career: ExperienceType;
 
     @Expose()
     @IsEnum(MatchingCompanyGetListDateEnum)
     @IsOptional()
-    public date: MatchingCompanyGetListDateEnum;
+    date: MatchingCompanyGetListDateEnum;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public occupation: string;
+    occupation: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public specialOccupation: string;
+    specialOccupation: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public region: string;
+    region: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 }

@@ -1,23 +1,20 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { $Enums, AccountStatus, AccountType, AdminLevel, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
-import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { AdminAdminGetResponse } from './dto/admin-admin-response.dto';
+import { AdminAdminSearchCategories } from './enum/admin-admin-search-category.enum';
 import { AdminAdminGetListRequest } from './request/admin-admin-get-list.request';
 import { AdminAdminUpsertRequest } from './request/admin-admin-upsert.request';
-import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
 import { AdminAdminGetDetailResponse } from './response/admin-admin-detail.response';
-import { AdminAdminSearchCategories } from './enum/admin-admin-search-category.enum';
-import { AdminAdminGetResponse } from './dto/admin-admin-response.dto';
+import { AdminAdminGetListResponse } from './response/admin-admin-get-list.response';
 
 @Injectable()
 export class AdminAdminService {
-    constructor(
-        private excelService: ExcelService,
-        private prismaService: PrismaService,
-    ) {}
+    constructor(private prismaService: PrismaService) {}
+
     async getList(query: AdminAdminGetListRequest): Promise<AdminAdminGetListResponse> {
         const list = await this.findByQuery(query);
 

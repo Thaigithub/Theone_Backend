@@ -6,10 +6,10 @@ export class TeamGetMemberRequest {
     @Expose()
     @ApiProperty({ type: 'string', example: 'user name' })
     @IsString()
-    public username: string;
+    username: string;
 
     @Expose()
     @ApiProperty({ type: 'string', example: 'user name' })
     @IsString()
-    public contact: string;
+    contact: string;
 }

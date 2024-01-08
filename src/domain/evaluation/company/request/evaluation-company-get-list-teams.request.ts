@@ -13,5 +13,5 @@ export class EvaluationCompanyGetListTeamsRequest extends EvaluationCompanyGetLi
     @Expose()
     @IsEnum(TeamSearchCategory)
     @IsOptional()
-    public searchCategory: TeamSearchCategory;
+    searchCategory: TeamSearchCategory;
 }

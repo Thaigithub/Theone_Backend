@@ -1,5 +1,5 @@
 export class OTPGenerator {
-    public static generateOTPString(): string {
+    static generateOTPString(): string {
         const digits = '0123456789';
         let OTP = '';
 

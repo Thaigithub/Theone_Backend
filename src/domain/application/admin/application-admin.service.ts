@@ -9,6 +9,7 @@ import { ApplicationAdminGetResponse } from './response/application-admin-get-li
 @Injectable()
 export class ApplicationAdminService {
     constructor(private prismaService: PrismaService) {}
+
     async getListForPost(postId: number, query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetResponse> {
         const applications = await this.prismaService.application.findMany({
             where: { postId, post: { isActive: true } },
@@ -86,6 +87,7 @@ export class ApplicationAdminService {
         });
         return new PaginationResponse(applicationList, new PageInfo(applicationListCount));
     }
+
     async getDetail(id: number): Promise<ApplicationAdminGetDetailResponse> {
         const application = await this.prismaService.application.findUnique({
             where: { id: id, post: { isActive: true } },

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import {
     ApplicationAdminSearchCategoryFilter,
     ApplicationAdminSortFilter,
@@ -9,7 +10,6 @@ import {
     PostAdminPostTypeFilter,
     PostAdminSearchCategoryFilter,
 } from '../dto/post-admin-filter';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 
 class BaseListRequest extends PaginationRequest {
     @Expose()
@@ -19,7 +19,7 @@ class BaseListRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public searchTerm: string;
+    searchTerm: string;
 }
 
 export class ApplicationAdminGetListRequest extends BaseListRequest {
@@ -31,7 +31,7 @@ export class ApplicationAdminGetListRequest extends BaseListRequest {
         enum: ApplicationAdminStatusFilter,
         required: false,
     })
-    public status: ApplicationAdminStatusFilter;
+    status: ApplicationAdminStatusFilter;
 
     @Expose()
     @IsEnum(ApplicationAdminSearchCategoryFilter)
@@ -41,7 +41,7 @@ export class ApplicationAdminGetListRequest extends BaseListRequest {
         enum: ApplicationAdminSearchCategoryFilter,
         required: false,
     })
-    public searchCategory: ApplicationAdminSearchCategoryFilter;
+    searchCategory: ApplicationAdminSearchCategoryFilter;
 
     @Expose()
     @IsEnum(ApplicationAdminSortFilter)
@@ -51,7 +51,7 @@ export class ApplicationAdminGetListRequest extends BaseListRequest {
         enum: ApplicationAdminSortFilter,
         required: false,
     })
-    public sortByApplication: ApplicationAdminSortFilter;
+    sortByApplication: ApplicationAdminSortFilter;
 }
 
 export class PostAdminGetListRequest extends BaseListRequest {
@@ -63,7 +63,7 @@ export class PostAdminGetListRequest extends BaseListRequest {
         enum: PostAdminPostTypeFilter,
         required: false,
     })
-    public type: PostAdminPostTypeFilter;
+    type: PostAdminPostTypeFilter;
 
     @Expose()
     @IsEnum(PostAdminPostStatusFilter)
@@ -73,7 +73,7 @@ export class PostAdminGetListRequest extends BaseListRequest {
         enum: PostAdminPostStatusFilter,
         required: false,
     })
-    public status: PostAdminPostStatusFilter;
+    status: PostAdminPostStatusFilter;
 
     @Expose()
     @IsDateString()
@@ -85,7 +85,7 @@ export class PostAdminGetListRequest extends BaseListRequest {
         type: Date,
         required: false,
     })
-    public startDate: string;
+    startDate: string;
 
     @Expose()
     @IsDateString()
@@ -97,7 +97,7 @@ export class PostAdminGetListRequest extends BaseListRequest {
         type: Date,
         required: false,
     })
-    public endDate: string;
+    endDate: string;
 
     @Expose()
     @IsEnum(PostAdminSearchCategoryFilter)
@@ -107,5 +107,5 @@ export class PostAdminGetListRequest extends BaseListRequest {
         enum: PostAdminSearchCategoryFilter,
         required: false,
     })
-    public searchCategory: PostAdminSearchCategoryFilter;
+    searchCategory: PostAdminSearchCategoryFilter;
 }

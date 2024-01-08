@@ -4,19 +4,19 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class PostAdminSiteResponse {
     @ApiProperty({ example: 'string' })
-    public name: string;
+    name: string;
 
     @ApiProperty({ example: 'string' })
-    public contact: string;
+    contact: string;
 
     @ApiProperty({ example: 'string' })
-    public personInCharge: string;
+    personInCharge: string;
 
     @ApiProperty({ example: 'string' })
-    public originalBuilding: string;
+    originalBuilding: string;
 
     @ApiProperty({ type: 'string', example: '101-dong, 42 Seolleung-ro 90-gil, Gangnam-gu, Seoul' })
-    public address: string;
+    address: string;
 }
 export class PostAdminResponse {
     @ApiProperty({ type: 'string' })
@@ -38,16 +38,16 @@ export class ApplicationAdminResponse {
     site: ApplicationAdminSiteResponse;
 
     @ApiProperty({ type: 'string' })
-    public name: Post['name'];
+    name: Post['name'];
 
     @ApiProperty({ type: Number })
-    public countApplication: number;
+    countApplication: number;
 
     @ApiProperty({ type: Date })
-    public startDate: Post['startDate'];
+    startDate: Post['startDate'];
 
     @ApiProperty({ type: 'enum', enum: PostStatus })
-    public status: Post['status'];
+    status: Post['status'];
 }
 
 export class PostAdminGetListResponse extends PaginationResponse<PostAdminResponse> {}

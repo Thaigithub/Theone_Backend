@@ -9,7 +9,7 @@ export class ContractCompanyGetListForSiteRequest {
     @ApiProperty({
         type: String,
     })
-    public pageSize: string;
+    pageSize: string;
 
     @Expose()
     @IsNumberString()
@@ -17,5 +17,5 @@ export class ContractCompanyGetListForSiteRequest {
     @ApiProperty({
         type: String,
     })
-    public pageNumber: string;
+    pageNumber: string;
 }

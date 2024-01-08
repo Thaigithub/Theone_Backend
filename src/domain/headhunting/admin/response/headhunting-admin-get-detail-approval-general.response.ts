@@ -5,16 +5,16 @@ import { HeadhuntingAdminGetListApprovalPayment } from '../dto/headhunting-admin
 
 export class HeadhuntingAdminGetDetailApprovalGeneral {
     @ApiProperty()
-    public id: number;
+    id: number;
 
     @ApiProperty()
-    public siteName: string;
+    siteName: string;
 
     @ApiProperty()
-    public siteContact: string;
+    siteContact: string;
 
     @ApiProperty()
-    public personInCharge: string;
+    personInCharge: string;
 
     //Request
     @ApiProperty()

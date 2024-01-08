@@ -11,7 +11,7 @@ export class MemberEvaluationAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsBooleanString()
     @IsOptional()
-    public isHighestRating: string;
+    isHighestRating: string;
 
     @ApiProperty({
         type: 'string',
@@ -20,5 +20,5 @@ export class MemberEvaluationAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    public keyword: string;
+    keyword: string;
 }

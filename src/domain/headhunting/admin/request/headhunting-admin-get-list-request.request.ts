@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { HeadhuntingAdminGetListCategory } from '../dto/headhunting-admin-get-list-category.enum';
 import { HeadhuntingAdminGetListRequestStatusEnum } from '../dto/headhunting-admin-get-list-request-status.enum';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
     @Expose()
@@ -13,7 +13,7 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public startRequestDate: string;
+    startRequestDate: string;
 
     @Expose()
     @IsString()
@@ -22,7 +22,7 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public endRequestDate: string;
+    endRequestDate: string;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListCategory)
@@ -32,7 +32,7 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListCategory,
         required: false,
     })
-    public category: HeadhuntingAdminGetListCategory;
+    category: HeadhuntingAdminGetListCategory;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListRequestStatusEnum)
@@ -42,7 +42,7 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
         enum: HeadhuntingAdminGetListRequestStatusEnum,
         required: false,
     })
-    public status: HeadhuntingAdminGetListRequestStatusEnum;
+    status: HeadhuntingAdminGetListRequestStatusEnum;
 
     @Expose()
     @IsString()
@@ -51,5 +51,5 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
         type: 'string',
         required: false,
     })
-    public keyword: string;
+    keyword: string;
 }

@@ -1,7 +1,7 @@
-import { PaginationRequest } from 'utils/generics/pagination.request';
-import { ContractStatus } from '../enum/contract-member-status.enum';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, Matches } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
+import { ContractStatus } from '../enum/contract-member-status.enum';
 
 export class ContractMemberGetListForSalaryRequest extends PaginationRequest {
     @Expose()
@@ -14,12 +14,12 @@ export class ContractMemberGetListForSalaryRequest extends PaginationRequest {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
-    public startDate: string;
+    startDate: string;
 
     @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
-    public endDate: string;
+    endDate: string;
 }

@@ -6,5 +6,5 @@ export class AdminCompanyUpdateEmailRequest {
     @Expose()
     @IsString()
     @ApiProperty({ description: 'Company new email', example: 'theone@gmail.com' })
-    public email: string;
+    email: string;
 }
