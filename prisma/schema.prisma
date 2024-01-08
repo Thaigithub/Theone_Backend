@@ -438,7 +438,7 @@ model PostBanner {
 
 model CompanyPostBanner {
   id               Int                 @unique
-  requestDate      DateTime            @map("request_date") @db.Date
+  requestDate      DateTime            @default(now()) @map("request_date") @db.Date
   acceptDate       DateTime?           @map("accept_date") @db.Date
   desiredStartDate DateTime            @map("desired_start_date") @db.Date
   desiredEndDate   DateTime            @map("desired_end_date") @db.Date

@@ -1,5 +1,6 @@
+import { BannerStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsOptional, Matches } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export class BannerAdminGetGeneralRequest extends PaginationRequest {
@@ -16,4 +17,14 @@ export class BannerAdminGetGeneralRequest extends PaginationRequest {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
     endDate: string;
+
+    @Expose()
+    @IsEnum(BannerStatus)
+    @IsOptional()
+    status: BannerStatus;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    keyword: string;
 }
