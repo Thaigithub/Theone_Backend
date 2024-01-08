@@ -6,29 +6,14 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength }
 export class PostCompanyCreateRequest {
     @Expose()
     @IsEnum(PostType)
-    @ApiProperty({
-        type: 'enum',
-        enum: PostType,
-        example: PostType.COMMON,
-    })
     type: PostType;
 
     @Expose()
     @IsEnum(PostCategory)
-    @ApiProperty({
-        type: 'enum',
-        enum: PostCategory,
-        example: PostCategory.GENERAL,
-    })
     category: PostCategory;
 
     @Expose()
     @IsEnum(PostStatus)
-    @ApiProperty({
-        type: 'enum',
-        enum: PostStatus,
-        example: PostStatus.PREPARE,
-    })
     status: PostStatus;
 
     @Expose()
@@ -50,24 +35,17 @@ export class PostCompanyCreateRequest {
 
     @Expose()
     @IsEnum(ExperienceType)
-    @ApiProperty({
-        type: 'enum',
-        enum: ExperienceType,
-        example: ExperienceType.REGARDLESS,
-    })
     experienceType: ExperienceType;
 
     @Expose()
-    @ApiProperty({ example: '1000' })
     @IsNotEmpty({ message: 'Number of people recruited is required' })
     @IsNumber()
     numberOfPeople: number;
 
     @Expose()
-    @ApiProperty({ type: 'number' })
     @IsNumber()
     @IsOptional()
-    specialNoteId: number;
+    specialOccupationId: number;
 
     @Expose()
     @ApiProperty({ type: 'number' })

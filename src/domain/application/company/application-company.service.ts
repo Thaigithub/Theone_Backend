@@ -90,6 +90,16 @@ export class ApplicationCompanyService {
                                 totalExperienceMonths: true,
                                 totalExperienceYears: true,
                                 desiredSalary: true,
+                                specialLicenses: {
+                                    select: {
+                                        code: {
+                                            select: {
+                                                codeName: true,
+                                            },
+                                        },
+                                        licenseNumber: true,
+                                    },
+                                },
                             },
                         },
                         district: {
@@ -114,28 +124,57 @@ export class ApplicationCompanyService {
             ...QueryPagingHelper.queryPaging(query),
         });
         const newApplicationList = applicationList.map((item) => {
-            const district = item.member.district;
-            delete item.member.district;
-            const { specialLicenses, ...rest } = item.member;
             return {
-                ...item,
-                member: {
-                    ...rest,
-                    specialLicenses: specialLicenses.map((item) => {
-                        return {
-                            name: item.code.codeName,
-                            licenseNumber: item.licenseNumber,
-                        };
-                    }),
-                    city: {
-                        englishName: district?.city.englishName || null,
-                        koreanName: district?.city.koreanName || null,
-                    },
-                    district: {
-                        englishName: district?.englishName || null,
-                        koreanName: district?.koreanName || null,
-                    },
-                },
+                id: item.id,
+                assignedAt: item.assignedAt,
+                member: item.member
+                    ? {
+                          name: item.member.name,
+                          contact: item.member.contact,
+                          totalExperienceMonths: item.member.totalExperienceYears,
+                          totalExperienceYears: item.member.totalExperienceMonths,
+                          desiredSalary: item.member.desiredSalary,
+                          specialLicenses: item.member.specialLicenses.map((item) => {
+                              return {
+                                  name: item.code.codeName,
+                                  licenseNumber: item.licenseNumber,
+                              };
+                          }),
+                          city: {
+                              englishName: item.member.district?.city.englishName || null,
+                              koreanName: item.member.district?.city.koreanName || null,
+                          },
+                          district: {
+                              englishName: item.member.district?.englishName || null,
+                              koreanName: item.member.district?.koreanName || null,
+                          },
+                      }
+                    : null,
+                team: item.team
+                    ? {
+                          name: item.team.name,
+                          city: {
+                              englishName: item.team.district?.city.englishName || null,
+                              koreanName: item.team.district?.city.koreanName || null,
+                          },
+                          district: {
+                              englishName: item.team.district?.englishName || null,
+                              koreanName: item.team.district?.koreanName || null,
+                          },
+                          leader: {
+                              contact: item.team.leader.contact,
+                              totalExperienceMonths: item.team.leader.totalExperienceMonths,
+                              totalExperienceYears: item.team.leader.totalExperienceMonths,
+                              desiredSalary: item.team.leader.desiredSalary,
+                              specialLicenses: item.team.leader.specialLicenses.map((item) => {
+                                  return {
+                                      name: item.code.codeName,
+                                      licenseNumber: item.licenseNumber,
+                                  };
+                              }),
+                          },
+                      }
+                    : null,
             };
         });
         const applicationListCount = await this.prismaService.application.count({

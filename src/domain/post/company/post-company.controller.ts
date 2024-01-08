@@ -1,23 +1,10 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpStatus,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyService } from './post-company.service';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
@@ -30,7 +17,6 @@ import { PostCompanyGetListApplicantsResponse } from './response/post-company-ge
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Posts Management')
 @Controller('/company/posts')
@@ -51,12 +37,6 @@ export class PostCompanyController {
     }
 
     @Post('/:id/headhunting-request')
-    @ApiOperation({
-        summary: 'Create a request of Headhunting post',
-        description: 'This endpoint creates a request of a Headhunting post in the system',
-    })
-    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async createHeadhuntingRequest(
         @Req() request: AccountIdExtensionRequest,
         @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
@@ -66,19 +46,6 @@ export class PostCompanyController {
         return BaseResponse.ok();
     }
     @Get('/headhunting-request')
-    @ApiOperation({
-        summary: 'Listing headhunting for request post',
-        description: 'Company can list/filter/search all headhunting posts for request to admin',
-    })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({
-        name: 'category',
-        type: String,
-        required: false,
-        description: 'Search by category:' + Object.values(PostCompanyHeadhuntingRequestFilter),
-    })
-    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Keyword for category search' })
     async getListHeadhuntingRequest(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyHeadhuntingRequestRequest,
@@ -88,16 +55,6 @@ export class PostCompanyController {
     }
 
     @Get('/applicant-site')
-    @ApiOperation({
-        summary: 'Listing post to show applicants',
-        description: 'Company can search/filter post to show applicants',
-    })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({ name: 'startDate', type: Date, required: false, description: 'Start date period of post' })
-    @ApiQuery({ name: 'endDate', type: Date, required: false, description: 'End date period of post' })
-    @ApiQuery({ name: 'keyword', type: String, required: false, description: 'Key word for search catagories' })
-    @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
     async getListApplicantSite(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
@@ -107,37 +64,11 @@ export class PostCompanyController {
     }
 
     @Get('/count')
-    @ApiResponse({ status: HttpStatus.ACCEPTED, type: PostCompanyCountPostsResponse })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
     async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
         return BaseResponse.of(await this.postCompanyService.countPosts(req.user.accountId));
     }
 
-    @Post('/create')
-    @ApiOperation({
-        summary: 'Create post',
-        description: 'This endpoint creates a post of a company in the system',
-    })
-    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async create(
-        @Req() userRequest: AccountIdExtensionRequest,
-        @Body() request: PostCompanyCreateRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.create(userRequest.user.accountId, request);
-        return BaseResponse.ok();
-    }
-
     @Get('/:id')
-    @ApiOperation({
-        summary: 'Post detail',
-        description: 'Retrieve post information detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: PostCompanyDetailResponse,
-    })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
     async getDetail(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -145,13 +76,7 @@ export class PostCompanyController {
         return BaseResponse.of(await this.postCompanyService.getPostDetails(request.user.accountId, id));
     }
 
-    // Change admin information
     @Patch('/:id')
-    @ApiOperation({
-        summary: 'Change post information',
-        description: 'Company change post information',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async changePageInfo(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -162,11 +87,6 @@ export class PostCompanyController {
     }
 
     @Delete('/:id')
-    @ApiOperation({
-        summary: 'Delete post',
-        description: 'Company can delete a job post',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     async deletePost(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -175,25 +95,20 @@ export class PostCompanyController {
     }
 
     @Get()
-    @ApiOperation({
-        summary: 'Listing post',
-        description: 'Company can search post',
-    })
-    @ApiQuery({ name: 'pageNumber', type: Number, required: false, description: 'Page number' })
-    @ApiQuery({ name: 'pageSize', type: Number, required: false, description: 'Items per page' })
-    @ApiQuery({ name: 'name', type: String, required: false, description: 'Search by job post title' })
-    @ApiQuery({ name: 'type', type: String, required: false, description: 'Type for search: COMMON, PREMIUM' })
-    @ApiQuery({
-        name: 'status',
-        type: String,
-        required: false,
-        description: 'Status for search: PREPARE,RECRUITING,DEADLINE',
-    })
     async getList(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListRequest,
     ): Promise<BaseResponse<PostCompanyGetListResponse>> {
         const posts = await this.postCompanyService.getList(request.user.accountId, query);
         return BaseResponse.of(posts);
+    }
+
+    @Post()
+    async create(
+        @Req() userRequest: AccountIdExtensionRequest,
+        @Body() request: PostCompanyCreateRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.create(userRequest.user.accountId, request);
+        return BaseResponse.ok();
     }
 }
