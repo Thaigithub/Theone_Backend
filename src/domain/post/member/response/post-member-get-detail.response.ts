@@ -32,4 +32,5 @@ export class PostMemberGetDetailResponse {
     };
 
     workLocation: Post['workLocation'];
+    isInterest: boolean;
 }

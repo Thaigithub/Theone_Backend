@@ -53,7 +53,7 @@ export class AccountMemberController {
         @Req() request: AccountIdExtensionRequest,
         @Body() body: AccountMemberChangePasswordRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.accountMemberService.changePassword(request.user.accountId, body));
+        return await this.accountMemberService.changePassword(request.user.accountId, body);
     }
 
     @Put('/bank-account')

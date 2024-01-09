@@ -15,6 +15,7 @@ import { AccountMemberCheckExistedResponse } from './response/account-member-che
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
+import { BaseResponse } from 'utils/generics/base.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -266,17 +267,17 @@ export class AccountMemberService {
         });
     }
 
-    async changePassword(accountId: number, body: AccountMemberChangePasswordRequest): Promise<void> {
+    async changePassword(accountId: number, body: AccountMemberChangePasswordRequest): Promise<BaseResponse<void>> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 isActive: true,
                 id: accountId,
             },
         });
-        if (!account) throw new BadRequestException('Account does not exist');
+        if (!account) throw new NotFoundException('Account does not exist');
 
-        const passwordMatch = await compare(account.password, account.password);
-        if (!passwordMatch) throw new BadRequestException('Current password does not match');
+        const passwordMatch = await compare(body.currentPassword, account.password);
+        if (!passwordMatch) return BaseResponse.error('Password does not match');
         await this.prismaService.account.update({
             data: {
                 password: await hash(body.newPassword, 10),
@@ -286,6 +287,7 @@ export class AccountMemberService {
                 id: accountId,
             },
         });
+        return BaseResponse.ok();
     }
 
     async upsertBankAccount(id: number, request: AccountMemberUpsertBankAccountRequest): Promise<void> {

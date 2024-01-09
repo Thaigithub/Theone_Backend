@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Param, ParseIntPipe, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType, SupportCategory } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
@@ -38,19 +38,33 @@ export class RecommendationCompanyController {
         return BaseResponse.of(posts);
     }
 
-    @Put('/:applicantId/detail')
-    @ApiOperation({
-        summary: 'Get detail of applicant',
-        description: 'Company can view detail of a applicant',
-    })
-    @ApiResponse({ status: HttpStatus.CREATED, type: BaseResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async getDetail(
+    @Get('/:applicantId/post/:postId/team')
+    async getDetailTeam(
         @Req() request: AccountIdExtensionRequest,
         @Param('applicantId', ParseIntPipe) applicationId: number,
-        @Body() body: RecommendationCompanyInterviewProposeRequest,
+        @Param('postId', ParseIntPipe) postId: number,
     ): Promise<BaseResponse<RecommendationCompanyGetDetailApplicantResponse>> {
-        const posts = await this.recommendationCompanyService.getDetailApplicants(request.user.accountId, applicationId, body);
+        const posts = await this.recommendationCompanyService.getDetailApplicants(
+            request.user.accountId,
+            applicationId,
+            postId,
+            true,
+        );
+        return BaseResponse.of(posts);
+    }
+
+    @Get('/:applicantId/post/:postId/member')
+    async getDetailMember(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('applicantId', ParseIntPipe) applicationId: number,
+        @Param('postId', ParseIntPipe) postId: number,
+    ): Promise<BaseResponse<RecommendationCompanyGetDetailApplicantResponse>> {
+        const posts = await this.recommendationCompanyService.getDetailApplicants(
+            request.user.accountId,
+            applicationId,
+            postId,
+            false,
+        );
         return BaseResponse.of(posts);
     }
 }
