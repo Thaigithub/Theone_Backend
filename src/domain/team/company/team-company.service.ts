@@ -80,9 +80,9 @@ export class TeamCompanyService {
         const teams = await this.prismaService.team.findMany({
             include: {
                 leader: true,
-                posts: {
+                district: {
                     include: {
-                        contract: true,
+                        city: true,
                     },
                 },
             },
@@ -90,22 +90,16 @@ export class TeamCompanyService {
             ...QueryPagingHelper.queryPaging(query),
         });
         return teams.map((item) => {
-            let isWorking: boolean;
-            const latestContractEndDate = item.posts[0]?.contract?.endDate.toISOString().split('T')[0];
-            const currentDate = new Date().toISOString().split('T')[0];
-            if (!latestContractEndDate || latestContractEndDate < currentDate) isWorking = false;
-            else isWorking = true;
-
             return {
                 id: item.id,
                 name: item.name,
-                leaderName: item.leader.name,
-                leaderContact: item.leader.contact,
                 totalMembers: item.totalMembers,
-                desiredSalary: item.desiredSalary,
+                cityKoreanName: item.district.city.koreanName,
+                districtKoreanName: item.district.koreanName,
+                leaderContact: item.leader.contact,
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
-                isWorking,
+                desiredSalary: item.desiredSalary,
             };
         });
     }
@@ -282,11 +276,12 @@ export class TeamCompanyService {
         return {
             name: team.name,
             totalMembers: team.totalMembers,
-            contact: team.leader.contact,
-            districtEnglishName: team.district ? team.district.englishName : null,
-            districtKoreanName: team.district ? team.district.koreanName : null,
-            cityEnglishName: team.district ? team.district.city.englishName : null,
-            cityKoreanName: team.district ? team.district.city.koreanName : null,
+            cityKoreanName: team.district.city.koreanName,
+            districtKoreanName: team.district.koreanName,
+            leaderContact: team.leader.contact,
+            leaderTotalExperienceYears: team.leader.totalExperienceYears,
+            leaderTotalExperienceMonths: team.leader.totalExperienceMonths,
+            desiredSalary: team.desiredSalary,
             members: listMembers.map((item) => {
                 return {
                     id: item.id,
@@ -294,10 +289,6 @@ export class TeamCompanyService {
                     contact: item.contact,
                     totalExperienceYears: item.totalExperienceYears,
                     totalExperienceMonths: item.totalExperienceMonths,
-                    districtEnglishName: item.district ? item.district.englishName : null,
-                    districtKoreanName: item.district ? item.district.koreanName : null,
-                    cityEnglishName: item.district ? item.district.city.englishName : null,
-                    cityKoreanName: item.district ? item.district.city.koreanName : null,
                     desiredOccupations: item.desiredOccupations
                         ? item.desiredOccupations.map((item) => {
                               return item.code.codeName;
