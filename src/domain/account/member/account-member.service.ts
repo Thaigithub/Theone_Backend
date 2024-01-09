@@ -301,6 +301,23 @@ export class AccountMemberService {
             );
         }
 
+        if (body.username) {
+            const usernameExist = await this.prismaService.account.findUnique({
+                where: {
+                    username: body.username,
+                },
+            });
+            if (usernameExist) throw new ConflictException('Username already existed');
+            await this.prismaService.account.update({
+                data: {
+                    username: body.username,
+                },
+                where: {
+                    id: accountId,
+                },
+            });
+        }
+
         await this.prismaService.member.update({
             data: {
                 name: body.name,
