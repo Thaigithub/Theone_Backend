@@ -48,6 +48,7 @@ model OtpProvider {
   ip        String
   type      OtpType
   data      String?
+  isUsed    Boolean  @default(false) @map("is_used")
 
   @@map("otp_providers")
 }
