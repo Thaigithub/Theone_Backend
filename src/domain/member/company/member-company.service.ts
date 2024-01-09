@@ -329,6 +329,7 @@ export class MemberCompanyService {
                           startDate: item.startDate,
                           endDate: item.endDate,
                           companyName: item.companyName,
+                          siteName: item.siteName,
                           codeName: item.occupation.codeName,
                       };
                   })

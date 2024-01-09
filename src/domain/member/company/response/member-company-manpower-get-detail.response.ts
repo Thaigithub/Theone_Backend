@@ -16,6 +16,7 @@ export class MemberCompanyManpowerGetDetailResponse {
         startDate: Career['startDate'];
         endDate: Career['endDate'];
         companyName: Career['companyName'];
+        siteName: Career['siteName'];
         codeName: Code['codeName'];
     }[];
     specialLicenses: {

@@ -1,4 +1,4 @@
-import { City, Code, District, Member, Team } from '@prisma/client';
+import { City, Code, District, Member, SpecialLicense, Team } from '@prisma/client';
 
 export class TeamCompanyManpowerGetDetailResponse {
     name: Team['name'];
@@ -16,5 +16,9 @@ export class TeamCompanyManpowerGetDetailResponse {
         totalExperienceYears: Member['totalExperienceYears'];
         totalExperienceMonths: Member['totalExperienceMonths'];
         desiredOccupations: Code['codeName'][];
+    }[];
+    specialLicenses: {
+        licenseNumber: SpecialLicense['licenseNumber'];
+        codeName: Code['codeName'];
     }[];
 }

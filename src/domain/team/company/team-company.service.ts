@@ -4,7 +4,7 @@ import { TeamCompanyGetTeamDetailApplicants } from './response/team-company-get-
 import { ManpowerListTeamsResponse } from './response/team-company-manpower-get-list.response';
 import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ExperienceType, Prisma } from '@prisma/client';
+import { CertificateStatus, ExperienceType, Prisma } from '@prisma/client';
 import { TeamCompanyManpowerGetDetailResponse } from './response/team-company-manpower-get-detail.response';
 
 @Injectable()
@@ -74,6 +74,73 @@ export class TeamCompanyService {
                 },
             ],
         };
+    }
+
+    private async getListSpecialLicensesOfTeam(teamId: number): Promise<{ licenseNumber: string; codeName: string }[]> {
+        const team = await this.prismaService.team.findUnique({
+            include: {
+                leader: {
+                    include: {
+                        specialLicenses: {
+                            include: {
+                                code: true,
+                            },
+                            where: {
+                                status: CertificateStatus.APPROVED,
+                            },
+                        },
+                    },
+                },
+                members: {
+                    include: {
+                        member: {
+                            include: {
+                                specialLicenses: {
+                                    include: {
+                                        code: true,
+                                    },
+                                    where: {
+                                        status: CertificateStatus.APPROVED,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                isActive: true,
+                id: teamId,
+            },
+        });
+
+        const leaderSpecialLicenses = team.leader.specialLicenses
+            ? team.leader.specialLicenses.map((item) => {
+                  return {
+                      licenseNumber: item.licenseNumber,
+                      codeName: item.code.codeName,
+                  };
+              })
+            : [];
+        let membersSpecialLicences = team.members
+            .map((item) => {
+                if (item.member.specialLicenses) {
+                    return {
+                        licenseNumber: item.member.specialLicenses.map((item) => {
+                            return {
+                                licenseNumber: item.licenseNumber,
+                                codeName: item.code.codeName,
+                            };
+                        }),
+                    };
+                }
+            })
+            .map((item) => {
+                return item.licenseNumber;
+            })
+            .flat(1);
+        membersSpecialLicences = membersSpecialLicences.concat(leaderSpecialLicenses);
+        return membersSpecialLicences;
     }
 
     async getList(query: TeamCompanyManpowerGetListRequest): Promise<ManpowerListTeamsResponse[]> {
@@ -198,6 +265,7 @@ export class TeamCompanyService {
                 englishName: application.district ? application.district.englishName : null,
                 koreanName: application.district ? application.district.koreanName : null,
             },
+            specialLicenses: await this.getListSpecialLicensesOfTeam(rest.id),
         };
     }
 
@@ -296,6 +364,7 @@ export class TeamCompanyService {
                         : [],
                 };
             }),
+            specialLicenses: await this.getListSpecialLicensesOfTeam(team.id),
         };
     }
 }
