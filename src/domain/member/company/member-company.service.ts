@@ -115,26 +115,10 @@ export class MemberCompanyService {
     async getList(query: MemberCompanyManpowerGetListRequest): Promise<ManpowerListMembersResponse[]> {
         const members = await this.prismaService.member.findMany({
             include: {
-                desiredOccupations: {
-                    include: {
-                        code: true,
-                    },
-                },
-                certificates: true,
                 specialLicenses: true,
-                applyPosts: {
+                district: {
                     include: {
-                        contract: true,
-                    },
-                    orderBy: {
-                        contract: {
-                            endDate: 'desc',
-                        },
-                    },
-                },
-                _count: {
-                    select: {
-                        teams: true,
+                        city: true,
                     },
                 },
             },
@@ -143,27 +127,15 @@ export class MemberCompanyService {
         });
 
         return members.map((item) => {
-            let isWorking: boolean;
-            const latestContractEndDate = item.applyPosts[0]?.contract?.endDate.toISOString().split('T')[0];
-            const currentDate = new Date().toISOString().split('T')[0];
-            if (!latestContractEndDate || latestContractEndDate < currentDate) isWorking = false;
-            else isWorking = true;
-
             return {
                 id: item.id,
                 name: item.name,
                 contact: item.contact,
                 desiredSalary: item.desiredSalary,
-                desiredOccupations: item.desiredOccupations
-                    ? item.desiredOccupations.map((item) => {
-                          return item.code.codeName;
-                      })
-                    : [],
+                cityKoreanName: item.district ? item.district.city.koreanName : null,
+                districtKoreanName: item.district ? item.district.city.koreanName : null,
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
-                isWorking,
-                numberOfTeams: item._count.teams,
-                certificates: item.certificates,
                 specialLicenses: item.specialLicenses,
             };
         });
@@ -309,35 +281,19 @@ export class MemberCompanyService {
                         city: true,
                     },
                 },
-                teams: {
-                    include: {
-                        team: {
-                            include: {
-                                leader: true,
-                            },
-                        },
-                    },
-                },
                 desiredOccupations: {
                     include: {
                         code: true,
                     },
                 },
-                career: true,
-                certificates: {
+                career: {
                     include: {
-                        code: true,
-                        file: true,
+                        occupation: true,
                     },
                 },
                 specialLicenses: {
-                    select: {
-                        code: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        licenseNumber: true,
+                    include: {
+                        code: true,
                     },
                 },
                 basicHealthSafetyCertificate: {
@@ -357,42 +313,34 @@ export class MemberCompanyService {
             username: member.account.username,
             contact: member.contact,
             email: member.email,
+            cityKoreanName: member.district ? member.district.city.koreanName : null,
+            districtKoreanName: member.district ? member.district.koreanName : null,
+            desiredSalary: member.desiredSalary,
+            totalExperienceYears: member.totalExperienceYears,
+            totalExperienceMonths: member.totalExperienceMonths,
             desiredOccupations: member.desiredOccupations
                 ? member.desiredOccupations.map((item) => {
                       return item.code.codeName;
                   })
                 : [],
-            desiredSalary: member.desiredSalary,
-            districtEnglishName: member.district ? member.district.englishName : null,
-            districtKoreanName: member.district ? member.district.koreanName : null,
-            citynglishName: member.district ? member.district.city.englishName : null,
-            cityKoreanName: member.district ? member.district.city.koreanName : null,
-            careers: {
-                list: member.career
-                    ? member.career.map((item) => {
-                          return {
-                              companyName: item.companyName,
-                              siteName: item.siteName,
-                              startWorkDate: item.startDate,
-                              endWorkDate: item.endDate,
-                          };
-                      })
-                    : null,
-                total: member.career.length,
-            },
-            teams: {
-                list: member.teams
-                    ? member.teams.map((item) => {
-                          return {
-                              name: item.team.name,
-                              totalMembers: item.team.totalMembers,
-                              totalExperienceYears: item.team.leader.totalExperienceYears,
-                              totalExperienceMonths: item.team.leader.totalExperienceMonths,
-                          };
-                      })
-                    : null,
-                total: member.teams.length,
-            },
+            careers: member.career
+                ? member.career.map((item) => {
+                      return {
+                          startDate: item.startDate,
+                          endDate: item.endDate,
+                          companyName: item.companyName,
+                          codeName: item.occupation.codeName,
+                      };
+                  })
+                : [],
+            specialLicenses: member.specialLicenses
+                ? member.specialLicenses.map((item) => {
+                      return {
+                          codeName: item.code.codeName,
+                          licenseNumber: item.licenseNumber,
+                      };
+                  })
+                : [],
             basicHealthAndSafetyEducation: {
                 registrationNumber: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.registrationNumber
@@ -400,30 +348,12 @@ export class MemberCompanyService {
                 dateOfCompletion: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.dateOfCompletion
                     : null,
-                keyOfPhoto: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.key : null,
-            },
-            certificates: {
-                list: member.certificates
-                    ? member.certificates.map((item) => {
-                          return {
-                              qualification: item.code.codeName,
-                              certificateNumber: item.certificateNumber,
-                              keyOfPhoto: item.file.key,
-                          };
-                      })
-                    : null,
-                total: member.certificates.length,
-            },
-            construcionEquiments: {
-                list: member.specialLicenses
-                    ? member.specialLicenses.map((item) => {
-                          return {
-                              name: item.code.codeName,
-                              licenseNumber: item.licenseNumber,
-                          };
-                      })
-                    : null,
-                total: member.specialLicenses.length,
+                photo: {
+                    fileName: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.fileName : null,
+                    type: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.type : null,
+                    key: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.key : null,
+                    size: member.basicHealthSafetyCertificate ? Number(member.basicHealthSafetyCertificate.file.size) : null,
+                },
             },
         };
     }
