@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
 export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
@@ -16,10 +16,13 @@ export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    occupationList: string[];
+    occupation: string[];
 
     @Expose()
     @IsString()
+    @Matches(/^(([0-9]+-[0-9]+)|([0-9]+-[0-9]+,){1,4}([0-9]+-[0-9]+))$/, {
+        message: 'The regionList must be in format x-x or x-x,x-x...(5 times)',
+    })
     @IsOptional()
-    districtList: string[];
+    regionList: string[];
 }

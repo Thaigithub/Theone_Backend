@@ -13,8 +13,9 @@ export class TeamCompanyService {
 
     private parseConditionFromQuery(query: TeamCompanyManpowerGetListRequest): Prisma.TeamWhereInput {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
-        const occupationList = query.occupationList?.map((item) => parseInt(item));
-        const districtList = query.districtList?.map((item) => parseInt(item));
+        const occupationList = query.occupation?.map((item) => parseInt(item));
+        const districtList = query.regionList?.map((item) => parseInt(item.split('-')[1]));
+        console.log(districtList);
 
         return {
             isActive: true,
@@ -64,10 +65,10 @@ export class TeamCompanyService {
                     ],
                 },
                 {
-                    code: query.occupationList && { id: { in: occupationList } },
+                    code: query.occupation && { id: { in: occupationList } },
                 },
                 {
-                    district: query.districtList && { id: { in: districtList } },
+                    district: query.regionList && { id: { in: districtList } },
                 },
                 {
                     totalMembers: query.numberOfMembers && { lte: query.numberOfMembers },
