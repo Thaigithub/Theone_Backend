@@ -70,81 +70,72 @@ export class SiteMemberService {
             return { isInterested: true };
         }
     }
-    async getSiteList(query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
-        const entireCity = await this.prismaService.district.findUnique({
-            where: {
-                id: query.districtId,
-                englishName: 'All',
-            },
-        });
+    async getSiteList(accountId: number, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
+        const entireCity = await (async () => {
+            if (!query.districtId) {
+                return null;
+            }
+            return await this.prismaService.district.findUnique({
+                where: {
+                    id: query.districtId,
+                    englishName: 'All',
+                },
+            });
+        })();
 
         const queryFilter: Prisma.SiteWhereInput = {
             ...(query.name && { name: { contains: query.name, mode: 'insensitive' } }),
-            district: {
-                id: !entireCity ? query.districtId : undefined,
-                city: {
-                    id: entireCity && entireCity.cityId,
-                },
-            },
+            ...(query.districtId &&
+                entireCity && {
+                    district: {
+                        city: {
+                            id: entireCity.id,
+                        },
+                    },
+                }),
+            ...(query.districtId &&
+                !entireCity && {
+                    district: {
+                        id: query.districtId,
+                    },
+                }),
             isActive: true,
         };
         const sites = await this.prismaService.site.findMany({
             select: {
                 id: true,
                 name: true,
-                address: true,
                 startDate: true,
                 endDate: true,
-                personInCharge: true,
-                personInChargeContact: true,
-                contact: true,
-                post: {
+                numberOfWorkers: true,
+                interestMember: {
                     where: {
-                        isActive: true,
-                        isHidden: false,
-                    },
-                },
-                company: {
-                    select: {
-                        logo: {
-                            select: {
-                                file: {
-                                    select: {
-                                        fileName: true,
-                                        key: true,
-                                        type: true,
-                                        size: true,
-                                    },
-                                },
-                            },
+                        member: {
+                            accountId: accountId,
+                            isActive: true,
                         },
                     },
+                    select: {
+                        id: true,
+                    },
+                    take: 1,
                 },
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
         });
+        const siteList = sites.map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+                startDate: item.startDate,
+                endDate: item.endDate,
+                numberOfWorkers: item.numberOfWorkers,
+                interestId: item.interestMember.length > 0 ? item.interestMember[0].id : null,
+            };
+        });
         const siteListCount = await this.prismaService.site.count({
             where: queryFilter,
-        });
-        const siteList = sites.map((site) => {
-            const countPost = site.post.length;
-            const file = site.company.logo?.file;
-            return {
-                id: site.id,
-                name: site.name,
-                address: site.address,
-                startDate: site.startDate,
-                endDate: site.endDate,
-                personInCharge: site.personInCharge,
-                personInChargeContact: site.personInChargeContact,
-                contact: site.contact,
-                countPost: countPost,
-                logoFileName: file?.fileName ? file.fileName : null,
-                logoFileKey: file?.key ? file.key : null,
-                logoFileType: file ? file.type : null,
-                logoFileSize: file ? file.size : null,
-            };
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
     }
@@ -210,10 +201,15 @@ export class SiteMemberService {
                 id: siteRecord.company.id,
                 name: siteRecord.company.name,
                 address: siteRecord.company.address,
-                logoFileName: siteRecord.company.logo ? siteRecord.company.logo.file.fileName : null,
-                logoFileKey: siteRecord.company.logo ? siteRecord.company.logo.file.key : null,
-                logoFileType: siteRecord.company.logo ? siteRecord.company.logo.file.type : null,
-                logoFileSize: siteRecord.company.logo ? siteRecord.company.logo.file.size : null,
+                logoFile: siteRecord.company.logo
+                    ? {
+                          fileName: siteRecord.company.logo.file.fileName,
+                          key: siteRecord.company.logo.file.key,
+                          type: siteRecord.company.logo.file.type,
+                          size: Number(siteRecord.company.logo.file.size),
+                      }
+                    : null,
+
                 contactName: siteRecord.company.contactName,
                 presentativeName: siteRecord.company.presentativeName,
                 email: siteRecord.company.email,
