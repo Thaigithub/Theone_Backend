@@ -1,6 +1,8 @@
 export class OtpVerifyResponse {
+    otpId: number;
     isVerified: boolean;
     status: OtpStatus;
+    data: string | null;
 }
 
 export enum OtpStatus {

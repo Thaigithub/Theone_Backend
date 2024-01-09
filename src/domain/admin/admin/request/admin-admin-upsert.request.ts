@@ -1,6 +1,6 @@
 import { AdminLevel, FunctionName } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
 import { AdminAdminUpdateRequest } from './admin-admin-update.request';
 
 export class AdminAdminUpsertRequest extends AdminAdminUpdateRequest {
@@ -15,5 +15,6 @@ export class AdminAdminUpsertRequest extends AdminAdminUpdateRequest {
     name: string;
 
     @Expose()
+    @IsArray()
     permissions: FunctionName[];
 }

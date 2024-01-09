@@ -44,8 +44,10 @@ model OtpProvider {
   otpCode   String   @map("otp_code")
   checked   Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   ip        String
   type      OtpType
+  data      String?
 
   @@map("otp_providers")
 }

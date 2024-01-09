@@ -2,6 +2,7 @@ import { BannerStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
+import { BannerAdminBannerSearchCategory } from '../enum/banner-admin-banner-search-category.enum';
 
 export class BannerAdminGetGeneralRequest extends PaginationRequest {
     @Expose()
@@ -27,4 +28,9 @@ export class BannerAdminGetGeneralRequest extends PaginationRequest {
     @IsString()
     @IsOptional()
     keyword: string;
+
+    @Expose()
+    @IsOptional()
+    @IsEnum(BannerAdminBannerSearchCategory)
+    category: BannerAdminBannerSearchCategory;
 }

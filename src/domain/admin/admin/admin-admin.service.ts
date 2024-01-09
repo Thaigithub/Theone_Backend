@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { $Enums, AccountStatus, AccountType, AdminLevel, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -31,6 +31,7 @@ export class AdminAdminService {
     }
 
     async changeAdminInfo(id: number, payload: AdminAdminUpsertRequest): Promise<void> {
+        console.log(payload);
         await this.updateAdmin(id, payload);
     }
 
@@ -53,15 +54,16 @@ export class AdminAdminService {
 
     async getPermissionsIds(permissions: $Enums.FunctionName[]): Promise<number[]> {
         const listFunctionID: number[] = [];
+        console.log(permissions);
         for (const functionName of permissions) {
             const result = await this.prismaService.function.findFirst({
                 where: {
                     name: functionName,
                 },
             });
-            listFunctionID.push(result.id);
+            if (result) listFunctionID.push(result.id);
         }
-
+        console.log(listFunctionID);
         return listFunctionID;
     }
 
@@ -141,51 +143,47 @@ export class AdminAdminService {
     }
 
     async updateAdmin(id: number, payload: AdminAdminUpsertRequest): Promise<void> {
-        try {
-            const listFunctionID = await this.getPermissionsIds(payload.permissions);
+        const listFunctionID = await this.getPermissionsIds(payload.permissions);
 
-            const existAdmin = await this.prismaService.admin.findUnique({
-                where: {
-                    isActive: true,
-                    id,
-                },
-                include: {
-                    account: true,
-                },
-            });
+        const existAdmin = await this.prismaService.admin.findUnique({
+            where: {
+                isActive: true,
+                id,
+            },
+            include: {
+                account: true,
+            },
+        });
 
-            if (!existAdmin) throw new BadRequestException('Admin account not exist');
+        if (!existAdmin) throw new NotFoundException('Admin not found');
 
-            await this.prismaService.admin.update({
-                where: {
-                    isActive: true,
-                    id,
-                },
-                data: {
-                    name: payload.name,
-                    level: payload.level,
-                    account: {
-                        update: {
-                            username: payload.username,
-                            password:
-                                payload.password !== null && payload.password !== undefined
-                                    ? await hash(payload.password, 10)
-                                    : existAdmin.account.password,
-                        },
-                    },
-                    permissions: {
-                        deleteMany: {
-                            adminId: id,
-                        },
-                        create: listFunctionID.map((functionId) => ({
-                            functionId: functionId,
-                        })),
+        await this.prismaService.admin.update({
+            where: {
+                isActive: true,
+                id,
+            },
+            data: {
+                name: payload.name,
+                level: payload.level,
+                account: {
+                    update: {
+                        username: payload.username,
+                        password:
+                            payload.password !== null && payload.password !== undefined
+                                ? await hash(payload.password, 10)
+                                : existAdmin.account.password,
                     },
                 },
-            });
-        } catch (error) {
-            throw new InternalServerErrorException(error);
-        }
+                permissions: {
+                    deleteMany: {
+                        adminId: id,
+                    },
+                    create: listFunctionID.map((functionId) => ({
+                        functionId: functionId,
+                    })),
+                },
+            },
+        });
     }
 
     async deleteAdminRepo(id: number): Promise<void> {
