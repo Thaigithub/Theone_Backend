@@ -120,15 +120,6 @@ export class SiteMemberService {
                     },
                     take: 1,
                 },
-                company: {
-                    select: {
-                        logo: {
-                            select: {
-                                file: true,
-                            },
-                        },
-                    },
-                },
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
@@ -141,7 +132,6 @@ export class SiteMemberService {
                 endDate: item.endDate,
                 numberOfWorkers: item.numberOfWorkers,
                 interestId: item.interestMember.length > 0 ? item.interestMember[0].id : null,
-                companyLogoKey: item.company.logo ? item.company.logo.file.key : null,
             };
         });
         const siteListCount = await this.prismaService.site.count({
