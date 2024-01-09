@@ -5,6 +5,11 @@ export class AccountMemberUpdateRequest {
     @IsString()
     @IsOptional()
     @Expose()
+    username: string;
+
+    @IsString()
+    @IsOptional()
+    @Expose()
     name: string;
 
     @IsNumber()
