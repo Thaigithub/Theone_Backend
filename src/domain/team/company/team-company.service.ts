@@ -15,7 +15,6 @@ export class TeamCompanyService {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupation?.map((item) => parseInt(item));
         const districtList = query.regionList?.map((item) => parseInt(item.split('-')[1]));
-        console.log(districtList);
 
         return {
             isActive: true,

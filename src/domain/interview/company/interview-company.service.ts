@@ -91,11 +91,6 @@ export class InterviewCompanyService {
                                         },
                                     },
                                 },
-                                certificates: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
                             },
                         },
                         team: {
@@ -111,11 +106,6 @@ export class InterviewCompanyService {
                                                         codeName: true,
                                                     },
                                                 },
-                                            },
-                                        },
-                                        certificates: {
-                                            select: {
-                                                name: true,
                                             },
                                         },
                                     },
@@ -171,7 +161,6 @@ export class InterviewCompanyService {
         });
 
         if (!interview) throw new BadRequestException('No interview found');
-
         return await this.memberCompanyService.getMemberDetail(interview.applicationId);
     }
 

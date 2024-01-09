@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
+import { MemberTeamService } from 'domain/team/member/team-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { BaseResponse } from 'utils/generics/base.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 import { PostResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { MemberTeamService } from 'domain/team/member/team-member.service';
-import { BaseResponse } from 'utils/generics/base.response';
 
 @Injectable()
 export class PostMemberService {
@@ -195,28 +195,9 @@ export class PostMemberService {
                     accountId,
                 },
             });
-            const memberCertificatesList = await this.prismaService.member.findUnique({
-                select: {
-                    certificates: {
-                        select: {
-                            code: {
-                                select: {
-                                    id: true,
-                                },
-                            },
-                        },
-                    },
-                },
-                where: {
-                    accountId,
-                },
-            });
             memberRegisteredCodeIdsList = [
                 ...new Set([
                     ...memberSpecialLicenseList.specialLicenses.map((item) => {
-                        return item.code.id;
-                    }),
-                    ...memberCertificatesList.certificates.map((item) => {
                         return item.code.id;
                     }),
                 ]),

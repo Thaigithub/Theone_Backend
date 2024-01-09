@@ -58,7 +58,6 @@ export class MatchingCompanyService {
                 member: {
                     include: {
                         specialLicenses: true,
-                        certificates: true,
                         applyPosts: {
                             include: {
                                 contract: true,
@@ -74,7 +73,6 @@ export class MatchingCompanyService {
                                 member: {
                                     include: {
                                         specialLicenses: true,
-                                        certificates: true,
                                         desiredOccupations: {
                                             include: {
                                                 code: true,
@@ -107,7 +105,6 @@ export class MatchingCompanyService {
             const members = await this.prismaService.member.findMany({
                 include: {
                     specialLicenses: true,
-                    certificates: true,
                     applyPosts: {
                         include: {
                             contract: true,
@@ -125,7 +122,6 @@ export class MatchingCompanyService {
                             member: {
                                 include: {
                                     specialLicenses: true,
-                                    certificates: true,
                                     desiredOccupations: {
                                         include: {
                                             code: true,
@@ -167,24 +163,6 @@ export class MatchingCompanyService {
 
         return listSpecial;
     }
-
-    getAllCertificareTeam(team): string[] {
-        const members = team.members;
-        const listCertificate: string[] = [];
-        const setCertificate = new Set<string>();
-        members.forEach((member) => {
-            const certificateList: string[] = member.member.certificates.map((cer) => cer.name);
-            certificateList.forEach((cer) => {
-                setCertificate.add(cer);
-            });
-        });
-        setCertificate.forEach((set) => {
-            listCertificate.push(set);
-        });
-
-        return listCertificate;
-    }
-
     async addHistory(company: Company, members: Member[], teams: Team[]) {
         await this.prismaService.matchingRecommendation.createMany({
             data: [
@@ -210,7 +188,6 @@ export class MatchingCompanyService {
                         totalMonths: member.totalExperienceMonths,
                         totalYears: member.totalExperienceYears,
                         specialNote: member.specialLicenses.map((special) => special.name),
-                        certificate: member.certificates.map((certificate) => certificate.name),
                         numberOfTeamMembers: null,
                         memberDetail: {
                             localInformation: member.address,
@@ -232,7 +209,6 @@ export class MatchingCompanyService {
                         totalMonths: team.totalExperienceMonths,
                         totalYears: team.totalExperienceYears,
                         specialNote: this.getAllSpecialNoteTeam(team),
-                        certificate: this.getAllCertificareTeam(team),
                         numberOfTeamMembers: team.members.length + 1,
                         memberDetail: null,
                         teamDetail: {

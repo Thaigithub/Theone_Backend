@@ -31,7 +31,6 @@ export class AdminAdminService {
     }
 
     async changeAdminInfo(id: number, payload: AdminAdminUpsertRequest): Promise<void> {
-        console.log(payload);
         await this.updateAdmin(id, payload);
     }
 
@@ -54,7 +53,6 @@ export class AdminAdminService {
 
     async getPermissionsIds(permissions: $Enums.FunctionName[]): Promise<number[]> {
         const listFunctionID: number[] = [];
-        console.log(permissions);
         for (const functionName of permissions) {
             const result = await this.prismaService.function.findFirst({
                 where: {
@@ -63,7 +61,6 @@ export class AdminAdminService {
             });
             if (result) listFunctionID.push(result.id);
         }
-        console.log(listFunctionID);
         return listFunctionID;
     }
 

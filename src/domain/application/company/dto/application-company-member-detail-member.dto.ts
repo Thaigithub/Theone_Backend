@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationCompanyMemberDetailAccountDTO } from './application-company-member-detail-account.dto';
 import { ApplicationCompanyMemberDetailBHSCerDTO } from './application-company-member-detail-bhscer.dto';
 import { ApplicationCompanyMemberDetailCareerDTO } from './application-company-member-detail-career.dto';
-import { ApplicationCompanyMemberDetailCertificatesDTO } from './application-company-member-detail-certificates.dto';
 import { ApplicationCompanyMemberDetailSpecialDTO } from './application-company-member-detail-special.dto';
 
 export class ApplicationCompantMemberDetailMemberDTO {
@@ -44,9 +43,6 @@ export class ApplicationCompantMemberDetailMemberDTO {
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailCareerDTO] })
     career: ApplicationCompanyMemberDetailCareerDTO[];
-
-    @ApiProperty({ type: [ApplicationCompanyMemberDetailCertificatesDTO] })
-    certificates: ApplicationCompanyMemberDetailCertificatesDTO[];
 
     @ApiProperty({ type: [ApplicationCompanyMemberDetailSpecialDTO] })
     specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];

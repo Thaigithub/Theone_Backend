@@ -511,17 +511,6 @@ export class AccountMemberService {
             },
         });
 
-        await this.prismaService.certificate.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
-                },
-            },
-        });
-
         await this.prismaService.disability.updateMany({
             data: {
                 isActive: false,
