@@ -7,6 +7,7 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 import { PostResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 import { MemberTeamService } from 'domain/team/member/team-member.service';
+import { BaseResponse } from 'utils/generics/base.response';
 
 @Injectable()
 export class PostMemberService {
@@ -80,19 +81,6 @@ export class PostMemberService {
         };
     }
 
-    private async getMemberId(accountId: number) {
-        const member = await this.prismaService.member.findUnique({
-            select: {
-                id: true,
-                isActive: true,
-            },
-            where: {
-                accountId,
-            },
-        });
-        return member.id;
-    }
-
     async getList(accountId: number | undefined, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
         if (siteId) {
             const siteExist = await this.prismaService.site.count({
@@ -102,23 +90,6 @@ export class PostMemberService {
                 },
             });
             if (!siteExist) throw new NotFoundException('Site does not exist');
-        }
-
-        let listInterestPostIds: number[];
-
-        if (accountId) {
-            const memberId = await this.getMemberId(accountId);
-            const interestPosts = await this.prismaService.interest.findMany({
-                select: {
-                    postId: true,
-                },
-                where: {
-                    memberId,
-                },
-            });
-            listInterestPostIds = interestPosts.map((item) => {
-                return item.postId;
-            });
         }
 
         const posts = await this.prismaService.post.findMany({
@@ -147,6 +118,13 @@ export class PostMemberService {
                                     },
                                 },
                             },
+                        },
+                    },
+                },
+                interested: {
+                    where: {
+                        member: {
+                            accountId,
                         },
                     },
                 },
@@ -179,7 +157,7 @@ export class PostMemberService {
                 siteAddress: site ? site.address : null,
                 siteAddressCity: site?.district ? site.district.city.englishName : null,
                 siteAddressDistrict: site?.district ? site.district.englishName : null,
-                isInterest: listInterestPostIds && listInterestPostIds.includes(item.id) ? true : false,
+                isInterest: item.interested.length !== 0 ? true : false,
             };
         });
     }
@@ -263,30 +241,30 @@ export class PostMemberService {
                                 city: true,
                             },
                         },
+                        interestMember: {
+                            where: {
+                                member: {
+                                    accountId,
+                                },
+                            },
+                        },
                     },
                 },
                 occupation: true,
                 specialOccupation: true,
+                interested: {
+                    where: {
+                        member: {
+                            accountId,
+                        },
+                    },
+                },
             },
             where: {
                 isActive: true,
                 id,
             },
         });
-
-        let siteIsInterested: boolean = false;
-        if (accountId) {
-            const memberId = await this.getMemberId(accountId);
-            const interest = await this.prismaService.interest.findUnique({
-                where: {
-                    memberId_siteId: {
-                        memberId,
-                        siteId: post.siteId,
-                    },
-                },
-            });
-            if (interest) siteIsInterested = true;
-        }
 
         return {
             postInformation: {
@@ -309,7 +287,7 @@ export class PostMemberService {
             },
             detail: post.postEditor,
             siteInformation: {
-                id: post.site.id,
+                id: post.siteId,
                 companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
                 siteName: post.site ? post.site.name : null,
                 siteAddress: post.site ? post.site.address : null,
@@ -317,9 +295,10 @@ export class PostMemberService {
                 endDate: post.site.endDate ? post.site.endDate.toISOString().split('T')[0] : null,
                 originalBuilding: post.site ? post.site.originalBuilding : null,
                 originalContractor: post.site ? post.site.contractStatus : null,
-                isInterest: siteIsInterested,
+                isInterest: post.site && post.site.interestMember.length !== 0 ? true : false,
             },
             workLocation: post.workLocation,
+            isInterest: post.interested.length !== 0 ? true : false,
         };
     }
 
@@ -365,7 +344,15 @@ export class PostMemberService {
     }
 
     async addApplyPostTeam(accountId: number, postId: number, teamId: number) {
-        await this.memberTeamService.checkTeamPermission(accountId, teamId, true);
+        const isTeamLeader = await this.prismaService.team.findUnique({
+            where: {
+                leader: {
+                    accountId,
+                },
+                id: teamId,
+            },
+        });
+        if (!isTeamLeader) return BaseResponse.error('You are not leader of this team');
         //Check exist post
         const post = await this.prismaService.post.findUnique({
             where: {
@@ -391,12 +378,13 @@ export class PostMemberService {
             throw new BadRequestException('This job post is already applied');
         }
 
-        await this.prismaService.application.create({
+        const newApplication = await this.prismaService.application.create({
             data: {
                 team: { connect: { id: teamId } },
                 post: { connect: { id: postId } },
             },
         });
+        return BaseResponse.of(newApplication);
     }
 
     async updateInterestPost(accountId: number, id: number): Promise<PostMemberUpdateInterestResponse> {

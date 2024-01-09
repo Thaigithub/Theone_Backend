@@ -84,9 +84,9 @@ export class MemberCompanyService {
                     ],
                 },
                 {
-                    desiredOccupations: {
+                    desiredOccupations: query.occupationList && {
                         some: {
-                            code: query.occupationList && { id: { in: occupationList } },
+                            code: { id: { in: occupationList } },
                         },
                     },
                 },

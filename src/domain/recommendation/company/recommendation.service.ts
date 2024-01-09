@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common/exceptions';
+import { BadRequestException, NotFoundException } from '@nestjs/common/exceptions';
 import { InterviewStatus, PostApplicationStatus, RequestObject, SupportCategory } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { RecommendationCompanyInterviewProposeRequest } from './request/recommendaation-company-interview-proposed.request';
@@ -86,7 +86,7 @@ export class RecommendationCompanyService {
         });
     }
 
-    async getDetailApplicants(accountId: number, applicantId: number, body: RecommendationCompanyInterviewProposeRequest) {
+    async getDetailApplicants(accountId: number, applicantId: number, postId: number, isTeam: boolean) {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
@@ -99,25 +99,25 @@ export class RecommendationCompanyService {
 
         const post = await this.prismaService.post.findUnique({
             where: {
-                id: body.postId,
+                id: postId,
                 isActive: true,
                 companyId: account.company.id,
             },
         });
 
-        if (!post) throw new BadRequestException('No Post found');
+        if (!post) throw new NotFoundException('No post found');
 
-        if (body.object === RequestObject.INDIVIDUAL) {
+        if (!isTeam) {
             const applicant = await this.prismaService.headhuntingRecommendation.findUnique({
                 where: {
                     memberId_postId: {
                         memberId: applicantId,
-                        postId: body.postId,
+                        postId: postId,
                     },
                 },
             });
 
-            if (!applicant) throw new BadRequestException('No applicant found');
+            if (!applicant) throw new NotFoundException('No applicant found');
 
             return await this.prismaService.member.findUnique({
                 where: {
@@ -189,7 +189,7 @@ export class RecommendationCompanyService {
                 where: {
                     teamId_postId: {
                         teamId: applicantId,
-                        postId: body.postId,
+                        postId: postId,
                     },
                 },
             });
