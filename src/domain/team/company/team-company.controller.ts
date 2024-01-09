@@ -54,11 +54,11 @@ export class TeamCompanyController {
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListTeams(
         @Query() query: TeamCompanyManpowerGetListRequest,
-        @Query('occupationList', new ParseArrayPipe({ optional: true })) occupationList: [string] | undefined,
+        @Query('occupation', new ParseArrayPipe({ optional: true })) occupation: [string] | undefined,
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
-        @Query('districtList', new ParseArrayPipe({ optional: true })) districtList: [string] | undefined,
+        @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
     ): Promise<BaseResponse<TeamCompanyManpowerGetListResponse>> {
-        query = { ...query, experienceTypeList, occupationList, districtList };
+        query = { ...query, experienceTypeList, occupation, regionList };
         const list = await this.teamCompanyService.getList(query);
         const total = await this.teamCompanyService.getTotal(query);
         const paginationResponse = new PaginationResponse(list, new PageInfo(total));

@@ -14,8 +14,8 @@ export class MemberCompanyService {
 
     private async parseConditionFromQuery(query: MemberCompanyManpowerGetListRequest): Promise<Prisma.MemberWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
-        const occupationList = query.occupationList?.map((item) => parseInt(item));
-        let districtList = query.districtList?.map((item) => parseInt(item));
+        const occupationList = query.occupation?.map((item) => parseInt(item));
+        let districtList = query.regionList?.map((item) => parseInt(item.split('-')[1]));
         const districtEntireCitiesList = await this.prismaService.district.findMany({
             where: {
                 id: { in: districtList },
@@ -84,7 +84,7 @@ export class MemberCompanyService {
                     ],
                 },
                 {
-                    desiredOccupations: query.occupationList && {
+                    desiredOccupations: query.occupation && {
                         some: {
                             code: { id: { in: occupationList } },
                         },
@@ -92,7 +92,7 @@ export class MemberCompanyService {
                 },
                 {
                     OR: [
-                        query.districtList
+                        query.regionList
                             ? {
                                   district: {
                                       id: { in: districtList },
