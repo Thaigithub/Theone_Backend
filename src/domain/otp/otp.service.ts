@@ -100,6 +100,17 @@ export class OtpService {
             where: {
                 id,
                 ip,
+                isUsed: false,
+            },
+        });
+    }
+    async usedOtp(id: number): Promise<void> {
+        await this.prismaService.otpProvider.update({
+            where: {
+                id,
+            },
+            data: {
+                isUsed: true,
             },
         });
     }

@@ -65,9 +65,11 @@ export class CompanyAuthService {
 
     async changePassword(body: AuthCompanyChangePasswordRequest, ip: string): Promise<void> {
         const searchOtp = await this.otpService.getOtp(body.otpId, ip);
+        if (!searchOtp) throw new NotFoundException('Otp not found');
         if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
             throw new BadRequestException('Otp verification is expired');
         }
+        await this.otpService.usedOtp(searchOtp.id);
         await this.prismaService.account.update({
             where: {
                 username: searchOtp.data,
@@ -110,7 +112,7 @@ export class CompanyAuthService {
             phoneNumber: company.phone,
             type: OtpType.PHONE,
             ip: ip,
-            data: passwordRequest.username ? null : company.account.username,
+            data: passwordRequest.username ? company.account.username : null,
         });
     }
 
