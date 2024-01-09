@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { CompanyAuthService } from './auth-company.service';
+import { AuthCompanyChangePasswordRequest } from './request/auth-company-change-password.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
@@ -19,15 +20,15 @@ export class CompanyAuthController {
         return BaseResponse.of(await this.companyAuthService.login(authUserDto));
     }
 
-    @Post('/send-otp-username')
-    async sendOTPToGetUserId(
+    @Post('/otp/username')
+    async sendOTPToGetUsername(
         @Body() body: AuthCompanyUserIdRequest,
         @Req() req: Request,
     ): Promise<BaseResponse<AuthCompanyOtpSendResponse>> {
         return BaseResponse.of(await this.companyAuthService.sendOtp(body, req.ip));
     }
 
-    @Post('/send-otp-password')
+    @Post('/otp/password')
     async sendOTPToGetPassword(
         @Body() body: AuthCompanyPasswordRequest,
         @Req() req: Request,
@@ -35,11 +36,16 @@ export class CompanyAuthController {
         return BaseResponse.of(await this.companyAuthService.sendOtp(body, req.ip));
     }
 
-    @Post('/verify-otp')
-    async verifyOTPToGetUserID(
+    @Post('/otp/verification')
+    async verifyOTP(
         @Body() body: AuthCompanyOtpVerifyRequest,
         @Req() req: Request,
     ): Promise<BaseResponse<AuthCompanyOtpVerifyResponse>> {
         return BaseResponse.of(await this.companyAuthService.verifyOtp(body, req.ip));
+    }
+
+    @Patch('/password')
+    async changePassword(@Req() req: Request, @Body() body: AuthCompanyChangePasswordRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.companyAuthService.changePassword(body, req.ip));
     }
 }

@@ -6,5 +6,5 @@ export class AuthCompanyUserIdRequest {
     name: string;
     @Expose()
     @IsString()
-    email: string;
+    phoneNumber: string;
 }

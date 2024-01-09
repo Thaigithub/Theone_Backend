@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OtpType } from '@prisma/client';
+import { OtpProvider, OtpType } from '@prisma/client';
 import { SMS_OTP_VALID_TIME } from 'app.config';
 import { MailService } from 'services/mail/mail.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -25,14 +25,17 @@ export class OtpService {
                 createdAt: 'desc',
             },
         });
-        if (getTimeDifferenceInMinutes(existedOtp.createdAt) < 1) {
-            throw new BadRequestException('Wait for 1 minute till next request');
+        if (existedOtp) {
+            if (getTimeDifferenceInMinutes(existedOtp.createdAt) < 1) {
+                throw new BadRequestException('Wait for 1 minute till next request');
+            }
         }
         const otp = await this.prismaService.otpProvider.create({
             data: {
                 otpCode: OTPGenerator.generateOTPString(),
                 type: request.type,
                 ip: request.ip,
+                data: request.data,
             },
             select: {
                 id: true,
@@ -55,20 +58,26 @@ export class OtpService {
         });
         if (!existedOtp) {
             return {
+                otpId: null,
                 isVerified: false,
                 status: OtpStatus.NOT_FOUND,
+                data: null,
             };
         }
         if (getTimeDifferenceInMinutes(existedOtp.createdAt) > parseInt(SMS_OTP_VALID_TIME, 10)) {
             return {
+                otpId: null,
                 isVerified: false,
                 status: OtpStatus.OUT_OF_TIME,
+                data: null,
             };
         }
         if (existedOtp.otpCode !== request.code) {
             return {
+                otpId: null,
                 isVerified: false,
                 status: OtpStatus.WRONG_CODE,
+                data: null,
             };
         }
         await this.prismaService.otpProvider.update({
@@ -80,8 +89,18 @@ export class OtpService {
             },
         });
         return {
+            otpId: request.otpId,
             isVerified: true,
             status: OtpStatus.VERIFIED,
+            data: existedOtp.data,
         };
+    }
+    async getOtp(id: number, ip: string): Promise<OtpProvider> {
+        return await this.prismaService.otpProvider.findUnique({
+            where: {
+                id,
+                ip,
+            },
+        });
     }
 }

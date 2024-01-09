@@ -1,6 +1,8 @@
 export class AuthMemberOtpVerifyResponse {
     isVerified: boolean;
     status: OtpStatus;
+    otpId: number;
+    data: string | null;
 }
 
 enum OtpStatus {

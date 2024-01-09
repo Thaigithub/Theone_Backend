@@ -38,6 +38,7 @@ export class AdminAdminController {
         @Param('id', ParseIntPipe) id: number,
         @Body() payload: AdminAdminUpsertRequest,
     ): Promise<BaseResponse<void>> {
+        console.log(id);
         await this.adminService.changeAdminInfo(id, payload);
         return BaseResponse.ok();
     }

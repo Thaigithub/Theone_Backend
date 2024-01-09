@@ -600,6 +600,7 @@ export class HeadhuntingAdminService {
                         site: true,
                         specialOccupation: true,
                         occupation: true,
+                        company: true,
                     },
                 },
             },
@@ -611,6 +612,7 @@ export class HeadhuntingAdminService {
                 siteName: detail.post.site?.name || null,
                 siteContact: detail.post.site?.contact || null,
                 personInCharge: detail.post.site?.personInCharge || null,
+                personInChargeContact: detail.post.site?.personInChargeContact || null,
                 specialOccupation: detail.post.specialOccupation?.codeName || null,
                 occupation: detail.post.occupation?.codeName || null,
                 object: detail.headhuntingRequest.object,
@@ -622,6 +624,7 @@ export class HeadhuntingAdminService {
                 paymentDate: new Date().toISOString(), //TODO: Adjust in future
                 matchingStatus: HeadhuntingAdminGetListApprovalMatching.SUCCESSFUL,
                 matchingDay: new Date().toISOString(),
+                email: detail.post.company.email,
             },
             member: {
                 rank: HeadhuntingAdminGetDetailApprovalRank.MEMBER,
@@ -638,6 +641,12 @@ export class HeadhuntingAdminService {
                 specialOccupation: detail.member.specialLicenses.map((special) => special.code.codeName),
                 experienceMonths: detail.member.totalExperienceMonths,
                 experienceYears: detail.member.totalExperienceYears,
+            },
+            request: {
+                specialOccupationCodeName: detail.post.specialOccupation?.codeName || null,
+                career: detail.post.experienceType,
+                postName: detail.post.name,
+                detail: detail.headhuntingRequest.detail,
             },
         };
 
@@ -680,6 +689,7 @@ export class HeadhuntingAdminService {
                         site: true,
                         specialOccupation: true,
                         occupation: true,
+                        company: true,
                     },
                 },
             },
@@ -691,6 +701,8 @@ export class HeadhuntingAdminService {
                 siteName: detail.post.site?.name || null,
                 siteContact: detail.post.site?.contact || null,
                 personInCharge: detail.post.site?.personInCharge || null,
+                personInChargeContact: detail.post.site?.personInChargeContact || null,
+                email: detail.post.company.email,
                 specialOccupation: detail.post.specialOccupation?.codeName || null,
                 occupation: detail.post.occupation?.codeName || null,
                 object: detail.headhuntingRequest.object,
@@ -727,6 +739,12 @@ export class HeadhuntingAdminService {
                     experienceYears: member.totalExperienceYears,
                 } as HeadhuntingGetDetailApprovalMemberResponse;
             }),
+            request: {
+                specialOccupationCodeName: detail.post.specialOccupation?.codeName || null,
+                career: detail.post.experienceType,
+                postName: detail.post.name,
+                detail: detail.headhuntingRequest.detail,
+            },
         };
 
         return detailResponse;

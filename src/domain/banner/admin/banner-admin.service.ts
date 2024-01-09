@@ -3,6 +3,7 @@ import { PostBannerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { BannerAdminBannerSearchCategory } from './enum/banner-admin-banner-search-category.enum';
 import { PostSearchCaterory } from './enum/banner-admin-post-search-category.enum';
 import { SiteSearchCaterory } from './enum/banner-admin-site-search-category.enum';
 import { BannerAdminChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
@@ -62,10 +63,22 @@ export class BannerAdminService {
                 },
                 startDate: query.startDate && new Date(query.startDate),
                 endDate: query.endDate && new Date(query.endDate),
-                title: {
-                    contains: query.keyword,
-                    mode: Prisma.QueryMode.insensitive,
-                },
+                title:
+                    query.category &&
+                    (query.category === BannerAdminBannerSearchCategory.TITLE
+                        ? {
+                              contains: query.keyword,
+                              mode: Prisma.QueryMode.insensitive,
+                          }
+                        : undefined),
+                urlLink:
+                    query.category &&
+                    (query.category === BannerAdminBannerSearchCategory.URL
+                        ? {
+                              contains: query.keyword,
+                              mode: Prisma.QueryMode.insensitive,
+                          }
+                        : undefined),
             },
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -242,14 +255,26 @@ export class BannerAdminService {
                         status: query.status,
                     },
                     post: {
-                        name: {
-                            contains: query.keyword,
-                            mode: Prisma.QueryMode.insensitive,
-                        },
+                        name:
+                            query.category &&
+                            (query.category === BannerAdminBannerSearchCategory.TITLE
+                                ? {
+                                      contains: query.keyword,
+                                      mode: Prisma.QueryMode.insensitive,
+                                  }
+                                : undefined),
                     },
                 },
                 startDate: query.startDate && new Date(query.startDate),
                 endDate: query.endDate && new Date(query.endDate),
+                urlLink:
+                    query.category &&
+                    (query.category === BannerAdminBannerSearchCategory.URL
+                        ? {
+                              contains: query.keyword,
+                              mode: Prisma.QueryMode.insensitive,
+                          }
+                        : undefined),
             },
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -419,7 +444,6 @@ export class BannerAdminService {
     }
     // COMPANY POST BANNER
     async getCompanyPostBanner(query: BannerAdminGetCompanyJobPostRequest): Promise<BannerAdminGetCompanyJobPostResponse> {
-        console.log(query);
         const querySearch = {
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -585,7 +609,7 @@ export class BannerAdminService {
             siteName: banner.post.site ? banner.post.site.name : null,
             companyId: banner.post.company.id,
             companyName: banner.post.company.name,
-            personInCharge: banner.post.site.personInCharge,
+            personInCharge: banner.post.site ? banner.post.site.personInCharge : null,
             desiredStartDate: banner.companyPostBanner.desiredStartDate,
             desiredEndDate: banner.companyPostBanner.desiredEndDate,
             acceptDate: banner.companyPostBanner.acceptDate,
@@ -907,7 +931,6 @@ export class BannerAdminService {
         }
         if (banner.postBanner && banner.postBanner.adminPostBanner) {
             await this.prismaService.adminPostBanner.update({ where: { id }, data: { priority: null } });
-            console.log(banner.postBanner.adminPostBanner.priority);
             const list = await this.prismaService.adminPostBanner.findMany({
                 where: {
                     priority: {

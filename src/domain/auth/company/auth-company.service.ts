@@ -1,12 +1,15 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType } from '@prisma/client';
-import { compare } from 'bcrypt';
+import { OTP_VERIFICATION_VALID_TIME } from 'app.config';
+import { compare, hash } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
+import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
+import { AuthCompanyChangePasswordRequest } from './request/auth-company-change-password.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
@@ -60,6 +63,21 @@ export class CompanyAuthService {
         return { token, uid, type };
     }
 
+    async changePassword(body: AuthCompanyChangePasswordRequest, ip: string): Promise<void> {
+        const searchOtp = await this.otpService.getOtp(body.otpId, ip);
+        if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
+            throw new BadRequestException('Otp verification is expired');
+        }
+        await this.prismaService.account.update({
+            where: {
+                username: searchOtp.data,
+            },
+            data: {
+                password: await hash(body.password, 10),
+            },
+        });
+    }
+
     async sendOtp(
         request: AuthCompanyUserIdRequest | AuthCompanyPasswordRequest,
         ip: string,
@@ -68,18 +86,32 @@ export class CompanyAuthService {
         const company = await this.prismaService.company.findFirst({
             where: {
                 name: request.name,
-                email: request.email,
+                phone: request.phoneNumber,
                 account: {
                     type: AccountType.COMPANY,
                     isActive: true,
                     username: passwordRequest.username,
                 },
             },
+            select: {
+                account: {
+                    select: {
+                        username: true,
+                    },
+                },
+                phone: true,
+            },
         });
         if (!company) {
             throw new NotFoundException(`Account not found `);
         }
-        return await this.otpService.sendOtp({ email: company.email, phoneNumber: null, type: OtpType.PHONE, ip: ip });
+        return await this.otpService.sendOtp({
+            email: null,
+            phoneNumber: company.phone,
+            type: OtpType.PHONE,
+            ip: ip,
+            data: passwordRequest.username ? null : company.account.username,
+        });
     }
 
     async verifyOtp(request: AuthCompanyOtpVerifyRequest, ip: string): Promise<AuthCompanyOtpVerifyResponse> {

@@ -5,4 +5,5 @@ export class OtpSendRequest {
     phoneNumber: string;
     type: OtpType;
     ip: string;
+    data: string | null;
 }

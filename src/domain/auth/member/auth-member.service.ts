@@ -1,17 +1,33 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType, SignupMethodType } from '@prisma/client';
-import { APPLE_OAUTH_RESTAPI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_VERIFY_URL, NAVER_VERIFY_URL } from 'app.config';
+import {
+    APPLE_OAUTH_RESTAPI,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    KAKAO_VERIFY_URL,
+    NAVER_VERIFY_URL,
+    OTP_VERIFICATION_VALID_TIME,
+} from 'app.config';
 import Axios from 'axios';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { DbType } from 'utils/constants/account.constant';
+import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AccountDTO } from './dto/auth-member-account.dto';
+import { AuthMemberChangePasswordRequest } from './request/auth-member-change-password.request';
 import { AuthMemberLoginRequest } from './request/auth-member-login-normal.request';
 import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social.request';
 import { AuthMemberPasswordRequest } from './request/auth-member-otp-send-password.request';
@@ -45,11 +61,39 @@ export class MemberAuthService {
                     username: passwordRequest.username,
                 },
             },
+            select: {
+                account: {
+                    select: {
+                        username: true,
+                    },
+                },
+                contact: true,
+            },
         });
         if (!member) {
             throw new NotFoundException(`Account not found `);
         }
-        return await this.otpService.sendOtp({ email: null, phoneNumber: member.contact, type: OtpType.PHONE, ip: ip });
+        return await this.otpService.sendOtp({
+            email: null,
+            phoneNumber: member.contact,
+            type: OtpType.PHONE,
+            ip: ip,
+            data: passwordRequest.username ? null : member.account.username,
+        });
+    }
+    async changePassword(body: AuthMemberChangePasswordRequest, ip: string): Promise<void> {
+        const searchOtp = await this.otpService.getOtp(body.otpId, ip);
+        if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
+            throw new BadRequestException('Otp verification is expired');
+        }
+        await this.prismaService.account.update({
+            where: {
+                username: searchOtp.data,
+            },
+            data: {
+                password: await hash(body.password, 10),
+            },
+        });
     }
     async verifyOtp(request: AuthMemberOtpVerifyRequest, ip: string): Promise<AuthMemberOtpVerifyResponse> {
         return await this.otpService.checkValidOtp(request, ip);
