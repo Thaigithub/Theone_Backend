@@ -1,0 +1,5 @@
+export enum ApplicationAdminContractStatus {
+    UNDER_CONTRACT = 'UNDER_CONTRACT',
+    CONTRACT_EXPIRED = 'CONTRACT_EXPIRED',
+    CONTRACT_NOT_FOUND = 'CONTRACT_NOT_FOUND',
+}

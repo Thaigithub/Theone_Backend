@@ -5,6 +5,8 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
+import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
+import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
 import { AccountMemberUpdateRequest } from './request/account-member-update.request';
@@ -15,7 +17,9 @@ import { AccountMemberUpsertHSTCertificateRequest } from './request/account-memb
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
-import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
+import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
+import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
+import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
@@ -46,7 +50,7 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
     }
 
-    @Patch('password')
+    @Patch('/password')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async changePassword(
@@ -54,6 +58,28 @@ export class AccountMemberController {
         @Body() body: AccountMemberChangePasswordRequest,
     ): Promise<BaseResponse<void>> {
         return await this.accountMemberService.changePassword(request.user.accountId, body);
+    }
+
+    @Post('/phone/otp')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    async sendOTPToVerifyPhone(
+        @Req() req,
+        @Req() request: AccountIdExtensionRequest,
+        @Body() body: AccountMemberSendOtpVerifyPhoneRequest,
+    ): Promise<BaseResponse<AccountMemberSendOtpVerifyPhoneResponse>> {
+        return BaseResponse.of(await this.accountMemberService.sendOtpVerifyPhone(req.ip, request.user.accountId, body));
+    }
+
+    @Post('/phone/otp/verification')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    async verifyOTPToVerifyPhone(
+        @Req() req,
+        @Req() request: AccountIdExtensionRequest,
+        @Body() body: AccountMemberVerifyOtpVerifyPhoneRequest,
+    ): Promise<BaseResponse<AccountMemberVerifyOtpVerifyPhoneResponse>> {
+        return BaseResponse.of(await this.accountMemberService.verifyOtpVerifyPhone(req.ip, request.user.accountId, body));
     }
 
     @Put('/bank-account')
