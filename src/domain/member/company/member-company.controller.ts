@@ -1,9 +1,9 @@
 import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
-import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberCompanyService } from './member-company.service';
@@ -11,7 +11,6 @@ import { MemberCompanyManpowerGetListRequest } from './request/member-company-ma
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @ApiTags('[COMPANY] Member Management')
 @Controller('/company/members')
@@ -32,20 +31,6 @@ export class MemberCompanyController {
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
     async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
         return BaseResponse.of(await this.memberCompanyService.countWorkers(req.user.accountId));
-    }
-
-    @Get(':id/applicants')
-    @ApiOperation({
-        summary: 'Post detail',
-        description: 'Retrieve post information detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: ApplicationCompanyGetMemberDetail,
-    })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getMemberDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
-        return BaseResponse.of(await this.memberCompanyService.getMemberDetail(id));
     }
 
     @Get(':id/manpower')

@@ -10,6 +10,8 @@ import { ApplicationCompanyUpdateStatusRequest } from './request/application-com
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-for-post.response';
+import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
+import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -299,5 +301,367 @@ export class ApplicationCompanyService {
             };
         });
         return new PaginationResponse(offer, new PageInfo(offer.length));
+    }
+
+    async getMemberDetail(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
+        const member = await this.prismaService.application.findUnique({
+            where: {
+                id: id,
+                post: {
+                    isActive: true,
+                    company: {
+                        accountId: accountId,
+                        isActive: true,
+                    },
+                },
+                member: {
+                    isActive: true,
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (!member) {
+            throw new NotFoundException('The member id is not found');
+        }
+        const memberInfor = await this.prismaService.member.findUniqueOrThrow({
+            where: {
+                id: member.id,
+                isActive: true,
+            },
+            select: {
+                name: true,
+                contact: true,
+                email: true,
+                district: {
+                    select: {
+                        englishName: true,
+                        koreanName: true,
+                        city: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                            },
+                        },
+                    },
+                },
+                desiredSalary: true,
+                totalExperienceYears: true,
+                totalExperienceMonths: true,
+                account: {
+                    select: {
+                        username: true,
+                    },
+                },
+                career: {
+                    select: {
+                        companyName: true,
+                        siteName: true,
+                        occupation: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        startDate: true,
+                        endDate: true,
+                    },
+                },
+                specialLicenses: {
+                    select: {
+                        id: true,
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                        licenseNumber: true,
+                    },
+                },
+                basicHealthSafetyCertificate: {
+                    select: {
+                        registrationNumber: true,
+                        dateOfCompletion: true,
+                        file: true,
+                    },
+                },
+                desiredOccupations: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        code: {
+                            select: {
+                                codeName: true,
+                            },
+                        },
+                    },
+                    orderBy: { updatedAt: 'desc' },
+                },
+            },
+        });
+
+        return {
+            id: member.id,
+            name: memberInfor.name,
+            username: memberInfor.account.username,
+            contact: memberInfor.contact,
+            email: memberInfor.email,
+            city: memberInfor.district
+                ? {
+                      englishName: memberInfor.district.city.englishName,
+                      koreanName: memberInfor.district.city.koreanName,
+                  }
+                : null,
+            district: memberInfor.district
+                ? {
+                      englishName: memberInfor.district.englishName,
+                      koreanName: memberInfor.district.koreanName,
+                  }
+                : null,
+            desiredSalary: memberInfor.desiredSalary,
+            totalExperienceMonths: memberInfor.totalExperienceMonths,
+            totalExperienceYears: memberInfor.totalExperienceYears,
+            desiredOccupations:
+                memberInfor.desiredOccupations.length > 0 ? memberInfor.desiredOccupations[0].code.codeName : null,
+            careers: memberInfor.career.map((item) => {
+                return {
+                    startDate: item.startDate,
+                    endDate: item.endDate,
+                    companyName: item.companyName,
+                    siteName: item.siteName,
+                    occupation: item.occupation ? item.occupation.codeName : null,
+                };
+            }),
+            specialLicenses: memberInfor.specialLicenses.map((item) => {
+                return {
+                    id: item.id,
+                    codeName: item.code ? item.code.codeName : null,
+                    licenseNumber: item.licenseNumber,
+                };
+            }),
+            basicHealthSafetyCertificate: memberInfor.basicHealthSafetyCertificate
+                ? {
+                      registrationNumber: memberInfor.basicHealthSafetyCertificate.registrationNumber,
+                      dateOfCompletion: memberInfor.basicHealthSafetyCertificate.dateOfCompletion,
+                      file: {
+                          fileName: memberInfor.basicHealthSafetyCertificate.file.fileName,
+                          type: memberInfor.basicHealthSafetyCertificate.file.type,
+                          key: memberInfor.basicHealthSafetyCertificate.file.key,
+                          size: Number(memberInfor.basicHealthSafetyCertificate.file.size),
+                      },
+                  }
+                : null,
+        };
+    }
+
+    async getTeamDetail(accountId: number, id: number): Promise<ApplicationCompanyGetTeamDetail> {
+        const team = await this.prismaService.application.findUnique({
+            where: {
+                id: id,
+                post: {
+                    isActive: true,
+                    company: {
+                        accountId: accountId,
+                        isActive: true,
+                    },
+                },
+            },
+            select: {
+                teamId: true,
+            },
+        });
+        if (!team) {
+            throw new NotFoundException('The application id applying for team is not found');
+        }
+
+        const application = await this.prismaService.team.findUnique({
+            where: {
+                id: team.teamId,
+                isActive: true,
+            },
+            select: {
+                name: true,
+                totalMembers: true,
+                district: {
+                    include: {
+                        city: true,
+                    },
+                },
+                leader: {
+                    select: {
+                        id: true,
+                        name: true,
+                        contact: true,
+                        totalExperienceYears: true,
+                        totalExperienceMonths: true,
+                        desiredSalary: true,
+                        desiredOccupations: {
+                            where: {
+                                isActive: true,
+                            },
+                            select: {
+                                code: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                            },
+                            take: 1,
+                            orderBy: { updatedAt: 'desc' },
+                        },
+                        career: {
+                            where: {
+                                isActive: true,
+                            },
+                            select: {
+                                startDate: true,
+                                endDate: true,
+                            },
+                            take: 1,
+                            orderBy: { updatedAt: 'desc' },
+                        },
+                        specialLicenses: {
+                            select: {
+                                id: true,
+                                code: {
+                                    select: {
+                                        codeName: true,
+                                    },
+                                },
+                                licenseNumber: true,
+                            },
+                        },
+                    },
+                },
+                members: {
+                    where: {
+                        isActive: true,
+                        member: {
+                            isActive: true,
+                        },
+                    },
+                    select: {
+                        member: {
+                            select: {
+                                id: true,
+                                name: true,
+                                contact: true,
+                                desiredSalary: true,
+                                desiredOccupations: {
+                                    where: {
+                                        isActive: true,
+                                    },
+                                    select: {
+                                        code: {
+                                            select: {
+                                                codeName: true,
+                                            },
+                                        },
+                                    },
+                                    take: 1,
+                                    orderBy: { updatedAt: 'desc' },
+                                },
+                                career: {
+                                    where: {
+                                        isActive: true,
+                                    },
+                                    select: {
+                                        startDate: true,
+                                        endDate: true,
+                                    },
+                                    take: 1,
+                                    orderBy: { updatedAt: 'desc' },
+                                },
+                                totalExperienceYears: true,
+                                totalExperienceMonths: true,
+                                specialLicenses: {
+                                    select: {
+                                        id: true,
+                                        code: {
+                                            select: {
+                                                codeName: true,
+                                            },
+                                        },
+                                        licenseNumber: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!application) {
+            throw new NotFoundException('The application applying for team is not exist');
+        }
+
+        const { leader, members } = application;
+
+        let specialLicenses = [];
+        const memberDetails = [];
+        members.forEach((element) => {
+            specialLicenses = specialLicenses.concat(
+                element.member.specialLicenses.map((license) => {
+                    return {
+                        id: license.id,
+                        codeName: license.code.codeName,
+                        licenseNumber: license.licenseNumber,
+                    };
+                }),
+            );
+            memberDetails.push({
+                id: element.member.id,
+                name: element.member.name,
+                contact: element.member.contact,
+                desiredOccupation:
+                    element.member.desiredOccupations.length > 0 ? element.member.desiredOccupations[0].code.codeName : null,
+                career: element.member.career.length > 0 ? element.member.career[0] : null,
+            });
+        });
+        memberDetails.push({
+            id: leader.id,
+            name: leader.name,
+            contact: leader.contact,
+            desiredOccupation: leader.desiredOccupations.length > 0 ? leader.desiredOccupations[0].code.codeName : null,
+            career: leader.career.length > 0 ? leader.career[0] : null,
+        });
+        specialLicenses = specialLicenses.concat(
+            leader.specialLicenses.map((license) => {
+                return {
+                    id: license.id,
+                    codeName: license.code?.codeName,
+                    licenseNumber: license.licenseNumber,
+                };
+            }),
+        );
+
+        return {
+            name: application.name,
+            totalMembers: application.totalMembers,
+            contact: application.leader.contact,
+            leader: {
+                id: leader.id,
+                contact: leader.contact,
+                totalExperienceYears: leader.totalExperienceYears,
+                totalExperienceMonths: leader.totalExperienceMonths,
+                desiredSalary: leader.desiredSalary,
+            },
+            members: memberDetails,
+            city: application.district?.city
+                ? {
+                      englishName: application.district.city.englishName,
+                      koreanName: application.district.city.koreanName,
+                  }
+                : null,
+            district: application.district
+                ? {
+                      englishName: application.district.englishName,
+                      koreanName: application.district.koreanName,
+                  }
+                : null,
+            specialLicenses: specialLicenses,
+        };
     }
 }

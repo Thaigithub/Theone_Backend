@@ -4,12 +4,11 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { TeamCompanyGetTeamDetailApplicants } from './response/team-company-get-team-detail.response';
-import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
-import { TeamCompanyManpowerGetListResponse } from './response/team-company-manpower-get-list.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { TeamCompanyService } from './team-company.service';
+import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
 import { TeamCompanyManpowerGetDetailResponse } from './response/team-company-manpower-get-detail.response';
+import { TeamCompanyManpowerGetListResponse } from './response/team-company-manpower-get-list.response';
+import { TeamCompanyService } from './team-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
@@ -18,21 +17,6 @@ import { TeamCompanyManpowerGetDetailResponse } from './response/team-company-ma
 @ApiTags('[COMPANY] Team Management')
 export class TeamCompanyController {
     constructor(private readonly teamCompanyService: TeamCompanyService) {}
-
-    @Get(':id/applicants')
-    @ApiOperation({
-        summary: 'Post detail',
-        description: 'Retrieve post information detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: TeamCompanyGetTeamDetailApplicants,
-    })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, type: BaseResponse })
-    async getTeamDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
-        return BaseResponse.of(await this.teamCompanyService.getTeamDetail(id));
-    }
-
     @Get(':id/manpower')
     @ApiOperation({
         summary: 'Get team detail in Manpower',

@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Application, InterviewStatus, PostApplicationStatus, Prisma, RequestObject, SupportCategory } from '@prisma/client';
+import { ApplicationCompanyService } from 'domain/application/company/application-company.service';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { MemberCompanyService } from 'domain/member/company/member-company.service';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
-import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -17,7 +17,7 @@ export class InterviewCompanyService {
     constructor(
         private prismaService: PrismaService,
         private memberCompanyService: MemberCompanyService,
-        private teamCompanyService: TeamCompanyService,
+        private applicationCompanyService: ApplicationCompanyService,
     ) {}
 
     async getList(accountId: number, query: InterviewCompantGetListRequest): Promise<InterviewCompanyGetItemResponse> {
@@ -139,48 +139,35 @@ export class InterviewCompanyService {
     }
 
     async getMemberDetail(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
-        const account = await this.prismaService.account.findUniqueOrThrow({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
         const interview = await this.prismaService.interview.findUnique({
             where: {
                 id,
                 application: {
                     post: {
-                        companyId: account.company.id,
+                        company: {
+                            accountId: accountId,
+                            isActive: true,
+                        }
                     },
                 },
             },
         });
 
         if (!interview) throw new BadRequestException('No interview found');
-        return await this.memberCompanyService.getMemberDetail(interview.applicationId);
+
+        return await this.applicationCompanyService.getMemberDetail(accountId, interview.applicationId);
     }
 
     async getTeamDetail(accountId: number, id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
-        const account = await this.prismaService.account.findUniqueOrThrow({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
         const interview = await this.prismaService.interview.findUnique({
             where: {
                 id,
                 application: {
                     post: {
-                        companyId: account.company.id,
+                        company: {
+                            accountId: accountId,
+                            isActive: true,
+                        },
                     },
                 },
             },
@@ -188,7 +175,7 @@ export class InterviewCompanyService {
 
         if (!interview) throw new BadRequestException('No interview found');
 
-        return await this.teamCompanyService.getTeamDetail(interview.applicationId);
+        return await this.applicationCompanyService.getTeamDetail(accountId, interview.applicationId);
     }
 
     async resultInterview(accountId: number, id: number, result: InterviewStatus) {
