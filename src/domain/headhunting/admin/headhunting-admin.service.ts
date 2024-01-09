@@ -261,7 +261,6 @@ export class HeadhuntingAdminService {
                     },
                 },
                 specialLicenses: true,
-                certificates: true,
                 account: {
                     select: {
                         username: true,
@@ -387,7 +386,6 @@ export class HeadhuntingAdminService {
                             },
                         },
                         specialLicenses: true,
-                        certificates: true,
                         level: true,
                         memberEvaluation: {
                             select: {
@@ -592,7 +590,6 @@ export class HeadhuntingAdminService {
                                 code: true,
                             },
                         },
-                        certificates: true,
                     },
                 },
                 post: {
@@ -637,7 +634,6 @@ export class HeadhuntingAdminService {
                       })
                     : [],
                 address: detail.member.address,
-                certificate: detail.member.certificates.map((cer) => cer.name),
                 specialOccupation: detail.member.specialLicenses.map((special) => special.code.codeName),
                 experienceMonths: detail.member.totalExperienceMonths,
                 experienceYears: detail.member.totalExperienceYears,
@@ -677,7 +673,6 @@ export class HeadhuntingAdminService {
                                                 code: true,
                                             },
                                         },
-                                        certificates: true,
                                     },
                                 },
                             },
@@ -733,7 +728,6 @@ export class HeadhuntingAdminService {
                           })
                         : [],
                     address: member.address,
-                    certificate: member.certificates.map((cer) => cer.name),
                     specialOccupation: member.specialLicenses.map((special) => special.code.codeName),
                     experienceMonths: member.totalExperienceMonths,
                     experienceYears: member.totalExperienceYears,

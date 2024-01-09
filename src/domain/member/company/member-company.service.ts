@@ -187,12 +187,6 @@ export class MemberCompanyService {
                         experiencedMonths: true,
                     },
                 },
-                certificates: {
-                    select: {
-                        name: true,
-                        certificateNumber: true,
-                    },
-                },
                 specialLicenses: {
                     select: {
                         code: {
@@ -221,7 +215,6 @@ export class MemberCompanyService {
                 },
             },
         });
-
         return {
             ...application,
             specialLicenses: application.specialLicenses

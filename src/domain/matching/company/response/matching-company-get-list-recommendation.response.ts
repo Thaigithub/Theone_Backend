@@ -10,7 +10,6 @@ export class MatchingCompanyGetItemRecommendation {
     totalMonths: number;
     totalYears: number;
     specialNote: string[];
-    certificate: string[];
     numberOfTeamMembers: number;
     memberDetail: MatchingCompanyGetItemRecommendationMemberDetail;
     teamDetail: MatchingCompanyGetItemRecommendationTeamDetail;

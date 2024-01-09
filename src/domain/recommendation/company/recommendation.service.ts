@@ -159,12 +159,6 @@ export class RecommendationCompanyService {
                             experiencedMonths: true,
                         },
                     },
-                    certificates: {
-                        select: {
-                            name: true,
-                            certificateNumber: true,
-                        },
-                    },
                     specialLicenses: {
                         select: {
                             code: {

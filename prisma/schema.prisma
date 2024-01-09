@@ -89,7 +89,6 @@ model Member {
   bankAccount                  BankAccount?
   certificationCareerRequest   CareerCertificationApplication?
   career                       Career[]
-  certificates                 Certificate[]
   currencyExchange             CurrencyExchange[]
   disability                   Disability?
   foreignWorker                ForeignWorker?
@@ -298,7 +297,6 @@ model File {
   updatedAt                    DateTime                      @updatedAt @map("updated_at")
   attachment                   Attachment?
   banner                       Banner?
-  certificate                  Certificate?
   contactCard                  ContactCard?
   contract                     Contract?
   foreignWorker                ForeignWorker?
@@ -327,26 +325,6 @@ model Function {
   permission Permission[]
 
   @@map("functions")
-}
-
-model Certificate {
-  id                Int               @id @default(autoincrement())
-  name              String
-  status            CertificateStatus @default(REQUESTING)
-  certificateNumber String            @map("certificate_number")
-  acquisitionDate   DateTime          @map("acquisition_date")
-  createdAt         DateTime          @default(now()) @map("created_at")
-  updatedAt         DateTime          @updatedAt @map("updated_at")
-  memberId          Int               @map("member_id")
-  fileId            Int               @unique @map("file_id")
-  isSpecial         Boolean           @default(false)
-  codeId            Int?              @map("code_id")
-  isActive          Boolean           @default(true) @map("is_active")
-  code              Code?             @relation(fields: [codeId], references: [id])
-  file              File              @relation(fields: [fileId], references: [id])
-  member            Member            @relation(fields: [memberId], references: [id])
-
-  @@map("certificates")
 }
 
 model SpecialLicense {
@@ -507,7 +485,6 @@ model Code {
   codeName       String           @map("code_name")
   codeType       CodeType         @map("code_type")
   career         Career[]
-  certificate    Certificate[]
   asGeneral      Post[]           @relation("post_occupation")
   asSpecial      Post[]           @relation("post_special")
   specialLicense SpecialLicense[]
