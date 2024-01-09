@@ -74,6 +74,7 @@ model Member {
   createdAt                    DateTime                        @default(now()) @map("created_at")
   updatedAt                    DateTime                        @updatedAt @map("updated_at")
   contact                      String?
+  isContactVerfied             Boolean                         @default(false) @map("is_contact_verified")
   email                        String?                         @unique
   totalExperienceYears         Int?                            @map("total_experience_years")
   totalExperienceMonths        Int?                            @map("total_experience_months")

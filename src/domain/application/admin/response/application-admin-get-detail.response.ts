@@ -1,4 +1,5 @@
-import { ContractStatus, Interview, Member, Post, PostApplicationStatus } from '@prisma/client';
+import { Interview, Member, Post, PostApplicationStatus } from '@prisma/client';
+import { ApplicationAdminContractStatus } from '../enum/application-admin-contract-status.enum';
 
 export class ApplicationAdminGetDetailResponse {
     status: PostApplicationStatus;
@@ -6,7 +7,7 @@ export class ApplicationAdminGetDetailResponse {
     isTeam: boolean;
     contact: Member['contact'];
     leaderName: Member['name'];
-    contractStatus: ContractStatus;
+    contractStatus: ApplicationAdminContractStatus;
     startDate: Post['startDate'];
     endDate: Post['endDate'];
     interviewRequestDate: Interview['interviewRequestDate'];

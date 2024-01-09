@@ -1,9 +1,13 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccountStatus, AccountType, MemberLevel, SignupMethodType } from '@prisma/client';
+import { AccountStatus, AccountType, MemberLevel, OtpType, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
-import { hash, compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
+import { OtpService } from 'domain/otp/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { BaseResponse } from 'utils/generics/base.response';
+import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
+import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
 import { AccountMemberUpdateRequest } from './request/account-member-update.request';
@@ -11,16 +15,57 @@ import { AccountMemberUpsertBankAccountRequest } from './request/account-member-
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
+import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
-import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
-import { BaseResponse } from 'utils/generics/base.response';
+import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
+import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
 export class AccountMemberService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private otpService: OtpService,
+    ) {}
+
+    async verifyOtpVerifyPhone(
+        ip: string,
+        accountId: number,
+        body: AccountMemberVerifyOtpVerifyPhoneRequest,
+    ): Promise<AccountMemberVerifyOtpVerifyPhoneResponse> {
+        const verify = await this.otpService.checkValidOtp(body, ip);
+        if (verify.isVerified) {
+            await this.prismaService.member.update({
+                where: {
+                    accountId,
+                },
+                data: {
+                    contact: verify.data,
+                    isContactVerfied: true,
+                },
+            });
+            verify.data = null;
+            return verify;
+        }
+        verify.data = null;
+        return verify;
+    }
+
+    async sendOtpVerifyPhone(
+        ip: string,
+        accountId: number,
+        body: AccountMemberSendOtpVerifyPhoneRequest,
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse> {
+        return await this.otpService.sendOtp({
+            email: null,
+            phoneNumber: body.phone,
+            type: OtpType.PHONE,
+            ip: ip,
+            data: body.phone,
+        });
+    }
 
     async signup(request: AccountMemberSignupRequest): Promise<void> {
         if (request.recommenderId !== undefined) {

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { ApplicationAdminContractStatus } from './enum/application-admin-contract-status.enum';
 import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
 import { ApplicationAdminGetResponse } from './response/application-admin-get-list.response';
@@ -140,7 +141,11 @@ export class ApplicationAdminService {
             isTeam: application.team ? true : false,
             contact: application.team ? null : application.member.contact,
             leaderName: application.team ? application.team?.leader.name : null,
-            contractStatus: application.post.site ? application.post.site.contractStatus : null,
+            contractStatus: application.contract
+                ? application.contract.endDate >= new Date()
+                    ? ApplicationAdminContractStatus.UNDER_CONTRACT
+                    : ApplicationAdminContractStatus.CONTRACT_EXPIRED
+                : ApplicationAdminContractStatus.CONTRACT_NOT_FOUND,
             startDate: application.contract ? application.contract.startDate : null,
             endDate: application.contract ? application.contract.endDate : null,
             interviewRequestDate: application.interview?.interviewRequestDate
