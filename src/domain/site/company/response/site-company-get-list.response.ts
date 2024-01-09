@@ -1,4 +1,4 @@
-import { City, District, Site } from '@prisma/client';
+import { City, District, File, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class SiteResponse {
@@ -13,6 +13,7 @@ export class SiteResponse {
     cityEnglishName: City['englishName'];
     districtKoreanName: District['koreanName'];
     districtEnglishName: District['englishName'];
+    companyLogoKey: File['key'];
 }
 
 export class SiteCompanyGetListResponse extends PaginationResponse<SiteResponse> {}

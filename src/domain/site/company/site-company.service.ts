@@ -9,37 +9,42 @@ import { SiteCompanyUpdateRequest } from './request/site-company-update.request'
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
 import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract.response';
 import { SiteResponse } from './response/site-company-get-list.response';
+import { Prisma } from '@prisma/client';
+import { ProgressStatus } from './dto/site-company-progress-status.enum';
 
 @Injectable()
 export class SiteCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    private async getCompanyId(accountId: number): Promise<number> {
-        const company = await this.prismaService.company.findUnique({
-            select: {
-                id: true,
-            },
-            where: {
-                isActive: true,
+    private parseConditionFromQuery(accountId: number, query: SiteCompanyGetListRequest): Prisma.SiteWhereInput {
+        const siteWhereInput: Prisma.SiteWhereInput = {
+            isActive: true,
+            company: {
                 accountId,
             },
-        });
-        return company.id;
+        };
+        switch (query.progressStatus) {
+            case ProgressStatus.WAITING:
+                siteWhereInput.startDate = { gt: new Date() };
+                break;
+            case ProgressStatus.IN_PROGRESS:
+                siteWhereInput.startDate = { lte: new Date() };
+                siteWhereInput.endDate = { gte: new Date() };
+                break;
+            case ProgressStatus.END:
+                siteWhereInput.endDate = { lt: new Date() };
+                break;
+        }
+        return siteWhereInput;
     }
 
     async getTotal(query: SiteCompanyGetListRequest, accountId: number): Promise<number> {
-        const companyId = await this.getCompanyId(accountId);
         return await this.prismaService.site.count({
-            where: {
-                isActive: true,
-                status: query.status,
-                companyId,
-            },
+            where: this.parseConditionFromQuery(accountId, query),
         });
     }
 
     async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteResponse[]> {
-        const companyId = await this.getCompanyId(accountId);
         const companies = await this.prismaService.site.findMany({
             include: {
                 district: {
@@ -47,12 +52,17 @@ export class SiteCompanyService {
                         city: true,
                     },
                 },
+                company: {
+                    include: {
+                        logo: {
+                            include: {
+                                file: true,
+                            },
+                        },
+                    },
+                },
             },
-            where: {
-                isActive: true,
-                status: query.status,
-                companyId,
-            },
+            where: this.parseConditionFromQuery(accountId, query),
             // Pagination
             // If both pageNumber and pageSize is provided then handle the pagination
             skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
@@ -72,18 +82,19 @@ export class SiteCompanyService {
                 cityEnglishName: item.district?.city.englishName ? item.district.city.englishName : null,
                 districtKoreanName: item.district?.koreanName ? item.district.koreanName : null,
                 districtEnglishName: item.district?.englishName ? item.district.englishName : null,
+                companyLogoKey: item.company.logo ? item.company.logo.file.key : null,
             };
         });
     }
 
     async getDetail(id: number, accountId: number): Promise<SiteCompanyGetDetailResponse> {
-        const companyId = await this.getCompanyId(accountId);
-
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
@@ -118,7 +129,9 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
         });
         return {
@@ -142,7 +155,16 @@ export class SiteCompanyService {
     }
 
     async createSite(body: SiteCompanyCreateRequest, accountId: number): Promise<void> {
-        const companyId = await this.getCompanyId(accountId);
+        const company = await this.prismaService.company.findUnique({
+            select: {
+                id: true,
+            },
+            where: {
+                isActive: true,
+                accountId,
+            },
+        });
+        const companyId = company.id;
         body.startDate = new Date(body.startDate).toISOString();
         body.endDate = new Date(body.endDate).toISOString();
         await this.prismaService.site.create({
@@ -154,13 +176,13 @@ export class SiteCompanyService {
     }
 
     async updateSite(id: number, body: SiteCompanyUpdateRequest, accountId: number): Promise<void> {
-        const companyId = await this.getCompanyId(accountId);
-
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
@@ -171,7 +193,9 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
             data: {
                 ...body,
@@ -180,13 +204,13 @@ export class SiteCompanyService {
     }
 
     async deleteSite(id: number, accountId: number): Promise<void> {
-        const companyId = await this.getCompanyId(accountId);
-
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
         });
         if (!siteExist) throw new NotFoundException('Site does not exist');
@@ -195,7 +219,9 @@ export class SiteCompanyService {
             where: {
                 isActive: true,
                 id,
-                companyId,
+                company: {
+                    accountId,
+                },
             },
             data: {
                 isActive: false,
