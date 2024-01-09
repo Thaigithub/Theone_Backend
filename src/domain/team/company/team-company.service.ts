@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { TeamCompanyGetTeamDetailApplicants } from './response/team-company-get-team-detail.response';
-import { ManpowerListTeamsResponse } from './response/team-company-manpower-get-list.response';
-import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
-import { QueryPagingHelper } from 'utils/pagination-query';
 import { CertificateStatus, ExperienceType, Prisma } from '@prisma/client';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
 import { TeamCompanyManpowerGetDetailResponse } from './response/team-company-manpower-get-detail.response';
+import { ManpowerListTeamsResponse } from './response/team-company-manpower-get-list.response';
 
 @Injectable()
 export class TeamCompanyService {
@@ -175,98 +174,6 @@ export class TeamCompanyService {
         return await this.prismaService.team.count({
             where: this.parseConditionFromQuery(query),
         });
-    }
-
-    async getTeamDetail(id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
-        const application = await this.prismaService.team.findUniqueOrThrow({
-            where: {
-                id,
-            },
-            include: {
-                district: {
-                    include: {
-                        city: true,
-                    },
-                },
-                leader: {
-                    include: {
-                        desiredOccupations: {
-                            include: {
-                                code: true,
-                            },
-                        },
-                    },
-                },
-                members: {
-                    include: {
-                        member: {
-                            include: {
-                                desiredOccupations: {
-                                    include: {
-                                        code: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    orderBy: [
-                        {
-                            member: {
-                                totalExperienceYears: 'desc',
-                            },
-                        },
-                        {
-                            member: {
-                                totalExperienceMonths: 'desc',
-                            },
-                        },
-                    ],
-                },
-            },
-        });
-
-        const { leader, members, ...rest } = application;
-
-        return {
-            ...rest,
-            leader: {
-                name: leader.name,
-                contact: leader.contact,
-                totalExperienceYears: leader.totalExperienceYears,
-                totalExperienceMonths: leader.totalExperienceMonths,
-                desiredSalary: leader.desiredSalary,
-                desiredOccupations: leader.desiredOccupations
-                    ? leader.desiredOccupations.map((item) => {
-                          return item.code.codeName;
-                      })
-                    : [],
-            },
-            members: members
-                ? members.map((item) => {
-                      return {
-                          id: item.memberId,
-                          name: item.member.name,
-                          contact: item.member.contact,
-                          totalExperienceYears: item.member.totalExperienceYears,
-                          totalExperienceMonths: item.member.totalExperienceMonths,
-                          desiredOccupations: item.member.desiredOccupations
-                              ? item.member.desiredOccupations.map((item) => {
-                                    return item.code.codeName;
-                                })
-                              : [],
-                      };
-                  })
-                : [],
-            city: {
-                englishName: application.district ? application.district.city.englishName : null,
-                koreanName: application.district ? application.district.city.koreanName : null,
-            },
-            district: {
-                englishName: application.district ? application.district.englishName : null,
-                koreanName: application.district ? application.district.koreanName : null,
-            },
-            specialLicenses: await this.getListSpecialLicensesOfTeam(rest.id),
-        };
     }
 
     async getTeamDetailManpower(id: number): Promise<TeamCompanyManpowerGetDetailResponse> {

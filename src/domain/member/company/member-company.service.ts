@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
-import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { MemberCompanyManpowerGetListRequest } from './request/member-company-manpower-get-list.request';
@@ -145,116 +144,6 @@ export class MemberCompanyService {
         return await this.prismaService.member.count({
             where: await this.parseConditionFromQuery(query),
         });
-    }
-
-    async getMemberDetail(id: number): Promise<ApplicationCompanyGetMemberDetail> {
-        const application = await this.prismaService.member.findUniqueOrThrow({
-            where: {
-                id,
-            },
-            select: {
-                name: true,
-                contact: true,
-                email: true,
-                district: {
-                    select: {
-                        englishName: true,
-                        koreanName: true,
-                        city: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                            },
-                        },
-                    },
-                },
-                desiredSalary: true,
-                totalExperienceYears: true,
-                totalExperienceMonths: true,
-                account: {
-                    select: {
-                        username: true,
-                    },
-                },
-                career: {
-                    select: {
-                        companyName: true,
-                        siteName: true,
-                        occupation: true,
-                        startDate: true,
-                        endDate: true,
-                        experiencedYears: true,
-                        experiencedMonths: true,
-                    },
-                },
-                specialLicenses: {
-                    select: {
-                        code: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        licenseNumber: true,
-                    },
-                },
-                basicHealthSafetyCertificate: {
-                    select: {
-                        registrationNumber: true,
-                        dateOfCompletion: true,
-                        file: true,
-                    },
-                },
-                desiredOccupations: {
-                    select: {
-                        code: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        return {
-            ...application,
-            specialLicenses: application.specialLicenses
-                ? application.specialLicenses.map((item) => {
-                      return {
-                          name: item.code.codeName,
-                          licenseNumber: item.licenseNumber,
-                      };
-                  })
-                : [],
-            desiredOccupations: application.desiredOccupations
-                ? application.desiredOccupations.map((item) => {
-                      return item.code.codeName;
-                  })
-                : [null],
-            basicHealthSafetyCertificate: application.basicHealthSafetyCertificate
-                ? {
-                      file: {
-                          fileName: application.basicHealthSafetyCertificate.file.fileName,
-                          type: application.basicHealthSafetyCertificate.file.type,
-                          key: application.basicHealthSafetyCertificate.file.key,
-                          size: Number(application.basicHealthSafetyCertificate.file.size),
-                      },
-                      dateOfCompletion: application.basicHealthSafetyCertificate.dateOfCompletion,
-                      registrationNumber: application.basicHealthSafetyCertificate.registrationNumber,
-                  }
-                : null,
-            city: application.district
-                ? {
-                      englishName: application.district.city.englishName,
-                      koreanName: application.district.city.koreanName,
-                  }
-                : null,
-            district: application.district
-                ? {
-                      englishName: application.district.englishName,
-                      koreanName: application.district.koreanName,
-                  }
-                : null,
-        };
     }
 
     async getMemberDetailManpower(id: number): Promise<MemberCompanyManpowerGetDetailResponse> {

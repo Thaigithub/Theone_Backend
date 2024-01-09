@@ -10,6 +10,8 @@ import { ApplicationCompanyUpdateStatusRequest } from './request/application-com
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
 import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-for-post.response';
+import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
+import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
 
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
@@ -37,6 +39,22 @@ export class ApplicationCompanyController {
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.getListForPost(request.user.accountId, query, postId));
+    }
+
+    @Get(':id/member')
+    async getMemberDetail(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
+        return BaseResponse.of(await this.applicationCompanyService.getMemberDetail(request.user.accountId, id));
+    }
+
+    @Get(':id/team')
+    async getTeamDetail(
+        @Req() request: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ApplicationCompanyGetTeamDetail>> {
+        return BaseResponse.of(await this.applicationCompanyService.getTeamDetail(request.user.accountId, id));
     }
 
     @Patch('/:id/status')

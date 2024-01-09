@@ -1,11 +1,20 @@
-import { Code } from '@prisma/client';
-import { ApplicationCompanyMemberDetailAccountDTO } from '../dto/application-company-member-detail-account.dto';
-import { ApplicationCompanyMemberDetailBHSCerDTO } from '../dto/application-company-member-detail-bhscer.dto';
-import { ApplicationCompanyMemberDetailCareerDTO } from '../dto/application-company-member-detail-career.dto';
-import { ApplicationCompanyMemberDetailSpecialDTO } from '../dto/application-company-member-detail-special.dto';
+import {
+    ApplicationCompanyGetBasicHealthCertificate,
+    ApplicationCompanyGetSpecialLicenses,
+} from './application-company-get-team-detail.response';
+
+class ApplicationCompanyGetCareerDetail {
+    startDate: Date;
+    endDate: Date;
+    companyName: string;
+    siteName: string;
+    occupation: string;
+}
 
 export class ApplicationCompanyGetMemberDetail {
+    id: number;
     name: string;
+    username: string;
     contact: string;
     email: string;
     city: {
@@ -16,9 +25,11 @@ export class ApplicationCompanyGetMemberDetail {
         englishName: string;
         koreanName: string;
     };
-    desiredOccupations: Code['codeName'][];
-    account: ApplicationCompanyMemberDetailAccountDTO;
-    career: ApplicationCompanyMemberDetailCareerDTO[];
-    specialLicenses: ApplicationCompanyMemberDetailSpecialDTO[];
-    basicHealthSafetyCertificate: ApplicationCompanyMemberDetailBHSCerDTO;
+    desiredSalary: number;
+    totalExperienceMonths: number;
+    totalExperienceYears: number;
+    desiredOccupations: string;
+    careers: ApplicationCompanyGetCareerDetail[];
+    specialLicenses: ApplicationCompanyGetSpecialLicenses[];
+    basicHealthSafetyCertificate: ApplicationCompanyGetBasicHealthCertificate;
 }
