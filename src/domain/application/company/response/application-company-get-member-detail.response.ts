@@ -28,7 +28,9 @@ export class ApplicationCompanyGetMemberDetail {
     desiredSalary: number;
     totalExperienceMonths: number;
     totalExperienceYears: number;
-    desiredOccupations: string;
+    desiredOccupations: {
+        codeName: string;
+    }[];
     careers: ApplicationCompanyGetCareerDetail[];
     specialLicenses: ApplicationCompanyGetSpecialLicenses[];
     basicHealthSafetyCertificate: ApplicationCompanyGetBasicHealthCertificate;
