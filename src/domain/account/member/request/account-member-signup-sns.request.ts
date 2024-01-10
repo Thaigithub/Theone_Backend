@@ -14,5 +14,5 @@ export class AccountMemberSignupSnsRequest {
     @Expose()
     @IsOptional()
     @IsString()
-    recommenderId?: string;
+    recommenderId: string;
 }

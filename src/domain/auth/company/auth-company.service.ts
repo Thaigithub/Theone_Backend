@@ -33,13 +33,10 @@ export class CompanyAuthService {
                 type: AccountType.COMPANY,
             },
         });
-
         if (!account) {
             throw new UnauthorizedException('Account not found');
         }
-
         const passwordMatch = await compare(loginData.password, account.password);
-
         if (!passwordMatch) {
             throw new UnauthorizedException('Invalid username or password');
         }
@@ -57,9 +54,7 @@ export class CompanyAuthService {
             accountId: uid,
             type,
         };
-
         const token = this.signToken(payload);
-
         return { token, uid, type };
     }
 
@@ -127,16 +122,13 @@ export class CompanyAuthService {
                 isActive: true,
             },
         });
-
         if (!account) {
             throw new UnauthorizedException('Account not found');
         }
-
         const payloadData: AuthJwtPayloadData = {
             accountId: account.id,
             type: account.type,
         };
-
         return payloadData;
     }
 

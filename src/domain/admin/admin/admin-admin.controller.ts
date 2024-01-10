@@ -30,20 +30,17 @@ export class AdminAdminController {
 
     @Get('/:id')
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<AdminAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.adminService.getMemberDetails(id));
+        return BaseResponse.of(await this.adminService.getDetail(id));
     }
 
     @Patch('/:id')
-    async changeAdminInfo(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: AdminAdminUpsertRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.adminService.changeAdminInfo(id, payload);
+    async update(@Param('id', ParseIntPipe) id: number, @Body() payload: AdminAdminUpsertRequest): Promise<BaseResponse<void>> {
+        await this.adminService.update(id, payload);
         return BaseResponse.ok();
     }
 
     @Delete('/:id')
-    async deleteAdmin(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.adminService.deleteAdmin(id));
+    async delete(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.adminService.delete(id));
     }
 }

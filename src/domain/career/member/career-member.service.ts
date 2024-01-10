@@ -1,13 +1,14 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerCertificationApplicationStatus, CareerType, CodeType } from '@prisma/client';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { CareerCertificationRequestStatus, CareerType, CodeType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
 import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberGetListResponse, CareerResponse } from './response/career-member-get-list.response';
 import { CareerMemberUpsertRequest } from './request/career-member-upsert.request';
+import { CareerMemberGetDetailResponse } from './response/career-member-get-detail.response';
+import { CareerMemberGetListResponse } from './response/career-member-get-list.response';
 
 @Injectable()
 export class CareerMemberService {
@@ -16,18 +17,8 @@ export class CareerMemberService {
         private readonly governmentService: GovernmentService,
     ) {}
 
-    private parseConditionsFromQuery(query: CareerMemberGetListRequest, memberId: number) {
-        return {
-            isActive: true,
-            type: query.type,
-            certificationType: query.certificationType,
-            memberId,
-        };
-    }
-
-    async getList(query: CareerMemberGetListRequest, accountId: number): Promise<CareerMemberGetListResponse> {
-        const memberId = await this.getMemberId(accountId);
-        const careers = await this.prismaService.career.findMany({
+    async getListGeneral(query: CareerMemberGetListRequest, accountId: number): Promise<CareerMemberGetListResponse> {
+        const search = {
             select: {
                 id: true,
                 type: true,
@@ -37,24 +28,32 @@ export class CareerMemberService {
                 startDate: true,
                 endDate: true,
                 occupation: true,
-                isExperienced: true,
             },
-            where: this.parseConditionsFromQuery(query, memberId),
+            where: {
+                isActive: true,
+                type: query.type,
+                certificationType: query.certificationType,
+                member: {
+                    accountId,
+                },
+            },
             orderBy: {
-                startDate: 'desc',
+                startDate: Prisma.SortOrder.desc,
             },
             ...QueryPagingHelper.queryPaging(query),
+        };
+        const careers = (await this.prismaService.career.findMany(search)).map((item) => {
+            const { occupation, ...rest } = item;
+            return {
+                ...rest,
+                occupationName: occupation.codeName,
+            };
         });
-
-        const total = await this.prismaService.career.count({
-            where: this.parseConditionsFromQuery(query, memberId),
-        });
-
+        const total = await this.prismaService.career.count({ where: search.where });
         return new PaginationResponse(careers, new PageInfo(total));
     }
 
-    async getDetail(id: number, accountId: number): Promise<CareerResponse> {
-        const memberId = await this.getMemberId(accountId);
+    async getDetailGeneral(id: number, accountId: number): Promise<CareerMemberGetDetailResponse> {
         const response = await this.prismaService.career.findUnique({
             select: {
                 id: true,
@@ -69,24 +68,20 @@ export class CareerMemberService {
             where: {
                 isActive: true,
                 id,
-                memberId,
+                member: {
+                    accountId,
+                },
             },
         });
-
         if (!response) throw new NotFoundException('Career does not exist');
-        return response;
+        const { occupation, ...rest } = response;
+        return {
+            ...rest,
+            occupationName: occupation.codeName,
+        };
     }
 
-    async getTotal(query: CareerMemberGetListRequest, accountId: number): Promise<number> {
-        const memberId = await this.getMemberId(accountId);
-        return await this.prismaService.career.count({
-            where: this.parseConditionsFromQuery(query, memberId),
-        });
-    }
-
-    async createCareer(body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-
+    async createGeneral(body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
@@ -95,32 +90,37 @@ export class CareerMemberService {
             },
         });
 
-        if (!occupation) throw new BadRequestException('Occupation (Code Id) does not exist');
+        if (!occupation) throw new NotFoundException('Occupation not found');
 
-        await this.prismaService.career.create({
+        await this.prismaService.member.update({
+            where: {
+                accountId,
+            },
             data: {
-                ...body,
-                memberId,
-                experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
-                experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
-                type: CareerType.GENERAL,
-                occupationId: occupation.id,
+                career: {
+                    create: {
+                        ...body,
+                        experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
+                        experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
+                        type: CareerType.GENERAL,
+                        occupationId: occupation.id,
+                    },
+                },
             },
         });
     }
 
-    async updateCareer(id: number, body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
+    async updateGeneral(id: number, accountId: number, body: CareerMemberUpsertRequest): Promise<void> {
         const career = await this.prismaService.career.findUnique({
             where: {
                 id,
                 isActive: true,
-                memberId,
+                member: {
+                    accountId,
+                },
             },
         });
-
-        if (!career) throw new NotFoundException('Career does not exist');
-
+        if (!career) throw new NotFoundException('Career not found');
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
@@ -128,7 +128,7 @@ export class CareerMemberService {
                 isActive: true,
             },
         });
-
+        if (!occupation) throw new NotFoundException('Occupation not found');
         await this.prismaService.career.update({
             data: {
                 ...body,
@@ -142,23 +142,25 @@ export class CareerMemberService {
         });
     }
 
-    async deleteCareer(id: number, accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-
-        const careerExist = await this.prismaService.career.count({
+    async deleteGeneral(id: number, accountId: number): Promise<void> {
+        const career = await this.prismaService.career.findUnique({
             where: {
                 isActive: true,
                 id,
-                memberId,
+                member: {
+                    accountId,
+                },
             },
         });
-        if (!careerExist) throw new NotFoundException('Career does not exist');
+        if (!career) throw new NotFoundException('Career not found');
 
         await this.prismaService.career.update({
             where: {
                 isActive: true,
                 id,
-                memberId,
+                member: {
+                    accountId,
+                },
             },
             data: {
                 isActive: false,
@@ -166,84 +168,81 @@ export class CareerMemberService {
         });
     }
 
-    async applyCertificate(accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-        if (!memberId) throw new NotFoundException('Member not found');
-        const request = await this.prismaService.careerCertificationApplication.count({
+    async createCertificateRequest(accountId: number): Promise<void> {
+        const request = await this.prismaService.careerCertificationRequest.count({
             where: {
-                memberId,
-                status: CareerCertificationApplicationStatus.APPROVED,
+                member: {
+                    accountId,
+                },
+                status: CareerCertificationRequestStatus.APPROVED,
             },
         });
-        if (request < 1) throw new BadRequestException('Request already approved');
+        if (request < 1) throw new ConflictException('Request already approved');
 
-        await this.prismaService.careerCertificationApplication.upsert({
+        await this.prismaService.member.update({
             where: {
-                memberId,
+                accountId,
             },
-            create: {
-                memberId,
-            },
-            update: {
-                status: CareerCertificationApplicationStatus.REQUESTING,
+            data: {
+                careerCertificationRequest: {
+                    upsert: {
+                        create: {
+                            status: CareerCertificationRequestStatus.REQUESTING,
+                        },
+                        update: {
+                            status: CareerCertificationRequestStatus.REQUESTING,
+                        },
+                    },
+                },
             },
         });
     }
 
     async getCertExperienceByHealthInsurance(accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-        if (!memberId) throw new NotFoundException('Member not found');
-
-        const application = await this.prismaService.careerCertificationApplication.findUnique({
-            where: {
-                memberId,
-            },
-        });
-        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
+        const application = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId,
+                },
+                select: {
+                    careerCertificationRequest: true,
+                },
+            })
+        ).careerCertificationRequest;
+        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-
-        await this.governmentService.saveCertificationExperienceHealthInsurance(memberId);
+        // await this.governmentService.saveCertificationExperienceHealthInsurance(accountId);
     }
 
     async getCertExperienceByEmploymentInsurance(accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-        if (!memberId) throw new NotFoundException('Member not found');
-
-        const application = await this.prismaService.careerCertificationApplication.findUnique({
-            where: {
-                memberId,
-            },
-        });
-        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
+        const application = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId,
+                },
+                select: {
+                    careerCertificationRequest: true,
+                },
+            })
+        ).careerCertificationRequest;
+        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-
-        await this.governmentService.saveCertificationExperienceEmploymentInsurance(memberId);
+        // await this.governmentService.saveCertificationExperienceEmploymentInsurance(accountId);
     }
 
     async getCertExperienceByTheOneSite(accountId: number): Promise<void> {
-        const memberId = await this.getMemberId(accountId);
-        if (!memberId) throw new NotFoundException('Member not found');
-
-        const application = await this.prismaService.careerCertificationApplication.findUnique({
-            where: {
-                memberId,
-            },
-        });
-        if (!application || application.status != CareerCertificationApplicationStatus.APPROVED)
+        const application = (
+            await this.prismaService.member.findUnique({
+                where: {
+                    accountId,
+                },
+                select: {
+                    careerCertificationRequest: true,
+                },
+            })
+        ).careerCertificationRequest;
+        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-
-        await this.governmentService.saveCertificationTheOneSite(memberId);
-    }
-
-    private async getMemberId(accountId: number): Promise<number> {
-        const member = await this.prismaService.member.findUnique({
-            select: {
-                id: true,
-            },
-            where: {
-                accountId,
-            },
-        });
-        return member.id;
+        // await this.governmentService.saveCertificationTheOneSite(accountId);
     }
 }

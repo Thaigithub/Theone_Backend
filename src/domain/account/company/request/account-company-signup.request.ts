@@ -1,6 +1,6 @@
 import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEmail, IsEnum, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNotEmptyObject, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class AccountCompanySignupRequest {
@@ -76,8 +76,10 @@ export class AccountCompanySignupRequest {
     type: CompanyType;
 
     @Expose()
+    @IsNotEmptyObject()
     logo: FileRequest;
 
     @Expose()
+    @IsNotEmptyObject()
     contactCard: FileRequest;
 }

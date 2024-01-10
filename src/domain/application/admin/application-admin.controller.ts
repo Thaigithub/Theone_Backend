@@ -19,8 +19,7 @@ export class ApplicationAdminController {
         @Param('postId', ParseIntPipe) id: number,
         @Query() query: ApplicationAdminGetListRequest,
     ): Promise<BaseResponse<ApplicationAdminGetResponse>> {
-        const applicationList = await this.applicationAdminService.getListForPost(id, query);
-        return BaseResponse.of(applicationList);
+        return BaseResponse.of(await this.applicationAdminService.getListForPost(id, query));
     }
 
     @Get('/:id')
