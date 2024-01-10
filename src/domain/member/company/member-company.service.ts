@@ -6,30 +6,19 @@ import { MemberCompanyManpowerGetListRequest } from './request/member-company-ma
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
+import { RegionService } from 'domain/region/region.service';
 
 @Injectable()
 export class MemberCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly regionService: RegionService,
+    ) {}
 
     private async parseConditionFromQuery(query: MemberCompanyManpowerGetListRequest): Promise<Prisma.MemberWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupation?.map((item) => parseInt(item));
-        let districtList = query.regionList?.map((item) => parseInt(item.split('-')[1]));
-        const districtEntireCitiesList = await this.prismaService.district.findMany({
-            where: {
-                id: { in: districtList },
-                englishName: 'All',
-            },
-        });
-        const districtEntireCitiesIdList = districtEntireCitiesList?.map((item) => {
-            return item.id;
-        });
-        districtList = districtList?.filter((item) => {
-            return !districtEntireCitiesIdList.includes(item);
-        });
-        const cityList = districtEntireCitiesList?.map((item) => {
-            return item.cityId;
-        });
+        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
 
         return {
             isActive: true,
@@ -91,17 +80,17 @@ export class MemberCompanyService {
                 },
                 {
                     OR: [
-                        query.regionList
+                        districtsList.length
                             ? {
                                   district: {
-                                      id: { in: districtList },
+                                      id: { in: districtsList },
                                   },
                               }
                             : {},
-                        districtEntireCitiesList
+                        citiesList.length
                             ? {
                                   district: {
-                                      cityId: { in: cityList },
+                                      cityId: { in: citiesList },
                                   },
                               }
                             : {},

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
-import { MemberTeamService } from 'domain/team/member/team-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { BaseResponse } from 'utils/generics/base.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -8,36 +7,20 @@ import { PostMemberGetListRequest } from './request/post-member-get-list.request
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
 import { PostResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { RegionService } from 'domain/region/region.service';
 
 @Injectable()
 export class PostMemberService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly memberTeamService: MemberTeamService,
+        private readonly regionService: RegionService,
     ) {}
 
     protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupationList?.map((item) => parseInt(item));
         const constructionMachineryList = query.constructionMachineryList?.map((item) => parseInt(item));
-        let districtList = query.regionList?.map((item) => {
-            return parseInt(item.split('-')[1]);
-        });
-        const districtEntireCitiesList = await this.prismaService.district.findMany({
-            where: {
-                id: { in: districtList },
-                englishName: 'All',
-            },
-        });
-        const districtEntireCitiesIdList = districtEntireCitiesList?.map((item) => {
-            return item.id;
-        });
-        districtList = districtList?.filter((item) => {
-            return !districtEntireCitiesIdList.includes(item);
-        });
-        const cityList = districtEntireCitiesList?.map((item) => {
-            return item.cityId;
-        });
+        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
 
         return {
             isActive: true,
@@ -56,17 +39,17 @@ export class PostMemberService {
                 },
                 {
                     OR: [
-                        query.regionList
+                        districtsList.length
                             ? {
                                   site: {
-                                      district: { id: { in: districtList } },
+                                      district: { id: { in: districtsList } },
                                   },
                               }
                             : {},
-                        districtEntireCitiesList
+                        citiesList.length
                             ? {
                                   site: {
-                                      district: { cityId: { in: cityList } },
+                                      district: { cityId: { in: citiesList } },
                                   },
                               }
                             : {},
