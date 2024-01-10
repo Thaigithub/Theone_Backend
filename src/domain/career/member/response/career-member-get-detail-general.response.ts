@@ -1,6 +1,6 @@
 import { Career, Code } from '@prisma/client';
 
-export class CareerMemberGetDetailResponse {
+export class CareerMemberGetDetailGeneralResponse {
     companyName: Career['companyName'];
     siteName: Career['siteName'];
     startDate: Career['startDate'];

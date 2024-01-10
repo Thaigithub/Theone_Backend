@@ -9,6 +9,7 @@ class CareerResponse {
     startDate: Career['startDate'];
     endDate: Career['endDate'];
     occupationName: Code['codeName'];
+    careerCertificationType: Career['certificationType'];
 }
 
-export class CareerMemberGetListResponse extends PaginationResponse<CareerResponse> {}
+export class CareerMemberGetListCertificationResponse extends PaginationResponse<CareerResponse> {}
