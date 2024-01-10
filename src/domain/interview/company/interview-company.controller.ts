@@ -110,7 +110,7 @@ export class InterviewCompanyController {
     })
     @ApiResponse({ status: HttpStatus.OK, type: BaseResponse })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
-    async proposeTeamInterview(@Body() body: InterviewCompanyProposeRequest): Promise<BaseResponse<null>> {
+    async proposeTeamInterview(@Body() body: InterviewCompanyProposeRequest): Promise<BaseResponse<void>> {
         await this.interviewCompanyService.proposeInterview(body);
         return BaseResponse.ok();
     }

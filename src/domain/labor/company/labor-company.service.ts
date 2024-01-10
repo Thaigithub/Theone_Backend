@@ -353,7 +353,6 @@ export class LaborCompanyService {
             amount: labor.contract.amount,
         };
     }
-
     async getDetailSalary(accountId: number, laborId: number, salaryId: number): Promise<LaborCompanyGetDetailSalaryResponse> {
         const salary = await this.prismaService.salaryHistory.findUnique({
             where: {

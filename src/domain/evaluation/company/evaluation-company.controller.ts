@@ -53,7 +53,7 @@ export class EvaluationCompanyController {
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
-    ): Promise<BaseResponse<null>> {
+    ): Promise<BaseResponse<void>> {
         await this.evaluationCompanyService.evaluateMember(request.user.accountId, id, body);
         return BaseResponse.ok();
     }
@@ -75,7 +75,7 @@ export class EvaluationCompanyController {
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
-    ): Promise<BaseResponse<null>> {
+    ): Promise<BaseResponse<void>> {
         await this.evaluationCompanyService.evaluateTeam(request.user.accountId, id, body);
         return BaseResponse.ok();
     }

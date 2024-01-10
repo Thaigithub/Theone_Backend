@@ -30,6 +30,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { NoticeModule } from './domain/notice/notice.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { ProductModule } from 'domain/product/product.module';
 
 @Module({
     imports: [
@@ -61,6 +62,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         WorkDateModule,
         PointModule,
         TeamMemberInvitationModule,
+        ProductModule,
         CurrencyExchangeModule,
         NoticeModule,
         InterestModule,

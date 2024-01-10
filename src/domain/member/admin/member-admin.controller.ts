@@ -57,7 +57,7 @@ export class MemberAdminController {
     async download(
         @Query() query: DownloadSingleMemberRequest | DownloadMembersRequest,
         @Res() response: Response,
-    ): Promise<BaseResponse<null>> {
+    ): Promise<BaseResponse<void>> {
         let memberIds = [];
         if (Array.isArray(query.memberId)) {
             memberIds = query.memberId.map((item) => parseInt(item));

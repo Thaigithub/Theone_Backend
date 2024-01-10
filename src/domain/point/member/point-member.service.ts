@@ -88,9 +88,6 @@ export class PointMemberService {
             if (!bankAccount) {
                 throw new NotFoundException('The bank account is not found');
             }
-            if (body.currencyExchangePoint <= 0) {
-                throw new ForbiddenException(`The points are must be greater than zero`);
-            }
 
             // Check if member is have enough points
             const member = await prisma.member.findUnique({
