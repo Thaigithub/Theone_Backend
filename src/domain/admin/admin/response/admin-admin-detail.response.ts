@@ -1,7 +1,9 @@
-import { Account, FunctionName } from '@prisma/client';
-import { AdminAdminGetResponse } from '../dto/admin-admin-response.dto';
+import { Account, Admin, FunctionName } from '@prisma/client';
 
-export class AdminAdminGetDetailResponse extends AdminAdminGetResponse {
+export class AdminAdminGetDetailResponse {
+    id: Admin['id'];
+    name: Admin['name'];
+    level: Admin['level'];
     account: {
         username: Account['username'];
     };

@@ -1,6 +1,6 @@
 import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsNotEmptyObject, IsNumberString, IsString, Matches, MaxLength } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class AccountCompanyUpdateRequest {
@@ -69,11 +69,14 @@ export class AccountCompanyUpdateRequest {
     corporateRegNum: string;
 
     @Expose()
+    @IsArray()
     attachments: FileRequest[];
 
     @Expose()
+    @IsNotEmptyObject()
     contactCard: FileRequest;
 
     @Expose()
+    @IsNotEmptyObject()
     logo: FileRequest;
 }

@@ -25,5 +25,5 @@ export class AccountMemberSignupRequest {
     @IsString()
     @Expose()
     @IsOptional()
-    recommenderId?: string;
+    recommenderId: string;
 }

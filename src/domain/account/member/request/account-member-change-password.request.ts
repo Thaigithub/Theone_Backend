@@ -4,9 +4,9 @@ import { IsString } from 'class-validator';
 export class AccountMemberChangePasswordRequest {
     @Expose()
     @IsString()
-    public currentPassword: string;
+    currentPassword: string;
 
     @Expose()
     @IsString()
-    public newPassword: string;
+    newPassword: string;
 }

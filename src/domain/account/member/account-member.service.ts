@@ -477,110 +477,112 @@ export class AccountMemberService {
     }
 
     async cancelMembership(accountId: number): Promise<void> {
-        await this.prismaService.account.update({
-            data: {
-                isActive: false,
-            },
-            where: {
-                id: accountId,
-            },
-        });
+        await this.prismaService.$transaction(async (tx) => {
+            await tx.account.update({
+                data: {
+                    isActive: false,
+                },
+                where: {
+                    id: accountId,
+                },
+            });
 
-        await this.prismaService.member.update({
-            data: {
-                isActive: false,
-            },
-            where: {
-                accountId,
-            },
-        });
-
-        await this.prismaService.bankAccount.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
+            await tx.member.update({
+                data: {
+                    isActive: false,
+                },
+                where: {
                     accountId,
                 },
-            },
-        });
+            });
 
-        await this.prismaService.basicHealthSafetyCertificate.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.bankAccount.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.career.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.basicHealthSafetyCertificate.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.disability.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.career.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.foreignWorker.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.disability.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.memberEvaluation.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.foreignWorker.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.membersOnTeams.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.memberEvaluation.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
-        });
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
 
-        await this.prismaService.teamMemberInvitation.updateMany({
-            data: {
-                isActive: false,
-            },
-            where: {
-                member: {
-                    accountId,
+            await tx.membersOnTeams.updateMany({
+                data: {
+                    isActive: false,
                 },
-            },
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
+
+            await tx.teamMemberInvitation.updateMany({
+                data: {
+                    isActive: false,
+                },
+                where: {
+                    member: {
+                        accountId,
+                    },
+                },
+            });
         });
     }
 }

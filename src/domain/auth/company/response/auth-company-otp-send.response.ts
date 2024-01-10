@@ -1,3 +1,5 @@
+import { OtpProvider } from '@prisma/client';
+
 export class AuthCompanyOtpSendResponse {
-    otpId: number;
+    otpId: OtpProvider['id'];
 }

@@ -1,7 +1,9 @@
+import { OtpProvider } from '@prisma/client';
+
 export class AccountMemberVerifyOtpVerifyPhoneResponse {
     isVerified: boolean;
     status: OtpStatus;
-    otpId: number;
+    otpId: OtpProvider['id'];
     data: string | null;
 }
 
