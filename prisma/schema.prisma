@@ -884,15 +884,16 @@ model SalaryHistory {
 }
 
 model Notice {
-  id        Int        @id @default(autoincrement())
+  id        Int          @id @default(autoincrement())
   title     String
   content   String?
-  isActive  Boolean    @default(true) @map("is_active")
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
   type      NoticeType
-  accountId Int        @map("account_id")
-  account   Account    @relation(fields: [accountId], references: [id])
+  accountId Int          @map("account_id")
+  account   Account      @relation(fields: [accountId], references: [id])
+  status    NoticeStatus @default(NOT_READ) @map("status")
 
   @@map("notices")
 }
@@ -1225,4 +1226,9 @@ enum PostHistoryType {
 enum PaymentForm {
   ON_SITE
   BANK_TRANSFER
+}
+
+enum NoticeStatus {
+  NOT_READ
+  READ
 }
