@@ -320,6 +320,7 @@ export class ApplicationCompanyService {
             },
             select: {
                 memberId: true,
+                status: true,
             },
         });
         if (!member) {
@@ -457,6 +458,7 @@ export class ApplicationCompanyService {
                       },
                   }
                 : null,
+            status: member.status,
         };
     }
 
@@ -471,9 +473,13 @@ export class ApplicationCompanyService {
                         isActive: true,
                     },
                 },
+                team: {
+                    isActive: true,
+                },
             },
             select: {
                 teamId: true,
+                status: true,
             },
         });
         if (!team) {
@@ -679,6 +685,7 @@ export class ApplicationCompanyService {
                   }
                 : null,
             specialLicenses: specialLicenses,
+            status: team.status,
         };
     }
 }

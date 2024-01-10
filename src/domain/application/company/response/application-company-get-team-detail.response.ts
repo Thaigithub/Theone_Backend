@@ -1,3 +1,4 @@
+import { PostApplicationStatus } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
 class ApplicationCompanyGetLeaderDetail {
@@ -43,4 +44,5 @@ export class ApplicationCompanyGetTeamDetail {
     members: ApplicationCompanyGetMemberDetails[];
 
     specialLicenses: ApplicationCompanyGetSpecialLicenses[];
+    status: PostApplicationStatus;
 }

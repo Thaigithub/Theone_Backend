@@ -1,3 +1,4 @@
+import { PostApplicationStatus } from '@prisma/client';
 import {
     ApplicationCompanyGetBasicHealthCertificate,
     ApplicationCompanyGetSpecialLicenses,
@@ -34,4 +35,5 @@ export class ApplicationCompanyGetMemberDetail {
     careers: ApplicationCompanyGetCareerDetail[];
     specialLicenses: ApplicationCompanyGetSpecialLicenses[];
     basicHealthSafetyCertificate: ApplicationCompanyGetBasicHealthCertificate;
+    status: PostApplicationStatus;
 }
