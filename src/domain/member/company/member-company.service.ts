@@ -61,13 +61,19 @@ export class MemberCompanyService {
                 {
                     OR: query.experienceTypeList && [
                         {
-                            totalExperienceYears: experienceTypeList.includes(ExperienceType.SHORT) ? { gte: 1, lte: 4 } : null,
+                            totalExperienceYears: experienceTypeList.includes(ExperienceType.SHORT)
+                                ? { not: null, gte: 1, lte: 4 }
+                                : undefined,
                         },
                         {
-                            totalExperienceYears: experienceTypeList?.includes(ExperienceType.MEDIUM) ? { gte: 5, lte: 9 } : null,
+                            totalExperienceYears: experienceTypeList.includes(ExperienceType.MEDIUM)
+                                ? { not: null, gte: 5, lte: 9 }
+                                : undefined,
                         },
                         {
-                            totalExperienceYears: experienceTypeList?.includes(ExperienceType.LONG) ? { gte: 10 } : null,
+                            totalExperienceYears: experienceTypeList.includes(ExperienceType.LONG)
+                                ? { not: null, gte: 10 }
+                                : undefined,
                         },
                     ],
                 },

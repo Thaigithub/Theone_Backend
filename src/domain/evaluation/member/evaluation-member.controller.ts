@@ -28,7 +28,7 @@ export class EvaluationMemberController {
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationMemberCreateEvaluationRequest,
-    ): Promise<BaseResponse<null>> {
+    ): Promise<BaseResponse<void>> {
         await this.evaluationMemberService.evaluateSite(request.user.accountId, id, body);
         return BaseResponse.ok();
     }

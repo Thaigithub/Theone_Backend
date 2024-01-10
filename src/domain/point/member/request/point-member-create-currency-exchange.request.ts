@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, Min } from 'class-validator';
 
 export class PointMemberCreateCurrencyExchangeRequest {
     @Expose()
@@ -15,6 +15,7 @@ export class PointMemberCreateCurrencyExchangeRequest {
 
     @Expose()
     @IsNumber()
+    @Min(0)
     @ApiProperty({ type: Number, example: 1 })
     currencyExchangePoint: number;
 }
