@@ -319,16 +319,15 @@ export class ApplicationCompanyService {
                 },
             },
             select: {
-                id: true,
+                memberId: true,
             },
         });
         if (!member) {
             throw new NotFoundException('The member id is not found');
         }
-        const memberInfor = await this.prismaService.member.findUniqueOrThrow({
+        const memberInfor = await this.prismaService.member.findUnique({
             where: {
-                id: member.id,
-                isActive: true,
+                id: member.memberId,
             },
             select: {
                 name: true,
@@ -402,7 +401,7 @@ export class ApplicationCompanyService {
         });
 
         return {
-            id: member.id,
+            id: member.memberId,
             name: memberInfor.name,
             username: memberInfor.account.username,
             contact: memberInfor.contact,
@@ -423,7 +422,13 @@ export class ApplicationCompanyService {
             totalExperienceMonths: memberInfor.totalExperienceMonths,
             totalExperienceYears: memberInfor.totalExperienceYears,
             desiredOccupations:
-                memberInfor.desiredOccupations.length > 0 ? memberInfor.desiredOccupations[0].code.codeName : null,
+                memberInfor.desiredOccupations.length > 0
+                    ? memberInfor.desiredOccupations.map((item) => {
+                          return {
+                              codeName: item.code.codeName,
+                          };
+                      })
+                    : [],
             careers: memberInfor.career.map((item) => {
                 return {
                     startDate: item.startDate,
@@ -507,7 +512,6 @@ export class ApplicationCompanyService {
                                     },
                                 },
                             },
-                            take: 1,
                             orderBy: { updatedAt: 'desc' },
                         },
                         career: {
@@ -559,7 +563,6 @@ export class ApplicationCompanyService {
                                             },
                                         },
                                     },
-                                    take: 1,
                                     orderBy: { updatedAt: 'desc' },
                                 },
                                 career: {
@@ -567,10 +570,9 @@ export class ApplicationCompanyService {
                                         isActive: true,
                                     },
                                     select: {
-                                        startDate: true,
-                                        endDate: true,
+                                        experiencedYears: true,
+                                        experiencedMonths: true,
                                     },
-                                    take: 1,
                                     orderBy: { updatedAt: 'desc' },
                                 },
                                 totalExperienceYears: true,
@@ -616,16 +618,31 @@ export class ApplicationCompanyService {
                 name: element.member.name,
                 contact: element.member.contact,
                 desiredOccupation:
-                    element.member.desiredOccupations.length > 0 ? element.member.desiredOccupations[0].code.codeName : null,
-                career: element.member.career.length > 0 ? element.member.career[0] : null,
+                    element.member.desiredOccupations.length > 0
+                        ? element.member.desiredOccupations.map((item) => {
+                              return {
+                                  codeName: item.code.codeName,
+                              };
+                          })
+                        : [],
+                totalExperienceYears: element.member.totalExperienceYears,
+                totalExperienceMonths: element.member.totalExperienceMonths,
             });
         });
-        memberDetails.push({
+        memberDetails.unshift({
             id: leader.id,
             name: leader.name,
             contact: leader.contact,
-            desiredOccupation: leader.desiredOccupations.length > 0 ? leader.desiredOccupations[0].code.codeName : null,
-            career: leader.career.length > 0 ? leader.career[0] : null,
+            desiredOccupation:
+                leader.desiredOccupations.length > 0
+                    ? leader.desiredOccupations.map((item) => {
+                          return {
+                              codeName: item.code.codeName,
+                          };
+                      })
+                    : [],
+            totalExperienceYears: leader.totalExperienceYears,
+            totalExperienceMonths: leader.totalExperienceMonths,
         });
         specialLicenses = specialLicenses.concat(
             leader.specialLicenses.map((license) => {

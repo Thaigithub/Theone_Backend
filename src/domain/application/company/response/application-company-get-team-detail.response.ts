@@ -10,11 +10,9 @@ class ApplicationCompanyGetLeaderDetail {
 
 class ApplicationCompanyGetMemberDetails extends ApplicationCompanyGetLeaderDetail {
     name: string;
-    desiredOccupations: string;
-    career: {
-        startDate: Date;
-        endDate: Date;
-    };
+    desiredOccupations: {
+        codeName: string;
+    }[];
 }
 
 export class ApplicationCompanyGetSpecialLicenses {

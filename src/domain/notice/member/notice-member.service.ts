@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -66,32 +66,31 @@ export class NoticeMemberService {
                 },
             });
         }
-        
     }
 
     async delete(accountId: number, id: number): Promise<void> {
-            const notice = await this.prismaService.notice.findUnique({
-                where: {
-                    id: id,
-                    isActive: true,
-                    account: {
-                        id: accountId,
-                        member: {
-                            isActive: true,
-                        },
+        const notice = await this.prismaService.notice.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+                account: {
+                    id: accountId,
+                    member: {
+                        isActive: true,
                     },
                 },
-            });
-            if (!notice) {
-                throw new NotFoundException('The notice id is not found');
-            }
-            await this.prismaService.notice.update({
-                where: {
-                    id: notice.id,
-                },
-                data: {
-                    isActive: false,
-                },
-            });
+            },
+        });
+        if (!notice) {
+            throw new NotFoundException('The notice id is not found');
+        }
+        await this.prismaService.notice.update({
+            where: {
+                id: notice.id,
+            },
+            data: {
+                isActive: false,
+            },
+        });
     }
 }
