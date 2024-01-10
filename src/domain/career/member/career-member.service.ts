@@ -1,14 +1,15 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerCertificationRequestStatus, CareerType, CodeType, Prisma } from '@prisma/client';
+import { CareerCertificationRequestStatus, CareerCertificationType, CareerType, CodeType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
-import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberUpsertRequest } from './request/career-member-upsert.request';
-import { CareerMemberGetDetailResponse } from './response/career-member-get-detail.response';
-import { CareerMemberGetListResponse } from './response/career-member-get-list.response';
+import { CareerMemberGetListCertificationRequest } from './request/career-member-get-list-certification.request';
+import { CareerMemberGetListGeneralRequest } from './request/career-member-get-list-general.request';
+import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert-general.request';
+import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
+import { CareerMemberGetListGeneralResponse } from './response/career-member-get-list-general.response';
 
 @Injectable()
 export class CareerMemberService {
@@ -17,7 +18,10 @@ export class CareerMemberService {
         private readonly governmentService: GovernmentService,
     ) {}
 
-    async getListGeneral(query: CareerMemberGetListRequest, accountId: number): Promise<CareerMemberGetListResponse> {
+    async getListGeneral(
+        query: CareerMemberGetListGeneralRequest,
+        accountId: number,
+    ): Promise<CareerMemberGetListGeneralResponse> {
         const search = {
             select: {
                 id: true,
@@ -31,8 +35,8 @@ export class CareerMemberService {
             },
             where: {
                 isActive: true,
-                type: query.type,
-                certificationType: query.certificationType,
+                type: CareerType.GENERAL,
+                certificationType: CareerCertificationType.NONE,
                 member: {
                     accountId,
                 },
@@ -53,7 +57,7 @@ export class CareerMemberService {
         return new PaginationResponse(careers, new PageInfo(total));
     }
 
-    async getDetailGeneral(id: number, accountId: number): Promise<CareerMemberGetDetailResponse> {
+    async getDetailGeneral(id: number, accountId: number): Promise<CareerMemberGetDetailGeneralResponse> {
         const response = await this.prismaService.career.findUnique({
             select: {
                 id: true,
@@ -71,6 +75,8 @@ export class CareerMemberService {
                 member: {
                     accountId,
                 },
+                type: CareerType.GENERAL,
+                certificationType: CareerCertificationType.NONE,
             },
         });
         if (!response) throw new NotFoundException('Career does not exist');
@@ -81,7 +87,7 @@ export class CareerMemberService {
         };
     }
 
-    async createGeneral(body: CareerMemberUpsertRequest, accountId: number): Promise<void> {
+    async createGeneral(body: CareerMemberUpsertGeneralRequest, accountId: number): Promise<void> {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
@@ -104,13 +110,14 @@ export class CareerMemberService {
                         experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
                         type: CareerType.GENERAL,
                         occupationId: occupation.id,
+                        certificationType: CareerCertificationType.NONE,
                     },
                 },
             },
         });
     }
 
-    async updateGeneral(id: number, accountId: number, body: CareerMemberUpsertRequest): Promise<void> {
+    async updateGeneral(id: number, accountId: number, body: CareerMemberUpsertGeneralRequest): Promise<void> {
         const career = await this.prismaService.career.findUnique({
             where: {
                 id,
@@ -118,6 +125,8 @@ export class CareerMemberService {
                 member: {
                     accountId,
                 },
+                type: CareerType.GENERAL,
+                certificationType: CareerCertificationType.NONE,
             },
         });
         if (!career) throw new NotFoundException('Career not found');
@@ -150,6 +159,8 @@ export class CareerMemberService {
                 member: {
                     accountId,
                 },
+                type: CareerType.GENERAL,
+                certificationType: CareerCertificationType.NONE,
             },
         });
         if (!career) throw new NotFoundException('Career not found');
@@ -168,7 +179,45 @@ export class CareerMemberService {
         });
     }
 
-    async createCertificateRequest(accountId: number): Promise<void> {
+    async getListCertification(
+        accountId: number,
+        query: CareerMemberGetListCertificationRequest,
+    ): Promise<CareerMemberGetListGeneralResponse> {
+        const search = {
+            select: {
+                id: true,
+                type: true,
+                certificationType: true,
+                companyName: true,
+                siteName: true,
+                startDate: true,
+                endDate: true,
+                occupation: true,
+            },
+            where: {
+                isActive: true,
+                type: CareerType.CERTIFICATION,
+                member: {
+                    accountId,
+                },
+            },
+            orderBy: {
+                certificationType: Prisma.SortOrder.desc,
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        };
+        const careers = (await this.prismaService.career.findMany(search)).map((item) => {
+            const { occupation, ...rest } = item;
+            return {
+                ...rest,
+                occupationName: occupation.codeName,
+            };
+        });
+        const total = await this.prismaService.career.count({ where: search.where });
+        return new PaginationResponse(careers, new PageInfo(total));
+    }
+
+    async createCertificationRequest(accountId: number): Promise<void> {
         const request = await this.prismaService.careerCertificationRequest.count({
             where: {
                 member: {
@@ -211,7 +260,7 @@ export class CareerMemberService {
         ).careerCertificationRequest;
         if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-        // await this.governmentService.saveCertificationExperienceHealthInsurance(accountId);
+        await this.governmentService.saveCertificationExperienceHealthInsurance(accountId);
     }
 
     async getCertExperienceByEmploymentInsurance(accountId: number): Promise<void> {
@@ -227,7 +276,7 @@ export class CareerMemberService {
         ).careerCertificationRequest;
         if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-        // await this.governmentService.saveCertificationExperienceEmploymentInsurance(accountId);
+        await this.governmentService.saveCertificationExperienceEmploymentInsurance(accountId);
     }
 
     async getCertExperienceByTheOneSite(accountId: number): Promise<void> {
@@ -243,6 +292,6 @@ export class CareerMemberService {
         ).careerCertificationRequest;
         if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
             throw new ForbiddenException('Application not exist or not approved');
-        // await this.governmentService.saveCertificationTheOneSite(accountId);
+        await this.governmentService.saveCertificationTheOneSite(accountId);
     }
 }

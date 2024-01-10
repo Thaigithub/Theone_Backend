@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
 
-export class CareerMemberUpsertRequest {
+export class CareerMemberUpsertGeneralRequest {
     @Expose()
     @IsString()
     @IsNotEmpty()

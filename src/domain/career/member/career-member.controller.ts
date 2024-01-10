@@ -5,10 +5,11 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { CareerMemberService } from './career-member.service';
-import { CareerMemberGetListRequest } from './request/career-member-get-list.request';
-import { CareerMemberUpsertRequest } from './request/career-member-upsert.request';
-import { CareerMemberGetDetailResponse } from './response/career-member-get-detail.response';
-import { CareerMemberGetListResponse } from './response/career-member-get-list.response';
+import { CareerMemberGetListCertificationRequest } from './request/career-member-get-list-certification.request';
+import { CareerMemberGetListGeneralRequest } from './request/career-member-get-list-general.request';
+import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert-general.request';
+import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
+import { CareerMemberGetListGeneralResponse } from './response/career-member-get-list-general.response';
 
 @Controller('member/careers')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -18,15 +19,15 @@ export class CareerMemberController {
 
     @Get('/general')
     async getListGeneral(
-        @Query() query: CareerMemberGetListRequest,
+        @Query() query: CareerMemberGetListGeneralRequest,
         @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<CareerMemberGetListResponse>> {
+    ): Promise<BaseResponse<CareerMemberGetListGeneralResponse>> {
         return BaseResponse.of(await this.careerMemberService.getListGeneral(query, request.user.accountId));
     }
 
     @Post('/general')
     async createGeneral(
-        @Body() body: CareerMemberUpsertRequest,
+        @Body() body: CareerMemberUpsertGeneralRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
         body.startDate = new Date(body.startDate).toISOString();
@@ -46,7 +47,7 @@ export class CareerMemberController {
     async getDetailGeneral(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<CareerMemberGetDetailResponse>> {
+    ): Promise<BaseResponse<CareerMemberGetDetailGeneralResponse>> {
         return BaseResponse.of(await this.careerMemberService.getDetailGeneral(id, request.user.accountId));
     }
 
@@ -54,20 +55,25 @@ export class CareerMemberController {
     async updateGeneral(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
-        @Body() body: CareerMemberUpsertRequest,
+        @Body() body: CareerMemberUpsertGeneralRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.careerMemberService.updateGeneral(id, request.user.accountId, body));
     }
 
-    @Get('/certificate')
-    async getListCertificate(@Req() request: AccountIdExtensionRequest) {}
-
-    @Post('/certificate/request')
-    async createCertificateRequest(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.careerMemberService.createCertificateRequest(request.user.accountId));
+    @Get('/certification')
+    async getListCertification(
+        @Req() request: AccountIdExtensionRequest,
+        @Query() query: CareerMemberGetListCertificationRequest,
+    ) {
+        return BaseResponse.of(await this.careerMemberService.getListCertification(request.user.accountId, query));
     }
 
-    @Post('/certificatio/health-insurance')
+    @Post('/certification/request')
+    async createCertificationRequest(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.careerMemberService.createCertificationRequest(request.user.accountId));
+    }
+
+    @Post('/certification/health-insurance')
     async getCertificationExperienceHealthInsurance(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.careerMemberService.getCertExperienceByHealthInsurance(request.user.accountId));
     }
