@@ -8,5 +8,4 @@ export class BannerAdminGetDetailAdminAdvertisingResponse {
     urlLink: AdminAdvertisingBanner['urlLink'];
     startDate: AdminAdvertisingBanner['startDate'];
     endDate: AdminAdvertisingBanner['endDate'];
-    regDate: AdminAdvertisingBanner['regDate'];
 }

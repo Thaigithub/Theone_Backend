@@ -383,7 +383,7 @@ model CareerCertificationRequest {
 
 model Banner {
   id                       Int                       @id @default(autoincrement())
-  status                   BannerStatus              @default(EXPOSE)
+  status                   BannerStatus              @default(HIDE)
   fileId                   Int                       @unique
   isActive                 Boolean                   @default(true) @map("is_active")
   createdAt                DateTime                  @default(now()) @map("created_at")
@@ -417,9 +417,8 @@ model CompanyPostBanner {
   desiredStartDate       DateTime               @map("desired_start_date") @db.Date
   desiredEndDate         DateTime               @map("desired_end_date") @db.Date
   priority               Int?
-  status                 RequestBannerStatus
+  status                 RequestBannerStatus    @default(PENDING)
   detail                 String?
-  title                  String?
   postId                 Int                    @map("post_id")
   companyBannerHistories CompanyBannerHistory[]
   banner                 Banner                 @relation(fields: [id], references: [id])
@@ -430,7 +429,6 @@ model CompanyPostBanner {
 
 model AdminPostBanner {
   id        Int      @unique
-  urlLink   String   @map("url_link")
   startDate DateTime @map("start_date") @db.Date
   endDate   DateTime @map("end_date") @db.Date
   regDate   DateTime @default(now()) @map("register_date") @db.Date
@@ -450,10 +448,9 @@ model CompanyAdvertisingBanner {
   acceptDate             DateTime?              @map("accept_date") @db.Date
   desiredStartDate       DateTime               @map("desired_start_date") @db.Date
   desiredEndDate         DateTime               @map("desired_end_date") @db.Date
-  regDate                DateTime               @default(now()) @map("register_date") @db.Date
   detail                 String?
   priority               Int?
-  status                 RequestBannerStatus
+  status                 RequestBannerStatus    @default(PENDING)
   companyId              Int
   company                Company                @relation(fields: [companyId], references: [id])
   banner                 Banner                 @relation(fields: [id], references: [id])

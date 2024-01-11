@@ -11,7 +11,6 @@ export class AdminJobPostBannerResponse {
     startDate: AdminPostBanner['startDate'];
     endDate: AdminPostBanner['endDate'];
     regDate: AdminPostBanner['regDate'];
-    urlLink: AdminPostBanner['urlLink'];
     priority: AdminPostBanner['priority'];
 }
 
