@@ -4,13 +4,13 @@ import { FileResponse } from 'utils/generics/file.response';
 class ApplicationCompanyGetLeaderDetail {
     id: number;
     contact: string;
+    name: string;
     totalExperienceYears: number;
     totalExperienceMonths: number;
     desiredSalary: number;
 }
 
 class ApplicationCompanyGetMemberDetails extends ApplicationCompanyGetLeaderDetail {
-    name: string;
     desiredOccupations: {
         codeName: string;
     }[];
@@ -40,6 +40,7 @@ export class ApplicationCompanyGetTeamDetail {
         englishName: string;
         koreanName: string;
     };
+    code: string;
     leader: ApplicationCompanyGetLeaderDetail;
     members: ApplicationCompanyGetMemberDetails[];
 

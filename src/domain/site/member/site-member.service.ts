@@ -70,7 +70,7 @@ export class SiteMemberService {
             return { isInterested: true };
         }
     }
-    async getSiteList(accountId: number, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
+    async getSiteList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
         const entireCity = await (async () => {
             if (!query.districtId) {
                 return null;
@@ -139,7 +139,7 @@ export class SiteMemberService {
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
     }
-    async getSiteDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
+    async getSiteDetail(accountId: number | undefined, id: number): Promise<SiteMemberGetDetailResponse> {
         await this.checkExistSite(id);
         const siteRecord = await this.prismaService.site.findUnique({
             where: {
@@ -178,19 +178,30 @@ export class SiteMemberService {
                         contactPhone: true,
                     },
                 },
+                interestMember: {
+                    where: {
+                        member: {
+                            accountId: accountId,
+                            isActive: true,
+                        },
+                    },
+                    select: {
+                        id: true,
+                    },
+                    take: 1,
+                },
             },
         });
-        const member = await this.prismaService.member.findUnique({
-            where: { accountId: accountId },
-            include: { interestSites: true },
-        });
+        if (!siteRecord) {
+            throw new NotFoundException('The site id is not found');
+        }
 
         const siteInfor = {
             site: {
                 id: siteRecord.id,
                 name: siteRecord.name,
                 address: siteRecord.address,
-                isInterest: member ? member.interestSites.some((interest) => interest.siteId === id) : false,
+                interestId: siteRecord.interestMember.length > 0 ? siteRecord.interestMember[0].id : null,
                 startDate: siteRecord.startDate,
                 endDate: siteRecord.endDate,
                 personInCharge: siteRecord.personInCharge,

@@ -1,9 +1,9 @@
-import { FileResponse } from "utils/generics/file.response";
+import { FileResponse } from 'utils/generics/file.response';
 
 class SiteDetailResponse {
     name: string;
     address: string;
-    isInterest: boolean;
+    interestId: number;
     startDate: Date;
     endDate: Date;
     personInCharge: string;

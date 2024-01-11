@@ -4,7 +4,6 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { PostMemberService } from './post-member.service';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
@@ -12,6 +11,8 @@ import { PostMemberGetListResponse } from './response/post-member-get-list.respo
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
 @Controller('/member/posts')
+@UseGuards(AuthJwtGuard, AuthRoleGuard)
+@Roles(AccountType.MEMBER)
 export class PostMemberController {
     constructor(private postMemberService: PostMemberService) {}
 
@@ -25,10 +26,7 @@ export class PostMemberController {
         siteId: number,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         query = { ...query, occupationList, constructionMachineryList, experienceTypeList, regionList };
-        const list = await this.postMemberService.getList(request.user?.accountId, query, siteId);
-        const total = await this.postMemberService.getTotal(query, siteId);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+        return BaseResponse.of(await this.postMemberService.getList(request.user?.accountId, query, siteId));
     }
 
     // Get list all
@@ -84,8 +82,6 @@ export class PostMemberController {
     }
 
     // Apply
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post(':id/apply/member')
     async addApplyPostMember(
         @Req() request: AccountIdExtensionRequest,
@@ -94,8 +90,6 @@ export class PostMemberController {
         return BaseResponse.of(await this.postMemberService.addApplyPostMember(request.user.accountId, id));
     }
 
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post(':id/apply/team/:teamId')
     async addApplyPost(
         @Req() request: AccountIdExtensionRequest,
@@ -106,9 +100,6 @@ export class PostMemberController {
     }
 
     // Interest
-
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/:id/interest')
     async addInterestPost(
         @Req() request: AccountIdExtensionRequest,

@@ -1,13 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
+import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { BaseResponse } from 'utils/generics/base.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
-import { PostResponse } from './response/post-member-get-list.response';
+import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { RegionService } from 'domain/region/region.service';
 
 @Injectable()
 export class PostMemberService {
@@ -64,7 +65,11 @@ export class PostMemberService {
         };
     }
 
-    async getList(accountId: number | undefined, query: PostMemberGetListRequest, siteId: number): Promise<PostResponse[]> {
+    async getList(
+        accountId: number | undefined,
+        query: PostMemberGetListRequest,
+        siteId: number,
+    ): Promise<PostMemberGetListResponse> {
         if (siteId) {
             const siteExist = await this.prismaService.site.count({
                 where: {
@@ -75,51 +80,56 @@ export class PostMemberService {
             if (!siteExist) throw new NotFoundException('Site does not exist');
         }
 
-        const posts = await this.prismaService.post.findMany({
-            select: {
-                id: true,
-                name: true,
-                startWorkDate: true,
-                endWorkDate: true,
-                numberOfPeople: true,
-                endDate: true,
-                occupation: {
-                    select: {
-                        codeName: true,
+        const posts = (
+            await this.prismaService.post.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    startWorkDate: true,
+                    endWorkDate: true,
+                    numberOfPeople: true,
+                    endDate: true,
+                    occupation: {
+                        select: {
+                            codeName: true,
+                        },
                     },
-                },
-                site: {
-                    select: {
-                        name: true,
-                        address: true,
-                        district: {
-                            select: {
-                                englishName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
+                    site: {
+                        select: {
+                            name: true,
+                            address: true,
+                            district: {
+                                select: {
+                                    englishName: true,
+                                    city: {
+                                        select: {
+                                            englishName: true,
+                                        },
                                     },
                                 },
                             },
                         },
                     },
-                },
-                interested: {
-                    where: {
-                        member: {
-                            accountId,
+                    interested: {
+                        where: {
+                            member: {
+                                accountId: accountId,
+                                isActive: true,
+                            },
                         },
+                        select: {
+                            id: true,
+                        },
+                        take: 1,
                     },
                 },
-            },
-            where: await this.parseConditionFromQuery(query, siteId),
-            orderBy: {
-                createdAt: 'desc',
-            },
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        return posts.map((item) => {
+                where: await this.parseConditionFromQuery(query, siteId),
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             const site = item.site;
             const startWorkDate = item.startWorkDate ? item.startWorkDate.toISOString().split('T')[0] : null;
             const endWorkDate = item.endWorkDate ? item.endWorkDate.toISOString().split('T')[0] : null;
@@ -131,7 +141,9 @@ export class PostMemberService {
             delete item.endWorkDate;
             delete item.endDate;
             return {
-                ...item,
+                id: item.id,
+                name: item.name,
+                numberOfPeople: item.numberOfPeople,
                 occupation,
                 startWorkDate,
                 endWorkDate,
@@ -140,9 +152,13 @@ export class PostMemberService {
                 siteAddress: site ? site.address : null,
                 siteAddressCity: site?.district ? site.district.city.englishName : null,
                 siteAddressDistrict: site?.district ? site.district.englishName : null,
-                isInterest: item.interested.length !== 0 ? true : false,
+                interestId: !accountId ? null : item.interested.length > 0 ? item.interested[0].id : null,
             };
         });
+        const count = await this.prismaService.post.count({
+            where: await this.parseConditionFromQuery(query, siteId),
+        });
+        return new PaginationResponse(posts, new PageInfo(count));
     }
 
     async getTotal(query: PostMemberGetListRequest, siteId: number): Promise<number> {
