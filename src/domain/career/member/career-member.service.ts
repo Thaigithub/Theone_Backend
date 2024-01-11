@@ -83,6 +83,7 @@ export class CareerMemberService {
         const { occupation, ...rest } = response;
         return {
             ...rest,
+            occupationId: occupation.id,
             occupationName: occupation.codeName,
         };
     }

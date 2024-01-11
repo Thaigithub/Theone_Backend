@@ -244,7 +244,7 @@ export class ApplicationCompanyService {
                     },
                 },
                 data: {
-                    status: PostApplicationStatus.REJECT_BY_COMPANY,
+                    status: PostApplicationStatus.PROPOSAL_INTERVIEW,
                 },
             });
         }
