@@ -113,31 +113,32 @@ model Member {
 }
 
 model Company {
-  id                     Int                      @id @default(autoincrement())
-  accountId              Int                      @unique @map("account_id")
-  name                   String
-  address                String
-  estDate                DateTime                 @map("est_date")
-  businessRegNumber      String                   @unique @map("buss_reg_number")
-  corporateRegNumber     String                   @unique @map("corp_reg_number")
-  type                   CompanyType
-  email                  String                   @unique
-  phone                  String
-  contactPhone           String                   @map("contact_phone")
-  contactName            String                   @map("contact_name")
-  isActive               Boolean                  @default(true) @map("is_active")
-  createdAt              DateTime                 @default(now()) @map("created_at")
-  updatedAt              DateTime                 @updatedAt @map("updated_at")
-  presentativeName       String                   @map("presentative_name")
-  insurance              String?
-  attachments            Attachment[]
-  account                Account                  @relation(fields: [accountId], references: [id])
-  contactCard            ContactCard?
-  logo                   Logo?
-  matchingRecommendation MatchingRecommendation[]
-  posts                  Post[]
-  sites                  Site[]
-  ProductPaymentHistory  ProductPaymentHistory[]
+  id                       Int                        @id @default(autoincrement())
+  accountId                Int                        @unique @map("account_id")
+  name                     String
+  address                  String
+  estDate                  DateTime                   @map("est_date")
+  businessRegNumber        String                     @unique @map("buss_reg_number")
+  corporateRegNumber       String                     @unique @map("corp_reg_number")
+  type                     CompanyType
+  email                    String                     @unique
+  phone                    String
+  contactPhone             String                     @map("contact_phone")
+  contactName              String                     @map("contact_name")
+  isActive                 Boolean                    @default(true) @map("is_active")
+  createdAt                DateTime                   @default(now()) @map("created_at")
+  updatedAt                DateTime                   @updatedAt @map("updated_at")
+  presentativeName         String                     @map("presentative_name")
+  insurance                String?
+  attachments              Attachment[]
+  account                  Account                    @relation(fields: [accountId], references: [id])
+  contactCard              ContactCard?
+  logo                     Logo?
+  matchingRecommendation   MatchingRecommendation[]
+  posts                    Post[]
+  sites                    Site[]
+  ProductPaymentHistory    ProductPaymentHistory[]
+  companyAdvertisingBanner CompanyAdvertisingBanner[]
 
   @@map("companies")
 }
@@ -381,21 +382,22 @@ model CareerCertificationRequest {
 }
 
 model Banner {
-  id            Int            @id @default(autoincrement())
-  status        BannerStatus   @default(EXPOSE)
-  fileId        Int            @unique
-  isActive      Boolean        @default(true) @map("is_active")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  file          File           @relation(fields: [fileId], references: [id])
-  generalBanner GeneralBanner?
-  postBanner    PostBanner?
-  siteBanner    SiteBanner?
+  id                       Int                       @id @default(autoincrement())
+  status                   BannerStatus              @default(EXPOSE)
+  fileId                   Int                       @unique
+  isActive                 Boolean                   @default(true) @map("is_active")
+  createdAt                DateTime                  @default(now()) @map("created_at")
+  updatedAt                DateTime                  @updatedAt @map("updated_at")
+  file                     File                      @relation(fields: [fileId], references: [id])
+  adminAdvertisingBanner   AdminAdvertisingBanner?
+  companyPostBanner        CompanyPostBanner?
+  adminPostBanner          AdminPostBanner?
+  companyAdvertisingBanner CompanyAdvertisingBanner?
 
   @@map("banners")
 }
 
-model GeneralBanner {
+model AdminAdvertisingBanner {
   id        Int      @unique
   urlLink   String   @map("url_link")
   title     String
@@ -405,23 +407,13 @@ model GeneralBanner {
   priority  Int?
   banner    Banner   @relation(fields: [id], references: [id])
 
-  @@map("general_banners")
-}
-
-model PostBanner {
-  id                Int                @unique
-  postId            Int                @map("post_id")
-  type              PostBannerType
-  adminPostBanner   AdminPostBanner?
-  companyPostBanner CompanyPostBanner?
-  banner            Banner             @relation(fields: [id], references: [id])
-  post              Post               @relation(fields: [postId], references: [id])
-
-  @@map("post_banners")
+  @@map("admin_advertising_banners")
 }
 
 model CompanyPostBanner {
   id                     Int                    @unique
+  postId                 Int                    @map("post_id")
+  post                   Post                   @relation(fields: [postId], references: [id])
   requestDate            DateTime               @default(now()) @map("request_date") @db.Date
   acceptDate             DateTime?              @map("accept_date") @db.Date
   desiredStartDate       DateTime               @map("desired_start_date") @db.Date
@@ -431,50 +423,55 @@ model CompanyPostBanner {
   detail                 String?
   title                  String?
   companyBannerHistories CompanyBannerHistory[]
-  postBanner             PostBanner             @relation(fields: [id], references: [id])
+  banner                 Banner                 @relation(fields: [id], references: [id])
 
   @@map("company_post_banners")
 }
 
 model AdminPostBanner {
-  id         Int        @unique
-  urlLink    String     @map("url_link")
-  startDate  DateTime   @map("start_date") @db.Date
-  endDate    DateTime   @map("end_date") @db.Date
-  regDate    DateTime   @default(now()) @map("register_date") @db.Date
-  priority   Int?
-  postBanner PostBanner @relation(fields: [id], references: [id])
+  id        Int      @unique
+  urlLink   String   @map("url_link")
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  regDate   DateTime @default(now()) @map("register_date") @db.Date
+  priority  Int?
+  postId    Int      @map("post_id")
+  post      Post     @relation(fields: [postId], references: [id])
+  banner    Banner   @relation(fields: [id], references: [id])
 
   @@map("admin_post_banners")
 }
 
-model SiteBanner {
+model CompanyAdvertisingBanner {
   id                     Int                    @unique
-  siteId                 Int                    @map("site_id")
-  title                  String?
+  urlLink                String                 @map("url_link")
+  title                  String
   requestDate            DateTime               @default(now()) @map("request_date") @db.Date
   acceptDate             DateTime?              @map("accept_date") @db.Date
   desiredStartDate       DateTime               @map("desired_start_date") @db.Date
   desiredEndDate         DateTime               @map("desired_end_date") @db.Date
-  priority               Int?
-  status                 RequestBannerStatus
+  regDate                DateTime               @default(now()) @map("register_date") @db.Date
   detail                 String?
-  companyBannerHistories CompanyBannerHistory[]
+  priority               Int?
   banner                 Banner                 @relation(fields: [id], references: [id])
-  site                   Site                   @relation(fields: [siteId], references: [id])
+  status                 RequestBannerStatus
+  companyBannerHistories CompanyBannerHistory[]
+  companyId              Int
+  company                Company                @relation(fields: [companyId], references: [id])
 
-  @@map("site_banners")
+  @@map("company_advertising_banners")
 }
 
 model CompanyBannerHistory {
-  id                  Int                 @id @default(autoincrement())
-  status              RequestBannerStatus
-  reason              String?
-  createdAt           DateTime            @default(now()) @map("created_at")
-  siteBannerId        Int?
-  companyPostBannerId Int?
-  companyPostBanner   CompanyPostBanner?  @relation(fields: [companyPostBannerId], references: [id])
-  siteBanner          SiteBanner?         @relation(fields: [siteBannerId], references: [id])
+  id                         Int                       @id @default(autoincrement())
+  status                     RequestBannerStatus
+  reason                     String?
+  createdAt                  DateTime                  @default(now()) @map("created_at")
+  siteBannerId               Int?
+  companyPostBannerId        Int?
+  companyPostBanner          CompanyPostBanner?        @relation(fields: [companyPostBannerId], references: [id])
+  CompanyAdvertisingBanner   CompanyAdvertisingBanner? @relation(fields: [companyAdvertisingBannerId], references: [id])
+  companyAdvertisingBannerId Int?
 
   @@map("company_banner_status")
 }
@@ -525,7 +522,6 @@ model Site {
   interestMember            Interest[]
   memberEvaluationByCompany MemberEvaluationByCompany[]
   post                      Post[]
-  siteBanner                SiteBanner[]
   siteEvaluation            SiteEvaluation?
   company                   Company                     @relation(fields: [companyId], references: [id])
   district                  District                    @relation(fields: [districtId], references: [id])
@@ -569,7 +565,8 @@ model Post {
   headhuntingRequest        HeadhuntingRequest?
   interested                Interest[]
   memberMatchings           MemberMatching[]
-  postBanner                PostBanner[]
+  adminPostBanner           AdminPostBanner[]
+  companyPostBanner         CompanyPostBanner[]
   postHistory               PostHistory[]
   company                   Company                     @relation(fields: [companyId], references: [id])
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
@@ -958,6 +955,7 @@ model ProductPaymentHistory {
 
   @@map("product_payment_histories")
 }
+
 model Bank {
   id        Int      @id @default(autoincrement())
   isActive  Boolean  @default(true) @map("is_active")

@@ -5,68 +5,70 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { BannerAdminService } from './banner-admin.service';
 import { BannerAdminChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
-import { BannerAdminGetAdminJobPostRequest } from './request/banner-admin-get-admin-jobpost.request';
-import { BannerAdminGetCompanyJobPostRequest } from './request/banner-admin-get-company-jobpost.request';
-import { BannerAdminGetGeneralRequest } from './request/banner-admin-get-general.request';
-import { BannerAdminGetSiteRequest } from './request/banner-admin-get-site.request';
+import { BannerAdminGetListAdminAdvertisingRequest } from './request/banner-admin-get-list-admin-advertising.request';
+import { BannerAdminGetListAdminJobPostRequest } from './request/banner-admin-get-list-admin-jobpost.request';
+import { BannerAdminGetListCompanyJobPostRequest } from './request/banner-admin-get-list-company-jobpost.request';
 import { BannerAdminUpdatePriority } from './request/banner-admin-update-priority.request';
-import { BannerAdminUpsertJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
-import { BannerAdminUpsertGeneralRequest } from './request/banner-admin-upsert-general.request';
-import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost-detail.response';
-import { BannerAdminGetAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost.response';
-import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost-detail.response';
-import { BannerAdminGetCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost.response';
-import { BannerAdminGetDetailGeneralResponse } from './response/banner-admin-get-general-detail.response';
-import { BannerAdminGetGeneralResponse } from './response/banner-admin-get-general.response';
-import { BannerAdminGetDetailSiteResponse } from './response/banner-admin-get-site-detail.response';
-import { BannerAdminGetSiteResponse } from './response/banner-admin-get-site.response';
+import { BannerAdminUpsertAdminAdvertisingRequest } from './request/banner-admin-upsert-admin-advertising.request';
+import { BannerAdminUpsertAdminJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
+import { BannerAdminGetDetailAdminAdvertisingResponse } from './response/banner-admin-get-detail-admin-advertising.response';
+import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-detail-admin-jobpost.response';
+import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-detail-company-jobpost.response';
+import { BannerAdminGetListAdminAdvertisingResponse } from './response/banner-admin-get-list-admin-advertising.response';
+import { BannerAdminGetListAdminJobPostResponse } from './response/banner-admin-get-list-admin-jobpost.response';
+import { BannerAdminGetListCompanyJobPostResponse } from './response/banner-admin-get-list-company-jobpost.response';
+import { BannerAdminGetListCompanyAdvertisingRequest } from './request/banner-admin-get-list-company-advertising.request';
+import { BannerAdminGetListCompanyAdvertisingResponse } from './response/banner-admin-get-list-company-advertising.response';
+import { BannerAdminGetDetailCompanyAdvertisingResponse } from './response/banner-admin-get-detail-company-advertising.response';
 
 @Controller('/admin/banners')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class BannerAdminController {
     constructor(private readonly bannerAdminService: BannerAdminService) {}
-    // GENERAL BANNER
-    @Post('/general')
-    async createGeneralBanner(@Body() body: BannerAdminUpsertGeneralRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerAdminService.createGeneralBanner(body));
+    // ADMIN ADVERTISING BANNER
+    @Post('/adminadvertising')
+    async createAdminAdvertisingBanner(@Body() body: BannerAdminUpsertAdminAdvertisingRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.createAdminAdvertisingBanner(body));
     }
 
-    @Get('/general')
-    async getGeneralBanner(@Query() query: BannerAdminGetGeneralRequest): Promise<BaseResponse<BannerAdminGetGeneralResponse>> {
-        return BaseResponse.of(await this.bannerAdminService.getGeneralBanner(query));
+    @Get('/adminadvertising')
+    async getAdminAdvertisingBanner(
+        @Query() query: BannerAdminGetListAdminAdvertisingRequest,
+    ): Promise<BaseResponse<BannerAdminGetListAdminAdvertisingResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getAdminAdvertisingBanner(query));
     }
 
-    @Get('/general/:id')
-    async getDetailGeneralBanner(
+    @Get('/adminadvertising/:id')
+    async getDetailAdminAdvertisingBanner(
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<BannerAdminGetDetailGeneralResponse>> {
-        return BaseResponse.of(await this.bannerAdminService.getDetailGeneralBanner(id));
+    ): Promise<BaseResponse<BannerAdminGetDetailAdminAdvertisingResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getDetailAdminAdvertisingBanner(id));
     }
 
-    @Put('/general/:id')
-    async updateGeneralBanner(
+    @Put('/adminadvertising/:id')
+    async updateAdminAdvertisingBanner(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: BannerAdminUpsertGeneralRequest,
+        @Body() body: BannerAdminUpsertAdminAdvertisingRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerAdminService.updateGeneralBanner(id, body));
+        return BaseResponse.of(await this.bannerAdminService.updateAdminAdvertisingBanner(id, body));
     }
 
-    @Patch('/general/priority')
-    async updateGeneralPriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerAdminService.updateGeneralBannerPriority(body));
+    @Patch('/adminadvertising/priority')
+    async updateAdminAdvertisingPriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.updateAdminAdvertisingBannerPriority(body));
     }
 
     // ADMIN POST BANNER
     @Post('/adminpost')
-    async createAdminPostBanner(@Body() body: BannerAdminUpsertJobPostRequest): Promise<BaseResponse<void>> {
+    async createAdminPostBanner(@Body() body: BannerAdminUpsertAdminJobPostRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.bannerAdminService.createAdminPostBanner(body));
     }
 
     @Get('/adminpost')
     async getAdminPostBanner(
-        @Query() query: BannerAdminGetAdminJobPostRequest,
-    ): Promise<BaseResponse<BannerAdminGetAdminJobPostResponse>> {
+        @Query() query: BannerAdminGetListAdminJobPostRequest,
+    ): Promise<BaseResponse<BannerAdminGetListAdminJobPostResponse>> {
         return BaseResponse.of(await this.bannerAdminService.getAdminPostBanner(query));
     }
 
@@ -80,7 +82,7 @@ export class BannerAdminController {
     @Put('/adminpost/:id')
     async updateAdminPostBanner(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: BannerAdminUpsertJobPostRequest,
+        @Body() body: BannerAdminUpsertAdminJobPostRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.bannerAdminService.updateAdminPostBanner(id, body));
     }
@@ -93,8 +95,8 @@ export class BannerAdminController {
     // COMPANY POST BANNER
     @Get('/companypost')
     async getCompanyPostBanner(
-        @Query() query: BannerAdminGetCompanyJobPostRequest,
-    ): Promise<BaseResponse<BannerAdminGetCompanyJobPostResponse>> {
+        @Query() query: BannerAdminGetListCompanyJobPostRequest,
+    ): Promise<BaseResponse<BannerAdminGetListCompanyJobPostResponse>> {
         return BaseResponse.of(await this.bannerAdminService.getCompanyPostBanner(query));
     }
 
@@ -118,13 +120,14 @@ export class BannerAdminController {
         return BaseResponse.of(await this.bannerAdminService.updateCompanyPostBannerPriority(body));
     }
 
-    // SITE POST BANNER
-    @Get('/site')
-    async getSiteBanner(@Query() query: BannerAdminGetSiteRequest): Promise<BaseResponse<BannerAdminGetSiteResponse>> {
-        return BaseResponse.of(await this.bannerAdminService.getSiteBanner(query));
+    // COMPANY ADVERTISING
+    @Get('/companyadvertising')
+    async getCompanyAdvertisingBanner(
+        @Query() query: BannerAdminGetListCompanyAdvertisingRequest,
+    ): Promise<BaseResponse<BannerAdminGetListCompanyAdvertisingResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getCompanyAdvertisingBanner(query));
     }
-
-    @Patch('/site/:id/status')
+    @Patch('/companyadvertising/:id/status')
     async changeSiteStatusBanner(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: BannerAdminChangeStatusCompanyBannerRequest,
@@ -132,14 +135,16 @@ export class BannerAdminController {
         return BaseResponse.of(await this.bannerAdminService.changeCompanyStatusBanner(false, id, body));
     }
 
-    @Get('/site/:id')
-    async getDetailSiteBanner(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<BannerAdminGetDetailSiteResponse>> {
-        return BaseResponse.of(await this.bannerAdminService.getDetailSiteBanner(id));
+    @Get('/companyadvertising/:id')
+    async getDetailCompanyAdvertisingBanner(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<BannerAdminGetDetailCompanyAdvertisingResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getDetailCompanyAdvertisingBanner(id));
     }
 
-    @Patch('/site/priority')
-    async updateSitePriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerAdminService.updateSiteBannerPriority(body));
+    @Patch('/companyadvertising/priority')
+    async updateCompanyAdvertisingriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.updateCompanyAdvertisingBannerPriority(body));
     }
 
     // COMMON ACTION
