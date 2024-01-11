@@ -5,9 +5,12 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { GetListType } from './dto/product-admin-get-list-type.enum';
 import { ProductAdminService } from './product-admin.service';
+import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
+import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdatePayAndUsageRequest } from './request/product-admin-update-pay-and-usage.request';
-import { ProductAdminUpdateByNumberRequest } from './request/product-admin-update-by-number.request';
-import { ProductAdminUpdateByTermRequest } from './request/product-admin-update-by-term.request';
+import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
+import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
+import { ProductAdminGetListPayAndUsageResponse } from './response/product-admin-get-list-pay-and-usage.response';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -15,30 +18,36 @@ import { ProductAdminUpdateByTermRequest } from './request/product-admin-update-
 export class ProductAdminController {
     constructor(private readonly productAdminService: ProductAdminService) {}
 
-    @Get('number')
-    async getListByNumber(): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getList(GetListType.BY_NUMBER));
+    @Get('limited-count')
+    async getListLimitedCount(): Promise<BaseResponse<ProductAdminGetListLimitedCountResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getList(GetListType.LIMITED_COUNT)) as ProductAdminGetListLimitedCountResponse,
+        );
     }
 
-    @Get('term')
-    async getListByTerm(): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getList(GetListType.BY_TERM));
+    @Get('fixed-term')
+    async getListFixedTerm(): Promise<BaseResponse<ProductAdminGetListFixedTermResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getList(GetListType.FIXED_TERM)) as ProductAdminGetListFixedTermResponse,
+        );
     }
 
     @Get('pay-and-usage')
-    async getListByPayAndUsage(): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getList(GetListType.BY_PAY_AND_USAGE));
+    async getListByPayAndUsage(): Promise<BaseResponse<ProductAdminGetListPayAndUsageResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getList(GetListType.PAY_AND_USAGE)) as ProductAdminGetListPayAndUsageResponse,
+        );
     }
 
-    @Put('number')
-    async updateProductsByNumber(@Body() body: ProductAdminUpdateByNumberRequest): Promise<BaseResponse<void>> {
-        await this.productAdminService.updateProductsByNumber(body);
+    @Put('limited-count')
+    async updateProductsLimitedCount(@Body() body: ProductAdminUpdateLimitedCountRequest): Promise<BaseResponse<void>> {
+        await this.productAdminService.updateProductsLimitedCount(body);
         return BaseResponse.ok();
     }
 
-    @Put('term')
-    async updateProductsByTerm(@Body() body: ProductAdminUpdateByTermRequest): Promise<BaseResponse<void>> {
-        await this.productAdminService.updateProductsByTerm(body);
+    @Put('fixed-term')
+    async updateProductsFixedTerm(@Body() body: ProductAdminUpdateFixedTermRequest): Promise<BaseResponse<void>> {
+        await this.productAdminService.updateProductsFixedTerm(body);
         return BaseResponse.ok();
     }
 

@@ -8,6 +8,8 @@ export class SiteResponse {
     endDate: Site['endDate'];
     numberOfWorkers: number;
     interestId: number;
+    longitude: Site['longitude'];
+    latitude: Site['latitude'];
 }
 
 export class SiteMemberGetListResponse extends PaginationResponse<SiteResponse> {}
