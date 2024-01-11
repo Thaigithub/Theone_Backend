@@ -8,10 +8,11 @@ import { PostMemberController } from './member/post-member.controller';
 import { PostMemberService } from './member/post-member.service';
 import { TeamModule } from 'domain/team/team.module';
 import { RegionModule } from 'domain/region/region.module';
+import { PostGuestController } from './guest/post-guest.controller';
 
 @Module({
     imports: [PrismaModule, TeamModule, RegionModule],
-    controllers: [PostAdminController, PostCompanyController, PostMemberController],
+    controllers: [PostAdminController, PostCompanyController, PostMemberController, PostGuestController],
     providers: [PostAdminService, PostCompanyService, PostMemberService],
     exports: [PostAdminService, PostCompanyService, PostMemberService],
 })

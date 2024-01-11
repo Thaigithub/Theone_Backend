@@ -23,19 +23,19 @@ export class SiteMemberController {
         return BaseResponse.of(await this.siteMemberService.updateInterestSite(request.user.accountId, id));
     }
 
-    @Get()
-    async getSites(
-        @Req() request: AccountIdExtensionRequest,
-        @Query() query: SiteMemberGetListRequest,
-    ): Promise<BaseResponse<SiteMemberGetListResponse>> {
-        return BaseResponse.of(await this.siteMemberService.getSiteList(request.user.accountId, query));
-    }
-
     @Get('/:id')
     async getDetail(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<SiteMemberGetDetailResponse>> {
         return BaseResponse.of(await this.siteMemberService.getSiteDetail(request.user.accountId, id));
+    }
+
+    @Get()
+    async getSites(
+        @Req() request: AccountIdExtensionRequest,
+        @Query() query: SiteMemberGetListRequest,
+    ): Promise<BaseResponse<SiteMemberGetListResponse>> {
+        return BaseResponse.of(await this.siteMemberService.getSiteList(request.user.accountId, query));
     }
 }

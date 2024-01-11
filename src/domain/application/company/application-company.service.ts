@@ -499,6 +499,11 @@ export class ApplicationCompanyService {
                         city: true,
                     },
                 },
+                code: {
+                    select: {
+                        codeName: true,
+                    },
+                },
                 leader: {
                     select: {
                         id: true,
@@ -666,6 +671,7 @@ export class ApplicationCompanyService {
             contact: application.leader.contact,
             leader: {
                 id: leader.id,
+                name: leader.name,
                 contact: leader.contact,
                 totalExperienceYears: leader.totalExperienceYears,
                 totalExperienceMonths: leader.totalExperienceMonths,
@@ -684,6 +690,7 @@ export class ApplicationCompanyService {
                       koreanName: application.district.koreanName,
                   }
                 : null,
+            code: application.code.codeName,
             specialLicenses: specialLicenses,
             status: team.status,
         };
