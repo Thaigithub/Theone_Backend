@@ -1,4 +1,4 @@
-export enum PostSearchCaterory {
+export enum BannerAdminPostSearchCaterory {
     COMPANY = 'COMPANY',
     SITE = 'SITE',
     POST = 'POST',

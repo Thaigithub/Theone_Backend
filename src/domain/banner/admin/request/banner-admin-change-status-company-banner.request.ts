@@ -10,5 +10,5 @@ export class BannerAdminChangeStatusCompanyBannerRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    reason: string;
+    reason?: string;
 }

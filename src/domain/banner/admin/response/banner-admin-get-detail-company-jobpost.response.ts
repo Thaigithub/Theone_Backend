@@ -1,10 +1,10 @@
-import { BannerStatus, Company, CompanyPostBanner, Post, PostBanner, RequestBannerStatus, Site } from '@prisma/client';
+import { BannerStatus, Company, CompanyPostBanner, Post, RequestBannerStatus, Site } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
 export class BannerAdminGetDetailCompanyJobPostResponse {
     bannerFile: FileResponse;
     bannerStatus: BannerStatus;
-    postId: PostBanner['postId'];
+    postId: CompanyPostBanner['postId'];
     postName: Post['name'];
     siteName: Site['name'];
     companyId: Company['id'];

@@ -1,8 +1,8 @@
 import { Expose } from 'class-transformer';
-import { IsString, Matches, MaxLength } from 'class-validator';
+import { IsDateString, IsNotEmptyObject, IsString, Matches, MaxLength } from 'class-validator';
 import { Banner } from '../dto/banner-admin-banner.dto';
 
-class GeneralBanner {
+class AdminAdvertisingBanner {
     @Expose()
     @IsString()
     urlLink: string;
@@ -16,16 +16,19 @@ class GeneralBanner {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
+    @IsDateString()
     startDate: string;
 
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
+    @IsDateString()
     endDate: string;
 }
 
-export class BannerAdminUpsertGeneralRequest extends Banner {
+export class BannerAdminUpsertAdminAdvertisingRequest extends Banner {
     @Expose()
-    generalBanner: GeneralBanner;
+    @IsNotEmptyObject()
+    adminAdvertisingBanner: AdminAdvertisingBanner;
 }

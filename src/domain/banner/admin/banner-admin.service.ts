@@ -1,35 +1,34 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PostBannerType, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { BannerAdminBannerSearchCategory } from './enum/banner-admin-banner-search-category.enum';
-import { PostSearchCaterory } from './enum/banner-admin-post-search-category.enum';
-import { SiteSearchCaterory } from './enum/banner-admin-site-search-category.enum';
+import { BannerAdminAdvertisingSearchCategory } from './enum/banner-admin-advertisng-search-category.enum';
+import { BannerAdminPostSearchCaterory } from './enum/banner-admin-post-search-category.enum';
 import { BannerAdminChangeStatusCompanyBannerRequest } from './request/banner-admin-change-status-company-banner.request';
-import { BannerAdminGetAdminJobPostRequest } from './request/banner-admin-get-admin-jobpost.request';
-import { BannerAdminGetCompanyJobPostRequest } from './request/banner-admin-get-company-jobpost.request';
-import { BannerAdminGetGeneralRequest } from './request/banner-admin-get-general.request';
-import { BannerAdminGetSiteRequest } from './request/banner-admin-get-site.request';
+import { BannerAdminGetListAdminAdvertisingRequest } from './request/banner-admin-get-list-admin-advertising.request';
+import { BannerAdminGetListAdminJobPostRequest } from './request/banner-admin-get-list-admin-jobpost.request';
+import { BannerAdminGetListCompanyAdvertisingRequest } from './request/banner-admin-get-list-company-advertising.request';
+import { BannerAdminGetListCompanyJobPostRequest } from './request/banner-admin-get-list-company-jobpost.request';
 import { BannerAdminUpdatePriority } from './request/banner-admin-update-priority.request';
-import { BannerAdminUpsertJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
-import { BannerAdminUpsertGeneralRequest } from './request/banner-admin-upsert-general.request';
-import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost-detail.response';
-import { BannerAdminGetAdminJobPostResponse } from './response/banner-admin-get-admin-jobpost.response';
-import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost-detail.response';
-import { BannerAdminGetCompanyJobPostResponse } from './response/banner-admin-get-company-jobpost.response';
-import { BannerAdminGetDetailGeneralResponse } from './response/banner-admin-get-general-detail.response';
-import { BannerAdminGetGeneralResponse } from './response/banner-admin-get-general.response';
-import { BannerAdminGetDetailSiteResponse } from './response/banner-admin-get-site-detail.response';
-import { BannerAdminGetSiteResponse } from './response/banner-admin-get-site.response';
+import { BannerAdminUpsertAdminAdvertisingRequest } from './request/banner-admin-upsert-admin-advertising.request';
+import { BannerAdminUpsertAdminJobPostRequest } from './request/banner-admin-upsert-admin-jobpost.request';
+import { BannerAdminGetDetailAdminAdvertisingResponse } from './response/banner-admin-get-detail-admin-advertising.response';
+import { BannerAdminGetDetailAdminJobPostResponse } from './response/banner-admin-get-detail-admin-jobpost.response';
+import { BannerAdminGetDetailCompanyAdvertisingResponse } from './response/banner-admin-get-detail-company-advertising.response';
+import { BannerAdminGetDetailCompanyJobPostResponse } from './response/banner-admin-get-detail-company-jobpost.response';
+import { BannerAdminGetListAdminAdvertisingResponse } from './response/banner-admin-get-list-admin-advertising.response';
+import { BannerAdminGetListAdminJobPostResponse } from './response/banner-admin-get-list-admin-jobpost.response';
+import { BannerAdminGetListCompanyAdvertisingResponse } from './response/banner-admin-get-list-company-advertising.response';
+import { BannerAdminGetListCompanyJobPostResponse } from './response/banner-admin-get-list-company-jobpost.response';
 
 @Injectable()
 export class BannerAdminService {
     constructor(private readonly prismaService: PrismaService) {}
 
     // GENERAL BANNER
-    async createGeneralBanner(request: BannerAdminUpsertGeneralRequest): Promise<void> {
-        const count = await this.prismaService.generalBanner.count({
+    async createAdminAdvertisingBanner(request: BannerAdminUpsertAdminAdvertisingRequest): Promise<void> {
+        const count = await this.prismaService.adminAdvertisingBanner.count({
             where: {
                 banner: {
                     isActive: true,
@@ -42,19 +41,21 @@ export class BannerAdminService {
                 file: {
                     create: request.file,
                 },
-                generalBanner: {
+                adminAdvertisingBanner: {
                     create: {
-                        urlLink: request.generalBanner.urlLink,
-                        title: request.generalBanner.title,
-                        startDate: new Date(request.generalBanner.startDate),
-                        endDate: new Date(request.generalBanner.endDate),
+                        urlLink: request.adminAdvertisingBanner.urlLink,
+                        title: request.adminAdvertisingBanner.title,
+                        startDate: new Date(request.adminAdvertisingBanner.startDate),
+                        endDate: new Date(request.adminAdvertisingBanner.endDate),
                         priority: count + 1,
                     },
                 },
             },
         });
     }
-    async getGeneralBanner(query: BannerAdminGetGeneralRequest): Promise<BannerAdminGetGeneralResponse> {
+    async getAdminAdvertisingBanner(
+        query: BannerAdminGetListAdminAdvertisingRequest,
+    ): Promise<BannerAdminGetListAdminAdvertisingResponse> {
         const search = {
             where: {
                 banner: {
@@ -65,7 +66,7 @@ export class BannerAdminService {
                 endDate: query.endDate && new Date(query.endDate),
                 title:
                     query.category &&
-                    (query.category === BannerAdminBannerSearchCategory.TITLE
+                    (query.category === BannerAdminAdvertisingSearchCategory.TITLE
                         ? {
                               contains: query.keyword,
                               mode: Prisma.QueryMode.insensitive,
@@ -73,7 +74,7 @@ export class BannerAdminService {
                         : undefined),
                 urlLink:
                     query.category &&
-                    (query.category === BannerAdminBannerSearchCategory.URL
+                    (query.category === BannerAdminAdvertisingSearchCategory.URL
                         ? {
                               contains: query.keyword,
                               mode: Prisma.QueryMode.insensitive,
@@ -100,7 +101,7 @@ export class BannerAdminService {
                 priority: Prisma.SortOrder.asc,
             },
         };
-        const banners = (await this.prismaService.generalBanner.findMany(search)).map((item) => {
+        const banners = (await this.prismaService.adminAdvertisingBanner.findMany(search)).map((item) => {
             return {
                 id: item.id,
                 title: item.title,
@@ -118,13 +119,13 @@ export class BannerAdminService {
                 priority: item.priority,
             };
         });
-        const total = await this.prismaService.generalBanner.count({ where: search.where });
+        const total = await this.prismaService.adminAdvertisingBanner.count({ where: search.where });
         return new PaginationResponse(banners, new PageInfo(total));
     }
-    async getDetailGeneralBanner(id: number): Promise<BannerAdminGetDetailGeneralResponse> {
-        const count = await this.prismaService.generalBanner.count({ where: { id, banner: { isActive: true } } });
+    async getDetailAdminAdvertisingBanner(id: number): Promise<BannerAdminGetDetailAdminAdvertisingResponse> {
+        const count = await this.prismaService.adminAdvertisingBanner.count({ where: { id, banner: { isActive: true } } });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const banner = await this.prismaService.generalBanner.findUnique({
+        const banner = await this.prismaService.adminAdvertisingBanner.findUnique({
             where: { id },
             select: {
                 urlLink: true,
@@ -155,10 +156,10 @@ export class BannerAdminService {
             regDate: banner.regDate,
         };
     }
-    async updateGeneralBanner(id: number, body: BannerAdminUpsertGeneralRequest): Promise<void> {
-        const count = await this.prismaService.generalBanner.count({ where: { id, banner: { isActive: true } } });
+    async updateAdminAdvertisingBanner(id: number, body: BannerAdminUpsertAdminAdvertisingRequest): Promise<void> {
+        const count = await this.prismaService.adminAdvertisingBanner.count({ where: { id, banner: { isActive: true } } });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const { startDate, endDate, ...rest } = body.generalBanner;
+        const { startDate, endDate, ...rest } = body.adminAdvertisingBanner;
         await this.prismaService.banner.update({
             where: {
                 id,
@@ -170,7 +171,7 @@ export class BannerAdminService {
                         data: body.file,
                     },
                 },
-                generalBanner: {
+                adminAdvertisingBanner: {
                     update: {
                         data: {
                             ...rest,
@@ -182,9 +183,9 @@ export class BannerAdminService {
             },
         });
     }
-    async updateGeneralBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
+    async updateAdminAdvertisingBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
         const priority = (
-            await this.prismaService.generalBanner.findMany({
+            await this.prismaService.adminAdvertisingBanner.findMany({
                 where: {
                     id: {
                         in: body.data.map((item) => item.id),
@@ -201,7 +202,7 @@ export class BannerAdminService {
         if (check.length !== 0) throw new BadRequestException('Banners priority changes is not fully listed');
         await Promise.all(
             body.data.map(async (item) => {
-                await this.prismaService.generalBanner.update({
+                await this.prismaService.adminAdvertisingBanner.update({
                     where: {
                         id: item.id,
                     },
@@ -213,13 +214,13 @@ export class BannerAdminService {
         );
     }
     // ADMIN POST BANNER
-    async createAdminPostBanner(request: BannerAdminUpsertJobPostRequest): Promise<void> {
+    async createAdminPostBanner(request: BannerAdminUpsertAdminJobPostRequest): Promise<void> {
+        const post = await this.prismaService.post.findUnique({ where: { id: request.adminPostBanner.postId } });
+        if (!post) throw new NotFoundException('Post not found');
         const count = await this.prismaService.adminPostBanner.count({
             where: {
-                postBanner: {
-                    banner: {
-                        isActive: true,
-                    },
+                banner: {
+                    isActive: true,
                 },
             },
         });
@@ -229,47 +230,40 @@ export class BannerAdminService {
                 file: {
                     create: request.file,
                 },
-                postBanner: {
+                adminPostBanner: {
                     create: {
-                        postId: request.postBanner.postId,
-                        type: PostBannerType.ADMIN,
-                        adminPostBanner: {
-                            create: {
-                                urlLink: request.postBanner.adminPostBanner.urlLink,
-                                endDate: new Date(request.postBanner.adminPostBanner.endDate),
-                                startDate: new Date(request.postBanner.adminPostBanner.startDate),
-                                priority: count + 1,
-                            },
-                        },
+                        postId: request.adminPostBanner.postId,
+                        urlLink: request.adminPostBanner.urlLink,
+                        endDate: new Date(request.adminPostBanner.endDate),
+                        startDate: new Date(request.adminPostBanner.startDate),
+                        priority: count + 1,
                     },
                 },
             },
         });
     }
-    async getAdminPostBanner(query: BannerAdminGetAdminJobPostRequest): Promise<BannerAdminGetAdminJobPostResponse> {
+    async getAdminPostBanner(query: BannerAdminGetListAdminJobPostRequest): Promise<BannerAdminGetListAdminJobPostResponse> {
         const search = {
             where: {
-                postBanner: {
-                    banner: {
-                        isActive: true,
-                        status: query.status,
-                    },
-                    post: {
-                        name:
-                            query.category &&
-                            (query.category === BannerAdminBannerSearchCategory.TITLE
-                                ? {
-                                      contains: query.keyword,
-                                      mode: Prisma.QueryMode.insensitive,
-                                  }
-                                : undefined),
-                    },
+                banner: {
+                    isActive: true,
+                    status: query.status,
+                },
+                post: {
+                    name:
+                        query.category &&
+                        (query.category === BannerAdminAdvertisingSearchCategory.TITLE
+                            ? {
+                                  contains: query.keyword,
+                                  mode: Prisma.QueryMode.insensitive,
+                              }
+                            : undefined),
                 },
                 startDate: query.startDate && new Date(query.startDate),
                 endDate: query.endDate && new Date(query.endDate),
                 urlLink:
                     query.category &&
-                    (query.category === BannerAdminBannerSearchCategory.URL
+                    (query.category === BannerAdminAdvertisingSearchCategory.URL
                         ? {
                               contains: query.keyword,
                               mode: Prisma.QueryMode.insensitive,
@@ -284,20 +278,16 @@ export class BannerAdminService {
                 regDate: true,
                 priority: true,
                 urlLink: true,
-                postBanner: {
+                postId: true,
+                post: {
                     select: {
-                        postId: true,
-                        post: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                        banner: {
-                            select: {
-                                status: true,
-                                file: true,
-                            },
-                        },
+                        name: true,
+                    },
+                },
+                banner: {
+                    select: {
+                        status: true,
+                        file: true,
                     },
                 },
             },
@@ -308,15 +298,15 @@ export class BannerAdminService {
         const result = (await this.prismaService.adminPostBanner.findMany(search)).map((item) => {
             return {
                 id: item.id,
-                postName: item.postBanner.post.name,
-                postId: item.postBanner.postId,
+                postName: item.post.name,
+                postId: item.postId,
                 bannerFile: {
-                    key: item.postBanner.banner.file.key,
-                    fileName: item.postBanner.banner.file.fileName,
-                    size: Number(item.postBanner.banner.file.size),
-                    type: item.postBanner.banner.file.type,
+                    key: item.banner.file.key,
+                    fileName: item.banner.file.fileName,
+                    size: Number(item.banner.file.size),
+                    type: item.banner.file.type,
                 },
-                status: item.postBanner.banner.status,
+                status: item.banner.status,
                 startDate: item.startDate,
                 endDate: item.endDate,
                 regDate: item.regDate,
@@ -329,10 +319,10 @@ export class BannerAdminService {
     }
     async getDetailAdminPostBanner(id: number): Promise<BannerAdminGetDetailAdminJobPostResponse> {
         const count = await this.prismaService.adminPostBanner.count({
-            where: { id, postBanner: { banner: { isActive: true } } },
+            where: { id, banner: { isActive: true } },
         });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const banner = await this.prismaService.postBanner.findUnique({
+        const banner = await this.prismaService.adminPostBanner.findUnique({
             where: { id },
             select: {
                 post: {
@@ -354,14 +344,10 @@ export class BannerAdminService {
                         status: true,
                     },
                 },
-                adminPostBanner: {
-                    select: {
-                        startDate: true,
-                        endDate: true,
-                        regDate: true,
-                        urlLink: true,
-                    },
-                },
+                startDate: true,
+                endDate: true,
+                regDate: true,
+                urlLink: true,
             },
         });
         return {
@@ -375,17 +361,16 @@ export class BannerAdminService {
                 size: Number(banner.banner.file.size),
             },
             status: banner.banner.status,
-            startDate: banner.adminPostBanner.startDate,
-            endDate: banner.adminPostBanner.endDate,
-            regDate: banner.adminPostBanner.regDate,
-            urlLink: banner.adminPostBanner.urlLink,
+            startDate: banner.startDate,
+            endDate: banner.endDate,
+            regDate: banner.regDate,
+            urlLink: banner.urlLink,
         };
     }
-    async updateAdminPostBanner(id: number, body: BannerAdminUpsertJobPostRequest) {
+    async updateAdminPostBanner(id: number, body: BannerAdminUpsertAdminJobPostRequest) {
         const count = await this.prismaService.adminPostBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const { adminPostBanner, ...rest } = body.postBanner;
-        const { startDate, endDate, ...other } = adminPostBanner;
+        const { startDate, endDate, ...rest } = body.adminPostBanner;
         await this.prismaService.banner.update({
             where: { id },
             data: {
@@ -393,19 +378,12 @@ export class BannerAdminService {
                     update: body.file,
                 },
                 status: body.status,
-                postBanner: {
+                adminPostBanner: {
                     update: {
                         data: {
                             ...rest,
-                            adminPostBanner: {
-                                update: {
-                                    data: {
-                                        ...other,
-                                        startDate: new Date(startDate),
-                                        endDate: new Date(endDate),
-                                    },
-                                },
-                            },
+                            startDate: new Date(startDate),
+                            endDate: new Date(endDate),
                         },
                     },
                 },
@@ -443,7 +421,9 @@ export class BannerAdminService {
         );
     }
     // COMPANY POST BANNER
-    async getCompanyPostBanner(query: BannerAdminGetCompanyJobPostRequest): Promise<BannerAdminGetCompanyJobPostResponse> {
+    async getCompanyPostBanner(
+        query: BannerAdminGetListCompanyJobPostRequest,
+    ): Promise<BannerAdminGetListCompanyJobPostResponse> {
         const querySearch = {
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -452,25 +432,21 @@ export class BannerAdminService {
                 requestDate: true,
                 acceptDate: true,
                 priority: true,
-                postBanner: {
+                postId: true,
+                post: {
                     select: {
-                        postId: true,
-                        post: {
+                        name: true,
+                        site: {
                             select: {
                                 name: true,
-                                site: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
                             },
                         },
-                        banner: {
-                            select: {
-                                status: true,
-                                file: true,
-                            },
-                        },
+                    },
+                },
+                banner: {
+                    select: {
+                        status: true,
+                        file: true,
                     },
                 },
             },
@@ -486,33 +462,33 @@ export class BannerAdminService {
                 requestDate: query.requestDate && new Date(query.requestDate),
             },
         };
-        if (query.searchKeyword !== undefined) {
-            switch (query.searchCategory) {
-                case PostSearchCaterory.COMPANY: {
+        if (query.keyword !== undefined) {
+            switch (query.category) {
+                case BannerAdminPostSearchCaterory.COMPANY: {
                     querySearch.where.postBanner['post'] = {
                         company: {
                             name: {
-                                contains: query.searchKeyword,
+                                contains: query.keyword,
                                 mode: Prisma.QueryMode.insensitive,
                             },
                         },
                     };
                     break;
                 }
-                case PostSearchCaterory.POST: {
+                case BannerAdminPostSearchCaterory.POST: {
                     querySearch.where.postBanner['post'] = {
                         name: {
-                            contains: query.searchKeyword,
+                            contains: query.keyword,
                             mode: Prisma.QueryMode.insensitive,
                         },
                     };
                     break;
                 }
-                case PostSearchCaterory.SITE: {
+                case BannerAdminPostSearchCaterory.SITE: {
                     querySearch.where.postBanner['post'] = {
                         site: {
                             name: {
-                                contains: query.searchKeyword,
+                                contains: query.keyword,
                                 mode: Prisma.QueryMode.insensitive,
                                 not: null,
                             },
@@ -525,16 +501,16 @@ export class BannerAdminService {
         const search = (await this.prismaService.companyPostBanner.findMany(querySearch)).map((item) => {
             return {
                 id: item.id,
-                postName: item.postBanner.post.name,
-                postId: item.postBanner.postId,
-                siteName: item.postBanner.post.site ? item.postBanner.post.site.name : null,
+                postName: item.post.name,
+                postId: item.postId,
+                siteName: item.post.site ? item.post.site.name : null,
                 bannerFile: {
-                    key: item.postBanner.banner.file.key,
-                    fileName: item.postBanner.banner.file.fileName,
-                    size: Number(item.postBanner.banner.file.size),
-                    type: item.postBanner.banner.file.type,
+                    key: item.banner.file.key,
+                    fileName: item.banner.file.fileName,
+                    size: Number(item.banner.file.size),
+                    type: item.banner.file.type,
                 },
-                bannerStatus: item.postBanner.banner.status,
+                bannerStatus: item.banner.status,
                 priority: item.priority,
                 requestDate: item.requestDate,
                 acceptDate: item.acceptDate,
@@ -547,7 +523,7 @@ export class BannerAdminService {
     async getDetailCompanyPostBanner(id: number): Promise<BannerAdminGetDetailCompanyJobPostResponse> {
         const count = await this.prismaService.companyPostBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
-        const banner = await this.prismaService.postBanner.findUnique({
+        const banner = await this.prismaService.companyPostBanner.findUnique({
             where: { id },
             select: {
                 post: {
@@ -581,17 +557,13 @@ export class BannerAdminService {
                         status: true,
                     },
                 },
-                companyPostBanner: {
-                    select: {
-                        title: true,
-                        detail: true,
-                        desiredStartDate: true,
-                        desiredEndDate: true,
-                        requestDate: true,
-                        acceptDate: true,
-                        status: true,
-                    },
-                },
+                title: true,
+                detail: true,
+                desiredStartDate: true,
+                desiredEndDate: true,
+                requestDate: true,
+                acceptDate: true,
+                status: true,
             },
         });
         return {
@@ -601,8 +573,8 @@ export class BannerAdminService {
                 type: banner.banner.file.type,
                 size: Number(banner.banner.file.size),
             },
-            title: banner.companyPostBanner.title,
-            detail: banner.companyPostBanner.detail,
+            title: banner.title,
+            detail: banner.detail,
             bannerStatus: banner.banner.status,
             postId: banner.postId,
             postName: banner.post.name,
@@ -610,11 +582,11 @@ export class BannerAdminService {
             companyId: banner.post.company.id,
             companyName: banner.post.company.name,
             personInCharge: banner.post.site ? banner.post.site.personInCharge : null,
-            desiredStartDate: banner.companyPostBanner.desiredStartDate,
-            desiredEndDate: banner.companyPostBanner.desiredEndDate,
-            acceptDate: banner.companyPostBanner.acceptDate,
-            requestDate: banner.companyPostBanner.requestDate,
-            requestStatus: banner.companyPostBanner.status,
+            desiredStartDate: banner.desiredStartDate,
+            desiredEndDate: banner.desiredEndDate,
+            acceptDate: banner.acceptDate,
+            requestDate: banner.requestDate,
+            requestStatus: banner.status,
         };
     }
     async updateCompanyPostBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
@@ -648,12 +620,31 @@ export class BannerAdminService {
         );
     }
     // SITE POST BANNER
-    async getSiteBanner(query: BannerAdminGetSiteRequest): Promise<BannerAdminGetSiteResponse> {
+    async getCompanyAdvertisingBanner(
+        query: BannerAdminGetListCompanyAdvertisingRequest,
+    ): Promise<BannerAdminGetListCompanyAdvertisingResponse> {
         const querySearch = {
             where: {
                 banner: {
                     isActive: true,
                 },
+                title:
+                    query.category &&
+                    (query.category === BannerAdminAdvertisingSearchCategory.TITLE
+                        ? {
+                              contains: query.keyword,
+                              mode: Prisma.QueryMode.insensitive,
+                          }
+                        : undefined),
+                urlLink:
+                    query.category &&
+                    (query.category === BannerAdminAdvertisingSearchCategory.URL
+                        ? {
+                              contains: query.keyword,
+                              mode: Prisma.QueryMode.insensitive,
+                          }
+                        : undefined),
+                requestDate: query.requestDate && new Date(query.requestDate),
             },
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -661,11 +652,6 @@ export class BannerAdminService {
                 requestDate: true,
                 acceptDate: true,
                 priority: true,
-                site: {
-                    select: {
-                        name: true,
-                    },
-                },
                 banner: {
                     select: {
                         status: true,
@@ -679,57 +665,10 @@ export class BannerAdminService {
                 priority: Prisma.SortOrder.asc,
             },
         };
-        if (query.keyword !== undefined) {
-            switch (query.search) {
-                case SiteSearchCaterory.COMPANY: {
-                    query['where'] = {
-                        site: {
-                            Company: {
-                                name: {
-                                    contains: query.keyword,
-                                },
-                            },
-                        },
-                    };
-                    break;
-                }
-                case SiteSearchCaterory.TITLE: {
-                    query['where'] = {
-                        title: {
-                            contains: query.keyword,
-                        },
-                    };
-                    break;
-                }
-                case SiteSearchCaterory.SITE: {
-                    query['where'] = {
-                        site: {
-                            name: {
-                                contains: query.keyword,
-                            },
-                        },
-                    };
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        }
-        if (query.startDate !== undefined) {
-            querySearch['where']['sate'] = {
-                gt: new Date(query.startDate),
-            };
-        }
-        if (query.endDate !== undefined) {
-            querySearch['where']['sate'] = {
-                lt: new Date(query.endDate),
-            };
-        }
-        const search = (await this.prismaService.siteBanner.findMany(querySearch)).map((item) => {
+
+        const search = (await this.prismaService.companyAdvertisingBanner.findMany(querySearch)).map((item) => {
             return {
                 id: item.id,
-                siteName: item.site.name,
                 title: item.title,
                 bannerFile: {
                     key: item.banner.file.key,
@@ -744,11 +683,11 @@ export class BannerAdminService {
                 requestStatus: item.status,
             };
         });
-        const total = await this.prismaService.siteBanner.count();
+        const total = await this.prismaService.companyAdvertisingBanner.count();
         return new PaginationResponse(search, new PageInfo(total));
     }
-    async getDetailSiteBanner(id: number): Promise<BannerAdminGetDetailSiteResponse> {
-        const count = await this.prismaService.siteBanner.count({ where: { id } });
+    async getDetailCompanyAdvertisingBanner(id: number): Promise<BannerAdminGetDetailCompanyAdvertisingResponse> {
+        const count = await this.prismaService.companyAdvertisingBanner.count({ where: { id } });
         if (count === 0) throw new NotFoundException('Banner not found');
         const banner = await this.prismaService.banner.findUnique({
             where: { id },
@@ -762,28 +701,21 @@ export class BannerAdminService {
                     },
                 },
                 status: true,
-                siteBanner: {
+                companyAdvertisingBanner: {
                     select: {
                         desiredEndDate: true,
                         desiredStartDate: true,
                         requestDate: true,
                         acceptDate: true,
                         status: true,
-                        siteId: true,
-                        site: {
-                            select: {
-                                personInCharge: true,
-                                name: true,
-                                companyId: true,
-                                company: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
-                            },
-                        },
                         title: true,
                         detail: true,
+                        company: {
+                            select: {
+                                name: true,
+                                contactName: true,
+                            },
+                        },
                     },
                 },
             },
@@ -796,23 +728,20 @@ export class BannerAdminService {
                 size: Number(banner.file.size),
             },
             bannerStatus: banner.status,
-            siteId: banner.siteBanner.siteId,
-            siteName: banner.siteBanner.site.name,
-            companyId: banner.siteBanner.site.companyId,
-            companyName: banner.siteBanner.site.company.name,
-            personInCharge: banner.siteBanner.site.personInCharge,
-            desiredStartDate: banner.siteBanner.desiredStartDate,
-            desiredEndDate: banner.siteBanner.desiredEndDate,
-            acceptDate: banner.siteBanner.acceptDate,
-            requestDate: banner.siteBanner.requestDate,
-            requestStatus: banner.siteBanner.status,
-            title: banner.siteBanner.title,
-            detail: banner.siteBanner.detail,
+            companyName: banner.companyAdvertisingBanner.company.name,
+            personInCharge: banner.companyAdvertisingBanner.company.contactName,
+            desiredStartDate: banner.companyAdvertisingBanner.desiredStartDate,
+            desiredEndDate: banner.companyAdvertisingBanner.desiredEndDate,
+            acceptDate: banner.companyAdvertisingBanner.acceptDate,
+            requestDate: banner.companyAdvertisingBanner.requestDate,
+            requestStatus: banner.companyAdvertisingBanner.status,
+            title: banner.companyAdvertisingBanner.title,
+            detail: banner.companyAdvertisingBanner.detail,
         };
     }
-    async updateSiteBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
+    async updateCompanyAdvertisingBannerPriority(body: BannerAdminUpdatePriority): Promise<void> {
         const priority = (
-            await this.prismaService.siteBanner.findMany({
+            await this.prismaService.companyAdvertisingBanner.findMany({
                 where: {
                     id: {
                         in: body.data.map((item) => item.id),
@@ -829,7 +758,7 @@ export class BannerAdminService {
         if (check.length !== 0) throw new BadRequestException('Banners priority changes is not fully listed');
         await Promise.all(
             body.data.map(async (item) => {
-                await this.prismaService.siteBanner.update({
+                await this.prismaService.companyAdvertisingBanner.update({
                     where: {
                         id: item.id,
                     },
@@ -848,39 +777,35 @@ export class BannerAdminService {
                 isActive: true,
             },
             select: {
-                generalBanner: {
+                adminAdvertisingBanner: {
                     select: {
                         priority: true,
                     },
                 },
-                siteBanner: {
+                companyAdvertisingBanner: {
                     select: {
                         priority: true,
                     },
                 },
-                postBanner: {
+                adminPostBanner: {
                     select: {
-                        adminPostBanner: {
-                            select: {
-                                priority: true,
-                            },
-                        },
-                        companyPostBanner: {
-                            select: {
-                                priority: true,
-                            },
-                        },
+                        priority: true,
+                    },
+                },
+                companyPostBanner: {
+                    select: {
+                        priority: true,
                     },
                 },
             },
         });
         if (!banner) throw new NotFoundException('Banner not found');
-        if (banner.generalBanner) {
-            await this.prismaService.generalBanner.update({ where: { id }, data: { priority: null } });
-            const list = await this.prismaService.generalBanner.findMany({
+        if (banner.adminAdvertisingBanner) {
+            await this.prismaService.adminAdvertisingBanner.update({ where: { id }, data: { priority: null } });
+            const list = await this.prismaService.adminAdvertisingBanner.findMany({
                 where: {
                     priority: {
-                        gt: banner.generalBanner.priority,
+                        gt: banner.adminAdvertisingBanner.priority,
                         not: null,
                     },
                 },
@@ -891,7 +816,7 @@ export class BannerAdminService {
             });
             await Promise.all(
                 list.map(async (item) => {
-                    await this.prismaService.generalBanner.update({
+                    await this.prismaService.adminAdvertisingBanner.update({
                         where: {
                             id: item.id,
                         },
@@ -902,12 +827,12 @@ export class BannerAdminService {
                 }),
             );
         }
-        if (banner.siteBanner) {
-            await this.prismaService.siteBanner.update({ where: { id }, data: { priority: null } });
-            const list = await this.prismaService.siteBanner.findMany({
+        if (banner.companyAdvertisingBanner) {
+            await this.prismaService.companyAdvertisingBanner.update({ where: { id }, data: { priority: null } });
+            const list = await this.prismaService.companyAdvertisingBanner.findMany({
                 where: {
                     priority: {
-                        gt: banner.siteBanner.priority,
+                        gt: banner.companyAdvertisingBanner.priority,
                         not: null,
                     },
                 },
@@ -918,7 +843,7 @@ export class BannerAdminService {
             });
             await Promise.all(
                 list.map(async (item) => {
-                    await this.prismaService.siteBanner.update({
+                    await this.prismaService.companyAdvertisingBanner.update({
                         where: {
                             id: item.id,
                         },
@@ -929,12 +854,12 @@ export class BannerAdminService {
                 }),
             );
         }
-        if (banner.postBanner && banner.postBanner.adminPostBanner) {
+        if (banner.adminPostBanner) {
             await this.prismaService.adminPostBanner.update({ where: { id }, data: { priority: null } });
             const list = await this.prismaService.adminPostBanner.findMany({
                 where: {
                     priority: {
-                        gt: banner.postBanner.adminPostBanner.priority,
+                        gt: banner.adminPostBanner.priority,
                         not: null,
                     },
                 },
@@ -956,12 +881,12 @@ export class BannerAdminService {
                 }),
             );
         }
-        if (banner.postBanner && banner.postBanner.companyPostBanner) {
+        if (banner.companyPostBanner) {
             await this.prismaService.companyPostBanner.update({ where: { id }, data: { priority: null } });
             const list = await this.prismaService.companyPostBanner.findMany({
                 where: {
                     priority: {
-                        gt: banner.postBanner.companyPostBanner.priority,
+                        gt: banner.companyPostBanner.priority,
                         not: null,
                     },
                 },
@@ -1015,14 +940,14 @@ export class BannerAdminService {
                 },
             });
         } else {
-            const count = await this.prismaService.siteBanner.count({
+            const count = await this.prismaService.companyAdvertisingBanner.count({
                 where: {
                     priority: {
                         not: null,
                     },
                 },
             });
-            await this.prismaService.siteBanner.update({
+            await this.prismaService.companyAdvertisingBanner.update({
                 where: {
                     id: id,
                 },
