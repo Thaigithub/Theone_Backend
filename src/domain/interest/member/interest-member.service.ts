@@ -147,10 +147,10 @@ export class InterestMemberService {
                               siteAddress: item.post?.site ? item.post.site.address : null,
                               logo: item.post?.company?.logo
                                   ? {
-                                        fileName: item.site.company.logo.file.fileName,
-                                        key: item.site.company.logo.file.key,
-                                        size: Number(item.site.company.logo.file.size),
-                                        type: item.site.company.logo.file.type,
+                                        fileName: item.post.company.logo.file.fileName,
+                                        key: item.post.company.logo.file.key,
+                                        size: Number(item.post.company.logo.file.size),
+                                        type: item.post.company.logo.file.type,
                                     }
                                   : null,
                           }

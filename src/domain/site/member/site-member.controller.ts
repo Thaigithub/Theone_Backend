@@ -9,12 +9,23 @@ import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.r
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 import { SiteMemberService } from './site-member.service';
+import { SiteMemberNearByGetListResponse } from './response/site-member-nearby-get-list.response';
+import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 
 @Controller('/member/sites')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class SiteMemberController {
     constructor(private siteMemberService: SiteMemberService) {}
+
+    @Get('/nearby')
+    async getNearBySites(
+        @Req() request: AccountIdExtensionRequest,
+        @Query() query: SiteMemberGetNearByRequest,
+    ): Promise<BaseResponse<SiteMemberNearByGetListResponse>> {
+        return BaseResponse.of(await this.siteMemberService.getNearBySites(request.user.accountId, query));
+    }
+
     @Post('/:id/interest')
     async addInterestSite(
         @Req() request: AccountIdExtensionRequest,
