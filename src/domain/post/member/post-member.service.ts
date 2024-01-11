@@ -152,7 +152,7 @@ export class PostMemberService {
                 siteAddress: site ? site.address : null,
                 siteAddressCity: site?.district ? site.district.city.englishName : null,
                 siteAddressDistrict: site?.district ? site.district.englishName : null,
-                interestId: !accountId ? null : item.interested.length > 0 ? item.interested[0].id : null,
+                interestId: accountId && item.interested.length > 0 ? item.interested[0].id : null,
             };
         });
         const count = await this.prismaService.post.count({
@@ -234,8 +234,10 @@ export class PostMemberService {
                 specialOccupation: true,
                 interested: {
                     where: {
+                        NOT: { member: null },
                         member: {
-                            accountId,
+                            accountId: accountId,
+                            isActive: true,
                         },
                     },
                 },
@@ -271,14 +273,14 @@ export class PostMemberService {
                 companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
                 siteName: post.site ? post.site.name : null,
                 siteAddress: post.site ? post.site.address : null,
-                startDate: post.site.startDate ? post.site.startDate.toISOString().split('T')[0] : null,
-                endDate: post.site.endDate ? post.site.endDate.toISOString().split('T')[0] : null,
+                startDate: post.site?.startDate ? post.site.startDate.toISOString().split('T')[0] : null,
+                endDate: post.site?.endDate ? post.site.endDate.toISOString().split('T')[0] : null,
                 originalBuilding: post.site ? post.site.originalBuilding : null,
                 originalContractor: post.site ? post.site.contractStatus : null,
-                isInterest: post.site && post.site.interestMember.length !== 0 ? true : false,
+                isInterest: post.site && accountId && post.site?.interestMember.length !== 0 ? true : false,
             },
             workLocation: post.workLocation,
-            isInterest: post.interested.length !== 0 ? true : false,
+            isInterest: accountId && post.interested.length !== 0 ? true : false,
         };
     }
 
