@@ -153,7 +153,6 @@ export class BannerAdminService {
             urlLink: banner.urlLink,
             startDate: banner.startDate,
             endDate: banner.endDate,
-            regDate: banner.regDate,
         };
     }
     async updateAdminAdvertisingBanner(id: number, body: BannerAdminUpsertAdminAdvertisingRequest): Promise<void> {
@@ -233,7 +232,6 @@ export class BannerAdminService {
                 adminPostBanner: {
                     create: {
                         postId: request.adminPostBanner.postId,
-                        urlLink: request.adminPostBanner.urlLink,
                         endDate: new Date(request.adminPostBanner.endDate),
                         startDate: new Date(request.adminPostBanner.startDate),
                         priority: count + 1,
@@ -328,6 +326,7 @@ export class BannerAdminService {
                 post: {
                     select: {
                         name: true,
+                        site: true,
                     },
                 },
                 postId: true,
@@ -347,13 +346,12 @@ export class BannerAdminService {
                 startDate: true,
                 endDate: true,
                 regDate: true,
-                urlLink: true,
             },
         });
         return {
             id: id,
             postName: banner.post.name,
-            postId: banner.postId,
+            siteName: banner.post.site?.name || null,
             bannerFile: {
                 fileName: banner.banner.file.fileName,
                 type: banner.banner.file.type,
@@ -363,8 +361,6 @@ export class BannerAdminService {
             status: banner.banner.status,
             startDate: banner.startDate,
             endDate: banner.endDate,
-            regDate: banner.regDate,
-            urlLink: banner.urlLink,
         };
     }
     async updateAdminPostBanner(id: number, body: BannerAdminUpsertAdminJobPostRequest) {
@@ -557,7 +553,6 @@ export class BannerAdminService {
                         status: true,
                     },
                 },
-                title: true,
                 detail: true,
                 desiredStartDate: true,
                 desiredEndDate: true,
@@ -573,10 +568,8 @@ export class BannerAdminService {
                 type: banner.banner.file.type,
                 size: Number(banner.banner.file.size),
             },
-            title: banner.title,
             detail: banner.detail,
             bannerStatus: banner.banner.status,
-            postId: banner.postId,
             postName: banner.post.name,
             siteName: banner.post.site ? banner.post.site.name : null,
             companyId: banner.post.company.id,
@@ -954,6 +947,12 @@ export class BannerAdminService {
                 data: {
                     status: body.status,
                     priority: count + 1,
+                    companyBannerHistories: {
+                        create: {
+                            reason: body.reason,
+                            status: body.status,
+                        },
+                    },
                 },
             });
         }
