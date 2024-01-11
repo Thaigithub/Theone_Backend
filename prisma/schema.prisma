@@ -104,10 +104,10 @@ model Member {
   desiredOccupations           MembersOnCodes[]
   teams                        MembersOnTeams[]
   point                        Point[]
+  ProductPaymentHistory        ProductPaymentHistory[]
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
-  ProductPaymentHistory        ProductPaymentHistory[]
 
   @@map("members")
 }
@@ -132,13 +132,13 @@ model Company {
   insurance                String?
   attachments              Attachment[]
   account                  Account                    @relation(fields: [accountId], references: [id])
+  companyAdvertisingBanner CompanyAdvertisingBanner[]
   contactCard              ContactCard?
   logo                     Logo?
   matchingRecommendation   MatchingRecommendation[]
   posts                    Post[]
-  sites                    Site[]
   ProductPaymentHistory    ProductPaymentHistory[]
-  companyAdvertisingBanner CompanyAdvertisingBanner[]
+  sites                    Site[]
 
   @@map("companies")
 }
@@ -388,11 +388,11 @@ model Banner {
   isActive                 Boolean                   @default(true) @map("is_active")
   createdAt                DateTime                  @default(now()) @map("created_at")
   updatedAt                DateTime                  @updatedAt @map("updated_at")
-  file                     File                      @relation(fields: [fileId], references: [id])
   adminAdvertisingBanner   AdminAdvertisingBanner?
-  companyPostBanner        CompanyPostBanner?
   adminPostBanner          AdminPostBanner?
+  file                     File                      @relation(fields: [fileId], references: [id])
   companyAdvertisingBanner CompanyAdvertisingBanner?
+  companyPostBanner        CompanyPostBanner?
 
   @@map("banners")
 }
@@ -412,8 +412,6 @@ model AdminAdvertisingBanner {
 
 model CompanyPostBanner {
   id                     Int                    @unique
-  postId                 Int                    @map("post_id")
-  post                   Post                   @relation(fields: [postId], references: [id])
   requestDate            DateTime               @default(now()) @map("request_date") @db.Date
   acceptDate             DateTime?              @map("accept_date") @db.Date
   desiredStartDate       DateTime               @map("desired_start_date") @db.Date
@@ -422,8 +420,10 @@ model CompanyPostBanner {
   status                 RequestBannerStatus
   detail                 String?
   title                  String?
+  postId                 Int                    @map("post_id")
   companyBannerHistories CompanyBannerHistory[]
   banner                 Banner                 @relation(fields: [id], references: [id])
+  post                   Post                   @relation(fields: [postId], references: [id])
 
   @@map("company_post_banners")
 }
@@ -436,8 +436,8 @@ model AdminPostBanner {
   regDate   DateTime @default(now()) @map("register_date") @db.Date
   priority  Int?
   postId    Int      @map("post_id")
-  post      Post     @relation(fields: [postId], references: [id])
   banner    Banner   @relation(fields: [id], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
 
   @@map("admin_post_banners")
 }
@@ -453,11 +453,11 @@ model CompanyAdvertisingBanner {
   regDate                DateTime               @default(now()) @map("register_date") @db.Date
   detail                 String?
   priority               Int?
-  banner                 Banner                 @relation(fields: [id], references: [id])
   status                 RequestBannerStatus
-  companyBannerHistories CompanyBannerHistory[]
   companyId              Int
   company                Company                @relation(fields: [companyId], references: [id])
+  banner                 Banner                 @relation(fields: [id], references: [id])
+  companyBannerHistories CompanyBannerHistory[]
 
   @@map("company_advertising_banners")
 }
@@ -469,9 +469,9 @@ model CompanyBannerHistory {
   createdAt                  DateTime                  @default(now()) @map("created_at")
   siteBannerId               Int?
   companyPostBannerId        Int?
-  companyPostBanner          CompanyPostBanner?        @relation(fields: [companyPostBannerId], references: [id])
-  CompanyAdvertisingBanner   CompanyAdvertisingBanner? @relation(fields: [companyAdvertisingBannerId], references: [id])
   companyAdvertisingBannerId Int?
+  CompanyAdvertisingBanner   CompanyAdvertisingBanner? @relation(fields: [companyAdvertisingBannerId], references: [id])
+  companyPostBanner          CompanyPostBanner?        @relation(fields: [companyPostBannerId], references: [id])
 
   @@map("company_banner_status")
 }
@@ -560,13 +560,13 @@ model Post {
   occupationId              Int?                        @map("occupation_id")
   siteId                    Int?                        @map("site_id")
   specialOccupationId       Int?                        @map("special_occupation_id")
+  adminPostBanner           AdminPostBanner[]
   applicants                Application[]
+  companyPostBanner         CompanyPostBanner[]
   headhuntingRecommendation HeadhuntingRecommendation[]
   headhuntingRequest        HeadhuntingRequest?
   interested                Interest[]
   memberMatchings           MemberMatching[]
-  adminPostBanner           AdminPostBanner[]
-  companyPostBanner         CompanyPostBanner[]
   postHistory               PostHistory[]
   company                   Company                     @relation(fields: [companyId], references: [id])
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
@@ -891,8 +891,8 @@ model Notice {
   updatedAt DateTime     @updatedAt @map("updated_at")
   type      NoticeType
   accountId Int          @map("account_id")
-  account   Account      @relation(fields: [accountId], references: [id])
   status    NoticeStatus @default(NOT_READ) @map("status")
+  account   Account      @relation(fields: [accountId], references: [id])
 
   @@map("notices")
 }
@@ -916,8 +916,8 @@ model CurrencyExchange {
   isActive       Boolean                @default(true) @map("is_active")
   createdAt      DateTime               @default(now()) @map("created_at")
   updatedAt      DateTime               @updatedAt @map("updated_at")
-  exchangeStatus CurrencyExchangeStatus @map("exchange_status")
   amount         Int                    @default(0) @map("amount")
+  exchangeStatus CurrencyExchangeStatus @map("exchange_status")
   member         Member?                @relation(fields: [memberId], references: [id])
 
   @@map("currency_exchanges")
@@ -947,11 +947,11 @@ model ProductPaymentHistory {
   expirationDate DateTime @map("expiration_date")
   remainingTimes Int      @map("remaining_times")
   productId      Int      @map("product_id")
-  product        Product  @relation(fields: [productId], references: [id])
   companyId      Int?     @map("company_id")
-  company        Company? @relation(fields: [companyId], references: [id])
   memberId       Int?     @map("member_id")
+  company        Company? @relation(fields: [companyId], references: [id])
   member         Member?  @relation(fields: [memberId], references: [id])
+  product        Product  @relation(fields: [productId], references: [id])
 
   @@map("product_payment_histories")
 }
