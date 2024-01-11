@@ -99,6 +99,7 @@ export class ProductAdminService {
                     },
                     where: {
                         isActive: true,
+                        usageType: UsageType.LIMITED_COUNT,
                         id: item.id,
                     },
                 });
@@ -123,6 +124,7 @@ export class ProductAdminService {
                     },
                     where: {
                         isActive: true,
+                        usageType: UsageType.FIX_TERM,
                         id: item.id,
                     },
                 });
