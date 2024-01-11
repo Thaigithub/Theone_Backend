@@ -1,19 +1,19 @@
 import { Expose } from 'class-transformer';
 
-class NumberOfTimesProperties {
+class CountLimitProperties {
     id: number;
-    numberOfTimes: number;
+    countLimit: number;
     price: number;
 }
 
 class PeriodProperties {
-    ONE_MONTH: NumberOfTimesProperties;
-    THREE_MONTHS: NumberOfTimesProperties;
-    SIX_MONTHS: NumberOfTimesProperties;
-    TWELVE_MONTHS: NumberOfTimesProperties;
+    _1months: CountLimitProperties;
+    _3months: CountLimitProperties;
+    _6months: CountLimitProperties;
+    _12months: CountLimitProperties;
 }
 
-export class ProductAdminUpdateByTermRequest {
+export class ProductAdminUpdateFixedTermRequest {
     @Expose()
     PULL_UP: PeriodProperties;
     @Expose()

@@ -111,6 +111,8 @@ export class SiteMemberService {
                 startDate: true,
                 endDate: true,
                 numberOfWorkers: true,
+                longitude: true,
+                latitude: true,
                 interestMember: {
                     where: {
                         member: {
@@ -134,6 +136,8 @@ export class SiteMemberService {
                 startDate: item.startDate,
                 endDate: item.endDate,
                 numberOfWorkers: item.numberOfWorkers,
+                longitude: item.longitude,
+                latitude: item.latitude,
                 interestId: item.interestMember.length > 0 && accountId ? item.interestMember[0].id : null,
             };
         });

@@ -1,30 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { ProductPeriod } from '@prisma/client';
+import { UsageType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { GetListType } from './dto/product-admin-get-list-type.enum';
+import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
+import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdatePayAndUsageRequest } from './request/product-admin-update-pay-and-usage.request';
-import { ProductAdminUpdateByNumberRequest } from './request/product-admin-update-by-number.request';
-import { ProductAdminUpdateByTermRequest } from './request/product-admin-update-by-term.request';
+import { ProductAdminGetListPayAndUsageResponse } from './response/product-admin-get-list-pay-and-usage.response';
+import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
+import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 
 @Injectable()
 export class ProductAdminService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async getList(listType: GetListType): Promise<any> {
+    async getList(
+        listType: GetListType,
+    ): Promise<
+        ProductAdminGetListLimitedCountResponse | ProductAdminGetListFixedTermResponse | ProductAdminGetListPayAndUsageResponse
+    > {
         const products = await this.prismaService.product.findMany({
             where: {
                 isActive: true,
                 OR:
-                    listType === GetListType.BY_NUMBER || listType === GetListType.BY_TERM
+                    listType === GetListType.LIMITED_COUNT || listType === GetListType.FIXED_TERM
                         ? [
-                              listType === GetListType.BY_NUMBER
+                              listType === GetListType.LIMITED_COUNT
                                   ? {
-                                        period: ProductPeriod.PERMANENT,
+                                        usageType: UsageType.LIMITED_COUNT,
                                     }
                                   : {},
-                              listType === GetListType.BY_TERM
+                              listType === GetListType.FIXED_TERM
                                   ? {
-                                        period: { not: ProductPeriod.PERMANENT },
+                                        usageType: UsageType.FIX_TERM,
                                     }
                                   : {},
                           ]
@@ -32,22 +39,22 @@ export class ProductAdminService {
             },
         });
         const transformedProductsList = products.reduce((result, product) => {
-            const { id, productType, period, numberOfTimes, price, isFree, usageCycle } = product;
+            const { id, productType, monthLimit, countLimit, price, isFree, usageCycle } = product;
             if (!result[productType]) {
                 result[productType] = {};
             }
             switch (listType) {
-                case GetListType.BY_NUMBER:
-                    if (!result[productType][`_${numberOfTimes}times`]) {
-                        result[productType][`_${numberOfTimes}times`] = { id, price };
+                case GetListType.LIMITED_COUNT:
+                    if (!result[productType][`_${countLimit}times`]) {
+                        result[productType][`_${countLimit}times`] = { id, price };
                     }
                     break;
-                case GetListType.BY_TERM:
-                    if (!result[productType][period]) {
-                        result[productType][period] = { id, numberOfTimes, price };
+                case GetListType.FIXED_TERM:
+                    if (!result[productType][`_${monthLimit}months`]) {
+                        result[productType][`_${monthLimit}months`] = { id, countLimit, price };
                     }
                     break;
-                case GetListType.BY_PAY_AND_USAGE:
+                case GetListType.PAY_AND_USAGE:
                     if (!result[productType]['isFree']) {
                         result[productType]['isFree'] = isFree;
                     }
@@ -58,14 +65,28 @@ export class ProductAdminService {
             }
             return result;
         }, {});
-        return transformedProductsList;
+        if (listType === GetListType.LIMITED_COUNT) {
+            const monthLimitForLimitedCountProducts = (
+                await this.prismaService.product.findFirst({
+                    where: {
+                        isActive: true,
+                        usageType: UsageType.LIMITED_COUNT,
+                    },
+                })
+            ).monthLimit;
+            return {
+                listProducts: transformedProductsList,
+                monthLimit: monthLimitForLimitedCountProducts,
+            } as ProductAdminGetListLimitedCountResponse;
+        } else if (listType === GetListType.FIXED_TERM) return transformedProductsList as ProductAdminGetListFixedTermResponse;
+        else if (listType === GetListType.PAY_AND_USAGE) return transformedProductsList as ProductAdminGetListPayAndUsageResponse;
     }
 
-    async updateProductsByNumber(body: ProductAdminUpdateByNumberRequest): Promise<void> {
+    async updateProductsLimitedCount(body: ProductAdminUpdateLimitedCountRequest): Promise<void> {
         const parsedProductsList: { id: number; price: number }[] = [];
-        for (const productType in body) {
-            for (const numberOfTimes in body[productType]) {
-                const { id, price } = body[productType][numberOfTimes];
+        for (const productType in body.listProducts) {
+            for (const countLimit in body.listProducts[productType]) {
+                const { id, price } = body.listProducts[productType][countLimit];
                 parsedProductsList.push({ id, price });
             }
         }
@@ -74,6 +95,7 @@ export class ProductAdminService {
                 await this.prismaService.product.update({
                     data: {
                         price: item.price,
+                        monthLimit: body.monthLimit,
                     },
                     where: {
                         isActive: true,
@@ -84,19 +106,19 @@ export class ProductAdminService {
         );
     }
 
-    async updateProductsByTerm(body: ProductAdminUpdateByTermRequest): Promise<void> {
-        const parsedProductsList: { id: number; price: number; numberOfTimes: number }[] = [];
+    async updateProductsFixedTerm(body: ProductAdminUpdateFixedTermRequest): Promise<void> {
+        const parsedProductsList: { id: number; price: number; countLimit: number }[] = [];
         for (const productType in body) {
-            for (const period in body[productType]) {
-                const { id, price, numberOfTimes } = body[productType][period];
-                parsedProductsList.push({ id, price, numberOfTimes });
+            for (const monthLimit in body[productType]) {
+                const { id, price, countLimit } = body[productType][monthLimit];
+                parsedProductsList.push({ id, price, countLimit });
             }
         }
         await Promise.all(
             parsedProductsList.map(async (item) => {
                 await this.prismaService.product.update({
                     data: {
-                        numberOfTimes: item.numberOfTimes,
+                        countLimit: item.countLimit,
                         price: item.price,
                     },
                     where: {

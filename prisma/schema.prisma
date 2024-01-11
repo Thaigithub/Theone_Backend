@@ -104,7 +104,7 @@ model Member {
   desiredOccupations           MembersOnCodes[]
   teams                        MembersOnTeams[]
   point                        Point[]
-  ProductPaymentHistory        ProductPaymentHistory[]
+  productPaymentHistory        ProductPaymentHistory[]
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
@@ -137,7 +137,7 @@ model Company {
   logo                     Logo?
   matchingRecommendation   MatchingRecommendation[]
   posts                    Post[]
-  ProductPaymentHistory    ProductPaymentHistory[]
+  productPaymentHistory    ProductPaymentHistory[]
   sites                    Site[]
 
   @@map("companies")
@@ -926,11 +926,12 @@ model Product {
   createdAt             DateTime                @default(now()) @map("created_at")
   updatedAt             DateTime                @updatedAt @map("updated_at")
   productType           ProductType             @map("product_type")
-  period                ProductPeriod
+  usageType             UsageType               @map("usage_type")
+  monthLimit            Int                     @map("month_limit")
+  countLimit            Int                     @map("count_limit")
   price                 Int
   isFree                Boolean                 @default(false) @map("is_free")
   usageCycle            Int                     @default(0) @map("usage_cycle")
-  numberOfTimes         Int                     @map("number_of_times")
   productPaymentHistory ProductPaymentHistory[]
 
   @@map("products")
@@ -1267,12 +1268,9 @@ enum ProductType {
   COMPANY_MATCHING_SERVICE
 }
 
-enum ProductPeriod {
-  PERMANENT
-  ONE_MONTH
-  THREE_MONTHS
-  SIX_MONTHS
-  TWELVE_MONTHS
+enum UsageType {
+  LIMITED_COUNT
+  FIX_TERM
 }
 
 enum NoticeStatus {

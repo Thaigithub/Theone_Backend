@@ -1,12 +1,14 @@
 import { ProductType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsArray, IsObject, Max, Min, Validate, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-
-class ChangePayAndUsagePayload {
-    productType: ProductType;
-    isFree: boolean;
-    usageCycle: number;
-}
+import {
+    ArrayMaxSize,
+    ArrayMinSize,
+    IsArray,
+    IsObject,
+    Validate,
+    ValidatorConstraint,
+    ValidatorConstraintInterface,
+} from 'class-validator';
 
 @ValidatorConstraint()
 class IsChangePayAndUsagePayloadArray implements ValidatorConstraintInterface {
@@ -25,11 +27,17 @@ class IsChangePayAndUsagePayloadArray implements ValidatorConstraintInterface {
     }
 }
 
+class ChangePayAndUsagePayload {
+    productType: ProductType;
+    isFree: boolean;
+    usageCycle: number;
+}
+
 export class ProductAdminUpdatePayAndUsageRequest {
     @Expose()
     @IsArray()
-    @Min(1)
-    @Max(7)
+    @ArrayMinSize(1)
+    @ArrayMaxSize(7)
     @IsObject({ each: true })
     @Validate(IsChangePayAndUsagePayloadArray, {
         message: 'Array contains invalid object',

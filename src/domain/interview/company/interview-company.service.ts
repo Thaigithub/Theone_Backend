@@ -147,7 +147,7 @@ export class InterviewCompanyService {
                         company: {
                             accountId: accountId,
                             isActive: true,
-                        }
+                        },
                     },
                 },
             },
@@ -216,11 +216,14 @@ export class InterviewCompanyService {
         }
     }
 
-    async proposeInterview(body: InterviewCompanyProposeRequest): Promise<void> {
+    async proposeInterview(body: InterviewCompanyProposeRequest, accountId: number): Promise<void> {
         const postExist = await this.prismaService.post.count({
             where: {
                 isActive: true,
                 id: body.postId,
+                company: {
+                    accountId,
+                },
             },
         });
         if (!postExist) throw new NotFoundException('Post does not exist');

@@ -63,10 +63,7 @@ export class SiteCompanyService {
                 },
             },
             where: this.parseConditionFromQuery(accountId, query),
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            skip: query.pageNumber && query.pageSize && (query.pageNumber - 1) * query.pageSize,
-            take: query.pageNumber && query.pageSize && query.pageSize,
+            ...QueryPagingHelper.queryPaging(query),
         });
 
         return companies.map((item) => {
@@ -100,29 +97,10 @@ export class SiteCompanyService {
         if (!siteExist) throw new NotFoundException('Site does not exist');
 
         const site = await this.prismaService.site.findUnique({
-            select: {
-                id: true,
-                name: true,
-                address: true,
-                contact: true,
-                personInCharge: true,
-                personInChargeContact: true,
-                email: true,
-                taxInvoiceEmail: true,
-                siteManagementNumber: true,
-                contractStatus: true,
-                startDate: true,
-                endDate: true,
+            include: {
                 district: {
-                    select: {
-                        englishName: true,
-                        koreanName: true,
-                        city: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                            },
-                        },
+                    include: {
+                        city: true,
                     },
                 },
             },
