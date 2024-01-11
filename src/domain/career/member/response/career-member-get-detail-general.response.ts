@@ -7,4 +7,5 @@ export class CareerMemberGetDetailGeneralResponse {
     endDate: Career['endDate'];
     occupationName: Code['codeName'];
     isExperienced: boolean;
+    occupationId: Code['id'];
 }
