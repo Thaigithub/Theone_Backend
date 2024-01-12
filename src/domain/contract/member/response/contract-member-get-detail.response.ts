@@ -1,6 +1,7 @@
 import { FileResponse } from 'utils/generics/file.response';
 
 export class ContractMemberGetDetailResponse {
+    postName: string;
     companyLogo: FileResponse;
     siteName: string;
     siteAddress: string;
