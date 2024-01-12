@@ -997,7 +997,6 @@ enum RequestBannerStatus {
   PENDING
   DENY
   APPROVED
-  REAPPLY
 }
 
 enum PostBannerType {

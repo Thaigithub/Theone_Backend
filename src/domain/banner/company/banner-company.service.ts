@@ -271,46 +271,28 @@ export class BannerCompanyService {
             },
             data: {
                 isActive: false,
-                postBanner: {
-                    update: {
-                        banner: {
-                            update: {
-                                isActive: false,
-                            },
-                        },
-                    },
-                },
-                advertisingBanner: {
-                    update: {
-                        banner: {
-                            update: {
-                                isActive: false,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-    }
-
-    async changeStatus(accountId: number, id: number): Promise<void> {
-        const request = await this.prismaService.bannerRequest.findUnique({
-            where: {
-                id,
-                company: {
-                    accountId,
-                },
-            },
-        });
-        if (!request) throw new NotFoundException('Request not found');
-        if (request.status !== RequestBannerStatus.DENY) throw new BadRequestException('Request is not at the correct status');
-        await this.prismaService.bannerRequest.update({
-            where: {
-                id,
-            },
-            data: {
-                requestDate: new Date(),
-                status: RequestBannerStatus.REAPPLY,
+                postBanner: request.postBannerId
+                    ? {
+                          update: {
+                              banner: {
+                                  update: {
+                                      isActive: false,
+                                  },
+                              },
+                          },
+                      }
+                    : undefined,
+                advertisingBanner: request.advertisingBannerId
+                    ? {
+                          update: {
+                              banner: {
+                                  update: {
+                                      isActive: false,
+                                  },
+                              },
+                          },
+                      }
+                    : undefined,
             },
         });
     }
