@@ -1,5 +1,5 @@
 export enum GetListType {
     LIMITED_COUNT = 'LIMITED_COUNT',
     FIXED_TERM = 'FIXED_TERM',
-    PAY_AND_USAGE = 'BY_PAY_AND_USAGE',
+    USAGE_CYCLE = 'USAGE_CYCLE',
 }

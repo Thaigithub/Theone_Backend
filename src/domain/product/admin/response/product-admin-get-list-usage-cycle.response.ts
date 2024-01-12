@@ -1,9 +1,8 @@
 class PayAndUsage {
-    isFree: boolean;
     usageCycle: number;
 }
 
-export class ProductAdminGetListPayAndUsageResponse {
+export class ProductAdminGetListUsageCycleResponse {
     PULL_UP: PayAndUsage;
     PREMIUM_POST: PayAndUsage;
     WORKER_VERIFICATION: PayAndUsage;

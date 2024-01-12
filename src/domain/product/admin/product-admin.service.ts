@@ -4,10 +4,10 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { GetListType } from './dto/product-admin-get-list-type.enum';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
-import { ProductAdminUpdatePayAndUsageRequest } from './request/product-admin-update-pay-and-usage.request';
-import { ProductAdminGetListPayAndUsageResponse } from './response/product-admin-get-list-pay-and-usage.response';
+import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
+import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
 
 @Injectable()
 export class ProductAdminService {
@@ -16,7 +16,7 @@ export class ProductAdminService {
     async getList(
         listType: GetListType,
     ): Promise<
-        ProductAdminGetListLimitedCountResponse | ProductAdminGetListFixedTermResponse | ProductAdminGetListPayAndUsageResponse
+        ProductAdminGetListLimitedCountResponse | ProductAdminGetListFixedTermResponse | ProductAdminGetListUsageCycleResponse
     > {
         const products = await this.prismaService.product.findMany({
             where: {
@@ -42,7 +42,7 @@ export class ProductAdminService {
             },
         });
         const transformedProductsList = products.reduce((result, product) => {
-            const { id, productType, monthLimit, countLimit, price, isFree, usageCycle } = product;
+            const { id, productType, monthLimit, countLimit, price, usageCycle } = product;
             if (!result[productType]) {
                 result[productType] = {};
             }
@@ -57,10 +57,7 @@ export class ProductAdminService {
                         result[productType][`_${monthLimit}months`] = { id, countLimit, price };
                     }
                     break;
-                case GetListType.PAY_AND_USAGE:
-                    if (!result[productType]['isFree']) {
-                        result[productType]['isFree'] = isFree;
-                    }
+                case GetListType.USAGE_CYCLE:
                     if (!result[productType]['usageCycle']) {
                         result[productType]['usageCycle'] = usageCycle;
                     }
@@ -82,7 +79,7 @@ export class ProductAdminService {
                 monthLimit: monthLimitForLimitedCountProducts,
             } as ProductAdminGetListLimitedCountResponse;
         } else if (listType === GetListType.FIXED_TERM) return transformedProductsList as ProductAdminGetListFixedTermResponse;
-        else if (listType === GetListType.PAY_AND_USAGE) return transformedProductsList as ProductAdminGetListPayAndUsageResponse;
+        else if (listType === GetListType.USAGE_CYCLE) return transformedProductsList as ProductAdminGetListUsageCycleResponse;
     }
 
     async updateProductsLimitedCount(body: ProductAdminUpdateLimitedCountRequest): Promise<void> {
@@ -135,7 +132,7 @@ export class ProductAdminService {
         );
     }
 
-    async updatePayAndUsage(body: ProductAdminUpdatePayAndUsageRequest): Promise<void> {
+    async updateUsageCycle(body: ProductAdminUpdateUsageCycleRequest): Promise<void> {
         await Promise.all(
             body.payload.map(async (item) => {
                 await this.prismaService.product.updateMany({

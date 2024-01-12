@@ -11,4 +11,5 @@ export class ContractMemberGetDetailResponse {
     created: Date;
     file: FileResponse;
     companyName: string;
+    personInCharge: string;
 }

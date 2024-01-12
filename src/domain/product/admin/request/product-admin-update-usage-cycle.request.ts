@@ -19,7 +19,6 @@ class IsChangePayAndUsagePayloadArray implements ValidatorConstraintInterface {
                 (a, b) =>
                     a &&
                     Object.values(ProductType).includes(b.productType) &&
-                    ['undefined', 'boolean'].includes(typeof b.isFree) &&
                     ['undefined', 'number'].includes(typeof b.usageCycle),
                 true,
             )
@@ -29,11 +28,10 @@ class IsChangePayAndUsagePayloadArray implements ValidatorConstraintInterface {
 
 class ChangePayAndUsagePayload {
     productType: ProductType;
-    isFree: boolean;
     usageCycle: number;
 }
 
-export class ProductAdminUpdatePayAndUsageRequest {
+export class ProductAdminUpdateUsageCycleRequest {
     @Expose()
     @IsArray()
     @ArrayMinSize(1)

@@ -7,10 +7,10 @@ import { GetListType } from './dto/product-admin-get-list-type.enum';
 import { ProductAdminService } from './product-admin.service';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
-import { ProductAdminUpdatePayAndUsageRequest } from './request/product-admin-update-pay-and-usage.request';
-import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
+import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
-import { ProductAdminGetListPayAndUsageResponse } from './response/product-admin-get-list-pay-and-usage.response';
+import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
+import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -32,10 +32,10 @@ export class ProductAdminController {
         );
     }
 
-    @Get('pay-and-usage')
-    async getListByPayAndUsage(): Promise<BaseResponse<ProductAdminGetListPayAndUsageResponse>> {
+    @Get('usage-cycle')
+    async getListUsageCycle(): Promise<BaseResponse<ProductAdminGetListUsageCycleResponse>> {
         return BaseResponse.of(
-            (await this.productAdminService.getList(GetListType.PAY_AND_USAGE)) as ProductAdminGetListPayAndUsageResponse,
+            (await this.productAdminService.getList(GetListType.USAGE_CYCLE)) as ProductAdminGetListUsageCycleResponse,
         );
     }
 
@@ -51,9 +51,9 @@ export class ProductAdminController {
         return BaseResponse.ok();
     }
 
-    @Put('pay-and-usage')
-    async updatePayAndUsage(@Body() body: ProductAdminUpdatePayAndUsageRequest): Promise<BaseResponse<void>> {
-        await this.productAdminService.updatePayAndUsage(body);
+    @Put('usage-cycle')
+    async updateUsageCycle(@Body() body: ProductAdminUpdateUsageCycleRequest): Promise<BaseResponse<void>> {
+        await this.productAdminService.updateUsageCycle(body);
         return BaseResponse.ok();
     }
 }
