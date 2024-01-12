@@ -225,14 +225,14 @@ export class MemberCompanyService {
                       };
                   })
                 : [],
-            basicHealthAndSafetyEducation: {
+            basicHealthSafetyCertificate: {
                 registrationNumber: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.registrationNumber
                     : null,
                 dateOfCompletion: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.dateOfCompletion
                     : null,
-                photo: {
+                file: {
                     fileName: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.fileName : null,
                     type: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.type : null,
                     key: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.key : null,
