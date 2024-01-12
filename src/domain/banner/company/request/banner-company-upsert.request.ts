@@ -2,32 +2,13 @@ import { Expose } from 'class-transformer';
 import { IsDateString, IsNotEmptyObject, IsNumber, IsOptional, IsString, IsUrl, Matches } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
-class CompanyPostType {
+class PostType {
     @Expose()
     @IsNumber()
     postId: number;
-
-    @Expose()
-    @IsDateString()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
-    })
-    desiredStartDate: string;
-
-    @Expose()
-    @IsDateString()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
-    })
-    desiredEndDate: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    detail: string;
 }
 
-class CompanyAdvertisingType {
+class AdvertisingType {
     @Expose()
     @IsString()
     title: string;
@@ -35,37 +16,37 @@ class CompanyAdvertisingType {
     @Expose()
     @IsUrl()
     urlLink: string;
-
-    @Expose()
-    @IsDateString()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
-    })
-    desiredStartDate: string;
-
-    @Expose()
-    @IsDateString()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
-    })
-    desiredEndDate: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    detail: string;
 }
 
-export class BannerCompanyUpsertRequest {
+export class BannerCompanyUpsertRequestRequest {
     @Expose()
     @IsNotEmptyObject()
     file: FileRequest;
 
     @Expose()
+    @IsDateString()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
+    })
+    startDate: string;
+
+    @Expose()
+    @IsDateString()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
+    })
+    endDate: string;
+
+    @Expose()
+    @IsString()
     @IsOptional()
-    companyPostBanner: CompanyPostType;
+    detail: string;
 
     @Expose()
     @IsOptional()
-    companyAdvertisingBanner: CompanyAdvertisingType;
+    postBanner: PostType;
+
+    @Expose()
+    @IsOptional()
+    advertisingBanner: AdvertisingType;
 }

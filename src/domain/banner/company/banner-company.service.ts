@@ -1,191 +1,27 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { BannerStatus, RequestBannerStatus } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BannerType, Prisma, RequestBannerStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { BannerCompanyBannerStatus } from './enum/banner-company-banner-status.enum';
 import { BannerCompanyBannerType } from './enum/banner-company-banner-type.enum';
-import { BannerCompanyGetListRequest } from './request/banner-company-get-list.request';
-import { BannerCompanyUpsertRequest } from './request/banner-company-upsert.request';
-import { BannerCompanyGetDetailResponse } from './response/banner-company-get-detail.response';
-import { BannerCompanyGetListResponse } from './response/banner-company-get-list.response';
+import { BannerCompanyGetListRequestRequest } from './request/banner-company-get-list-request.request';
+import { BannerCompanyUpsertRequestRequest } from './request/banner-company-upsert.request';
+import { BannerCompanyGetDetailRequestResponse } from './response/banner-company-get-detail-request.response';
+import { BannerCompanyGetListRequestResponse } from './response/banner-company-get-list-request.response';
 
 @Injectable()
 export class BannerCompanyService {
     constructor(private prismaService: PrismaService) {}
-    async getList(accountId: number, query: BannerCompanyGetListRequest): Promise<BannerCompanyGetListResponse> {
+    async getList(accountId: number, query: BannerCompanyGetListRequestRequest): Promise<BannerCompanyGetListRequestResponse> {
         const search = {
             ...QueryPagingHelper.queryPaging(query),
             select: {
                 status: true,
-                file: true,
-                companyAdvertisingBanner: true,
-                companyPostBanner: {
+                requestDate: true,
+                id: true,
+                postBanner: {
                     select: {
-                        post: {
-                            select: {
-                                name: true,
-                                site: true,
-                            },
-                        },
-                        status: true,
-                        desiredStartDate: true,
-                        desiredEndDate: true,
-                        requestDate: true,
-                    },
-                },
-            },
-            where: {
-                OR: [
-                    {
-                        companyPostBanner: {
-                            post: {
-                                company: {
-                                    accountId,
-                                },
-                            },
-                        },
-                    },
-                    {
-                        companyAdvertisingBanner: {
-                            company: {
-                                accountId,
-                            },
-                        },
-                    },
-                ],
-                adminAdvertisingBanner: null,
-                adminPostBanner: null,
-                companyAdvertisingBanner: query.type
-                    ? query.type === BannerCompanyBannerType.ADVERTISING
-                        ? { NOT: null }
-                        : undefined
-                    : undefined,
-                companyPostBanner: query.type
-                    ? query.type === BannerCompanyBannerType.POST
-                        ? { NOT: null }
-                        : undefined
-                    : undefined,
-            },
-        };
-        const banner = (await this.prismaService.banner.findMany(search)).map((item) => {
-            let status = null;
-            if (
-                item.status === BannerStatus.EXPOSE &&
-                (item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.status === RequestBannerStatus.APPROVED
-                    : item.companyPostBanner.status === RequestBannerStatus.APPROVED)
-            )
-                status = BannerCompanyBannerStatus.EXPOSE;
-            if (
-                item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.status === RequestBannerStatus.DENY
-                    : item.companyPostBanner.status === RequestBannerStatus.DENY
-            )
-                status = BannerCompanyBannerStatus.REJECT;
-            if (
-                item.status === BannerStatus.HIDE &&
-                (item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.status === RequestBannerStatus.APPROVED
-                    : item.companyPostBanner.status === RequestBannerStatus.APPROVED)
-            )
-                status = BannerCompanyBannerStatus.EXPOSE_END;
-            if (
-                item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.status === RequestBannerStatus.PENDING ||
-                      item.companyAdvertisingBanner.status === RequestBannerStatus.REAPPLY
-                    : item.companyPostBanner.status === RequestBannerStatus.PENDING ||
-                      item.companyPostBanner.status === RequestBannerStatus.REAPPLY
-            )
-                status = BannerCompanyBannerStatus.WAITING_FOR_APPROVAL;
-            return {
-                bannerStatus: status,
-                name: item.companyAdvertisingBanner ? item.companyAdvertisingBanner.title : item.companyPostBanner.post.name,
-                info: item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.urlLink
-                    : item.companyPostBanner.post.site?.name || null,
-                startDate: item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.desiredStartDate
-                    : item.companyPostBanner.desiredStartDate,
-                endDate: item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.desiredEndDate
-                    : item.companyPostBanner.desiredEndDate,
-                requestDate: item.companyAdvertisingBanner
-                    ? item.companyAdvertisingBanner.requestDate
-                    : item.companyPostBanner.requestDate,
-            };
-        });
-        const total = await this.prismaService.banner.count({ where: search.where });
-        return new PaginationResponse(banner, new PageInfo(total));
-    }
-
-    async create(accountId: number, body: BannerCompanyUpsertRequest): Promise<void> {
-        if (!body.companyAdvertisingBanner && !body.companyPostBanner)
-            throw new BadRequestException('Information for the banner is undefined');
-        if (body.companyAdvertisingBanner) {
-            const companyId = (await this.prismaService.company.findUnique({ where: { accountId }, select: { id: true } })).id;
-            await this.prismaService.banner.create({
-                data: {
-                    file: {
-                        create: body.file,
-                    },
-                    companyAdvertisingBanner: {
-                        create: {
-                            urlLink: body.companyAdvertisingBanner.urlLink,
-                            desiredEndDate: new Date(body.companyAdvertisingBanner.desiredEndDate),
-                            desiredStartDate: new Date(body.companyAdvertisingBanner.desiredStartDate),
-                            detail: body.companyAdvertisingBanner.detail,
-                            companyId: companyId,
-                            title: body.companyAdvertisingBanner.title,
-                        },
-                    },
-                },
-            });
-        } else {
-            await this.prismaService.$transaction(async (prisma) => {
-                const bannerId = (
-                    await prisma.banner.create({
-                        data: {
-                            file: {
-                                create: body.file,
-                            },
-                        },
-                    })
-                ).id;
-                await prisma.post.update({
-                    where: {
-                        id: body.companyPostBanner.postId,
-                    },
-                    data: {
-                        companyPostBanner: {
-                            create: {
-                                desiredEndDate: new Date(body.companyPostBanner.desiredEndDate),
-                                desiredStartDate: new Date(body.companyPostBanner.desiredStartDate),
-                                detail: body.companyPostBanner.detail,
-                                id: bannerId,
-                            },
-                        },
-                    },
-                });
-            });
-        }
-    }
-
-    async getDetail(accountId: number, id: number): Promise<BannerCompanyGetDetailResponse> {
-        const banner = await this.prismaService.banner.findUnique({
-            where: {
-                id,
-            },
-            select: {
-                file: true,
-                status: true,
-                companyAdvertisingBanner: true,
-                companyPostBanner: {
-                    select: {
-                        desiredEndDate: true,
-                        desiredStartDate: true,
-                        detail: true,
-                        status: true,
                         post: {
                             select: {
                                 name: true,
@@ -196,35 +32,286 @@ export class BannerCompanyService {
                                 },
                             },
                         },
+                        banner: {
+                            select: {
+                                startDate: true,
+                                endDate: true,
+                                status: true,
+                            },
+                        },
+                    },
+                },
+                advertisingBanner: {
+                    select: {
+                        urlLink: true,
+                        title: true,
+                        banner: {
+                            select: {
+                                startDate: true,
+                                endDate: true,
+                                status: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                company: {
+                    accountId,
+                },
+                isActive: true,
+            },
+            orderBy: {
+                requestDate: Prisma.SortOrder.desc,
+            },
+        };
+        const banner = (await this.prismaService.bannerRequest.findMany(search)).map((item) => {
+            let status = null;
+            if (item.status === RequestBannerStatus.DENY) status = BannerCompanyBannerStatus.REJECT;
+            if (item.status === RequestBannerStatus.PENDING) status = BannerCompanyBannerStatus.WAITING_FOR_APPROVAL;
+            if (item.advertisingBanner) {
+                if (item.status === RequestBannerStatus.APPROVED && item.advertisingBanner.banner.endDate < new Date())
+                    status = BannerCompanyBannerStatus.EXPOSE_END;
+                if (
+                    item.status === RequestBannerStatus.APPROVED &&
+                    item.advertisingBanner.banner.endDate > new Date() &&
+                    item.advertisingBanner.banner.startDate < new Date()
+                )
+                    status = BannerCompanyBannerStatus.EXPOSE;
+                if (item.status === RequestBannerStatus.APPROVED && item.advertisingBanner.banner.startDate > new Date())
+                    status = BannerCompanyBannerStatus.APPROVED;
+                return {
+                    id: item.id,
+                    status: status,
+                    name: item.advertisingBanner.title,
+                    info: item.advertisingBanner.urlLink,
+                    startDate: item.advertisingBanner.banner.startDate,
+                    endDate: item.advertisingBanner.banner.endDate,
+                    requestDate: item.requestDate,
+                };
+            } else {
+                if (item.status === RequestBannerStatus.APPROVED && item.postBanner.banner.endDate < new Date())
+                    status = BannerCompanyBannerStatus.EXPOSE_END;
+                if (item.status === RequestBannerStatus.APPROVED && item.advertisingBanner.banner.startDate > new Date())
+                    status = BannerCompanyBannerStatus.APPROVED;
+                if (
+                    item.status === RequestBannerStatus.APPROVED &&
+                    item.postBanner.banner.endDate > new Date() &&
+                    item.postBanner.banner.startDate < new Date()
+                )
+                    status = BannerCompanyBannerStatus.EXPOSE;
+                return {
+                    id: item.id,
+                    status: status,
+                    name: item.postBanner.post.name,
+                    info: item.postBanner.post.site?.name || null,
+                    startDate: item.postBanner.banner.startDate,
+                    endDate: item.postBanner.banner.endDate,
+                    requestDate: item.requestDate,
+                };
+            }
+        });
+        const total = await this.prismaService.bannerRequest.count({ where: search.where });
+        return new PaginationResponse(banner, new PageInfo(total));
+    }
+
+    async create(accountId: number, body: BannerCompanyUpsertRequestRequest): Promise<void> {
+        if (!body.advertisingBanner && !body.postBanner) throw new BadRequestException('Information for the banner is undefined');
+        const companyId = (await this.prismaService.company.findUnique({ where: { accountId }, select: { id: true } })).id;
+        if (body.advertisingBanner) {
+            await this.prismaService.banner.create({
+                data: {
+                    file: {
+                        create: body.file,
+                    },
+                    endDate: new Date(body.endDate),
+                    startDate: new Date(body.startDate),
+                    advertisingBanner: {
+                        create: {
+                            type: BannerType.COMPANY,
+                            urlLink: body.advertisingBanner.urlLink,
+                            title: body.advertisingBanner.title,
+                            request: {
+                                create: {
+                                    detail: body.detail,
+                                    companyId: companyId,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        } else {
+            await this.prismaService.$transaction(async (prisma) => {
+                await prisma.banner.create({
+                    data: {
+                        file: {
+                            create: body.file,
+                        },
+                        startDate: new Date(body.startDate),
+                        endDate: new Date(body.endDate),
+                        postBanner: {
+                            create: {
+                                type: BannerType.COMPANY,
+                                postId: body.postBanner.postId,
+                                request: {
+                                    create: {
+                                        detail: body.detail,
+                                        status: RequestBannerStatus.PENDING,
+                                        companyId: companyId,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+        }
+    }
+
+    async getDetail(accountId: number, id: number): Promise<BannerCompanyGetDetailRequestResponse> {
+        const request = await this.prismaService.bannerRequest.findUnique({
+            where: {
+                id,
+                company: {
+                    accountId,
+                },
+            },
+            select: {
+                detail: true,
+                status: true,
+                advertisingBanner: {
+                    select: {
+                        title: true,
+                        urlLink: true,
+                        banner: {
+                            select: {
+                                startDate: true,
+                                endDate: true,
+                                file: true,
+                            },
+                        },
+                    },
+                },
+                postBanner: {
+                    select: {
+                        post: {
+                            select: {
+                                name: true,
+                                site: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                            },
+                        },
+                        banner: {
+                            select: {
+                                startDate: true,
+                                endDate: true,
+                                file: true,
+                            },
+                        },
                     },
                 },
             },
         });
-        return {
-            file: {
-                fileName: banner.file.fileName,
-                type: banner.file.type,
-                key: banner.file.key,
-                size: Number(banner.file.size),
+        if (request.advertisingBanner) {
+            return {
+                type: BannerCompanyBannerType.ADVERTISING,
+                file: {
+                    fileName: request.advertisingBanner.banner.file.fileName,
+                    type: request.advertisingBanner.banner.file.type,
+                    key: request.advertisingBanner.banner.file.key,
+                    size: Number(request.advertisingBanner.banner.file.fileName),
+                },
+                startDate: request.advertisingBanner.banner.startDate,
+                endDate: request.advertisingBanner.banner.endDate,
+                detail: request.detail,
+                requestStatus: request.status,
+                banner: {
+                    title: request.advertisingBanner.title,
+                    urlLink: request.advertisingBanner.urlLink,
+                },
+            };
+        } else {
+            return {
+                type: BannerCompanyBannerType.ADVERTISING,
+                file: {
+                    fileName: request.postBanner.banner.file.fileName,
+                    type: request.postBanner.banner.file.type,
+                    key: request.postBanner.banner.file.key,
+                    size: Number(request.postBanner.banner.file.fileName),
+                },
+                startDate: request.postBanner.banner.startDate,
+                endDate: request.postBanner.banner.endDate,
+                detail: request.detail,
+                requestStatus: request.status,
+                banner: {
+                    postName: request.postBanner.post.name,
+                    siteName: request.postBanner.post.site?.name || null,
+                },
+            };
+        }
+    }
+
+    async delete(accountId: number, id: number): Promise<void> {
+        const request = await this.prismaService.bannerRequest.findUnique({
+            where: {
+                id,
+                company: {
+                    accountId,
+                },
             },
-            type: banner.companyAdvertisingBanner ? BannerCompanyBannerType.ADVERTISING : BannerCompanyBannerType.POST,
-            banner: banner.companyAdvertisingBanner
-                ? {
-                      title: banner.companyAdvertisingBanner.title,
-                      url: banner.companyAdvertisingBanner.urlLink,
-                      desiredEndDate: banner.companyAdvertisingBanner.desiredEndDate,
-                      desiredStartDate: banner.companyAdvertisingBanner.desiredStartDate,
-                      detail: banner.companyAdvertisingBanner.detail,
-                      requestStatus: banner.companyAdvertisingBanner.status,
-                  }
-                : {
-                      postName: banner.companyPostBanner.post.name,
-                      siteName: banner.companyPostBanner.post.site?.name || null,
-                      desiredEndDate: banner.companyPostBanner.desiredEndDate,
-                      desiredStartDate: banner.companyPostBanner.desiredStartDate,
-                      detail: banner.companyPostBanner.detail,
-                      requestStatus: banner.companyPostBanner.status,
-                  },
-        };
+        });
+        if (!request) throw new NotFoundException('Request not found');
+        await this.prismaService.bannerRequest.update({
+            where: {
+                id,
+            },
+            data: {
+                isActive: false,
+                postBanner: {
+                    update: {
+                        banner: {
+                            update: {
+                                isActive: false,
+                            },
+                        },
+                    },
+                },
+                advertisingBanner: {
+                    update: {
+                        banner: {
+                            update: {
+                                isActive: false,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    async changeStatus(accountId: number, id: number): Promise<void> {
+        const request = await this.prismaService.bannerRequest.findUnique({
+            where: {
+                id,
+                company: {
+                    accountId,
+                },
+            },
+        });
+        if (!request) throw new NotFoundException('Request not found');
+        if (request.status !== RequestBannerStatus.DENY) throw new BadRequestException('Request is not at the correct status');
+        await this.prismaService.bannerRequest.update({
+            where: {
+                id,
+            },
+            data: {
+                requestDate: new Date(),
+                status: RequestBannerStatus.REAPPLY,
+            },
+        });
     }
 }

@@ -4,7 +4,7 @@ import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-valid
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { BannerAdminAdvertisingSearchCategory } from '../enum/banner-admin-advertisng-search-category.enum';
 
-export class BannerAdminGetListAdminAdvertisingRequest extends PaginationRequest {
+export class BannerAdminGetListAdvertisingRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsDateString()
