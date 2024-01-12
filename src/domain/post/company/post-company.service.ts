@@ -3,6 +3,7 @@ import { CodeType, PostCategory, PostStatus, PostType, Prisma, RequestStatus } f
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { PostCompanyPostCategoryFilter } from './enum/post-company-filter.enum';
 import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
@@ -27,7 +28,18 @@ export class PostCompanyService {
             isActive: true,
             ...(query.type && { type: PostType[query.type] }),
             ...(query.status && { status: PostStatus[query.status] }),
-            name: { contains: query.name, mode: 'insensitive' },
+            name: query.category
+                ? query.category === PostCompanyPostCategoryFilter.POST_NAME
+                    ? { contains: query.name, mode: 'insensitive' }
+                    : undefined
+                : { contains: query.name, mode: 'insensitive' },
+            site: {
+                name: query.category
+                    ? query.category === PostCompanyPostCategoryFilter.SITE_NAME
+                        ? { contains: query.name, mode: 'insensitive' }
+                        : undefined
+                    : { contains: query.name, mode: 'insensitive' },
+            },
             companyId: account.company.id,
         };
 

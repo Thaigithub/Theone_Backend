@@ -1,38 +1,54 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { BannerCompanyService } from './banner-company.service';
-import { BannerCompanyGetListRequest } from './request/banner-company-get-list.request';
-import { BannerCompanyUpsertRequest } from './request/banner-company-upsert.request';
-import { BannerCompanyGetDetailResponse } from './response/banner-company-get-detail.response';
-import { BannerCompanyGetListResponse } from './response/banner-company-get-list.response';
+import { BannerCompanyGetListRequestRequest } from './request/banner-company-get-list-request.request';
+import { BannerCompanyUpsertRequestRequest } from './request/banner-company-upsert.request';
+import { BannerCompanyGetDetailRequestResponse } from './response/banner-company-get-detail-request.response';
+import { BannerCompanyGetListRequestResponse } from './response/banner-company-get-list-request.response';
 
 @Controller('/company/banners')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class BannerCompanyController {
     constructor(private bannerCompanyService: BannerCompanyService) {}
-    @Get()
+    @Get('/request')
     async getList(
-        @Query() query: BannerCompanyGetListRequest,
+        @Query() query: BannerCompanyGetListRequestRequest,
         @Req() req: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<BannerCompanyGetListResponse>> {
+    ): Promise<BaseResponse<BannerCompanyGetListRequestResponse>> {
         return BaseResponse.of(await this.bannerCompanyService.getList(req.user.accountId, query));
     }
 
-    @Post()
-    async create(@Req() req: AccountIdExtensionRequest, @Body() body: BannerCompanyUpsertRequest): Promise<BaseResponse<void>> {
+    @Post('/request')
+    async create(
+        @Req() req: AccountIdExtensionRequest,
+        @Body() body: BannerCompanyUpsertRequestRequest,
+    ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.bannerCompanyService.create(req.user.accountId, body));
     }
 
-    @Get('/:id')
+    @Get('/request/:id')
     async getDetail(
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<BannerCompanyGetDetailResponse>> {
+    ): Promise<BaseResponse<BannerCompanyGetDetailRequestResponse>> {
         return BaseResponse.of(await this.bannerCompanyService.getDetail(req.user.accountId, id));
+    }
+
+    @Delete('/request/:id')
+    async delete(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerCompanyService.delete(req.user.accountId, id));
+    }
+
+    @Patch('/request/:id/status')
+    async changeStatus(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerCompanyService.changeStatus(req.user.accountId, id));
     }
 }
