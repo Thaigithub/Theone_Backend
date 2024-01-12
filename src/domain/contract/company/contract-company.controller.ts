@@ -1,5 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -13,32 +12,18 @@ import { ContractCompanyGetDetailResponse } from './response/contract-company-ge
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
-@ApiTags('[COMPANY] Contract Management')
 @Controller('/company/contracts')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class ContractCompanyController {
     constructor(private contractCompanyService: ContractCompanyService) {}
 
     @Get('/count')
-    @ApiOperation({
-        summary: 'count contracts that company have responsibility (use for dashboard)',
-        description: 'Company retrieve the total contract that is active',
-    })
-    @ApiResponse({ status: HttpStatus.ACCEPTED, type: ContractCompanyCountContractsResponse })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
     async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<ContractCompanyCountContractsResponse>> {
         return BaseResponse.of(await this.contractCompanyService.countContracts(req.user.accountId));
     }
 
     @Get('/site/:id')
-    @ApiOperation({
-        summary: 'Get contracts for specific site',
-        description: 'Company retrieve information of the contract site',
-    })
     async getContractOnSite(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
@@ -55,7 +40,7 @@ export class ContractCompanyController {
         return BaseResponse.of(await this.contractCompanyService.getDetail(id, req.user.accountId));
     }
 
-    @Patch('/:id')
+    @Put('/:id')
     async updateContract(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: AccountIdExtensionRequest,
@@ -64,7 +49,7 @@ export class ContractCompanyController {
         return BaseResponse.of(await this.contractCompanyService.update(id, req.user.accountId, body));
     }
 
-    @Put()
+    @Post()
     async createContract(
         @Body() body: ContractCompanyCreateRequest,
         @Req() request: AccountIdExtensionRequest,

@@ -37,6 +37,9 @@ export class ProductAdminService {
                           ]
                         : undefined,
             },
+            orderBy: {
+                id: 'asc',
+            },
         });
         const transformedProductsList = products.reduce((result, product) => {
             const { id, productType, monthLimit, countLimit, price, isFree, usageCycle } = product;

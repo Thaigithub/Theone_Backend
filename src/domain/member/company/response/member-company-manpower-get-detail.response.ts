@@ -29,9 +29,9 @@ export class MemberCompanyManpowerGetDetailResponse {
         codeName: Code['codeName'];
         licenseNumber: SpecialLicense['licenseNumber'];
     }[];
-    basicHealthAndSafetyEducation: {
+    basicHealthSafetyCertificate: {
         registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
         dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
-        photo: FileResponse;
+        file: FileResponse;
     };
 }
