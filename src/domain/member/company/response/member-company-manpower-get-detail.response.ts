@@ -6,8 +6,14 @@ export class MemberCompanyManpowerGetDetailResponse {
     username: Account['username'];
     contact: Member['contact'];
     email: Member['email'];
-    cityKoreanName: City['koreanName'];
-    districtKoreanName: District['koreanName'];
+    district: {
+        koreanName: District['koreanName'];
+        englishName: District['englishName'];
+    };
+    city: {
+        koreanName: City['koreanName'];
+        englishName: City['englishName'];
+    };
     desiredSalary: Member['desiredSalary'];
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];

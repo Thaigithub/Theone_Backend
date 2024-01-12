@@ -190,8 +190,14 @@ export class MemberCompanyService {
             username: member.account.username,
             contact: member.contact,
             email: member.email,
-            cityKoreanName: member.district ? member.district.city.koreanName : null,
-            districtKoreanName: member.district ? member.district.koreanName : null,
+            district: {
+                englishName: member.district ? member.district.englishName : null,
+                koreanName: member.district ? member.district.koreanName : null,
+            },
+            city: {
+                englishName: member.district ? member.district.city.englishName : null,
+                koreanName: member.district ? member.district.city.koreanName : null,
+            },
             desiredSalary: member.desiredSalary,
             totalExperienceYears: member.totalExperienceYears,
             totalExperienceMonths: member.totalExperienceMonths,
