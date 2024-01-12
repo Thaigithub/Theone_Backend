@@ -20,6 +20,7 @@ import { AccountMemberGetDetailResponse } from './response/account-member-get-de
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
+import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
@@ -50,14 +51,24 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
     }
 
-    @Patch('/password')
+    @Post('password/phone/otp')
+    @Roles(AccountType.MEMBER)
+    @UseGuards(AuthJwtGuard, AuthRoleGuard)
+    async changePasswordVerifyPhone(
+        @Req() request,
+        @Body() body: AccountMemberSendOtpVerifyPhoneRequest,
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<void>> {
+        return await this.accountMemberService.sendOtpVerifyPhone(request.ip, request.user.accountId, body);
+    }
+
+    @Patch('password')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async changePassword(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request,
         @Body() body: AccountMemberChangePasswordRequest,
-    ): Promise<BaseResponse<void>> {
-        return await this.accountMemberService.changePassword(request.user.accountId, body);
+    ): Promise<BaseResponse<AccountMemberChangePasswordResponse>> {
+        return BaseResponse.of(await this.accountMemberService.changePassword(request.ip, request.user.accountId, body));
     }
 
     @Post('/phone/otp')
@@ -65,10 +76,15 @@ export class AccountMemberController {
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async sendOTPToVerifyPhone(
         @Req() req,
-        @Req() request: AccountIdExtensionRequest,
         @Body() body: AccountMemberSendOtpVerifyPhoneRequest,
     ): Promise<BaseResponse<AccountMemberSendOtpVerifyPhoneResponse>> {
-        return BaseResponse.of(await this.accountMemberService.sendOtpVerifyPhone(req.ip, request.user.accountId, body));
+        return BaseResponse.of(
+            (await this.accountMemberService.sendOtpVerifyPhone(
+                req.ip,
+                undefined,
+                body,
+            )) as AccountMemberSendOtpVerifyPhoneResponse,
+        );
     }
 
     @Post('/phone/otp/verification')

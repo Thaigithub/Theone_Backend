@@ -21,6 +21,9 @@ import { AccountMemberGetBankDetailResponse } from './response/account-member-ge
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
+import { OtpStatus } from 'domain/otp/response/otp-verify.response';
+import { ChangePasswordStatus } from './dto/account-member-change-password-status.enum';
+import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -57,14 +60,27 @@ export class AccountMemberService {
         ip: string,
         accountId: number,
         body: AccountMemberSendOtpVerifyPhoneRequest,
-    ): Promise<AccountMemberSendOtpVerifyPhoneResponse> {
-        return await this.otpService.sendOtp({
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<void>> {
+        if (accountId) {
+            const isValidPhone = await this.prismaService.account.findUnique({
+                where: {
+                    isActive: true,
+                    id: accountId,
+                    type: AccountType.MEMBER,
+                    member: {
+                        contact: body.phone,
+                    },
+                },
+            });
+            if (!isValidPhone) return BaseResponse.error('Incorrect phone number') as BaseResponse<void>;
+        }
+        return (await this.otpService.sendOtp({
             email: null,
             phoneNumber: body.phone,
             type: OtpType.PHONE,
             ip: ip,
             data: body.phone,
-        });
+        })) as AccountMemberSendOtpVerifyPhoneResponse;
     }
 
     async signup(request: AccountMemberSignupRequest): Promise<void> {
@@ -329,7 +345,11 @@ export class AccountMemberService {
         });
     }
 
-    async changePassword(accountId: number, body: AccountMemberChangePasswordRequest): Promise<BaseResponse<void>> {
+    async changePassword(
+        ip: string,
+        accountId: number,
+        body: AccountMemberChangePasswordRequest,
+    ): Promise<AccountMemberChangePasswordResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 isActive: true,
@@ -339,17 +359,31 @@ export class AccountMemberService {
         if (!account) throw new NotFoundException('Account does not exist');
 
         const passwordMatch = await compare(body.currentPassword, account.password);
-        if (!passwordMatch) return BaseResponse.error('Password does not match');
-        await this.prismaService.account.update({
-            data: {
-                password: await hash(body.newPassword, 10),
-            },
-            where: {
-                isActive: true,
-                id: accountId,
-            },
-        });
-        return BaseResponse.ok();
+        if (!passwordMatch) return { status: ChangePasswordStatus.PASSWORD_NOT_MATCH };
+
+        const otpVerificationStatus = await this.otpService.checkValidOtp({ otpId: body.otpId, code: body.code }, ip);
+        if (otpVerificationStatus.status === OtpStatus.VERIFIED) {
+            await this.otpService.usedOtp(body.otpId);
+            await this.prismaService.account.update({
+                data: {
+                    password: await hash(body.newPassword, 10),
+                },
+                where: {
+                    isActive: true,
+                    id: accountId,
+                },
+            });
+        }
+        switch (otpVerificationStatus.status) {
+            case OtpStatus.VERIFIED:
+                return { status: ChangePasswordStatus.SUCCESS };
+            case OtpStatus.NOT_FOUND:
+                return { status: ChangePasswordStatus.OTP_NOT_FOUND };
+            case OtpStatus.OUT_OF_TIME:
+                return { status: ChangePasswordStatus.OTP_OUT_OF_TIME };
+            case OtpStatus.WRONG_CODE:
+                return { status: ChangePasswordStatus.OTP_WRONG_CODE };
+        }
     }
 
     async upsertBankAccount(id: number, request: AccountMemberUpsertBankAccountRequest): Promise<void> {
