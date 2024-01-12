@@ -950,18 +950,19 @@ model Product {
 }
 
 model ProductPaymentHistory {
-  id             Int      @id @default(autoincrement())
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  expirationDate DateTime @map("expiration_date")
-  remainingTimes Int      @map("remaining_times")
-  productId      Int      @map("product_id")
-  companyId      Int?     @map("company_id")
-  memberId       Int?     @map("member_id")
-  company        Company? @relation(fields: [companyId], references: [id])
-  member         Member?  @relation(fields: [memberId], references: [id])
-  product        Product  @relation(fields: [productId], references: [id])
+  id             Int         @id @default(autoincrement())
+  isActive       Boolean     @default(true) @map("is_active")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  expirationDate DateTime    @map("expiration_date")
+  remainingTimes Int         @map("remaining_times")
+  productId      Int         @map("product_id")
+  companyId      Int?        @map("company_id")
+  memberId       Int?        @map("member_id")
+  company        Company?    @relation(fields: [companyId], references: [id])
+  member         Member?     @relation(fields: [memberId], references: [id])
+  product        Product     @relation(fields: [productId], references: [id])
+  paymentForm    PaymentForm @map("payment_form")
 
   @@map("product_payment_histories")
 }

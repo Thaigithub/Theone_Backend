@@ -1,4 +1,4 @@
-import { PostApplicationStatus } from '@prisma/client';
+import { Code, PostApplicationStatus } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
 class ApplicationCompanyGetLeaderDetail {
@@ -8,6 +8,7 @@ class ApplicationCompanyGetLeaderDetail {
     totalExperienceYears: number;
     totalExperienceMonths: number;
     desiredSalary: number;
+    occupations: Code['codeName'][];
 }
 
 class ApplicationCompanyGetMemberDetails extends ApplicationCompanyGetLeaderDetail {
