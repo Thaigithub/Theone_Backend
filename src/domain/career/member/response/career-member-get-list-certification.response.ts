@@ -1,15 +1,16 @@
 import { Career, Code } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pagination.response';
 
-class CareerResponse {
-    id: Career['id'];
-    type: Career['type'];
+export class CareerResponse {
     companyName: Career['companyName'];
-    siteName: Career['siteName'];
     startDate: Career['startDate'];
     endDate: Career['endDate'];
+    createdAt: Career['createdAt'];
     occupationName: Code['codeName'];
-    careerCertificationType: Career['certificationType'];
+    // careerCertificationType: Career['certificationType'];
 }
 
-export class CareerMemberGetListCertificationResponse extends PaginationResponse<CareerResponse> {}
+export class CareerMemberGetListCertificationResponse {
+    healthInsurances: CareerResponse[];
+    employeeInsurances: CareerResponse[];
+    oneSiteInquiries: CareerResponse[];
+}

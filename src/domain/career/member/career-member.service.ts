@@ -5,10 +5,10 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { getTimeDifferenceInMonths, getTimeDifferenceInYears } from '../../../utils/time-calculator';
-import { CareerMemberGetListCertificationRequest } from './request/career-member-get-list-certification.request';
 import { CareerMemberGetListGeneralRequest } from './request/career-member-get-list-general.request';
 import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert-general.request';
 import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
+import { CareerResponse } from './response/career-member-get-list-certification.response';
 import { CareerMemberGetListGeneralResponse } from './response/career-member-get-list-general.response';
 import { BaseResponse } from 'utils/generics/base.response';
 
@@ -194,42 +194,88 @@ export class CareerMemberService {
         });
     }
 
-    async getListCertification(
-        accountId: number,
-        query: CareerMemberGetListCertificationRequest,
-    ): Promise<CareerMemberGetListGeneralResponse> {
-        const search = {
-            select: {
-                id: true,
-                type: true,
-                certificationType: true,
-                companyName: true,
-                siteName: true,
-                startDate: true,
-                endDate: true,
-                occupation: true,
-            },
+    async getListCertification(accountId: number) {
+        const member = await this.prismaService.member.findUnique({
             where: {
+                accountId: accountId,
                 isActive: true,
-                type: CareerType.CERTIFICATION,
-                member: {
-                    accountId,
+            },
+            select: {
+                careerCertificationRequest: {
+                    select: {
+                        status: true,
+                    },
                 },
             },
-            orderBy: {
-                certificationType: Prisma.SortOrder.desc,
-            },
-            ...QueryPagingHelper.queryPaging(query),
-        };
-        const careers = (await this.prismaService.career.findMany(search)).map((item) => {
-            const { occupation, ...rest } = item;
-            return {
-                ...rest,
-                occupationName: occupation.codeName,
-            };
         });
-        const total = await this.prismaService.career.count({ where: search.where });
-        return new PaginationResponse(careers, new PageInfo(total));
+        if (!member) {
+            throw new NotFoundException('The member id is not found');
+        }
+        if (!member.careerCertificationRequest) {
+            return {
+                status: 'NOT_REQUESTED',
+                data: null,
+            };
+        } else if (member.careerCertificationRequest.status === CareerCertificationRequestStatus.REQUESTING) {
+            return {
+                status: 'REQUESTING',
+                data: null,
+            };
+        } else if (member.careerCertificationRequest.status === CareerCertificationRequestStatus.REFUSED) {
+            return {
+                status: 'REFUSED',
+                data: null,
+            };
+        }
+        const career = (
+            await this.prismaService.career.findMany({
+                where: {
+                    isActive: true,
+                    type: CareerType.CERTIFICATION,
+                    member: {
+                        accountId,
+                        isActive: true,
+                    },
+                },
+                select: {
+                    type: true,
+                    certificationType: true,
+                    companyName: true,
+                    siteName: true,
+                    startDate: true,
+                    endDate: true,
+                    createdAt: true,
+                    occupation: true,
+                },
+            })
+        ).reduce((result: { [key: string]: CareerResponse[] }, currentItem) => {
+            if (!result[currentItem.certificationType]) {
+                result[currentItem.certificationType] = [];
+            }
+            result[currentItem.certificationType].push({
+                companyName: currentItem.companyName,
+                startDate: currentItem.startDate,
+                endDate: currentItem.endDate,
+                createdAt: currentItem.createdAt,
+                occupationName: currentItem.occupation.codeName,
+            });
+            return result;
+        }, {});
+
+        return {
+            status: 'APPROVED',
+            data: {
+                healthInsurances: career[CareerCertificationType.HEALTH_INSURANCE]
+                    ? career[CareerCertificationType.HEALTH_INSURANCE]
+                    : [],
+                employeeInsurances: career[CareerCertificationType.EMPLOYMENT_INSURANCE]
+                    ? career[CareerCertificationType.EMPLOYMENT_INSURANCE]
+                    : null,
+                oneSiteInquiries: career[CareerCertificationType.THE_ONE_SITE]
+                    ? career[CareerCertificationType.THE_ONE_SITE]
+                    : [],
+            },
+        };
     }
 
     async createCertificationRequest(accountId: number): Promise<void> {

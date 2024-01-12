@@ -5,7 +5,6 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { CareerMemberService } from './career-member.service';
-import { CareerMemberGetListCertificationRequest } from './request/career-member-get-list-certification.request';
 import { CareerMemberGetListGeneralRequest } from './request/career-member-get-list-general.request';
 import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert-general.request';
 import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
@@ -61,11 +60,8 @@ export class CareerMemberController {
     }
 
     @Get('/certification')
-    async getListCertification(
-        @Req() request: AccountIdExtensionRequest,
-        @Query() query: CareerMemberGetListCertificationRequest,
-    ) {
-        return BaseResponse.of(await this.careerMemberService.getListCertification(request.user.accountId, query));
+    async getListCertification(@Req() request: AccountIdExtensionRequest) {
+        return BaseResponse.of(await this.careerMemberService.getListCertification(request.user.accountId));
     }
 
     @Post('/certification/request')
