@@ -131,6 +131,7 @@ model Company {
   presentativeName       String                   @map("presentative_name")
   insurance              String?
   attachments            Attachment[]
+  bannerRequests         BannerRequest[]
   account                Account                  @relation(fields: [accountId], references: [id])
   contactCard            ContactCard?
   logo                   Logo?
@@ -138,7 +139,6 @@ model Company {
   posts                  Post[]
   productPaymentHistory  ProductPaymentHistory[]
   sites                  Site[]
-  bannerRequests         BannerRequest[]
 
   @@map("companies")
 }
@@ -388,10 +388,10 @@ model Banner {
   isActive          Boolean            @default(true) @map("is_active")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
-  startDate         DateTime           @map("start_date") @db.Date
   endDate           DateTime           @map("end_date") @db.Date
-  file              File               @relation(fields: [fileId], references: [id])
+  startDate         DateTime           @map("start_date") @db.Date
   advertisingBanner AdvertisingBanner?
+  file              File               @relation(fields: [fileId], references: [id])
   postBanner        PostBanner?
 
   @@map("banners")
@@ -399,11 +399,11 @@ model Banner {
 
 model AdvertisingBanner {
   id       Int            @unique
-  banner   Banner         @relation(fields: [id], references: [id])
   urlLink  String         @map("url_link")
   title    String
   priority Int?
   type     BannerType
+  banner   Banner         @relation(fields: [id], references: [id])
   request  BannerRequest?
 
   @@map("advertising_banners")
@@ -412,11 +412,11 @@ model AdvertisingBanner {
 model PostBanner {
   id       Int            @unique
   priority Int?
-  banner   Banner         @relation(fields: [id], references: [id])
   postId   Int            @map("post_id")
-  post     Post           @relation(fields: [postId], references: [id])
   type     BannerType
   request  BannerRequest?
+  banner   Banner         @relation(fields: [id], references: [id])
+  post     Post           @relation(fields: [postId], references: [id])
 
   @@map("post_banners")
 }
@@ -427,14 +427,14 @@ model BannerRequest {
   detail                 String?
   status                 RequestBannerStatus    @default(PENDING)
   companyId              Int
-  company                Company                @relation(fields: [companyId], references: [id])
   advertisingBannerId    Int?                   @unique
-  advertisingBanner      AdvertisingBanner?     @relation(fields: [advertisingBannerId], references: [id])
   postBannerId           Int?                   @unique
-  postBanner             PostBanner?            @relation(fields: [postBannerId], references: [id])
-  requestBannerHistories BannerRequestHistory[]
   requestDate            DateTime               @default(now()) @map("request_date") @db.Date
   isActive               Boolean                @default(true) @map("is_active")
+  requestBannerHistories BannerRequestHistory[]
+  advertisingBanner      AdvertisingBanner?     @relation(fields: [advertisingBannerId], references: [id])
+  company                Company                @relation(fields: [companyId], references: [id])
+  postBanner             PostBanner?            @relation(fields: [postBannerId], references: [id])
 
   @@map("banner_requests")
 }
@@ -444,8 +444,8 @@ model BannerRequestHistory {
   status          RequestBannerStatus
   reason          String?
   createdAt       DateTime            @default(now()) @map("created_at")
-  BannerRequest   BannerRequest?      @relation(fields: [bannerRequestId], references: [id])
   bannerRequestId Int?
+  BannerRequest   BannerRequest?      @relation(fields: [bannerRequestId], references: [id])
 
   @@map("banner_request_status")
 }
@@ -497,10 +497,10 @@ model Site {
   memberEvaluationByCompany MemberEvaluationByCompany[]
   post                      Post[]
   siteEvaluation            SiteEvaluation?
+  siteHistory               SiteHistory[]
   company                   Company                     @relation(fields: [companyId], references: [id])
   district                  District                    @relation(fields: [districtId], references: [id])
   teamEvaluationByCompany   TeamEvaluationByCompany[]
-  siteHistory               SiteHistory[]
 
   @@map("sites")
 }
@@ -551,12 +551,12 @@ model Post {
   headhuntingRequest        HeadhuntingRequest?
   interested                Interest[]
   memberMatchings           MemberMatching[]
+  postBanner                PostBanner[]
   postHistory               PostHistory[]
   company                   Company                     @relation(fields: [companyId], references: [id])
   occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
   site                      Site?                       @relation(fields: [siteId], references: [id])
   specialOccupation         Code?                       @relation("post_special", fields: [specialOccupationId], references: [id])
-  postBanner                PostBanner[]
 
   @@map("posts")
 }
@@ -914,12 +914,12 @@ model Product {
   createdAt             DateTime                @default(now()) @map("created_at")
   updatedAt             DateTime                @updatedAt @map("updated_at")
   productType           ProductType             @map("product_type")
-  usageType             UsageType               @map("usage_type")
-  monthLimit            Int                     @map("month_limit")
-  countLimit            Int                     @map("count_limit")
   price                 Int
   isFree                Boolean                 @default(false) @map("is_free")
   usageCycle            Int                     @default(0) @map("usage_cycle")
+  countLimit            Int                     @map("count_limit")
+  monthLimit            Int                     @map("month_limit")
+  usageType             UsageType               @map("usage_type")
   productPaymentHistory ProductPaymentHistory[]
 
   @@map("products")
@@ -935,10 +935,10 @@ model ProductPaymentHistory {
   productId      Int         @map("product_id")
   companyId      Int?        @map("company_id")
   memberId       Int?        @map("member_id")
+  paymentForm    PaymentForm @map("payment_form")
   company        Company?    @relation(fields: [companyId], references: [id])
   member         Member?     @relation(fields: [memberId], references: [id])
   product        Product     @relation(fields: [productId], references: [id])
-  paymentForm    PaymentForm @map("payment_form")
 
   @@map("product_payment_histories")
 }
