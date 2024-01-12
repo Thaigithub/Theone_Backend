@@ -13,6 +13,7 @@ import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upser
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
+import { LaborCompanyWorkDatesGetListResponse } from './response/labor-company-workdates-get-list.response';
 
 @ApiTags('[COMPANY] Labor Management')
 @Controller('/company/labors')
@@ -37,6 +38,15 @@ export class LaborCompanyController {
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborCompanyService.createSalary(req.user.accountId, id, body));
     }
+
+    @Get('/:id/workDate')
+    async getWorkDates(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<LaborCompanyWorkDatesGetListResponse>> {
+        return BaseResponse.of(await this.laborCompanyService.getWorkDates(req.user.accountId, id));
+    }
+
     @Put('/:id/workDate')
     async update(
         @Req() req: AccountIdExtensionRequest,
@@ -45,6 +55,7 @@ export class LaborCompanyController {
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborCompanyService.updateWorkDate(req.user.accountId, id, body));
     }
+
     @Get('/:id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
