@@ -10,6 +10,7 @@ import { CareerMemberGetListGeneralRequest } from './request/career-member-get-l
 import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert-general.request';
 import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
 import { CareerMemberGetListGeneralResponse } from './response/career-member-get-list-general.response';
+import { BaseResponse } from 'utils/generics/base.response';
 
 @Injectable()
 export class CareerMemberService {
@@ -88,7 +89,7 @@ export class CareerMemberService {
         };
     }
 
-    async createGeneral(body: CareerMemberUpsertGeneralRequest, accountId: number): Promise<void> {
+    async createGeneral(body: CareerMemberUpsertGeneralRequest, accountId: number): Promise<BaseResponse<void>> {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
@@ -99,6 +100,18 @@ export class CareerMemberService {
 
         if (!occupation) throw new NotFoundException('Occupation not found');
 
+        if (!body.isExperienced) {
+            const isNotExperienceCareerExist = await this.prismaService.career.findFirst({
+                where: {
+                    isActive: true,
+                    member: {
+                        accountId,
+                    },
+                    isExperienced: body.isExperienced,
+                },
+            });
+            if (isNotExperienceCareerExist) return BaseResponse.error('Only 1 No Experience Career can be registered');
+        }
         await this.prismaService.member.update({
             where: {
                 accountId,
@@ -116,6 +129,7 @@ export class CareerMemberService {
                 },
             },
         });
+        return BaseResponse.ok();
     }
 
     async updateGeneral(id: number, accountId: number, body: CareerMemberUpsertGeneralRequest): Promise<void> {

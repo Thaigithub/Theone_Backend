@@ -32,7 +32,7 @@ export class CareerMemberController {
     ): Promise<BaseResponse<void>> {
         body.startDate = new Date(body.startDate).toISOString();
         body.endDate = new Date(body.endDate).toISOString();
-        return BaseResponse.of(await this.careerMemberService.createGeneral(body, request.user.accountId));
+        return await this.careerMemberService.createGeneral(body, request.user.accountId);
     }
 
     @Delete('/general/:id')

@@ -314,9 +314,6 @@ export class ApplicationCompanyService {
                         isActive: true,
                     },
                 },
-                member: {
-                    isActive: true,
-                },
             },
             select: {
                 memberId: true,
@@ -446,18 +443,24 @@ export class ApplicationCompanyService {
                     licenseNumber: item.licenseNumber,
                 };
             }),
-            basicHealthSafetyCertificate: memberInfor.basicHealthSafetyCertificate
-                ? {
-                      registrationNumber: memberInfor.basicHealthSafetyCertificate.registrationNumber,
-                      dateOfCompletion: memberInfor.basicHealthSafetyCertificate.dateOfCompletion,
-                      file: {
-                          fileName: memberInfor.basicHealthSafetyCertificate.file.fileName,
-                          type: memberInfor.basicHealthSafetyCertificate.file.type,
-                          key: memberInfor.basicHealthSafetyCertificate.file.key,
-                          size: Number(memberInfor.basicHealthSafetyCertificate.file.size),
-                      },
-                  }
-                : null,
+            basicHealthSafetyCertificate: {
+                registrationNumber: memberInfor.basicHealthSafetyCertificate
+                    ? memberInfor.basicHealthSafetyCertificate.registrationNumber
+                    : null,
+                dateOfCompletion: memberInfor.basicHealthSafetyCertificate
+                    ? memberInfor.basicHealthSafetyCertificate.dateOfCompletion
+                    : null,
+                file: {
+                    fileName: memberInfor.basicHealthSafetyCertificate
+                        ? memberInfor.basicHealthSafetyCertificate.file.fileName
+                        : null,
+                    type: memberInfor.basicHealthSafetyCertificate ? memberInfor.basicHealthSafetyCertificate.file.type : null,
+                    key: memberInfor.basicHealthSafetyCertificate ? memberInfor.basicHealthSafetyCertificate.file.key : null,
+                    size: memberInfor.basicHealthSafetyCertificate
+                        ? Number(memberInfor.basicHealthSafetyCertificate.file.size)
+                        : null,
+                },
+            },
             status: member.status,
         };
     }
@@ -676,6 +679,11 @@ export class ApplicationCompanyService {
                 totalExperienceYears: leader.totalExperienceYears,
                 totalExperienceMonths: leader.totalExperienceMonths,
                 desiredSalary: leader.desiredSalary,
+                occupations: leader.desiredOccupations
+                    ? leader.desiredOccupations.map((item) => {
+                          return item.code.codeName;
+                      })
+                    : [],
             },
             members: memberDetails,
             city: application.district?.city
