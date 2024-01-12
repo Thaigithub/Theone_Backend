@@ -17,7 +17,7 @@ export class MemberCompanyManpowerGetDetailResponse {
     desiredSalary: Member['desiredSalary'];
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
-    desiredOccupations: Code['codeName'][];
+    desiredOccupations: { codeName: Code['codeName'] }[];
     careers: {
         startDate: Career['startDate'];
         endDate: Career['endDate'];

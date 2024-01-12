@@ -203,7 +203,7 @@ export class MemberCompanyService {
             totalExperienceMonths: member.totalExperienceMonths,
             desiredOccupations: member.desiredOccupations
                 ? member.desiredOccupations.map((item) => {
-                      return item.code.codeName;
+                      return { codeName: item.code.codeName };
                   })
                 : [],
             careers: member.career

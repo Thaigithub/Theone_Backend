@@ -165,6 +165,7 @@ export class ContractMemberService {
                                         address: true,
                                         startDate: true,
                                         endDate: true,
+                                        personInCharge: true,
                                     },
                                 },
                                 company: {
@@ -204,6 +205,7 @@ export class ContractMemberService {
             endDate: contract.endDate,
             created: contract.createdAt,
             companyName: contract.application.post.company.name,
+            personInCharge: contract.application.post.site.personInCharge,
         };
     }
     async getListForSalary(
