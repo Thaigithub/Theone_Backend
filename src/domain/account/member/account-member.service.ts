@@ -334,10 +334,20 @@ export class AccountMemberService {
             });
         }
 
+        const isEntireCityId = await this.prismaService.district.findUnique({
+            where: {
+                isActive: true,
+                id: body.districtId,
+                englishName: 'All',
+            },
+        });
+        if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+
         await this.prismaService.member.update({
             data: {
                 name: body.name,
                 desiredSalary: body.desiredSalary,
+                districtId: body.districtId,
             },
             where: {
                 accountId,

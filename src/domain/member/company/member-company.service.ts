@@ -213,7 +213,7 @@ export class MemberCompanyService {
                           endDate: item.endDate,
                           companyName: item.companyName,
                           siteName: item.siteName,
-                          codeName: item.occupation.codeName,
+                          occupation: item.occupation.codeName,
                       };
                   })
                 : [],

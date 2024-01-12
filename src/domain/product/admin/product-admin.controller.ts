@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { GetListType } from './dto/product-admin-get-list-type.enum';
+import { GetListType } from './dto/product-admin-get-list.enum';
 import { ProductAdminService } from './product-admin.service';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
@@ -11,6 +11,8 @@ import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-upd
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
+import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -37,6 +39,13 @@ export class ProductAdminController {
         return BaseResponse.of(
             (await this.productAdminService.getList(GetListType.USAGE_CYCLE)) as ProductAdminGetListUsageCycleResponse,
         );
+    }
+
+    @Get('companies')
+    async getListCompany(
+        @Query() query: ProductAdminGetListCompanyRequest,
+    ): Promise<BaseResponse<ProductAdminGetListCompanyResponse>> {
+        return BaseResponse.of(await this.productAdminService.getListCompany(query));
     }
 
     @Put('limited-count')
