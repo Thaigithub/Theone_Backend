@@ -23,4 +23,8 @@ export class AccountMemberUpdateRequest {
     @IsOptional()
     @Expose()
     desiredOccupations: number[];
+
+    @IsNumber()
+    @Expose()
+    districtId: number;
 }

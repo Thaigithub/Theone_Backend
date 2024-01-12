@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { UsageType } from '@prisma/client';
+import { Prisma, ProductType, UsageType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { GetListType } from './dto/product-admin-get-list-type.enum';
+import { GetListType } from './dto/product-admin-get-list.enum';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
+import { SearchCategory } from './dto/product-admin-get-list-company.enum';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
 
 @Injectable()
 export class ProductAdminService {
@@ -133,15 +138,50 @@ export class ProductAdminService {
     }
 
     async updateUsageCycle(body: ProductAdminUpdateUsageCycleRequest): Promise<void> {
-        await Promise.all(
-            body.payload.map(async (item) => {
-                await this.prismaService.product.updateMany({
-                    data: item,
-                    where: {
-                        productType: item.productType,
-                    },
-                });
+        for (const productType in body) {
+            await this.prismaService.product.updateMany({
+                data: {
+                    usageCycle: body[productType]['usageCycle'],
+                },
+                where: {
+                    isActive: true,
+                    productType: productType as ProductType,
+                },
+            });
+        }
+    }
+
+    async getListCompany(query: ProductAdminGetListCompanyRequest): Promise<ProductAdminGetListCompanyResponse> {
+        const queryFilter: Prisma.CompanyWhereInput = {
+            isActive: true,
+            ...(query.searchCategory === SearchCategory.COMPANY_NAME && {
+                name: { contains: query.keyword, mode: 'insensitive' },
             }),
-        );
+            NOT: {
+                productPaymentHistory: null,
+            },
+        };
+        const companies = await this.prismaService.company.findMany({
+            include: {
+                productPaymentHistory: true,
+            },
+            where: queryFilter,
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const list = companies.map((item) => {
+            return {
+                id: item.id,
+                companyName: item.name,
+                manager: item.presentativeName,
+                contact: item.contactPhone,
+                totalPaymentAmount: item.productPaymentHistory.reduce((total, item) => {
+                    return total + item.cost;
+                }, 0),
+            };
+        });
+        const total = await this.prismaService.company.count({
+            where: queryFilter,
+        });
+        return new PaginationResponse(list, new PageInfo(total));
     }
 }

@@ -23,7 +23,7 @@ export class MemberCompanyManpowerGetDetailResponse {
         endDate: Career['endDate'];
         companyName: Career['companyName'];
         siteName: Career['siteName'];
-        codeName: Code['codeName'];
+        occupation: Code['codeName'];
     }[];
     specialLicenses: {
         codeName: Code['codeName'];

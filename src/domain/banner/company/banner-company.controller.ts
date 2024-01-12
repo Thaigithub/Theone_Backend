@@ -12,7 +12,7 @@ import { BannerCompanyGetListRequestResponse } from './response/banner-company-g
 
 @Controller('/company/banners')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@Roles(AccountType.ADMIN)
+@Roles(AccountType.COMPANY)
 export class BannerCompanyController {
     constructor(private bannerCompanyService: BannerCompanyService) {}
     @Get('/request')
