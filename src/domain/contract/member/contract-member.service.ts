@@ -159,6 +159,7 @@ export class ContractMemberService {
                     select: {
                         post: {
                             select: {
+                                name: true,
                                 site: {
                                     select: {
                                         name: true,
@@ -191,6 +192,7 @@ export class ContractMemberService {
                 type: contract.application.post.company.logo.file.type,
                 size: Number(contract.application.post.company.logo.file.size),
             },
+            postName: contract.application.post.name,
             siteName: contract.application.post.site.name,
             siteAddress: contract.application.post.site.address,
             siteStartDate: contract.application.post.site.startDate,
