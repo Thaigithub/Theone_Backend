@@ -6,5 +6,5 @@ export class BannerResponse {
     status: BannerStatus;
     startDate: Date;
     endDate: Date;
-    createDate: Date;
+    createdDate: Date;
 }

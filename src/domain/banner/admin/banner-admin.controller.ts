@@ -1,14 +1,21 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { BannerAdminService } from './banner-admin.service';
+import { BannerAdminChangeStatusRequestBannerRequest } from './request/banner-admin-change-status-request-banner.request';
 import { BannerAdminGetListAdvertisingRequestRequest } from './request/banner-admin-get-list-advertising-request.request';
 import { BannerAdminGetListAdvertisingRequest } from './request/banner-admin-get-list-advertising.request';
+import { BannerAdminUpdatePriority } from './request/banner-admin-update-priority.request';
 import { BannerAdminUpsertAdvertisingRequest } from './request/banner-admin-upsert-advertising.request';
+import { BannerAdminUpsertPostRequest } from './request/banner-admin-upsert-post.request';
+import { BannerAdminGetDetailAdvertisingResponse } from './response/banner-admin-get-detail-advertising.response';
 import { BannerAdminGetListAdvertisingRequestResponse } from './response/banner-admin-get-list-advertising-request.response';
 import { BannerAdminGetListAdvertisingResponse } from './response/banner-admin-get-list-advertising.response';
+import { BannerAdminGetDetailAdvertisingRequestResponse } from './response/banner-admin-get-detail-advertising-request.response';
+import { BannerAdminGetListPostRequest } from './request/banner-admin-get-list-post.request';
+import { BannerAdminGetListPostResponse } from './response/banner-admin-get-list-post.response';
 
 @Controller('/admin/banners')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -34,50 +41,50 @@ export class BannerAdminController {
         return BaseResponse.of(await this.bannerAdminService.getAdvertisingBannerRequest(query));
     }
 
-    // @Get('/advertising/:id')
-    // async getDetailAdvertisingBanner(
-    //     @Param('id', ParseIntPipe) id: number,
-    // ): Promise<BaseResponse<BannerAdminGetDetailAdvertisingResponse>> {
-    //     return BaseResponse.of(await this.bannerAdminService.getDetailAdvertisingBanner(id));
-    // }
+    @Get('/advertising/:id')
+    async getDetailAdvertisingBanner(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<BannerAdminGetDetailAdvertisingResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getDetailAdvertisingBanner(id));
+    }
 
-    // @Put('/advertising/:id')
-    // async updateAdvertisingBanner(
-    //     @Param('id', ParseIntPipe) id: number,
-    //     @Body() body: BannerAdminUpsertAdvertisingRequest,
-    // ): Promise<BaseResponse<void>> {
-    //     return BaseResponse.of(await this.bannerAdminService.updateAdvertisingBanner(id, body));
-    // }
+    @Put('/advertising/:id')
+    async updateAdvertisingBanner(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: BannerAdminUpsertAdvertisingRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.updateAdvertisingBanner(id, body));
+    }
 
-    // @Patch('/advertising/priority')
-    // async updateAdvertisingBannerPriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
-    //     return BaseResponse.of(await this.bannerAdminService.updateAdvertisingBannerPriority(body));
-    // }
+    @Patch('/advertising/priority')
+    async updateAdvertisingBannerPriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.updateAdvertisingBannerPriority(body));
+    }
 
-    // @Get('/advertising/request/:id')
-    // async getDetailAdvertisingBannerRequest(
-    //     @Param('id', ParseIntPipe) id: number,
-    // ): Promise<BaseResponse<BannerAdminGetDetailAdvertisingRequestResponse>> {
-    //     return BaseResponse.of(await this.bannerAdminService.getDetailAdvertisingBannerRequest(id));
-    // }
+    @Get('/advertising/request/:id')
+    async getDetailAdvertisingBannerRequest(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<BannerAdminGetDetailAdvertisingRequestResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getDetailAdvertisingBannerRequest(id));
+    }
 
-    // @Patch('/advertising/request/:id/status')
-    // async changeAdvertisingStatusBannerRequest(
-    //     @Param('id', ParseIntPipe) id: number,
-    //     @Body() body: BannerAdminChangeStatusRequestBannerRequest,
-    // ): Promise<BaseResponse<void>> {
-    //     return BaseResponse.of(await this.bannerAdminService.changeStatusBannerRequest(id, body));
-    // }
+    @Patch('/advertising/request/:id/status')
+    async changeAdvertisingStatusBannerRequest(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: BannerAdminChangeStatusRequestBannerRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.changeStatusBannerRequest(true, id, body));
+    }
 
-    // @Post('/post')
-    // async createPostBanner(@Body() body: BannerAdminUpsertPostRequest): Promise<BaseResponse<void>> {
-    //     return BaseResponse.of(await this.bannerAdminService.createPostBanner(body));
-    // }
+    @Post('/post')
+    async createPostBanner(@Body() body: BannerAdminUpsertPostRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.createPostBanner(body));
+    }
 
-    // @Get('/post')
-    // async getPostBanner(@Query() query: BannerAdminGetListPostRequest): Promise<BaseResponse<BannerAdminGetListPostResponse>> {
-    //     return BaseResponse.of(await this.bannerAdminService.getPostBanner(query));
-    // }
+    @Get('/post')
+    async getPostBanner(@Query() query: BannerAdminGetListPostRequest): Promise<BaseResponse<BannerAdminGetListPostResponse>> {
+        return BaseResponse.of(await this.bannerAdminService.getPostBanner(query));
+    }
 
     // @Patch('/post/priority')
     // async updatePostBannerPriority(@Body() body: BannerAdminUpdatePriority): Promise<BaseResponse<void>> {
@@ -119,8 +126,8 @@ export class BannerAdminController {
     //     return BaseResponse.of(await this.bannerAdminService.getDetailPostBannerRequest(id));
     // }
 
-    // @Delete('/:id')
-    // async deleteBanner(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-    //     return BaseResponse.of(await this.bannerAdminService.deleteBanner(id));
-    // }
+    @Delete('/:id')
+    async deleteBanner(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.bannerAdminService.deleteBanner(id));
+    }
 }

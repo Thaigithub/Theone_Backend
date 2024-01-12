@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -42,13 +42,5 @@ export class BannerCompanyController {
     @Delete('/request/:id')
     async delete(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.bannerCompanyService.delete(req.user.accountId, id));
-    }
-
-    @Patch('/request/:id/status')
-    async changeStatus(
-        @Req() req: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerCompanyService.changeStatus(req.user.accountId, id));
     }
 }
