@@ -523,8 +523,20 @@ model Site {
   company                   Company                     @relation(fields: [companyId], references: [id])
   district                  District                    @relation(fields: [districtId], references: [id])
   teamEvaluationByCompany   TeamEvaluationByCompany[]
+  siteHistory               SiteHistory[]
 
   @@map("sites")
+}
+
+model SiteHistory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  content   String
+  siteId    Int      @map("site_id")
+  site      Site     @relation(fields: [siteId], references: [id])
+
+  @@map("site_histories")
 }
 
 model Post {
@@ -1211,6 +1223,7 @@ enum SiteStatus {
   REVIEWING
   REJECTED
   APPROVED
+  SUSPENDED
 }
 
 enum RequestStatus {
