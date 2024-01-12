@@ -11,6 +11,7 @@ import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upser
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
+import { LaborCompanyWorkDatesGetListResponse } from './response/labor-company-workdates-get-list.response';
 
 @Injectable()
 export class LaborCompanyService {
@@ -449,5 +450,36 @@ export class LaborCompanyService {
                 }),
             });
         }
+    }
+
+    async getWorkDates(accountId: number, id: number): Promise<LaborCompanyWorkDatesGetListResponse> {
+        const workDates = await this.prismaService.workDate.findMany({
+            where: {
+                laborId: id,
+                labor: {
+                    contract: {
+                        application: {
+                            post: {
+                                site: {
+                                    company: {
+                                        accountId: accountId,
+                                        isActive: true,
+                                    },
+                                    isActive: true,
+                                },
+                                isActive: true,
+                            },
+                        },
+                    },
+                },
+            },
+            select: {
+                date: true,
+                hours: true,
+            },
+        });
+        return {
+            workDates: workDates,
+        };
     }
 }

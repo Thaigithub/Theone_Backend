@@ -760,6 +760,8 @@ model Contract {
   file                     File                       @relation(fields: [fileId], references: [id])
   labor                    Labor?
   SiteEvaluationByContract SiteEvaluationByContract[]
+  settlementCompleteDate   DateTime?                  @map("settlement_complete")
+  settlementStatus         SettlementStatus           @default(NONE) @map("settlement_status")
 
   @@map("contracts")
 }
@@ -1271,4 +1273,10 @@ enum NoticeStatus {
 enum BannerType {
   ADMIN
   COMPANY
+}
+
+enum SettlementStatus {
+  UNSETTLED
+  SETTLED
+  NONE
 }

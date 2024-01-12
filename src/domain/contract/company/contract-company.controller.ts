@@ -1,16 +1,21 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ContractCompanyService } from './contract-company.service';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
+import { ContractCompanySettlementGetListRequest } from './request/contract-company-settlement-get-list.request';
+import { ContractCompanySettlementUpdateRequest } from './request/contract-company-settlement-update.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { ContractCompanySettlementGetDetailResponse } from './response/contract-company-settlement-get-detail.response';
+import { ContractCompanySettlementGetListResponse } from './response/contract-company-settlement-get-list.response';
+import { ContractCompanyGetSettlementDetailRequest } from './request/contract-company-settlement-get-detail.request';
 
 @Controller('/company/contracts')
 @Roles(AccountType.COMPANY)
@@ -30,6 +35,32 @@ export class ContractCompanyController {
         @Query() query: ContractCompanyGetListForSiteRequest,
     ): Promise<BaseResponse<ContractCompanyGetListForSiteResponse>> {
         return BaseResponse.of(await this.contractCompanyService.getContractOnSite(id, request.user.accountId, query));
+    }
+
+    @Get('/settlement')
+    async getSettlementMemberList(
+        @Req() req: AccountIdExtensionRequest,
+        @Query() query: ContractCompanySettlementGetListRequest,
+    ): Promise<BaseResponse<ContractCompanySettlementGetListResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.getSettlementList(req.user.accountId, query));
+    }
+
+    @Get('/:id/settlement')
+    async getSettlementDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+        @Query() query: ContractCompanyGetSettlementDetailRequest,
+    ): Promise<BaseResponse<ContractCompanySettlementGetDetailResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.getSettlementDetail(req.user.accountId, id, query));
+    }
+
+    @Patch('/:id/settlement/status')
+    async updateSettlementStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+        @Body() body: ContractCompanySettlementUpdateRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.contractCompanyService.updateSettlementStatus(req.user.accountId, id, body));
     }
 
     @Get('/:id')
