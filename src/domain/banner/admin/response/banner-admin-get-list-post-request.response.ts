@@ -1,4 +1,4 @@
-import { Post, RequestBannerStatus } from '@prisma/client';
+import { BannerRequest, Post, RequestBannerStatus } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
@@ -8,6 +8,7 @@ class GetListPostRequestResponse {
     requestDate: Date;
     status: RequestBannerStatus;
     acceptDate: Date;
+    id: BannerRequest['id'];
 }
 
 export class BannerAdminGetListPostRequestResponse extends PaginationResponse<GetListPostRequestResponse> {}
