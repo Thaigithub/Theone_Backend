@@ -104,7 +104,6 @@ model Member {
   desiredOccupations           MembersOnCodes[]
   teams                        MembersOnTeams[]
   point                        Point[]
-  productPaymentHistory        ProductPaymentHistory[]
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
@@ -917,7 +916,6 @@ model Product {
   updatedAt             DateTime                @updatedAt @map("updated_at")
   productType           ProductType             @map("product_type")
   price                 Int
-  isFree                Boolean                 @default(false) @map("is_free")
   usageCycle            Int                     @default(0) @map("usage_cycle")
   countLimit            Int                     @map("count_limit")
   monthLimit            Int                     @map("month_limit")
@@ -936,11 +934,9 @@ model ProductPaymentHistory {
   expirationDate DateTime    @map("expiration_date")
   remainingTimes Int         @map("remaining_times")
   productId      Int         @map("product_id")
-  companyId      Int?        @map("company_id")
-  memberId       Int?        @map("member_id")
+  companyId      Int         @map("company_id")
   paymentForm    PaymentForm @map("payment_form")
-  company        Company?    @relation(fields: [companyId], references: [id])
-  member         Member?     @relation(fields: [memberId], references: [id])
+  company        Company     @relation(fields: [companyId], references: [id])
   product        Product     @relation(fields: [productId], references: [id])
 
   @@map("product_payment_histories")
