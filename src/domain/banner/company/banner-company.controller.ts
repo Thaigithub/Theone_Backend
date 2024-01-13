@@ -16,11 +16,11 @@ import { BannerCompanyGetListRequestResponse } from './response/banner-company-g
 export class BannerCompanyController {
     constructor(private bannerCompanyService: BannerCompanyService) {}
     @Get('/request')
-    async getList(
+    async getListRequest(
         @Query() query: BannerCompanyGetListRequestRequest,
         @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<BannerCompanyGetListRequestResponse>> {
-        return BaseResponse.of(await this.bannerCompanyService.getList(req.user.accountId, query));
+        return BaseResponse.of(await this.bannerCompanyService.getListRequest(req.user.accountId, query));
     }
 
     @Post('/request')
@@ -28,7 +28,7 @@ export class BannerCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Body() body: BannerCompanyUpsertRequestRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerCompanyService.create(req.user.accountId, body));
+        return BaseResponse.of(await this.bannerCompanyService.createRequest(req.user.accountId, body));
     }
 
     @Get('/request/:id')
@@ -36,11 +36,11 @@ export class BannerCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<BannerCompanyGetDetailRequestResponse>> {
-        return BaseResponse.of(await this.bannerCompanyService.getDetail(req.user.accountId, id));
+        return BaseResponse.of(await this.bannerCompanyService.getDetailRequest(req.user.accountId, id));
     }
 
     @Delete('/request/:id')
     async delete(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.bannerCompanyService.delete(req.user.accountId, id));
+        return BaseResponse.of(await this.bannerCompanyService.deleteRequest(req.user.accountId, id));
     }
 }

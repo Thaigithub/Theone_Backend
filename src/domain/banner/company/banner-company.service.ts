@@ -13,7 +13,10 @@ import { BannerCompanyGetListRequestResponse } from './response/banner-company-g
 @Injectable()
 export class BannerCompanyService {
     constructor(private prismaService: PrismaService) {}
-    async getList(accountId: number, query: BannerCompanyGetListRequestRequest): Promise<BannerCompanyGetListRequestResponse> {
+    async getListRequest(
+        accountId: number,
+        query: BannerCompanyGetListRequestRequest,
+    ): Promise<BannerCompanyGetListRequestResponse> {
         const search = {
             ...QueryPagingHelper.queryPaging(query),
             select: {
@@ -115,8 +118,20 @@ export class BannerCompanyService {
         return new PaginationResponse(banner, new PageInfo(total));
     }
 
-    async create(accountId: number, body: BannerCompanyUpsertRequestRequest): Promise<void> {
+    async createRequest(accountId: number, body: BannerCompanyUpsertRequestRequest): Promise<void> {
         if (!body.advertisingBanner && !body.postBanner) throw new BadRequestException('Information for the banner is undefined');
+        if (body.postBanner) {
+            const post = await this.prismaService.post.findUnique({
+                where: {
+                    id: body.postBanner.postId,
+                    company: {
+                        accountId,
+                    },
+                    isActive: true,
+                },
+            });
+            if (!post) throw new NotFoundException('Post not found');
+        }
         const companyId = (await this.prismaService.company.findUnique({ where: { accountId }, select: { id: true } })).id;
         if (body.advertisingBanner) {
             await this.prismaService.banner.create({
@@ -142,40 +157,38 @@ export class BannerCompanyService {
                 },
             });
         } else {
-            await this.prismaService.$transaction(async (prisma) => {
-                await prisma.banner.create({
-                    data: {
-                        file: {
-                            create: body.file,
-                        },
-                        startDate: new Date(body.startDate),
-                        endDate: new Date(body.endDate),
-                        postBanner: {
-                            create: {
-                                type: BannerType.COMPANY,
-                                postId: body.postBanner.postId,
-                                request: {
-                                    create: {
-                                        detail: body.detail,
-                                        status: RequestBannerStatus.PENDING,
-                                        companyId: companyId,
-                                    },
+            await this.prismaService.banner.create({
+                data: {
+                    file: {
+                        create: body.file,
+                    },
+                    startDate: new Date(body.startDate),
+                    endDate: new Date(body.endDate),
+                    postBanner: {
+                        create: {
+                            type: BannerType.COMPANY,
+                            postId: body.postBanner.postId,
+                            request: {
+                                create: {
+                                    detail: body.detail,
+                                    companyId: companyId,
                                 },
                             },
                         },
                     },
-                });
+                },
             });
         }
     }
 
-    async getDetail(accountId: number, id: number): Promise<BannerCompanyGetDetailRequestResponse> {
+    async getDetailRequest(accountId: number, id: number): Promise<BannerCompanyGetDetailRequestResponse> {
         const request = await this.prismaService.bannerRequest.findUnique({
             where: {
                 id,
                 company: {
                     accountId,
                 },
+                isActive: true,
             },
             select: {
                 detail: true,
@@ -216,6 +229,7 @@ export class BannerCompanyService {
                 },
             },
         });
+        if (!request) throw new NotFoundException('Request not found');
         if (request.advertisingBanner) {
             return {
                 type: BannerCompanyBannerType.ADVERTISING,
@@ -236,7 +250,7 @@ export class BannerCompanyService {
             };
         } else {
             return {
-                type: BannerCompanyBannerType.ADVERTISING,
+                type: BannerCompanyBannerType.POST,
                 file: {
                     fileName: request.postBanner.banner.file.fileName,
                     type: request.postBanner.banner.file.type,
@@ -255,13 +269,14 @@ export class BannerCompanyService {
         }
     }
 
-    async delete(accountId: number, id: number): Promise<void> {
+    async deleteRequest(accountId: number, id: number): Promise<void> {
         const request = await this.prismaService.bannerRequest.findUnique({
             where: {
                 id,
                 company: {
                     accountId,
                 },
+                isActive: true,
             },
         });
         if (!request) throw new NotFoundException('Request not found');
@@ -271,28 +286,6 @@ export class BannerCompanyService {
             },
             data: {
                 isActive: false,
-                postBanner: request.postBannerId
-                    ? {
-                          update: {
-                              banner: {
-                                  update: {
-                                      isActive: false,
-                                  },
-                              },
-                          },
-                      }
-                    : undefined,
-                advertisingBanner: request.advertisingBannerId
-                    ? {
-                          update: {
-                              banner: {
-                                  update: {
-                                      isActive: false,
-                                  },
-                              },
-                          },
-                      }
-                    : undefined,
             },
         });
     }

@@ -1,13 +1,13 @@
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { BannerAdminPostSearchCaterory } from '../enum/banner-admin-post-search-category.enum';
+import { BannerAdminPostSearchCategory } from '../enum/banner-admin-post-search-category.enum';
 
 export class BannerAdminGetListPostRequestRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
-    @IsEnum(BannerAdminPostSearchCaterory)
-    category: BannerAdminPostSearchCaterory;
+    @IsEnum(BannerAdminPostSearchCategory)
+    category: BannerAdminPostSearchCategory;
 
     @Expose()
     @IsOptional()

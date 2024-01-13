@@ -447,7 +447,7 @@ model BannerRequestHistory {
   bannerRequestId Int?
   BannerRequest   BannerRequest?      @relation(fields: [bannerRequestId], references: [id])
 
-  @@map("banner_request_status")
+  @@map("banner_request_histories")
 }
 
 model Code {
