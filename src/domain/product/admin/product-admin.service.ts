@@ -157,8 +157,8 @@ export class ProductAdminService {
             ...(query.searchCategory === SearchCategory.COMPANY_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
-            NOT: {
-                productPaymentHistory: null,
+            productPaymentHistory: {
+                some: {},
             },
         };
         const companies = await this.prismaService.company.findMany({
@@ -183,5 +183,65 @@ export class ProductAdminService {
             where: queryFilter,
         });
         return new PaginationResponse(list, new PageInfo(total));
+    }
+
+    async getCompanyInformation(companyId: number) {
+        const company = await this.prismaService.company.findUnique({
+            include: {
+                productPaymentHistory: true,
+            },
+            where: {
+                isActive: true,
+                id: companyId,
+                productPaymentHistory: {
+                    some: {},
+                },
+            },
+        });
+        return {
+            companyName: company.name,
+            manager: company.presentativeName,
+            contact: company.contactPhone,
+            totalPaymentAmount: company.productPaymentHistory.reduce((total, item) => {
+                return total + item.cost;
+            }, 0),
+        };
+    }
+
+    async getCompanyProductHistory(companyId: number, usageType: UsageType) {
+        const products = await this.prismaService.productPaymentHistory.findMany({
+            include: {
+                product: true,
+            },
+            where: {
+                companyId,
+                product: {
+                    usageType,
+                },
+                expirationDate: { gte: new Date() },
+            },
+            orderBy: {
+                productId: 'asc',
+            },
+        });
+        const transformedProducts = products.reduce((result, item) => {
+            const { remainingTimes, product } = item;
+            switch (usageType) {
+                case UsageType.LIMITED_COUNT:
+                    if (!result[product.productType]) result[product.productType] = 0;
+                    result[product.productType] += remainingTimes;
+                    break;
+                case UsageType.FIX_TERM:
+                    if (!result[product.productType]) result[product.productType] = {};
+                    if (!result[product.productType][`_${product.monthLimit}months`])
+                        result[product.productType][`_${product.monthLimit}months`] = 0;
+                    result[product.productType][`_${product.monthLimit}months`] += remainingTimes;
+                    break;
+            }
+            return result;
+        }, {});
+        return {
+            products: transformedProducts,
+        };
     }
 }

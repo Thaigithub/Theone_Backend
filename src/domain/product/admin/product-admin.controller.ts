@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
-import { AccountType } from '@prisma/client';
+import { Body, Controller, Get, Param, ParseIntPipe, Put, Query, UseGuards } from '@nestjs/common';
+import { AccountType, UsageType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -46,6 +46,21 @@ export class ProductAdminController {
         @Query() query: ProductAdminGetListCompanyRequest,
     ): Promise<BaseResponse<ProductAdminGetListCompanyResponse>> {
         return BaseResponse.of(await this.productAdminService.getListCompany(query));
+    }
+
+    @Get('companies/:id')
+    async getCompanyInformation(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
+        return BaseResponse.of(await this.productAdminService.getCompanyInformation(id));
+    }
+
+    @Get('companies/:id/limited-count')
+    async getCompanyLimitedCountProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
+        return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.LIMITED_COUNT));
+    }
+
+    @Get('companies/:id/fixed-term')
+    async getCompanyFixedTermProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
+        return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.FIX_TERM));
     }
 
     @Put('limited-count')
