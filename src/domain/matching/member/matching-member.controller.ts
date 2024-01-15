@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MatchingMemberService } from './matching-member.service';
 import { MatchingMemberGetListRequest } from './request/matching-member-get-list.request';
@@ -10,13 +10,10 @@ import { MatchingMemberTeamApplyRequest } from './request/matching-member-team-a
 import { MatchingMemberGetDetailResponse } from './response/matching-member-get-detail.response';
 import { MatchingMemberGetListResponse } from './response/matching-member-get-list.response';
 import { MatchingMemberInterestPostResponse } from './response/matching-member-interest-post.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
-@ApiBearerAuth()
 @Controller('member/matching')
-@ApiTags('[MEMBER] Matching Management')
 export class MatchingMemberController {
     constructor(private readonly matchingMemberService: MatchingMemberService) {}
 

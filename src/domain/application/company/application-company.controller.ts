@@ -41,20 +41,20 @@ export class ApplicationCompanyController {
         return BaseResponse.of(await this.applicationCompanyService.getListForPost(request.user.accountId, query, postId));
     }
 
-    @Get(':id/member')
-    async getMemberDetail(
+    @Get('/:id/member')
+    async getDetailMember(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
-        return BaseResponse.of(await this.applicationCompanyService.getMemberDetail(request.user.accountId, id));
+        return BaseResponse.of(await this.applicationCompanyService.getDetailMember(request.user.accountId, id));
     }
 
-    @Get(':id/team')
-    async getTeamDetail(
+    @Get('/:id/team')
+    async getDetailTeam(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetTeamDetail>> {
-        return BaseResponse.of(await this.applicationCompanyService.getTeamDetail(request.user.accountId, id));
+        return BaseResponse.of(await this.applicationCompanyService.getDetailTeam(request.user.accountId, id));
     }
 
     @Patch('/:id/status')

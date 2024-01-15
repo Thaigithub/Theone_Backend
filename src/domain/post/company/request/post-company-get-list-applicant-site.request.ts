@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { PostType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
@@ -23,9 +22,5 @@ export class PostCompanyGetListApplicantSiteRequest extends PaginationRequest {
     @Expose()
     @IsEnum(PostType)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: PostType,
-    })
     type: PostType;
 }

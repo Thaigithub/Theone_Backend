@@ -1,5 +1,4 @@
 import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -12,14 +11,9 @@ import { EvaluationMemberCreateEvaluationRequest } from './request/evaluation-me
 import { EvaluationMemberGetListRequest } from './request/evaluation-member-get-list.request';
 import { EvaluationMemberGetListResponse } from './response/evaluation-member-get-list.response';
 
-@ApiTags('[MEMBER] Evaluation Management')
 @Controller('/member/site-evaluations')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
-@Controller()
 export class EvaluationMemberController {
     constructor(private readonly evaluationMemberService: EvaluationMemberService) {}
 

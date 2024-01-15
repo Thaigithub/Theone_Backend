@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -18,13 +17,9 @@ import { PostCompanyGetListBySite } from './response/post-company-get-list-by-si
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
-@ApiTags('[COMPANY] Posts Management')
 @Controller('/company/posts')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class PostCompanyController {
     constructor(private postCompanyService: PostCompanyService) {}
 

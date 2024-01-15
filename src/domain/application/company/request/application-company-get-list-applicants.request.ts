@@ -7,7 +7,7 @@ export class ApplicationCompanyGetListApplicantsRequest extends PaginationReques
     @Expose()
     @IsEnum(ApplicationCompanyApplicantsSearch)
     @IsOptional()
-    searchCategory: ApplicationCompanyApplicantsSearch;
+    category: ApplicationCompanyApplicantsSearch;
 
     @Expose()
     @IsString()
@@ -17,10 +17,10 @@ export class ApplicationCompanyGetListApplicantsRequest extends PaginationReques
     @Expose()
     @IsString()
     @IsOptional()
-    startApplicationDate: string;
+    startDate: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    endApplicationDate: string;
+    endDate: string;
 }

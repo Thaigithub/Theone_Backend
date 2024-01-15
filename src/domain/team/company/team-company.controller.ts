@@ -1,5 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -12,18 +11,10 @@ import { TeamCompanyService } from './team-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
-@ApiBearerAuth()
 @Controller('company/teams')
-@ApiTags('[COMPANY] Team Management')
 export class TeamCompanyController {
     constructor(private readonly teamCompanyService: TeamCompanyService) {}
     @Get(':id/manpower')
-    @ApiOperation({
-        summary: 'Get team detail in Manpower',
-        description: 'Company can retrieve team information detail in Manpower',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: TeamCompanyManpowerGetDetailResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getTeamDetailManpower(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<TeamCompanyManpowerGetDetailResponse>> {
@@ -31,11 +22,6 @@ export class TeamCompanyController {
     }
 
     @Get('manpower')
-    @ApiOperation({
-        summary: 'Get list of teams in Manpower',
-        description: 'Company can retrieve all teams in Manpower',
-    })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListTeams(
         @Query() query: TeamCompanyManpowerGetListRequest,
         @Query('occupation', new ParseArrayPipe({ optional: true })) occupation: [string] | undefined,

@@ -1,5 +1,4 @@
 import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -11,12 +10,9 @@ import { PointAdminGetDetailResponse } from './response/point-admin-get-detail.r
 import { PointAdminGetListResponse } from './response/point-admin-get-list.response';
 import { PointAdminGetMemberListResponse } from './response/point-admin-get-member-list.response';
 
-@ApiTags('[ADMIN] Point Management')
 @Controller('/admin/points')
-@ApiBearerAuth()
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiProduces('application/json')
 export class PointAdminrController {
     constructor(private pointAdminService: PointAdminService) {}
     @Get('/members')

@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -15,11 +14,9 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
 import { LaborCompanyWorkDatesGetListResponse } from './response/labor-company-workdates-get-list.response';
 
-@ApiTags('[COMPANY] Labor Management')
 @Controller('/company/labors')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
     @Get('/:id/salary/:salaryId')

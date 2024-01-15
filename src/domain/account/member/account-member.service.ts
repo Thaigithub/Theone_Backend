@@ -3,9 +3,11 @@ import { AccountStatus, AccountType, MemberLevel, OtpType, SignupMethodType } fr
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
 import { compare, hash } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
+import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { BaseResponse } from 'utils/generics/base.response';
+import { AccountMemberChangePasswordRequestStatus } from './enum/account-member-change-password-request-status.enum';
 import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
@@ -16,14 +18,12 @@ import { AccountMemberUpsertDisabilityRequest } from './request/account-member-u
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
+import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
-import { OtpStatus } from 'domain/otp/response/otp-verify.response';
-import { ChangePasswordStatus } from './dto/account-member-change-password-status.enum';
-import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -369,7 +369,7 @@ export class AccountMemberService {
         if (!account) throw new NotFoundException('Account does not exist');
 
         const passwordMatch = await compare(body.currentPassword, account.password);
-        if (!passwordMatch) return { status: ChangePasswordStatus.PASSWORD_NOT_MATCH };
+        if (!passwordMatch) return { status: AccountMemberChangePasswordRequestStatus.PASSWORD_NOT_MATCH };
 
         const otpVerificationStatus = await this.otpService.checkValidOtp({ otpId: body.otpId, code: body.code }, ip);
         if (otpVerificationStatus.status === OtpStatus.VERIFIED) {
@@ -386,13 +386,13 @@ export class AccountMemberService {
         }
         switch (otpVerificationStatus.status) {
             case OtpStatus.VERIFIED:
-                return { status: ChangePasswordStatus.SUCCESS };
+                return { status: AccountMemberChangePasswordRequestStatus.SUCCESS };
             case OtpStatus.NOT_FOUND:
-                return { status: ChangePasswordStatus.OTP_NOT_FOUND };
+                return { status: AccountMemberChangePasswordRequestStatus.OTP_NOT_FOUND };
             case OtpStatus.OUT_OF_TIME:
-                return { status: ChangePasswordStatus.OTP_OUT_OF_TIME };
+                return { status: AccountMemberChangePasswordRequestStatus.OTP_OUT_OF_TIME };
             case OtpStatus.WRONG_CODE:
-                return { status: ChangePasswordStatus.OTP_WRONG_CODE };
+                return { status: AccountMemberChangePasswordRequestStatus.OTP_WRONG_CODE };
         }
     }
 

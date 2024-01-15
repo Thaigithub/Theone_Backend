@@ -1,5 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseIntPipe, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseIntPipe, Query, Res, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -14,9 +13,7 @@ import { WorkAdminService } from './work-admin.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@ApiBearerAuth()
 @Controller('admin/work')
-@ApiTags('[ADMIN] Work Management')
 export class WorkAdminController {
     constructor(private readonly workAdminService: WorkAdminService) {}
 
@@ -27,28 +24,12 @@ export class WorkAdminController {
     }
 
     @Get(':id/site')
-    @ApiOperation({
-        summary: 'Get worker detail',
-        description: 'Admin can view worker detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: WorkAdminGetDetailSiteResponse,
-    })
     async getDetailSite(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<WorkAdminGetDetailSiteResponse>> {
         const code = await this.workAdminService.getDetailSite(id);
         return BaseResponse.of(code);
     }
 
     @Get(':siteId/work-history')
-    @ApiOperation({
-        summary: 'Get worker history detail',
-        description: 'Admin can view worker history detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: WorkAdminGetDetailSiteResponse,
-    })
     async getDetailHistory(
         @Param('siteId', ParseIntPipe) id: number,
         @Query() query: WorkAdminGetDetailListHistoryRequest,
@@ -58,14 +39,6 @@ export class WorkAdminController {
     }
 
     @Get(':siteId/download-work-history')
-    @ApiOperation({
-        summary: 'Download worker history detail excel',
-        description: 'Admin can download worker history detail',
-    })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: WorkAdminGetDetailSiteResponse,
-    })
     async downloadDetailHistory(
         @Res() response: Response,
         @Param('siteId', ParseIntPipe) id: number,

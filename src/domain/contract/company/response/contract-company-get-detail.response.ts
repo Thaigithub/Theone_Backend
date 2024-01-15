@@ -1,5 +1,5 @@
 import { PaymentForm, SalaryType } from '@prisma/client';
-import { FileClass } from '../dto/contract-company-filetype.dto';
+import { FileResponse } from 'utils/generics/file.response';
 import { ContractType } from '../enum/contract-company-type-contract.enum';
 
 export class ContractCompanyGetDetailResponse {
@@ -17,7 +17,7 @@ export class ContractCompanyGetDetailResponse {
     endDate: Date;
     salaryType: SalaryType;
     amount: number;
-    file: FileClass;
+    file: FileResponse;
     department: string;
     paymentForm: PaymentForm;
 }

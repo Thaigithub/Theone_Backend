@@ -29,9 +29,9 @@ export class ApplicationCompanyService {
                 },
                 id: postId,
             },
-            ...(query.startApplicationDate && { assignedAt: { gte: new Date(query.startApplicationDate) } }),
-            ...(query.endApplicationDate && { assignedAt: { lte: new Date(query.endApplicationDate) } }),
-            ...(query.searchCategory == ApplicationCompanyApplicantsSearch.NAME && {
+            ...(query.startDate && { assignedAt: { gte: new Date(query.startDate) } }),
+            ...(query.endDate && { assignedAt: { lte: new Date(query.endDate) } }),
+            ...(query.category == ApplicationCompanyApplicantsSearch.NAME && {
                 OR: [
                     {
                         member: {
@@ -303,7 +303,7 @@ export class ApplicationCompanyService {
         return new PaginationResponse(offer, new PageInfo(offer.length));
     }
 
-    async getMemberDetail(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
+    async getDetailMember(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
         const member = await this.prismaService.application.findUnique({
             where: {
                 id: id,
@@ -465,7 +465,7 @@ export class ApplicationCompanyService {
         };
     }
 
-    async getTeamDetail(accountId: number, id: number): Promise<ApplicationCompanyGetTeamDetail> {
+    async getDetailTeam(accountId: number, id: number): Promise<ApplicationCompanyGetTeamDetail> {
         const team = await this.prismaService.application.findUnique({
             where: {
                 id: id,

@@ -66,8 +66,7 @@ export class ContractCompanyService {
                     },
                 },
             },
-            skip: request.pageNumber && request.pageSize && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
-            take: request.pageSize && parseInt(request.pageSize),
+            ...QueryPagingHelper.queryPaging(request),
         };
         const contracts = (await this.prismaService.contract.findMany(query)).map((item) => {
             return {
@@ -215,13 +214,7 @@ export class ContractCompanyService {
                 },
             },
             select: {
-                file: {
-                    select: {
-                        fileName: true,
-                        type: true,
-                        key: true,
-                    },
-                },
+                file: true,
                 startDate: true,
                 endDate: true,
                 paymentForm: true,
@@ -286,7 +279,12 @@ export class ContractCompanyService {
             endDate: contract.endDate,
             salaryType: contract.salaryType,
             amount: contract.amount,
-            file: contract.file,
+            file: {
+                fileName: contract.file.fileName,
+                type: contract.file.type,
+                key: contract.file.key,
+                size: Number(contract.file.size),
+            },
             department: contract.department,
             paymentForm: contract.paymentForm,
         };

@@ -19,8 +19,7 @@ export class AdminAdminController {
 
     @Get()
     async getList(@Query() query: AdminAdminGetListRequest): Promise<BaseResponse<AdminAdminGetListResponse>> {
-        const admins = await this.adminService.getList(query);
-        return BaseResponse.of(admins);
+        return BaseResponse.of(await this.adminService.getList(query));
     }
 
     @Post()
@@ -35,8 +34,7 @@ export class AdminAdminController {
 
     @Patch('/:id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() payload: AdminAdminUpsertRequest): Promise<BaseResponse<void>> {
-        await this.adminService.update(id, payload);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.adminService.update(id, payload));
     }
 
     @Delete('/:id')

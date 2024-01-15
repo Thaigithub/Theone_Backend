@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -23,10 +22,6 @@ export class InterviewMemberGetListRequest extends PaginationRequest {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
     })
-    @ApiProperty({
-        description: 'Start date',
-        example: '2023-05-10',
-    })
     startDate: string;
 
     @Expose()
@@ -34,10 +29,6 @@ export class InterviewMemberGetListRequest extends PaginationRequest {
     @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'The property must be in the format yyyy-mm-dd.',
-    })
-    @ApiProperty({
-        description: 'End date',
-        example: '2023-05-10',
     })
     endDate: string;
 }

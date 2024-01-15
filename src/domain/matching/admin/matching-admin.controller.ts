@@ -1,5 +1,4 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -10,9 +9,7 @@ import { MatchingAdminGetListResponse } from './response/matching-admin-get-list
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@ApiBearerAuth()
 @Controller('admin/matching')
-@ApiTags('[ADMIN] Matching Management')
 export class MatchingAdminController {
     constructor(private readonly matchingAdminService: MatchingAdminService) {}
 

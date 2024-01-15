@@ -1,4 +1,4 @@
-export enum ChangePasswordStatus {
+export enum AccountMemberChangePasswordRequestStatus {
     SUCCESS = 'SUCCESS',
     PASSWORD_NOT_MATCH = 'PASSWORD_NOT_MATCH',
     OTP_NOT_FOUND = 'OTP_NOT_FOUND',

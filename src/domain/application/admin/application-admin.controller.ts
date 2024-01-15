@@ -4,9 +4,9 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApplicationAdminService } from './application-admin.service';
-import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
+import { ApplicationAdminGetListRequest } from './request/application-admin-get-list-for-post.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
-import { ApplicationAdminGetResponse } from './response/application-admin-get-list.response';
+import { ApplicationAdminGetResponse } from './response/application-admin-get-list-for-post.response';
 
 @Controller('/admin/applications')
 @Roles(AccountType.ADMIN)

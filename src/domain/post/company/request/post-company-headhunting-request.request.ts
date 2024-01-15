@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -13,10 +12,6 @@ export class PostCompanyHeadhuntingRequestRequest extends PaginationRequest {
     @Expose()
     @IsEnum(PostCompanyHeadhuntingRequestFilter)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: PostCompanyHeadhuntingRequestFilter,
-    })
     category: PostCompanyHeadhuntingRequestFilter;
 
     @Expose()

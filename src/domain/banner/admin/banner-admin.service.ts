@@ -32,6 +32,9 @@ export class BannerAdminService {
                 banner: {
                     isActive: true,
                 },
+                NOT: {
+                    priority: null,
+                },
             },
         });
         await this.prismaService.banner.create({
@@ -416,6 +419,9 @@ export class BannerAdminService {
             where: {
                 banner: {
                     isActive: true,
+                },
+                NOT: {
+                    priority: null,
                 },
             },
         });
