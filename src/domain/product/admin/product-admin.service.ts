@@ -1,18 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ProductType, UsageType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { GetListType } from './dto/product-admin-get-list.enum';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { GetListType } from './enum/product-admin-get-list.enum';
+import { ProductAdminRefundSearchCategory } from './enum/product-admin-refund-search-category.enum';
+import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
+import { ProductAdminGetListRefundRequest } from './request/product-admin-get-list-refund.request';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
+import { ProductAdminUpdateRefundStatusRequest } from './request/product-admin-update-refund-status.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
+import { ProductAdminGetDetailRefundResponse } from './response/product-admin-get-detail-refund.response';
+import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
+import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
-import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
-import { SearchCategory } from './dto/product-admin-get-list-company.enum';
-import { QueryPagingHelper } from 'utils/pagination-query';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
+import { ProductAdminGetListSearchCategory } from './dto/product-admin-get-list-company.enum';
 
 @Injectable()
 export class ProductAdminService {
@@ -154,7 +159,7 @@ export class ProductAdminService {
     async getListCompany(query: ProductAdminGetListCompanyRequest): Promise<ProductAdminGetListCompanyResponse> {
         const queryFilter: Prisma.CompanyWhereInput = {
             isActive: true,
-            ...(query.searchCategory === SearchCategory.COMPANY_NAME && {
+            ...(query.searchCategory === ProductAdminGetListSearchCategory.COMPANY_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
             productPaymentHistory: {
@@ -243,5 +248,116 @@ export class ProductAdminService {
         return {
             products: transformedProducts,
         };
+    }
+
+    async getListRefund(query: ProductAdminGetListRefundRequest): Promise<ProductAdminGetListRefundResponse> {
+        const search = {
+            ...QueryPagingHelper.queryPaging(query),
+            where: {
+                status: query.status,
+                createdAt: {
+                    gte: query.startDate && new Date(query.startDate),
+                    lte: query.endDate && new Date(query.endDate),
+                },
+                productPaymentHistory: {
+                    company: {
+                        name:
+                            query.category &&
+                            (query.category === ProductAdminRefundSearchCategory.COMPANY
+                                ? { contains: query.keyword, mode: Prisma.QueryMode.insensitive }
+                                : undefined),
+                    },
+                },
+            },
+            select: {
+                productPaymentHistory: {
+                    select: {
+                        company: {
+                            select: {
+                                name: true,
+                                presentativeName: true,
+                                phone: true,
+                            },
+                        },
+                        product: true,
+                        cost: true,
+                    },
+                },
+                status: true,
+            },
+        };
+        const refunds = (await this.prismaService.refund.findMany(search)).map((item) => {
+            return {
+                companyName: item.productPaymentHistory.company.name,
+                presentativeName: item.productPaymentHistory.company.presentativeName,
+                contact: item.productPaymentHistory.company.phone,
+                productType: item.productPaymentHistory.product.productType,
+                amount: item.productPaymentHistory.cost,
+                status: item.status,
+            };
+        });
+        const total = await this.prismaService.refund.count({ where: search.where });
+        return new PaginationResponse(refunds, new PageInfo(total));
+    }
+
+    async getDetailRefund(id: number): Promise<ProductAdminGetDetailRefundResponse> {
+        const refund = await this.prismaService.refund.findUnique({
+            where: {
+                isActive: true,
+                id,
+            },
+            select: {
+                productPaymentHistory: {
+                    select: {
+                        company: {
+                            select: {
+                                name: true,
+                                presentativeName: true,
+                                phone: true,
+                            },
+                        },
+                        product: true,
+                        cost: true,
+                    },
+                },
+                status: true,
+                createdAt: true,
+            },
+        });
+        if (!refund) throw new NotFoundException('Refund not found');
+        return {
+            companyName: refund.productPaymentHistory.company.name,
+            presentativeName: refund.productPaymentHistory.company.presentativeName,
+            contact: refund.productPaymentHistory.company.phone,
+            productType: refund.productPaymentHistory.product.productType,
+            usageType: refund.productPaymentHistory.product.usageType,
+            amount: refund.productPaymentHistory.cost,
+            status: refund.status,
+            createdAt: refund.createdAt,
+        };
+    }
+
+    async updateRefundStatus(id: number, body: ProductAdminUpdateRefundStatusRequest): Promise<void> {
+        const refund = await this.prismaService.refund.findUnique({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!refund) throw new NotFoundException('Refund not found');
+        await this.prismaService.refund.update({
+            where: {
+                id,
+            },
+            data: {
+                status: body.status,
+                refundHistory: {
+                    create: {
+                        status: body.status,
+                        reason: body.updateReason,
+                    },
+                },
+            },
+        });
     }
 }
