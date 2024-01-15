@@ -654,6 +654,7 @@ export class BannerAdminService {
                     select: {
                         name: true,
                         site: true,
+                        id: true,
                     },
                 },
                 postId: true,
@@ -679,6 +680,7 @@ export class BannerAdminService {
             postBanner: {
                 postName: banner.post.name,
                 siteName: banner.post.site?.name || null,
+                postId: banner.post.id,
             },
             file: {
                 fileName: banner.banner.file.fileName,
@@ -770,6 +772,7 @@ export class BannerAdminService {
                                         name: true,
                                     },
                                 },
+                                id: true,
                             },
                         },
                         banner: {
@@ -796,6 +799,7 @@ export class BannerAdminService {
             postBanner: {
                 postName: banner.postBanner.post.name,
                 siteName: banner.postBanner.post.site?.name || null,
+                postId: banner.postBanner.post.id,
             },
             file: {
                 fileName: banner.postBanner.banner.file.fileName,
