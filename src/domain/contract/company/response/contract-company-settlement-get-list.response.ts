@@ -1,11 +1,12 @@
 import { SettlementStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { ContractCompanyGetMember, ContractCompanyGetTeam } from './contract-company-settlement-get-detail.response';
+import { ContractCompanyMember } from '../dto/contract-company-member.dto';
+import { ContractCompanyTeam } from '../dto/contract-company-team.dto';
 
 export class ContractCompanySettlementResponse {
     id: number;
-    memberInfor: ContractCompanyGetMember;
-    teamInfor: ContractCompanyGetTeam;
+    memberInfor: ContractCompanyMember;
+    teamInfor: ContractCompanyTeam;
     settlementStatus: SettlementStatus;
     settlementCompleteDate: Date;
 }

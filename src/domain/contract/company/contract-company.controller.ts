@@ -13,9 +13,9 @@ import { ContractCompanyUpdateRequest } from './request/contract-company-update.
 import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { ContractCompanySettlementGetDetailResponse } from './response/contract-company-settlement-get-detail.response';
 import { ContractCompanySettlementGetListResponse } from './response/contract-company-settlement-get-list.response';
-import { ContractCompanyGetSettlementDetailRequest } from './request/contract-company-settlement-get-detail.request';
+import { ContractCompanySettlementGetTeamDetailResponse } from './response/contract-company-settlement-get-team-detail.response';
+import { ContractCompanySettlementGetMemberDetailResponse } from './response/contract-company-settlement-get-member-detail.response';
 
 @Controller('/company/contracts')
 @Roles(AccountType.COMPANY)
@@ -45,13 +45,20 @@ export class ContractCompanyController {
         return BaseResponse.of(await this.contractCompanyService.getSettlementList(req.user.accountId, query));
     }
 
-    @Get('/:id/settlement')
-    async getSettlementDetail(
+    @Get('/:id/settlement/team')
+    async getTeamSettlementDetail(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: AccountIdExtensionRequest,
-        @Query() query: ContractCompanyGetSettlementDetailRequest,
-    ): Promise<BaseResponse<ContractCompanySettlementGetDetailResponse>> {
-        return BaseResponse.of(await this.contractCompanyService.getSettlementDetail(req.user.accountId, id, query));
+    ): Promise<BaseResponse<ContractCompanySettlementGetTeamDetailResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.getTeamSettlementDetail(req.user.accountId, id));
+    }
+
+    @Get('/:id/settlement/member')
+    async getMemberSettlementDetail(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ContractCompanySettlementGetMemberDetailResponse>> {
+        return BaseResponse.of(await this.contractCompanyService.getMemberSettlementDetail(req.user.accountId, id));
     }
 
     @Patch('/:id/settlement/status')

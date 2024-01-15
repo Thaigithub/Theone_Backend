@@ -1,5 +1,6 @@
 import { PaymentForm, SalaryType } from '@prisma/client';
 import { FileClass } from '../dto/contract-company-filetype.dto';
+import { ContractType } from '../enum/contract-company-type-contract.enum';
 
 export class ContractCompanyGetDetailResponse {
     companyName: string;
@@ -19,8 +20,4 @@ export class ContractCompanyGetDetailResponse {
     file: FileClass;
     department: string;
     paymentForm: PaymentForm;
-}
-export enum ContractType {
-    TEAM = 'TEAM',
-    INDIVIDUAL = 'INDIVIDUAL',
 }
