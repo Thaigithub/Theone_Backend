@@ -1,20 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PostApplicationStatus, Prisma, SettlementStatus, SupportCategory } from '@prisma/client';
+import { PostApplicationStatus, Prisma, SettlementStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractType } from './enum/contract-company-type-contract.enum';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
-import { ContractCompanyGetSettlementDetailRequest } from './request/contract-company-settlement-get-detail.request';
 import { ContractCompanySettlementGetListRequest } from './request/contract-company-settlement-get-list.request';
 import { ContractCompanySettlementUpdateRequest } from './request/contract-company-settlement-update.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
 import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { ContractCompanySettlementGetDetailResponse } from './response/contract-company-settlement-get-detail.response';
 import { ContractCompanySettlementGetListResponse } from './response/contract-company-settlement-get-list.response';
+import { ContractCompanySettlementGetMemberDetailResponse } from './response/contract-company-settlement-get-member-detail.response';
+import { ContractCompanySettlementGetTeamDetailResponse } from './response/contract-company-settlement-get-team-detail.response';
 
 @Injectable()
 export class ContractCompanyService {
@@ -99,6 +99,7 @@ export class ContractCompanyService {
             select: {
                 post: {
                     select: {
+                        id: true,
                         site: {
                             select: {
                                 id: true,
@@ -110,6 +111,7 @@ export class ContractCompanyService {
                 },
                 team: {
                     select: {
+                        id: true,
                         _count: {
                             select: {
                                 members: true,
@@ -132,6 +134,20 @@ export class ContractCompanyService {
         if (!application) throw new NotFoundException('Application not found or not ready');
         if (!application.post.site) throw new BadRequestException('This post has no site to create contract');
 
+        let isHeadhuntingRecommendation = false;
+        const record = this.prismaService.headhuntingRecommendation.findFirst({
+            where: {
+                ...(application.member && { memberId: application.member.id }),
+                ...(application.team && { teamId: application.team.id }),
+                postId: application.post.id,
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (record) {
+            isHeadhuntingRecommendation = true;
+        }
         await this.prismaService.file.create({
             data: {
                 key: body.fileKey,
@@ -147,11 +163,7 @@ export class ContractCompanyService {
                         amount: body.amount,
                         department: body.department,
                         paymentForm: body.paymentForm,
-                        settlementStatus: application.interview?.supportCategory
-                            ? application.interview.supportCategory === SupportCategory.HEADHUNTING
-                                ? SettlementStatus.UNSETTLED
-                                : SettlementStatus.NONE
-                            : SettlementStatus.NONE,
+                        settlementStatus: isHeadhuntingRecommendation ? SettlementStatus.UNSETTLED : SettlementStatus.NONE,
                     },
                 },
             },
@@ -284,14 +296,13 @@ export class ContractCompanyService {
         accountId: number,
         query: ContractCompanySettlementGetListRequest,
     ): Promise<ContractCompanySettlementGetListResponse> {
-        if (query.settlementStatus && query.settlementStatus === SettlementStatus.NONE) {
-            throw new BadRequestException('The settlement status must be settled on unsettled');
-        }
         const queryFilter: Prisma.ContractWhereInput = {
             ...(query.settlementStatus && { settlementStatus: query.settlementStatus }),
             ...(!query.settlementStatus && { NOT: { settlementStatus: SettlementStatus.NONE } }),
+            ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
+            ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             application: {
-                ...(!query.isTeam && {
+                ...(query.object === ContractType.INDIVIDUAL && {
                     AND: [
                         { NOT: { memberId: null } },
                         {
@@ -302,7 +313,7 @@ export class ContractCompanyService {
                         },
                     ],
                 }),
-                ...(query.isTeam && {
+                ...(query.object === ContractType.TEAM && {
                     AND: [
                         { NOT: { teamId: null } },
                         {
@@ -374,11 +385,7 @@ export class ContractCompanyService {
         return new PaginationResponse(contracts, new PageInfo(countContract));
     }
 
-    async getSettlementDetail(
-        accountId: number,
-        id: number,
-        query: ContractCompanyGetSettlementDetailRequest,
-    ): Promise<ContractCompanySettlementGetDetailResponse> {
+    async getTeamSettlementDetail(accountId: number, id: number): Promise<ContractCompanySettlementGetTeamDetailResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id: id,
@@ -390,6 +397,7 @@ export class ContractCompanyService {
                             isActive: true,
                         },
                     },
+                    NOT: { team: null },
                 },
                 NOT: { settlementStatus: SettlementStatus.NONE },
             },
@@ -452,8 +460,112 @@ export class ContractCompanyService {
         if (!contract) {
             throw new NotFoundException('The contract id is not found');
         }
-        if ((contract.application.member && query.isTeam) || (contract.application.team && !query.isTeam)) {
-            throw new NotFoundException('The contract is not match your query');
+        const workLoadInformation = () => {
+            const countWorkDays = contract?.labor ? contract.labor.workDates.length : null;
+            const averageWorkLoad =
+                contract?.labor && countWorkDays > 0
+                    ? contract.labor.workDates.reduce((total, current) => {
+                          return total + current.hours;
+                      }, 0) / countWorkDays
+                    : null;
+            return {
+                workDays: countWorkDays,
+                workLoad: averageWorkLoad,
+                laborId: contract.labor ? contract.labor.id : null,
+            };
+        };
+        return {
+            siteInfor: {
+                siteName: contract.application.post.site.name,
+                startDateConstruction: contract.application.post.site.startDate,
+                endDateConstruction: contract.application.post.site.endDate,
+                startDateContract: contract.startDate,
+                endDateContract: contract.endDate,
+                isWorking: new Date() <= contract.endDate && new Date() >= contract.startDate,
+            },
+            wageInfor: contract.labor
+                ? {
+                      wage: contract.labor?.salaryHistories[0]?.base ? contract.labor.salaryHistories[0].base : null,
+                      deductibleAmount: contract.labor?.salaryHistories[0]?.totalDeductible
+                          ? contract.labor.salaryHistories[0].totalDeductible
+                          : null,
+                      actualSalary: contract.labor?.salaryHistories[0]?.totalPayment
+                          ? contract.labor.salaryHistories[0].totalPayment
+                          : null,
+                  }
+                : null,
+            workLoadInfor: workLoadInformation(),
+            teamInfor: {
+                leaderName: contract.application.team.leader.name,
+                teamName: contract.application.team.name,
+                contact: contract.application.team.leader.contact,
+            },
+        };
+    }
+
+    async getMemberSettlementDetail(accountId: number, id: number): Promise<ContractCompanySettlementGetMemberDetailResponse> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id: id,
+                application: {
+                    post: {
+                        isActive: true,
+                        company: {
+                            accountId: accountId,
+                            isActive: true,
+                        },
+                    },
+                    NOT: { member: null },
+                },
+                NOT: { settlementStatus: SettlementStatus.NONE },
+            },
+            select: {
+                application: {
+                    select: {
+                        post: {
+                            select: {
+                                site: {
+                                    select: {
+                                        name: true,
+                                        startDate: true,
+                                        endDate: true,
+                                    },
+                                },
+                            },
+                        },
+                        member: {
+                            select: {
+                                name: true,
+                                contact: true,
+                            },
+                        },
+                    },
+                },
+                startDate: true,
+                endDate: true,
+                labor: {
+                    select: {
+                        id: true,
+                        salaryHistories: {
+                            orderBy: { date: 'desc' },
+                            take: 1,
+                            select: {
+                                base: true,
+                                totalDeductible: true,
+                                totalPayment: true,
+                            },
+                        },
+                        workDates: {
+                            select: {
+                                hours: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!contract) {
+            throw new NotFoundException('The contract id is not found');
         }
         const workLoadInformation = () => {
             const countWorkDays = contract?.labor ? contract.labor.workDates.length : null;
@@ -490,19 +602,10 @@ export class ContractCompanyService {
                   }
                 : null,
             workLoadInfor: workLoadInformation(),
-            memberInfor: !query.isTeam
-                ? {
-                      name: contract.application.member.name,
-                      contact: contract.application.member.contact,
-                  }
-                : null,
-            teamInfor: query.isTeam
-                ? {
-                      leaderName: contract.application.team.leader.name,
-                      teamName: contract.application.team.name,
-                      contact: contract.application.team.leader.contact,
-                  }
-                : null,
+            memberInfor: {
+                name: contract.application.member.name,
+                contact: contract.application.member.contact,
+            },
         };
     }
 

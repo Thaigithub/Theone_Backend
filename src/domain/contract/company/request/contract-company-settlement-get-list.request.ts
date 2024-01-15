@@ -1,15 +1,14 @@
-import { SettlementStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { ParseBoolean } from 'utils/custom-decorators';
-
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
+import { ContractType } from '../enum/contract-company-type-contract.enum';
+import { ContractCompanySettlementStatus } from '../enum/contract-company-settlement-status.enum';
 
 export class ContractCompanySettlementGetListRequest extends PaginationRequest {
     @Expose()
-    @IsEnum(SettlementStatus)
+    @IsEnum(ContractCompanySettlementStatus)
     @IsOptional()
-    settlementStatus: SettlementStatus;
+    settlementStatus: ContractCompanySettlementStatus;
 
     @Expose()
     @IsString()
@@ -17,6 +16,22 @@ export class ContractCompanySettlementGetListRequest extends PaginationRequest {
     searchTerm: string;
 
     @Expose()
-    @ParseBoolean()
-    isTeam: boolean;
+    @IsString()
+    @IsOptional()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
+    })
+    startDate: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'The property must be in the format yyyy-mm-dd.',
+    })
+    endDate: string;
+
+    @Expose()
+    @IsEnum(ContractType)
+    object: ContractType;
 }
