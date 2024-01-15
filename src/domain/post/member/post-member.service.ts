@@ -154,7 +154,7 @@ export class PostMemberService {
                 siteAddress: site ? site.address : null,
                 siteAddressCity: site?.district ? site.district.city.englishName : null,
                 siteAddressDistrict: site?.district ? site.district.englishName : null,
-                interestId: accountId && item.interested.length > 0 ? item.interested[0].id : null,
+                isInterested: accountId && item.interested.length > 0 ? true : false,
             };
         });
         const count = await this.prismaService.post.count({

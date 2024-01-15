@@ -3,7 +3,7 @@ import { FileResponse } from 'utils/generics/file.response';
 class SiteDetailResponse {
     name: string;
     address: string;
-    interestId: number;
+    isInterested: boolean;
     startDate: Date;
     endDate: Date;
     personInCharge: string;

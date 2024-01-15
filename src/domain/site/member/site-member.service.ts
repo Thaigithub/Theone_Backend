@@ -138,7 +138,7 @@ export class SiteMemberService {
                 numberOfWorkers: item.numberOfWorkers,
                 longitude: item.longitude,
                 latitude: item.latitude,
-                interestId: item.interestMember.length > 0 && accountId ? item.interestMember[0].id : null,
+                isInterested: item.interestMember.length > 0 && accountId ? true : false,
             };
         });
         const siteListCount = await this.prismaService.site.count({
@@ -247,7 +247,7 @@ export class SiteMemberService {
                         occupationName: post.occupation?.codeName || null,
                     };
                 }),
-                interestId: accountId && item.interestMember.length > 0 ? item.interestMember[0].id : null,
+                isInterested: accountId && item.interestMember.length > 0 ? true : false,
                 status: item.status,
                 longitude: item.longitude,
                 latitude: item.latitude,
@@ -321,7 +321,7 @@ export class SiteMemberService {
                 id: siteRecord.id,
                 name: siteRecord.name,
                 address: siteRecord.address,
-                interestId: siteRecord.interestMember.length > 0 && accountId ? siteRecord.interestMember[0].id : null,
+                isInterested: siteRecord.interestMember.length > 0 && accountId ? true : false,
                 startDate: siteRecord.startDate,
                 endDate: siteRecord.endDate,
                 personInCharge: siteRecord.personInCharge,

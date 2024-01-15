@@ -20,7 +20,7 @@ export class SiteNearByResponse {
         endDate: Date;
         occupationName: string;
     }[];
-    interestId: number;
+    isInterested: boolean;
     status: Site['status'];
     longitude: Site['longitude'];
     latitude: Site['latitude'];
