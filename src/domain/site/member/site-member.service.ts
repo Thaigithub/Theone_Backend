@@ -7,7 +7,7 @@ import { SiteMemberGetListRequest } from './request/site-member-get-list.request
 import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
-import { SiteMemberNearByGetListResponse, SiteNearByResponse } from './response/site-member-nearby-get-list.response';
+import { SiteMemberNearByGetListResponse } from './response/site-member-nearby-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
@@ -197,6 +197,8 @@ export class SiteMemberService {
                             id: true,
                             name: true,
                             isPulledUp: true,
+                            occupation: true,
+                            endDate: true,
                         },
                         ...(query.numberOfPost && { take: query.numberOfPost }),
                     },
@@ -236,12 +238,20 @@ export class SiteMemberService {
                           key: item.company.logo.file.key,
                       }
                     : null,
-                posts: item.post,
+                posts: item.post.map((post) => {
+                    return {
+                        id: post.id,
+                        name: post.name,
+                        isPulledUp: post.isPulledUp,
+                        endDate: post.endDate,
+                        occupationName: post.occupation?.codeName || null,
+                    };
+                }),
                 interestId: accountId && item.interestMember.length > 0 ? item.interestMember[0].id : null,
                 status: item.status,
                 longitude: item.longitude,
                 latitude: item.latitude,
-            } as SiteNearByResponse;
+            };
         });
 
         return {

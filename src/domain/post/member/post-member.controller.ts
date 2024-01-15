@@ -5,8 +5,10 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PostMemberService } from './post-member.service';
+import { PostMemberGetListPremiumRequest } from './request/post-member-get-list-premium.request';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
+import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
@@ -70,6 +72,14 @@ export class PostMemberController {
             regionList,
             siteId,
         );
+    }
+
+    @Get('/premium')
+    async getPremium(
+        @Req() req: AccountIdExtensionRequest,
+        @Query() query: PostMemberGetListPremiumRequest,
+    ): Promise<BaseResponse<PostMemberGetListPremiumResponse>> {
+        return BaseResponse.of(await this.postMemberService.getListPremium(req.user.accountId, query));
     }
 
     // Get detail
