@@ -1,12 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, Prisma } from '@prisma/client';
+import { ExperienceType, PostType, Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { PostMemberGetListPremiumRequest } from './request/post-member-get-list-premium.request';
 import { PostMemberGetListRequest } from './request/post-member-get-list.request';
 import { PostMemberGetDetailResponse } from './response/post-member-get-detail.response';
+import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
 
@@ -422,5 +424,62 @@ export class PostMemberService {
             });
             return { isInterested: true };
         }
+    }
+
+    async getListPremium(
+        accountId: number | undefined,
+        query: PostMemberGetListPremiumRequest,
+    ): Promise<PostMemberGetListPremiumResponse> {
+        const search = {
+            ...QueryPagingHelper.queryPaging(query),
+            where: {
+                type: PostType.PREMIUM,
+                isHidden: false,
+                isActive: true,
+            },
+            select: {
+                company: {
+                    select: {
+                        logo: {
+                            select: {
+                                file: true,
+                            },
+                        },
+                    },
+                },
+                name: true,
+                endDate: true,
+                id: true,
+                site: true,
+                workLocation: true,
+                occupation: true,
+                interested: {
+                    where: {
+                        member: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+        };
+        const posts = (await this.prismaService.post.findMany(search)).map((item) => {
+            return {
+                companyLogo: {
+                    fileName: item.company.logo.file.fileName,
+                    type: item.company.logo.file.type,
+                    key: item.company.logo.file.key,
+                    size: Number(item.company.logo.file.size),
+                },
+                postName: item.name,
+                endDate: item.endDate,
+                id: item.id,
+                siteName: item.site?.name || null,
+                workLocation: item.workLocation,
+                isInterested: accountId ? (item.interested.length === 0 ? false : true) : null,
+                occupationName: item.occupation?.codeName || null,
+            };
+        });
+        const total = await this.prismaService.post.count({ where: search.where });
+        return new PaginationResponse(posts, new PageInfo(total));
     }
 }

@@ -17,6 +17,8 @@ export class SiteNearByResponse {
         id: number;
         name: string;
         isPulledUp: boolean;
+        endDate: Date;
+        occupationName: string;
     }[];
     interestId: number;
     status: Site['status'];
