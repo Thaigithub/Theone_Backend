@@ -7,13 +7,13 @@ import { SiteMemberGetListRequest } from './request/site-member-get-list.request
 import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
-import { SiteMemberNearByGetListResponse } from './response/site-member-nearby-get-list.response';
+import { SiteMemberNearByGetListResponse, SiteNearByResponse } from './response/site-member-nearby-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
 export class SiteMemberService {
     constructor(private readonly prismaService: PrismaService) {}
-    async checkExistSite(id: number) {
+    async checkExist(id: number) {
         const siteRecord = await this.prismaService.site.findUnique({
             where: {
                 id: id,
@@ -37,7 +37,7 @@ export class SiteMemberService {
             },
         });
 
-        await this.checkExistSite(id);
+        await this.checkExist(id);
 
         //Check exist member - site
         //If exist, remove that record
@@ -73,7 +73,7 @@ export class SiteMemberService {
             return { isInterested: true };
         }
     }
-    async getSiteList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
+    async getList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
         const entireCity = await (async () => {
             if (!query.districtId) {
                 return null;
@@ -150,25 +150,11 @@ export class SiteMemberService {
         accountId: number | undefined,
         query: SiteMemberGetNearByRequest,
     ): Promise<SiteMemberNearByGetListResponse> {
-        const minLat = Math.min(query.latitude1, query.latitude2);
-        const maxLat = Math.max(query.latitude1, query.latitude2);
-        const minLon = Math.min(query.longtitude1, query.longtitude2);
-        const maxLon = Math.max(query.longtitude1, query.longtitude2);
-
-        const queryFilter: Prisma.SiteWhereInput = {
-            isActive: true,
-            latitude: {
-                gte: minLat,
-                lte: maxLat,
-            },
-            longitude: {
-                gte: minLon,
-                lte: maxLon,
-            },
-        };
         const meshList = (
             await this.prismaService.site.findMany({
-                where: queryFilter,
+                where: {
+                    isActive: true,
+                },
                 ...QueryPagingHelper.queryPaging(query),
                 select: {
                     id: true,
@@ -253,16 +239,18 @@ export class SiteMemberService {
                 posts: item.post,
                 interestId: accountId && item.interestMember.length > 0 ? item.interestMember[0].id : null,
                 status: item.status,
-            };
+                longitude: item.longitude,
+                latitude: item.latitude,
+            } as SiteNearByResponse;
         });
-        const count = await this.prismaService.site.count({
-            where: queryFilter,
-        });
-        return new PaginationResponse(meshList, new PageInfo(count));
+
+        return {
+            sites: meshList,
+        };
     }
 
-    async getSiteDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
-        await this.checkExistSite(id);
+    async getDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
+        await this.checkExist(id);
         const siteRecord = await this.prismaService.site.findUnique({
             where: {
                 id: id,
