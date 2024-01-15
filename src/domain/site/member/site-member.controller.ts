@@ -39,7 +39,7 @@ export class SiteMemberController {
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<SiteMemberGetDetailResponse>> {
-        return BaseResponse.of(await this.siteMemberService.getSiteDetail(request.user.accountId, id));
+        return BaseResponse.of(await this.siteMemberService.getDetail(request.user.accountId, id));
     }
 
     @Get()
@@ -47,6 +47,6 @@ export class SiteMemberController {
         @Req() request: AccountIdExtensionRequest,
         @Query() query: SiteMemberGetListRequest,
     ): Promise<BaseResponse<SiteMemberGetListResponse>> {
-        return BaseResponse.of(await this.siteMemberService.getSiteList(request.user.accountId, query));
+        return BaseResponse.of(await this.siteMemberService.getList(request.user.accountId, query));
     }
 }

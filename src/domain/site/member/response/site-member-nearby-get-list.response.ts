@@ -1,10 +1,9 @@
-import { SiteStatus } from '@prisma/client';
+import { Site } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
-import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class SiteNearByResponse {
-    id: number;
-    name: string;
+    id: Site['id'];
+    name: Site['name'];
     dictrict: {
         koreanName: string;
         englishName: string;
@@ -20,7 +19,11 @@ export class SiteNearByResponse {
         isPulledUp: boolean;
     }[];
     interestId: number;
-    status: SiteStatus;
+    status: Site['status'];
+    longitude: Site['longitude'];
+    latitude: Site['latitude'];
 }
 
-export class SiteMemberNearByGetListResponse extends PaginationResponse<SiteNearByResponse> {}
+export class SiteMemberNearByGetListResponse {
+    sites: SiteNearByResponse[];
+}

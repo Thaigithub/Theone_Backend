@@ -4,12 +4,10 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-
 import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
-
+import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { HeadhuntingCompanyService } from './headhunting-company.service';
 import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/headhunting-company-get-list-recommendation.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
