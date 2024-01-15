@@ -30,10 +30,10 @@ export class AdminAdminService {
             where: {
                 isActive: true,
                 ...(query.level && { level: AdminLevel[query.level] }),
-                ...(query.searchCategory === AdminAdminSearchCategories.ID && {
+                ...(query.category === AdminAdminSearchCategories.ID && {
                     account: { username: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } },
                 }),
-                ...(query.searchCategory === AdminAdminSearchCategories.ADMIN_NAME && {
+                ...(query.category === AdminAdminSearchCategories.ADMIN_NAME && {
                     name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
                 }),
             },
@@ -159,7 +159,7 @@ export class AdminAdminService {
         await this.prismaService.$transaction([deleteAdmin, deletePermissions]);
     }
 
-    async getPermissionsIds(permissions: FunctionName[]): Promise<number[]> {
+    private async getPermissionsIds(permissions: FunctionName[]): Promise<number[]> {
         const listFunctionID: number[] = [];
         for (const functionName of permissions) {
             const result = await this.prismaService.function.findFirst({

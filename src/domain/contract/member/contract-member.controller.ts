@@ -1,5 +1,4 @@
 import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -13,13 +12,9 @@ import { ContractMemberGetDetailResponse } from './response/contract-member-get-
 import { ContractMemberGetListForSalaryResponse } from './response/contract-member-get-list-for-salary.response';
 import { ContractMemberGetListResponse } from './response/contract-member-get-list.response';
 
-@ApiTags('[MEMBER] Contract Management')
 @Controller('/member/contracts')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class ContractMemberController {
     constructor(private contractMemberService: ContractMemberService) {}
 

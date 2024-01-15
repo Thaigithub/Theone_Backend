@@ -446,8 +446,7 @@ export class ApplicationMemberService {
                     },
                 },
             },
-            skip: body.pageNumber && (parseInt(body.pageNumber) - 1) * parseInt(body.pageSize),
-            take: body.pageSize && parseInt(body.pageSize),
+            ...QueryPagingHelper.queryPaging(body),
         };
         switch (body.filter) {
             case ApplicationMemberGetListOfferFilter.ACCEPTED: {

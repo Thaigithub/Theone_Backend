@@ -1,11 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { SearchCategory } from '../dto/company-admin-search-category.dto.request.dto';
-export class AdminCompanyGetListRequest {
+export class AdminCompanyGetListRequest extends PaginationRequest {
     @Expose()
-    @ApiProperty({ description: 'Company type', example: CompanyType.CORPORATION, type: 'enum', enum: CompanyType })
     @IsEnum(CompanyType)
     @IsOptional()
     type: CompanyType;
@@ -13,24 +12,10 @@ export class AdminCompanyGetListRequest {
     @Expose()
     @IsOptional()
     @IsEnum(SearchCategory)
-    @ApiProperty({ description: 'Search Keyword', example: 'NAME', type: 'enum', enum: SearchCategory })
     searchCategory: SearchCategory;
 
     @Expose()
     @IsOptional()
     @IsString()
-    @ApiProperty({ description: 'Company name', example: 'TheOne' })
     searchKeyword: string;
-
-    @Expose()
-    @IsOptional()
-    @IsNumberString()
-    @ApiProperty({ description: 'Page number', example: '1' })
-    pageNumber: string;
-
-    @Expose()
-    @IsOptional()
-    @IsNumberString()
-    @ApiProperty({ description: 'Page size', example: '1' })
-    pageSize: string;
 }

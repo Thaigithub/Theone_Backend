@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post, Put, Query, Req, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -11,13 +10,9 @@ import { SpecialLicenseMemberGetDetailResponse } from './response/special-licens
 import { SpecialLicenseMemberGetListResponse } from './response/special-license-member-get-list.response';
 import { SpecialLicenseService } from './special-license-member.service';
 
-@ApiTags('[MEMBER] Special License Management')
 @Controller('member/special-licenses')
-@ApiBearerAuth()
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class MemberSpecialLicenseController {
     constructor(@Inject(SpecialLicenseService) private readonly specialLicenseService: SpecialLicenseService) {}
     @Post()

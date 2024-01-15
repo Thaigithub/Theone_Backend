@@ -3,9 +3,9 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationAdminContractStatus } from './enum/application-admin-contract-status.enum';
-import { ApplicationAdminGetListRequest } from './request/application-admin-get-list.request';
+import { ApplicationAdminGetListRequest } from './request/application-admin-get-list-for-post.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
-import { ApplicationAdminGetResponse } from './response/application-admin-get-list.response';
+import { ApplicationAdminGetResponse } from './response/application-admin-get-list-for-post.response';
 
 @Injectable()
 export class ApplicationAdminService {

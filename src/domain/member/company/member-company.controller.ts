@@ -1,5 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -12,34 +11,18 @@ import { MemberCompanyCountWorkersResponse } from './response/member-company-get
 import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
 import { MemberCompanyManpowerGetListResponse } from './response/member-company-manpower-get-list.response';
 
-@ApiTags('[COMPANY] Member Management')
 @Controller('/company/members')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class MemberCompanyController {
     constructor(private memberCompanyService: MemberCompanyService) {}
 
     @Get('/count-working-members')
-    @ApiOperation({
-        summary: 'Count all worker that are working (having that contract is active, use for dashboard)',
-        description: 'Company retrieve the total number of workers that are working (having that contract is active',
-    })
-    @ApiResponse({ status: HttpStatus.ACCEPTED, type: MemberCompanyCountWorkersResponse })
-    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'The company account does not exist', type: BaseResponse })
     async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
         return BaseResponse.of(await this.memberCompanyService.countWorkers(req.user.accountId));
     }
 
     @Get(':id/manpower')
-    @ApiOperation({
-        summary: 'Get member detail in Manpower',
-        description: 'Company can retrieve member information detail in Manpower',
-    })
-    @ApiResponse({ status: HttpStatus.OK, type: MemberCompanyManpowerGetDetailResponse })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getMemberDetailManpower(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<MemberCompanyManpowerGetDetailResponse>> {
@@ -47,11 +30,6 @@ export class MemberCompanyController {
     }
 
     @Get('manpower')
-    @ApiOperation({
-        summary: 'Get list of members in Manpower',
-        description: 'Company can retrieve all members in Manpower',
-    })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BaseResponse })
     async getListMember(
         @Query() query: MemberCompanyManpowerGetListRequest,
         @Query('occupation', new ParseArrayPipe({ optional: true })) occupation: [string] | undefined,

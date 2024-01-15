@@ -1,13 +1,4 @@
-import { Member } from '@prisma/client';
-import { ApplicationCompanyApplicantsSpecialDTO } from './application-company-applicants-member.dto';
-
-export class ApplicationCompanyApplicantsLeaderDTO {
-    contact: string;
-    totalExperienceMonths: Member['totalExperienceMonths'];
-    totalExperienceYears: Member['totalExperienceYears'];
-    desiredSalary: Member['desiredSalary'];
-    specialLicenses: ApplicationCompanyApplicantsSpecialDTO[];
-}
+import { Code, Member, SpecialLicense } from '@prisma/client';
 
 export class ApplicationCompanyApplicantsTeamDTO {
     name: string;
@@ -19,5 +10,14 @@ export class ApplicationCompanyApplicantsTeamDTO {
         englishName: string;
         koreanName: string;
     };
-    leader: ApplicationCompanyApplicantsLeaderDTO;
+    leader: {
+        contact: string;
+        totalExperienceMonths: Member['totalExperienceMonths'];
+        totalExperienceYears: Member['totalExperienceYears'];
+        desiredSalary: Member['desiredSalary'];
+        specialLicenses: {
+            name: Code['codeName'];
+            licenseNumber: SpecialLicense['licenseNumber'];
+        }[];
+    };
 }

@@ -13,7 +13,7 @@ export class AdminAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(AdminAdminSearchCategories)
     @IsOptional()
-    searchCategory: AdminAdminSearchCategories;
+    category: AdminAdminSearchCategories;
 
     @Expose()
     @IsString()

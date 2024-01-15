@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -25,9 +24,7 @@ import { HeadhuntingAdminGetListRequestResponse } from './response/headhunting-a
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@ApiBearerAuth()
 @Controller('admin/headhunting')
-@ApiTags('[ADMIN] Headhunting Management')
 export class HeadhuntingAdminController {
     constructor(private readonly headhuntingAdminService: HeadhuntingAdminService) {}
 

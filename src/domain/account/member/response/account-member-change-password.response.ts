@@ -1,5 +1,5 @@
-import { ChangePasswordStatus } from '../dto/account-member-change-password-status.enum';
+import { AccountMemberChangePasswordRequestStatus } from '../enum/account-member-change-password-request-status.enum';
 
 export class AccountMemberChangePasswordResponse {
-    status: ChangePasswordStatus;
+    status: AccountMemberChangePasswordRequestStatus;
 }

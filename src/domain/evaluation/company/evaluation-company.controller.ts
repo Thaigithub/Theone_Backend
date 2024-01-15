@@ -1,17 +1,4 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    HttpStatus,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -26,29 +13,13 @@ import { EvaluationCompanyGetListTeamsRequest } from './request/evaluation-compa
 import { EvaluationCompanyGetListMembersResponse } from './response/evaluation-company-get-list-members.response';
 import { EvaluationCompanyGetListTeamsResponse } from './response/evaluation-company-get-list-teams.response';
 
-@ApiTags('[COMPANY] Evaluation Management')
 @Controller('/company/evaluations')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-@ApiBearerAuth()
-@ApiProduces('application/json')
-@ApiConsumes('application/json')
 export class EvaluationCompanyController {
     constructor(private readonly evaluationCompanyService: EvaluationCompanyService) {}
 
     @Patch('member-evaluations/:id')
-    @ApiOperation({
-        summary: 'Evaluate member',
-        description: 'Company can evaluate member',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.OK,
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async evaluateMember(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -59,18 +30,6 @@ export class EvaluationCompanyController {
     }
 
     @Patch('team-evaluations/:id')
-    @ApiOperation({
-        summary: 'Evaluate team',
-        description: 'Company can evaluate team',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.OK,
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async evaluateTeam(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -81,14 +40,6 @@ export class EvaluationCompanyController {
     }
 
     @Get('member-evaluations')
-    @ApiOperation({
-        summary: 'Get list of evaluation tickets for member',
-        description: 'Company can retrieve all evaluation tickets for member, including incomplete & complete evaluation',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async getMemberEvaluations(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: EvaluationCompanyGetListMembersRequest,
@@ -102,14 +53,6 @@ export class EvaluationCompanyController {
     }
 
     @Get('team-evaluations')
-    @ApiOperation({
-        summary: 'Get list of evaluation tickets for team',
-        description: 'Company can retrieve all evaluation tickets for team, including incomplete & complete evaluation',
-    })
-    @ApiResponse({
-        type: BaseResponse,
-        status: HttpStatus.NOT_FOUND,
-    })
     async getTeamEvaluations(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: EvaluationCompanyGetListTeamsRequest,

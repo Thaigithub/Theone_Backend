@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { SearchCategory } from './dto/company-admin-search-category.dto.request.dto';
 import { AdminCompanyDownloadListRequest, AdminCompanyDownloadRequest } from './request/company-admin-download-list.request';
 import { AdminCompanyGetListRequest } from './request/company-admin-get-list.request';
@@ -38,8 +39,7 @@ export class AdminCompanyService {
                 contactName: true,
                 contactPhone: true,
             },
-            take: request.pageSize && parseInt(request.pageSize),
-            skip: request.pageNumber && (parseInt(request.pageNumber) - 1) * parseInt(request.pageSize),
+            ...QueryPagingHelper.queryPaging(request),
         };
         switch (request.searchCategory) {
             case SearchCategory.NAME: {

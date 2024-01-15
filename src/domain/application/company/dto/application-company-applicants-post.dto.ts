@@ -1,11 +1,16 @@
-import { Post, SalaryType, Site } from '@prisma/client';
-import { ApplicationCompanyApplicantsPostCodeDTO } from './application-company-applicants-post-code.dto';
+import { Code, Post, SalaryType, Site } from '@prisma/client';
 
 export class ApplicationCompanyApplicantsPostDTO {
     siteContact: Site['personInChargeContact'];
     salaryAmount: Post['salaryAmount'];
     salaryType: SalaryType;
     siteAddress: Site['address'];
-    occupation: ApplicationCompanyApplicantsPostCodeDTO;
-    specialNote: ApplicationCompanyApplicantsPostCodeDTO;
+    occupation: {
+        code: Code['code'];
+        codeName: Code['codeName'];
+    };
+    specialNote: {
+        code: Code['code'];
+        codeName: Code['codeName'];
+    };
 }

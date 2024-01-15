@@ -1,21 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { IsNumberString, IsOptional } from 'class-validator';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class ContractCompanyGetListForSiteRequest {
-    @Expose()
-    @IsNumberString()
-    @IsOptional()
-    @ApiProperty({
-        type: String,
-    })
-    pageSize: string;
-
-    @Expose()
-    @IsNumberString()
-    @IsOptional()
-    @ApiProperty({
-        type: String,
-    })
-    pageNumber: string;
-}
+export class ContractCompanyGetListForSiteRequest extends PaginationRequest {}

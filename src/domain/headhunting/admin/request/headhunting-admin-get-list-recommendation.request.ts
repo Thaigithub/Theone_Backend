@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { MemberLevel } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
@@ -13,37 +12,22 @@ class HeadhuntingAdminGetListRecommendationRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
     @IsNumber()
-    @ApiProperty()
     @Transform(({ value }) => value && parseInt(value))
     requestId: number;
 
     @Expose()
     @IsEnum(HeadhuntinAdminGetListRecommendationSort)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: HeadhuntinAdminGetListRecommendationSort,
-        required: false,
-    })
     sortScore: HeadhuntinAdminGetListRecommendationSort;
 
     @Expose()
     @IsEnum(MemberLevel)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: MemberLevel,
-        required: false,
-    })
     tier: MemberLevel;
 
     @Expose()
     @IsString()
     @IsOptional()
-    @ApiProperty({
-        type: 'string',
-        required: false,
-    })
     keyword: string;
 }
 
@@ -51,11 +35,6 @@ export class HeadhuntingAdminGetListMemberRecommendationRequest extends Headhunt
     @Expose()
     @IsEnum(HeadhuntingAdminGetListMemberApprovalCategory)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: HeadhuntingAdminGetListMemberApprovalCategory,
-        required: false,
-    })
     category: HeadhuntingAdminGetListMemberApprovalCategory;
 }
 
@@ -63,10 +42,5 @@ export class HeadhuntingAdminGetListTeamRecommendationRequest extends Headhuntin
     @Expose()
     @IsEnum(HeadhuntingAdminGetListTeamApprovalCategory)
     @IsOptional()
-    @ApiProperty({
-        type: 'enum',
-        enum: HeadhuntingAdminGetListTeamApprovalCategory,
-        required: false,
-    })
     category: HeadhuntingAdminGetListTeamApprovalCategory;
 }
