@@ -1,25 +1,23 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CodeType, PostHistoryType, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import {
-    ApplicationAdminSearchCategoryFilter,
-    ApplicationAdminSortFilter,
-    ApplicationAdminStatusFilter,
-    PostAdminPostStatusFilter,
-    PostAdminSearchCategoryFilter,
-} from './dto/post-admin-filter';
+import { PostAdminApplicationSearchCategoryFilter } from './enum/post-admin-application-search-category-filter.enum';
+import { PostAdminApplicationSortCategory } from './enum/post-admin-application-sort-category.enum';
+import { PostAdminApplicationStatusFilter } from './enum/post-admin-application-status-filter.enum';
+import { PostAdminPostStatusFilter } from './enum/post-admin-post-status-filter.enum';
+import { PostAdminSearchCategoryFilter } from './enum/post-admin-search-category-filter.enum';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
-import { ApplicationAdminGetListRequest, PostAdminGetListRequest } from './request/post-admin-get-list.request';
-import {
-    PostAdminModifyHiddenRequest,
-    PostAdminModifyPostTypeRequest,
-    PostAdminModifyPullUpRequest,
-    PostAdminModifyRequest,
-} from './request/post-admin-modify-request';
-import { PostAdminDetailResponse } from './response/post-admin-detail.response';
-import { ApplicationAdminGetListResponse, PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { PostAdminGetListForApplicationRequest } from './request/post-admin-get-list-application.request';
+import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
+import { PostAdminUpdateExposureRequest } from './request/post-admin-update-exposure.request';
+import { PostAdminUpdatePullupRequest } from './request/post-admin-update-pullup.request';
+import { PostAdminUpdateTypeRequest } from './request/post-admin-update-type.request';
+import { PostAdminUpdateRequest } from './request/post-admin-update.request';
+import { PostAdminGetDetailResponse } from './response/post-admin-get-detail.response';
+import { PostAdminGetListForApplicationResponse } from './response/post-admin-get-list-application.response';
+import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
 
 @Injectable()
 export class PostAdminService {
@@ -38,37 +36,6 @@ export class PostAdminService {
         return post_record;
     }
 
-    async checkExistPosts(ids: number[]) {
-        if (ids.length === 0) {
-            throw new BadRequestException('The Post ids is empty');
-        }
-        const existingPosts = await this.prismaService.post.findMany({
-            where: {
-                id: {
-                    in: ids,
-                },
-                isActive: true,
-            },
-        });
-        const existingIds = existingPosts.map((post) => post.id);
-        const nonExistingIds = ids.filter((id) => !existingIds.includes(id));
-        if (nonExistingIds.length > 0) {
-            throw new NotFoundException(`The Post ids: ${nonExistingIds} are not found`);
-        }
-    }
-
-    async checkExistSite(id: number) {
-        const site_record = await this.prismaService.site.findUnique({
-            where: {
-                id: id,
-                isActive: true,
-            },
-        });
-        if (!site_record) {
-            throw new NotFoundException('The site id is not found');
-        }
-        return site_record;
-    }
     async checkCodeType(id: number, codeType: CodeType) {
         if (id) {
             const code = await this.prismaService.code.findUnique({
@@ -144,16 +111,16 @@ export class PostAdminService {
         return new PaginationResponse(postList, new PageInfo(postListCount));
     }
 
-    async getPostApplicationList(query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetListResponse> {
+    async getListForApplication(query: PostAdminGetListForApplicationRequest): Promise<PostAdminGetListForApplicationResponse> {
         /*
         This function use for search & filtering the post list based on screen "Support Management"
         */
         const queryFilter: Prisma.PostWhereInput = {
-            ...(query.status == ApplicationAdminStatusFilter.STOPPED && { isActive: false }),
-            ...(query.status == ApplicationAdminStatusFilter.HIDDEN && { isHidden: true }),
-            ...(query.status == ApplicationAdminStatusFilter.CLOSED && { status: 'DEADLINE' }),
+            ...(query.status == PostAdminApplicationStatusFilter.STOPPED && { isActive: false }),
+            ...(query.status == PostAdminApplicationStatusFilter.HIDDEN && { isHidden: true }),
+            ...(query.status == PostAdminApplicationStatusFilter.CLOSED && { status: 'DEADLINE' }),
             isActive: true,
-            ...(query.status == ApplicationAdminStatusFilter.IN_PROGRESS
+            ...(query.status == PostAdminApplicationStatusFilter.IN_PROGRESS
                 ? {
                       OR: [{ status: 'RECRUITING' }, { status: 'PREPARE' }],
                   }
@@ -166,25 +133,25 @@ export class PostAdminService {
                       ],
                   }
                 : {}),
-            ...(query.searchCategory == ApplicationAdminSearchCategoryFilter.ANNOUNCEMENT_NAME && {
+            ...(query.searchCategory == PostAdminApplicationSearchCategoryFilter.ANNOUNCEMENT_NAME && {
                 name: { contains: query.searchTerm, mode: 'insensitive' },
             }),
-            ...(query.searchCategory == ApplicationAdminSearchCategoryFilter.SITE_NAME && {
+            ...(query.searchCategory == PostAdminApplicationSearchCategoryFilter.SITE_NAME && {
                 site: { name: { contains: query.searchTerm, mode: 'insensitive' } },
             }),
         };
         const sortStrategy: Prisma.PostOrderByWithRelationInput = {
-            ...(query.sortByApplication == ApplicationAdminSortFilter.HIGHEST_APPLICATION && {
+            ...(query.sortByApplication == PostAdminApplicationSortCategory.HIGHEST_APPLICATION && {
                 applicants: {
                     _count: 'desc',
                 },
             }),
-            ...(query.sortByApplication == ApplicationAdminSortFilter.LOWEST_APPLICATION && {
+            ...(query.sortByApplication == PostAdminApplicationSortCategory.LOWEST_APPLICATION && {
                 applicants: {
                     _count: 'asc',
                 },
             }),
-            ...(query.sortByApplication == ApplicationAdminSortFilter.MOST_RECENT && { startDate: 'desc' }),
+            ...(query.sortByApplication == PostAdminApplicationSortCategory.MOST_RECENT && { startDate: 'desc' }),
         };
         const tempList = await this.prismaService.post.findMany({
             select: {
@@ -214,7 +181,7 @@ export class PostAdminService {
         return new PaginationResponse(postList, new PageInfo(applicationListCount));
     }
 
-    async getPostDetails(id: number): Promise<PostAdminDetailResponse> {
+    async getDetail(id: number): Promise<PostAdminGetDetailResponse> {
         const infor = await this.prismaService.post.findUnique({
             where: {
                 id,
@@ -242,6 +209,13 @@ export class PostAdminService {
                         address: true,
                         originalBuilding: true,
                         personInCharge: true,
+                        district: {
+                            select: {
+                                englishName: true,
+                                koreanName: true,
+                                city: true,
+                            },
+                        },
                     },
                 },
             },
@@ -252,14 +226,7 @@ export class PostAdminService {
         return infor;
     }
 
-    async updatePost(postId: number, historyType: PostHistoryType, data: any, content: string) {
-        const postHistory = await this.prismaService.postHistory.create({
-            data: {
-                postId: postId,
-                content: content,
-                historyType: historyType,
-            },
-        });
+    async recordPostHistory(postId: number, historyType: PostHistoryType, data: any, content: string | undefined) {
         await this.prismaService.post.update({
             where: {
                 id: postId,
@@ -268,38 +235,34 @@ export class PostAdminService {
             data: {
                 ...data,
                 postHistory: {
-                    connect: { id: postHistory.id },
+                    create: {
+                        content: content,
+                        historyType: historyType,
+                    },
                 },
-                updatedAt: new Date(),
             },
         });
         return true;
     }
 
-    async changePostInfo(id: number, request: PostAdminModifyRequest) {
+    async update(id: number, request: PostAdminUpdateRequest) {
         await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
         await this.checkCodeType(request.occupationId, CodeType.GENERAL);
-
-        //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
         request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime + 'Z' : undefined;
         request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime + 'Z' : undefined;
         await this.checkExistPost(id);
-        if (request.siteId) {
-            await this.checkExistSite(request.siteId);
-        }
         const data = {
-            updatedAt: new Date(),
             type: request.type,
             category: request.category,
             status: request.status,
             name: request.name,
             workLocation: request.workLocation,
-            startDate: request.startDate,
-            endDate: request.endDate,
+            startDate: request.startDate && new Date(request.startDate),
+            endDate: request.endDate && new Date(request.endDate),
             experienceType: request.experienceType,
             numberOfPeople: request.numberOfPeople,
-            specialNoteId: request.specialNoteId || null,
+            specialOccupationId: request.specialNoteId || null,
             occupationId: request.occupationId || null,
             otherInformation: request.otherInformation,
             salaryType: request.salaryType,
@@ -309,27 +272,9 @@ export class PostAdminService {
             workday: request.workday,
             startWorkTime: request.startWorkTime,
             endWorkTime: request.endWorkTime,
-            siteId: request.siteId,
             postEditor: request.postEditor,
         };
-        await this.prismaService.$transaction(async () => {
-            await this.updatePost(id, PostHistoryType.EDITED, data, request.updateReason);
-            const updatedPostRecord = await this.checkExistPost(id);
-            await this.prismaService.site.update({
-                where: {
-                    id: updatedPostRecord.siteId,
-                    isActive: true,
-                },
-                data: {
-                    name: request.siteName,
-                    address: request.siteAddress,
-                    contact: request.siteContact,
-                    personInCharge: request.sitePersonInCharge,
-                    originalBuilding: request.originalBuilding,
-                    updatedAt: new Date(),
-                },
-            });
-        });
+        await this.recordPostHistory(id, PostHistoryType.EDITED, data, request.updateReason);
     }
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
@@ -337,9 +282,10 @@ export class PostAdminService {
         const data = {
             isActive: false,
         };
-        await this.updatePost(id, PostHistoryType.DELETED, data, query.deleteReason);
+        await this.recordPostHistory(id, PostHistoryType.DELETED, data, query.deleteReason);
     }
-    async changeHiddenStatus(id: number, payload: PostAdminModifyHiddenRequest) {
+
+    async updateExposure(id: number, payload: PostAdminUpdateExposureRequest) {
         const post_record = await this.checkExistPost(id);
         if (post_record.isHidden != payload.isHidden) {
             await this.prismaService.post.update({
@@ -349,13 +295,12 @@ export class PostAdminService {
                 },
                 data: {
                     isHidden: payload.isHidden,
-                    updatedAt: new Date(),
                 },
             });
         }
     }
 
-    async changePullUp(payload: PostAdminModifyPullUpRequest) {
+    async updatePullup(payload: PostAdminUpdatePullupRequest) {
         await this.prismaService.post.updateMany({
             where: {
                 id: {
@@ -365,12 +310,11 @@ export class PostAdminService {
             },
             data: {
                 isPulledUp: payload.isPulledUp,
-                updatedAt: new Date(),
             },
         });
     }
 
-    async changePostType(payload: PostAdminModifyPostTypeRequest) {
+    async updatePostType(payload: PostAdminUpdateTypeRequest) {
         await this.prismaService.post.updateMany({
             where: {
                 id: {
@@ -380,7 +324,6 @@ export class PostAdminService {
             },
             data: {
                 type: payload.type,
-                updatedAt: new Date(),
             },
         });
     }
