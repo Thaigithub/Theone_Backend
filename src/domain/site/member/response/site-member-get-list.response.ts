@@ -7,7 +7,7 @@ export class SiteResponse {
     startDate: Site['startDate'];
     endDate: Site['endDate'];
     numberOfWorkers: number;
-    interestId: number;
+    isInterested: boolean;
     longitude: Site['longitude'];
     latitude: Site['latitude'];
 }
