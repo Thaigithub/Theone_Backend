@@ -10,19 +10,26 @@ import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-co
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
+import { ProductAdminService } from '../admin/product-admin.service';
+import { ProductCompanyGetListLimitedCountResponse } from './request/product-company-get-list-limited-count.response';
+import { ProductCompanyGetListFixedTermResponse } from './request/product-company-get-list-fixed-term.response';
+import { GetListType } from '../admin/enum/product-admin-get-list.enum';
 
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Controller('company/products')
 export class ProductCompanyController {
-    constructor(private readonly productPaymentHistoryCompanyService: ProductCompanyService) {}
+    constructor(
+        private readonly productCompanyService: ProductCompanyService,
+        private readonly productAdminService: ProductAdminService,
+    ) {}
 
     @Get('/payment')
     async getPaymentHistoryList(
         @Req() req: AccountIdExtensionRequest,
         @Query() query: ProductCompanyGetPaymentHistoryListRequest,
     ): Promise<BaseResponse<ProductCompanyPaymentHistoryGetListResponse>> {
-        return BaseResponse.of(await this.productPaymentHistoryCompanyService.getPaymentHistoryList(req.user.accountId, query));
+        return BaseResponse.of(await this.productCompanyService.getPaymentHistoryList(req.user.accountId, query));
     }
 
     @Get('/usage')
@@ -30,7 +37,7 @@ export class ProductCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Query() query: ProductCompanyUsageHistoryGetListRequest,
     ): Promise<BaseResponse<ProductCompanyUsageHistoryGetListResponse>> {
-        return BaseResponse.of(await this.productPaymentHistoryCompanyService.getUsageHistory(req.user.accountId, query));
+        return BaseResponse.of(await this.productCompanyService.getUsageHistory(req.user.accountId, query));
     }
 
     @Post('/payment/:id/taxbill')
@@ -38,7 +45,7 @@ export class ProductCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.productPaymentHistoryCompanyService.createTaxBillRequest(req.user.accountId, id));
+        return BaseResponse.of(await this.productCompanyService.createTaxBillRequest(req.user.accountId, id));
     }
 
     @Get('/payment/:id/taxbill')
@@ -46,7 +53,7 @@ export class ProductCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<FileResponse>> {
-        return BaseResponse.of(await this.productPaymentHistoryCompanyService.getTaxBill(req.user.accountId, id));
+        return BaseResponse.of(await this.productCompanyService.getTaxBill(req.user.accountId, id));
     }
 
     @Get('/payment/:id/card-receipt')
@@ -54,6 +61,20 @@ export class ProductCompanyController {
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<FileResponse>> {
-        return BaseResponse.of(await this.productPaymentHistoryCompanyService.getcardReceipt(req.user.accountId, id));
+        return BaseResponse.of(await this.productCompanyService.getcardReceipt(req.user.accountId, id));
+    }
+
+    @Get('/limited-count')
+    async getListLimitedCount(): Promise<BaseResponse<ProductCompanyGetListLimitedCountResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getList(GetListType.LIMITED_COUNT)) as ProductCompanyGetListLimitedCountResponse,
+        );
+    }
+
+    @Get('/fixed-term')
+    async getListFixedTerm(): Promise<BaseResponse<ProductCompanyGetListFixedTermResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getList(GetListType.FIXED_TERM)) as ProductCompanyGetListFixedTermResponse,
+        );
     }
 }
