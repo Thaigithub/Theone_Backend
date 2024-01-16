@@ -107,6 +107,7 @@ model Member {
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
+  memberPreference             MemberPreference?
 
   @@map("members")
 }
@@ -988,6 +989,24 @@ model MembersOnCodes {
 
   @@id([memberId, codeId])
   @@map("members_on_codes")
+}
+
+model MemberPreference {
+  id                                     Int      @id @default(autoincrement())
+  memberId                               Int      @unique @map("member_id")
+  isActive                               Boolean  @default(true) @map("is_active")
+  createdAt                              DateTime @default(now()) @map("created_at")
+  updatedAt                              DateTime @updatedAt @map("updated_at")
+  isPushNotificationActive               Boolean  @default(true) @map("is_push_notification_active")
+  isNotificationSoundActive              Boolean  @default(true) @map("is_notification_sound_active")
+  isNoticeNotificationActive             Boolean  @default(true) @map("is_notice_notification_active")
+  isServiceNotificationActive            Boolean  @default(true) @map("is_service_notification_active")
+  isTeamNotificationActive               Boolean  @default(true) @map("is_team_notification_active")
+  isSearchByMemberLocationAllowed        Boolean  @default(false) @map("is_search_by_member_location_allowed")
+  isMemberLocationSearchedBySitesAllowed Boolean  @default(false) @map("is_member_location_searched_by_sites_allowed")
+  member                                 Member   @relation(fields: [memberId], references: [id])
+
+  @@map("member_preferences")
 }
 
 enum CurrencyExchangeStatus {

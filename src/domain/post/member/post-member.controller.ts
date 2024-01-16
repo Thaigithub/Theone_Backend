@@ -111,10 +111,10 @@ export class PostMemberController {
 
     // Interest
     @Post('/:id/interest')
-    async addInterestPost(
+    async updateInterest(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<PostMemberUpdateInterestResponse>> {
-        return BaseResponse.of(await this.postMemberService.updateInterestPost(request.user.accountId, id));
+        return BaseResponse.of(await this.postMemberService.updateInterest(request.user.accountId, id));
     }
 }

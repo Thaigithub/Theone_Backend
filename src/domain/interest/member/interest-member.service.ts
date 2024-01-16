@@ -182,13 +182,13 @@ export class InterestMemberService {
         }
         if (body.interestType === InterestMemberGetFilter.POST) {
             if (interest.postId) {
-                await this.postMemberService.updateInterestPost(accountId, interest.postId);
+                await this.postMemberService.updateInterest(accountId, interest.postId);
             } else {
                 throw new NotFoundException('The Post of interest is not exist');
             }
         } else {
             if (interest.siteId) {
-                await this.siteMemberService.updateInterestSite(accountId, interest.siteId);
+                await this.siteMemberService.updateInterest(accountId, interest.siteId);
             } else {
                 throw new NotFoundException('The Site of interest is not exist');
             }

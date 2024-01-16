@@ -5,12 +5,12 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
+import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
+import { SiteMemberNearByGetListResponse } from './response/site-member-get-list-nearby.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 import { SiteMemberService } from './site-member.service';
-import { SiteMemberNearByGetListResponse } from './response/site-member-nearby-get-list.response';
-import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 
 @Controller('/member/sites')
 @Roles(AccountType.MEMBER)
@@ -19,19 +19,19 @@ export class SiteMemberController {
     constructor(private siteMemberService: SiteMemberService) {}
 
     @Get('/nearby')
-    async getNearBySites(
+    async getListNearBy(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: SiteMemberGetNearByRequest,
     ): Promise<BaseResponse<SiteMemberNearByGetListResponse>> {
-        return BaseResponse.of(await this.siteMemberService.getNearBySites(request.user.accountId, query));
+        return BaseResponse.of(await this.siteMemberService.getListNearBy(request.user.accountId, query));
     }
 
     @Post('/:id/interest')
-    async addInterestSite(
+    async updateInterest(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<SiteMemberUpdateInterestResponse>> {
-        return BaseResponse.of(await this.siteMemberService.updateInterestSite(request.user.accountId, id));
+        return BaseResponse.of(await this.siteMemberService.updateInterest(request.user.accountId, id));
     }
 
     @Get('/:id')
@@ -43,7 +43,7 @@ export class SiteMemberController {
     }
 
     @Get()
-    async getSites(
+    async getList(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: SiteMemberGetListRequest,
     ): Promise<BaseResponse<SiteMemberGetListResponse>> {

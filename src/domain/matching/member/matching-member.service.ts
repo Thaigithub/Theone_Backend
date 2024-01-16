@@ -333,6 +333,6 @@ export class MatchingMemberService {
 
         if (!matchingPost) throw new NotFoundException('No matching post found');
 
-        return await this.postMemberService.updateInterestPost(accountId, matchingPost.postId);
+        return await this.postMemberService.updateInterest(accountId, matchingPost.postId);
     }
 }
