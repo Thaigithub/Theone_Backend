@@ -5,15 +5,16 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { FileResponse } from 'utils/generics/file.response';
+import { GetListType } from '../admin/enum/product-admin-get-list.enum';
+import { ProductAdminService } from '../admin/product-admin.service';
 import { ProductCompanyService } from './product-company.service';
+import { ProductCompanyGetListFixedTermResponse } from './request/product-company-get-list-fixed-term.response';
+import { ProductCompanyGetListLimitedCountResponse } from './request/product-company-get-list-limited-count.response';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
-import { ProductAdminService } from '../admin/product-admin.service';
-import { ProductCompanyGetListLimitedCountResponse } from './request/product-company-get-list-limited-count.response';
-import { ProductCompanyGetListFixedTermResponse } from './request/product-company-get-list-fixed-term.response';
-import { GetListType } from '../admin/enum/product-admin-get-list.enum';
 
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -38,6 +39,14 @@ export class ProductCompanyController {
         @Query() query: ProductCompanyUsageHistoryGetListRequest,
     ): Promise<BaseResponse<ProductCompanyUsageHistoryGetListResponse>> {
         return BaseResponse.of(await this.productCompanyService.getUsageHistory(req.user.accountId, query));
+    }
+
+    @Post('/:id/payment')
+    async create(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<ProductCompanyPaymentCreateResponse>> {
+        return BaseResponse.of(await this.productCompanyService.createPaymentHistory(id, req.user.accountId));
     }
 
     @Post('/payment/:id/refund')

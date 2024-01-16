@@ -934,11 +934,13 @@ model ProductPaymentHistory {
   createdAt      DateTime       @default(now()) @map("created_at")
   updatedAt      DateTime       @updatedAt @map("updated_at")
   cost           Int
-  expirationDate DateTime       @map("expiration_date")
+  status         PaymentStatus  @default(PROCESSING)
+  merchantId     String?        @unique @map("merchant_id")
+  expirationDate DateTime       @map("expiration_date") @db.Date()
   remainingTimes Int            @map("remaining_times")
   productId      Int            @map("product_id")
   companyId      Int            @map("company_id")
-  paymentType    PaymentType    @map("payment_type")
+  paymentType    PaymentType?   @map("payment_type")
   company        Company        @relation(fields: [companyId], references: [id])
   product        Product        @relation(fields: [productId], references: [id])
   cardReceipt    CardReceipt?
@@ -1384,4 +1386,10 @@ enum TaxBillStatus {
 
 enum CardReceiptStatus {
   IN_PROGRESS
+}
+
+enum PaymentStatus {
+  PROCESSING
+  COMPLETE
+  FAIL
 }

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { FileResponse } from 'utils/generics/file.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -7,12 +8,16 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ProductCompanyTaxInvoiceType } from './enum/product-company-tax-invoice-type.enum';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
-
 @Injectable()
 export class ProductCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private portoneService: PortoneService,
+    ) {}
+
     async getPaymentHistoryList(
         accountId: number,
         query: ProductCompanyGetPaymentHistoryListRequest,
@@ -306,6 +311,51 @@ export class ProductCompanyService {
         }
     }
 
+    async createPaymentHistory(id: number, accountId: number): Promise<ProductCompanyPaymentCreateResponse> {
+        const product = await this.prismaService.product.findUnique({ where: { id } });
+        if (!product) throw new NotFoundException('Product not found');
+        const merchantId = await this.prismaService.$transaction(async (prisma) => {
+            const date = new Date();
+            const companyId = (
+                await this.prismaService.company.findUnique({
+                    where: {
+                        accountId,
+                    },
+                })
+            ).id;
+            const productPaymentHistoryId = (
+                await prisma.productPaymentHistory.create({
+                    data: {
+                        cost: product.price,
+                        productId: id,
+                        createdAt: date,
+                        remainingTimes: product.countLimit,
+                        expirationDate: new Date(),
+                        companyId,
+                    },
+                })
+            ).id;
+            const merchantId = JSON.stringify({
+                accountId: accountId,
+                createdAt: date,
+                merchantId: productPaymentHistoryId,
+            });
+            await prisma.productPaymentHistory.update({
+                where: { id: productPaymentHistoryId },
+                data: {
+                    merchantId: merchantId,
+                },
+                select: {
+                    product: true,
+                },
+            });
+            await this.portoneService.createPayment(product.price, merchantId);
+            return merchantId;
+        });
+        return {
+            merchantId: merchantId,
+        };
+    }
     async createRefund(accountId: number, id: number): Promise<void> {
         const paymentHistory = await this.prismaService.productPaymentHistory.findUnique({
             where: {
