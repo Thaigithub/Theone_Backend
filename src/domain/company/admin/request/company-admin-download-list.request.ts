@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsNumber, IsNumberString } from 'class-validator';
 
-export class AdminCompanyDownloadListRequest {
+export class CompanyAdminDownloadListRequest {
     @Expose()
     @IsArray()
     @ArrayNotEmpty({ message: 'The array must not be empty' })

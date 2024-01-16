@@ -5,14 +5,12 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { GetListType } from './enum/product-admin-get-list.enum';
 import { ProductAdminService } from './product-admin.service';
-import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
 import { ProductAdminGetListRefundRequest } from './request/product-admin-get-list-refund.request';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdateRefundStatusRequest } from './request/product-admin-update-refund-status.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
 import { ProductAdminGetDetailRefundResponse } from './response/product-admin-get-detail-refund.response';
-import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
@@ -45,24 +43,12 @@ export class ProductAdminController {
         );
     }
 
-    @Get('/companies')
-    async getListCompany(
-        @Query() query: ProductAdminGetListCompanyRequest,
-    ): Promise<BaseResponse<ProductAdminGetListCompanyResponse>> {
-        return BaseResponse.of(await this.productAdminService.getListCompany(query));
-    }
-
-    @Get('/companies/:id')
-    async getCompanyInformation(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getCompanyInformation(id));
-    }
-
-    @Get('/companies/:id/limited-count')
+    @Get('/company/:id/limited-count')
     async getCompanyLimitedCountProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
         return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.LIMITED_COUNT));
     }
 
-    @Get('/companies/:id/fixed-term')
+    @Get('/company/:id/fixed-term')
     async getCompanyFixedTermProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
         return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.FIX_TERM));
     }

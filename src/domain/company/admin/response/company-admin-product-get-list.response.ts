@@ -9,4 +9,4 @@ class CompanyResponse {
     totalPaymentAmount: number;
 }
 
-export class ProductAdminGetListCompanyResponse extends PaginationResponse<CompanyResponse> {}
+export class CompanyAdminProductGetListResponse extends PaginationResponse<CompanyResponse> {}

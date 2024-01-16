@@ -11,4 +11,4 @@ export class CompanyResponse {
     regDate: Account['createdAt'];
 }
 
-export class AdminCompanyGetListResponse extends PaginationResponse<CompanyResponse> {}
+export class CompanyAdminGetListResponse extends PaginationResponse<CompanyResponse> {}

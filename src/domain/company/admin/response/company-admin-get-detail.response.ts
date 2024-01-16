@@ -1,7 +1,7 @@
 import { Account, Company } from '@prisma/client';
 import { CompanyAdminGetDetailCompanySiteList } from '../dto/company-admin-get-detail-site-list.response.dto';
 
-export class AdminCompanyGetDetailsResponse {
+export class CompanyAdminGetDetailsResponse {
     name: Company['name'];
     account: {
         username: Account['username'];
