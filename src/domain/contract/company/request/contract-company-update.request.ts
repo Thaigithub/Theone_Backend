@@ -6,14 +6,14 @@ export class ContractCompanyUpdateRequest {
     @Expose()
     @IsString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     startDate: Date;
 
     @Expose()
     @IsString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     endDate: Date;
 

@@ -7,14 +7,14 @@ export class LaborCompanyGetListRequest extends PaginationRequest {
     @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     startDate: string;
 
     @IsOptional()
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     endDate: string;
 

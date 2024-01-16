@@ -9,7 +9,7 @@ export class BannerAdminGetListAdvertisingRequest extends PaginationRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     startDate: string;
 
@@ -17,7 +17,7 @@ export class BannerAdminGetListAdvertisingRequest extends PaginationRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     endDate: string;
 

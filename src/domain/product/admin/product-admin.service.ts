@@ -15,10 +15,19 @@ import { ProductAdminGetListFixedTermResponse } from './response/product-admin-g
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
+import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
+import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
+import { ProductAdminGetListSettlementResponse } from './response/product-admin-get-list-settlement.response';
+import { Response } from 'express';
+import { ExcelService } from 'services/excel/excel.service';
 
 @Injectable()
 export class ProductAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly excelService: ExcelService,
+    ) {}
 
     async getList(
         listType: GetListType,
@@ -153,7 +162,10 @@ export class ProductAdminService {
         }
     }
 
-    async getCompanyProductHistory(companyId: number, usageType: UsageType) {
+    async getCompanyProductHistory(
+        companyId: number,
+        usageType: UsageType,
+    ): Promise<ProductAdminGetCompanyDetailLimitedCountResponse | ProductAdminGetCompanyDetailFixedTermResponse> {
         const products = await this.prismaService.productPaymentHistory.findMany({
             include: {
                 product: true,
@@ -187,7 +199,7 @@ export class ProductAdminService {
         }, {});
         return {
             products: transformedProducts,
-        };
+        } as ProductAdminGetCompanyDetailLimitedCountResponse | ProductAdminGetCompanyDetailFixedTermResponse;
     }
 
     async getListRefund(query: ProductAdminGetListRefundRequest): Promise<ProductAdminGetListRefundResponse> {
@@ -303,5 +315,77 @@ export class ProductAdminService {
                 },
             },
         });
+    }
+
+    async getListSettlement(query: ProductAdminGetListSettlementRequest): Promise<ProductAdminGetListSettlementResponse> {
+        const queryFilter: Prisma.ProductPaymentHistoryWhereInput = {
+            isActive: true,
+            product: {
+                productType: query.productType,
+            },
+            paymentType: query.paymentMethod,
+            status: query.paymentStatus,
+            ...(query.startPaymentDate && { createdAt: { gte: new Date(query.startPaymentDate) } }),
+            ...(query.endPaymentDate && { createdAt: { lte: new Date(query.endPaymentDate) } }),
+        };
+        const settlements = await this.prismaService.productPaymentHistory.findMany({
+            include: {
+                company: true,
+                product: true,
+                refund: true,
+            },
+            where: queryFilter,
+            orderBy: {
+                id: 'asc',
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const list = settlements.map((item) => {
+            return {
+                id: item.id,
+                companyName: item.company.name,
+                productType: item.product.productType,
+                paymentDate: item.createdAt.toISOString().split('T')[0],
+                paymentMethod: item.paymentType,
+                cost: item.cost,
+                paymentStatus: item.status,
+                refundStatus: item.refund ? item.refund.status : null,
+            };
+        });
+        const total = await this.prismaService.productPaymentHistory.count({
+            where: queryFilter,
+        });
+        return new ProductAdminGetListSettlementResponse(list, new PageInfo(total));
+    }
+
+    async downloadSettlement(idList: number[], response: Response): Promise<void> {
+        const settlements = (
+            await this.prismaService.productPaymentHistory.findMany({
+                include: {
+                    company: true,
+                    product: true,
+                    refund: true,
+                },
+                where: {
+                    isActive: true,
+                    id: { in: idList },
+                },
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                company_name: item.company.name,
+                product_type: item.product.productType,
+                payment_date: item.createdAt.toISOString().split('T')[0],
+                payment_method: item.paymentType,
+                cost: item.cost,
+                payment_status: item.status,
+                refund_status: item.refund ? item.refund.status : null,
+            };
+        });
+        const excelStream = await this.excelService.createExcelFile(settlements, 'Settlements');
+        response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        response.setHeader('Content-Disposition', 'attachment; filename=SettlementList.xlsx');
+        excelStream.pipe(response);
     }
 }

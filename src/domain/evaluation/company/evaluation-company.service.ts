@@ -2,11 +2,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { MemberEvaluationByCompany, Prisma, TeamEvaluationByCompany } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { EvaluationStatus, MemberSearchCategory, TeamSearchCategory } from './dto/evaluation-company-get-list-request.enum';
-import { EvaluationType } from './dto/evaluation-company-type.enum';
+import { EvaluationStatus } from './enum/evaluation-company-get-list-request.enum';
+import { EvaluationType } from './enum/evaluation-company-type.enum';
 import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-company-create-evaluation.request';
-import { EvaluationCompanyGetListMembersRequest } from './request/evaluation-company-get-list-members.request';
-import { EvaluationCompanyGetListTeamsRequest } from './request/evaluation-company-get-list-teams.request';
+import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
 import { MemberEvaluationByCompanyResponse } from './response/evaluation-company-get-list-members.response';
 import { TeamEvaluationByCompanyResponse } from './response/evaluation-company-get-list-teams.response';
 
@@ -56,7 +55,7 @@ export class EvaluationCompanyService {
     private parseConditionFromQuery(
         evaluationType: EvaluationType,
         accountId: number,
-        query: EvaluationCompanyGetListMembersRequest | EvaluationCompanyGetListTeamsRequest,
+        query: EvaluationCompanyGetListRequest,
     ): Prisma.MemberEvaluationByCompanyWhereInput | Prisma.TeamEvaluationByCompanyWhereInput {
         switch (evaluationType) {
             case EvaluationType.MEMBER:
@@ -91,25 +90,29 @@ export class EvaluationCompanyService {
                                     : undefined,
                         },
                         {
-                            OR:
-                                query.searchCategory && query.keyword
-                                    ? [
-                                          query.searchCategory === MemberSearchCategory.NAME
-                                              ? {
-                                                    memberEvaluation: {
-                                                        member: { name: { contains: query.keyword, mode: 'insensitive' } },
-                                                    },
-                                                }
-                                              : {},
-                                          query.searchCategory === MemberSearchCategory.CONTACT
-                                              ? {
-                                                    memberEvaluation: {
-                                                        member: { contact: { contains: query.keyword, mode: 'insensitive' } },
-                                                    },
-                                                }
-                                              : {},
-                                      ]
-                                    : undefined,
+                            OR: query.keyword
+                                ? [
+                                      {
+                                          memberEvaluation: {
+                                              member: {
+                                                  name: { contains: query.keyword, mode: 'insensitive' },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          memberEvaluation: {
+                                              member: {
+                                                  contact: { contains: query.keyword, mode: 'insensitive' },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          site: {
+                                              name: { contains: query.keyword, mode: 'insensitive' },
+                                          },
+                                      },
+                                  ]
+                                : undefined,
                         },
                     ],
                 } as Prisma.MemberEvaluationByCompanyWhereInput;
@@ -146,36 +149,31 @@ export class EvaluationCompanyService {
                                     : undefined,
                         },
                         {
-                            OR:
-                                query.searchCategory && query.keyword
-                                    ? [
-                                          query.searchCategory === TeamSearchCategory.TEAM_NAME
-                                              ? {
-                                                    teamEvaluation: {
-                                                        team: { name: { contains: query.keyword, mode: 'insensitive' } },
-                                                    },
-                                                }
-                                              : {},
-                                          query.searchCategory === TeamSearchCategory.LEADER_NAME
-                                              ? {
-                                                    teamEvaluation: {
-                                                        team: {
-                                                            leader: { name: { contains: query.keyword, mode: 'insensitive' } },
-                                                        },
-                                                    },
-                                                }
-                                              : {},
-                                          query.searchCategory === TeamSearchCategory.LEADER_NAME
-                                              ? {
-                                                    teamEvaluation: {
-                                                        team: {
-                                                            leader: { contact: { contains: query.keyword, mode: 'insensitive' } },
-                                                        },
-                                                    },
-                                                }
-                                              : {},
-                                      ]
-                                    : undefined,
+                            OR: query.keyword
+                                ? [
+                                      {
+                                          teamEvaluation: {
+                                              team: {
+                                                  name: { contains: query.keyword, mode: 'insensitive' },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          teamEvaluation: {
+                                              team: {
+                                                  leader: {
+                                                      contact: { contains: query.keyword, mode: 'insensitive' },
+                                                  },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          site: {
+                                              name: { contains: query.keyword, mode: 'insensitive' },
+                                          },
+                                      },
+                                  ]
+                                : undefined,
                         },
                     ],
                 } as Prisma.TeamEvaluationByCompanyWhereInput;
@@ -280,7 +278,7 @@ export class EvaluationCompanyService {
 
     async getListMembers(
         accountId: number,
-        query: EvaluationCompanyGetListMembersRequest,
+        query: EvaluationCompanyGetListRequest,
     ): Promise<MemberEvaluationByCompanyResponse[]> {
         const listMemberEvaluationByCompany = await this.prismaService.memberEvaluationByCompany.findMany({
             include: {
@@ -310,7 +308,7 @@ export class EvaluationCompanyService {
         });
     }
 
-    async getTotalMembers(accountId: number, query: EvaluationCompanyGetListMembersRequest): Promise<number> {
+    async getTotalMembers(accountId: number, query: EvaluationCompanyGetListRequest): Promise<number> {
         return await this.prismaService.memberEvaluationByCompany.count({
             where: this.parseConditionFromQuery(
                 EvaluationType.MEMBER,
@@ -320,10 +318,7 @@ export class EvaluationCompanyService {
         });
     }
 
-    async getListTeams(
-        accountId: number,
-        query: EvaluationCompanyGetListTeamsRequest,
-    ): Promise<TeamEvaluationByCompanyResponse[]> {
+    async getListTeams(accountId: number, query: EvaluationCompanyGetListRequest): Promise<TeamEvaluationByCompanyResponse[]> {
         const listTeamEvaluationByCompany = await this.prismaService.teamEvaluationByCompany.findMany({
             include: {
                 teamEvaluation: {
@@ -357,7 +352,7 @@ export class EvaluationCompanyService {
         });
     }
 
-    async getTotalTeams(accountId: number, query: EvaluationCompanyGetListTeamsRequest): Promise<number> {
+    async getTotalTeams(accountId: number, query: EvaluationCompanyGetListRequest): Promise<number> {
         return await this.prismaService.teamEvaluationByCompany.count({
             where: this.parseConditionFromQuery(
                 EvaluationType.TEAM,
