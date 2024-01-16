@@ -21,7 +21,7 @@ model Account {
   admin                  Admin?
   company                Company?
   member                 Member?
-  notices                Notice[]
+  notifications          Notification[]
 
   @@map("accounts")
 }
@@ -871,19 +871,19 @@ model SalaryHistory {
   @@map("salary_histories")
 }
 
-model Notice {
-  id        Int          @id @default(autoincrement())
+model Notification {
+  id        Int                @id @default(autoincrement())
   title     String
   content   String?
-  isActive  Boolean      @default(true) @map("is_active")
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
-  type      NoticeType
-  accountId Int          @map("account_id")
-  status    NoticeStatus @default(NOT_READ) @map("status")
-  account   Account      @relation(fields: [accountId], references: [id])
+  isActive  Boolean            @default(true) @map("is_active")
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  type      NotificationType
+  accountId Int                @map("account_id")
+  status    NotificationStatus @default(NOT_READ) @map("status")
+  account   Account            @relation(fields: [accountId], references: [id])
 
-  @@map("notices")
+  @@map("notifications")
 }
 
 model Point {
@@ -1065,7 +1065,7 @@ enum BannerStatus {
   EXPOSE
 }
 
-enum NoticeType {
+enum NotificationType {
   ON_SITE_APPROVAL
   ON_SITE_STOP
   FIELD_REFUSAL
@@ -1355,7 +1355,7 @@ enum UsageType {
   FIX_TERM
 }
 
-enum NoticeStatus {
+enum NotificationStatus {
   NOT_READ
   READ
 }
