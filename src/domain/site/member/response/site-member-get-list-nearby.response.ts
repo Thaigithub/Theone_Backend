@@ -24,6 +24,8 @@ export class SiteNearByResponse {
     status: Site['status'];
     longitude: Site['longitude'];
     latitude: Site['latitude'];
+    startDate: Date;
+    endDate: Date;
 }
 
 export class SiteMemberNearByGetListResponse {

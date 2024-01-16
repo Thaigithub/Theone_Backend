@@ -1,11 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { BaseResponse } from 'utils/generics/base.response';
-import { SiteMemberService } from '../member/site-member.service';
-import { SiteMemberGetDetailResponse } from '../member/response/site-member-get-detail.response';
-import { SiteMemberGetListResponse } from '../member/response/site-member-get-list.response';
 import { SiteMemberGetListRequest } from '../member/request/site-member-get-list.request';
-import { SiteMemberNearByGetListResponse } from '../member/response/site-member-nearby-get-list.response';
 import { SiteMemberGetNearByRequest } from '../member/request/site-member-get-nearby.request';
+import { SiteMemberGetDetailResponse } from '../member/response/site-member-get-detail.response';
+import { SiteMemberNearByGetListResponse } from '../member/response/site-member-get-list-nearby.response';
+import { SiteMemberGetListResponse } from '../member/response/site-member-get-list.response';
+import { SiteMemberService } from '../member/site-member.service';
 
 @Controller('/guest/sites')
 export class SiteGuestController {
@@ -13,7 +13,7 @@ export class SiteGuestController {
 
     @Get('/nearby')
     async getNearBySites(@Query() query: SiteMemberGetNearByRequest): Promise<BaseResponse<SiteMemberNearByGetListResponse>> {
-        return BaseResponse.of(await this.siteMemberService.getNearBySites(undefined, query));
+        return BaseResponse.of(await this.siteMemberService.getListNearBy(undefined, query));
     }
     @Get('/:id')
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteMemberGetDetailResponse>> {

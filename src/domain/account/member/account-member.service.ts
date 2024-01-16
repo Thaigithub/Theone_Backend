@@ -109,6 +109,9 @@ export class AccountMemberService {
                         name: request.name,
                         level: MemberLevel.THIRD,
                         signupMethod: SignupMethodType.GENERAL,
+                        memberPreference: {
+                            create: {},
+                        },
                     },
                 },
             },
@@ -167,6 +170,9 @@ export class AccountMemberService {
                         name: payload.name,
                         level: MemberLevel.THIRD,
                         signupMethod: request.signupMethod,
+                        memberPreference: {
+                            create: {},
+                        },
                     },
                 },
             },

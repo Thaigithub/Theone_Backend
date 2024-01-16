@@ -371,7 +371,7 @@ export class PostMemberService {
         return BaseResponse.of(newApplication);
     }
 
-    async updateInterestPost(accountId: number, id: number): Promise<PostMemberUpdateInterestResponse> {
+    async updateInterest(accountId: number, id: number): Promise<PostMemberUpdateInterestResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,

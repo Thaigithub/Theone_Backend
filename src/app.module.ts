@@ -15,6 +15,8 @@ import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
 import { PointModule } from 'domain/point/point.module';
 import { PostModule } from 'domain/post/post.module';
+import { PreferenceModule } from 'domain/preference/preference.module';
+import { ProductModule } from 'domain/product/product.module';
 import { RecommendationModule } from 'domain/recommendation/recommendation.module';
 import { RegionModule } from 'domain/region/region.module';
 import { SiteModule } from 'domain/site/site.module';
@@ -30,7 +32,6 @@ import { CompanyModule } from './domain/company/company.module';
 import { NoticeModule } from './domain/notice/notice.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
-import { ProductModule } from 'domain/product/product.module';
 
 @Module({
     imports: [
@@ -66,6 +67,7 @@ import { ProductModule } from 'domain/product/product.module';
         CurrencyExchangeModule,
         NoticeModule,
         InterestModule,
+        PreferenceModule,
     ],
 })
 export class AppModule {}

@@ -6,8 +6,8 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
 import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
+import { SiteMemberNearByGetListResponse } from './response/site-member-get-list-nearby.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
-import { SiteMemberNearByGetListResponse } from './response/site-member-nearby-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class SiteMemberService {
         return siteRecord;
     }
 
-    async updateInterestSite(accountId: number, id: number): Promise<SiteMemberUpdateInterestResponse> {
+    async updateInterest(accountId: number, id: number): Promise<SiteMemberUpdateInterestResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
@@ -73,6 +73,7 @@ export class SiteMemberService {
             return { isInterested: true };
         }
     }
+
     async getList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
         const entireCity = await (async () => {
             if (!query.districtId) {
@@ -146,7 +147,8 @@ export class SiteMemberService {
         });
         return new PaginationResponse(siteList, new PageInfo(siteListCount));
     }
-    async getNearBySites(
+
+    async getListNearBy(
         accountId: number | undefined,
         query: SiteMemberGetNearByRequest,
     ): Promise<SiteMemberNearByGetListResponse> {
@@ -216,6 +218,8 @@ export class SiteMemberService {
                     },
                     longitude: true,
                     latitude: true,
+                    startDate: true,
+                    endDate: true,
                 },
             })
         ).map((item) => {
@@ -251,6 +255,8 @@ export class SiteMemberService {
                 status: item.status,
                 longitude: item.longitude,
                 latitude: item.latitude,
+                startDate: item.startDate,
+                endDate: item.endDate,
             };
         });
 
