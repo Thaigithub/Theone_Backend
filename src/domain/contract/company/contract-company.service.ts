@@ -567,15 +567,14 @@ export class ContractCompanyService {
         }
         const workLoadInformation = () => {
             const countWorkDays = contract?.labor ? contract.labor.workDates.length : null;
-            const averageWorkLoad =
-                contract?.labor && countWorkDays > 0
-                    ? contract.labor.workDates.reduce((total, current) => {
-                          return total + current.hours;
-                      }, 0) / countWorkDays
-                    : null;
+            const totalWorkDays = contract?.labor
+                ? contract.labor.workDates.reduce((total, current) => {
+                      return total + current.hours;
+                  }, 0)
+                : null;
             return {
                 workDays: countWorkDays,
-                workLoad: averageWorkLoad,
+                workLoad: totalWorkDays,
                 laborId: contract.labor ? contract.labor.id : null,
             };
         };

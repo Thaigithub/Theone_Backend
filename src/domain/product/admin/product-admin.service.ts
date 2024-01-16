@@ -224,6 +224,7 @@ export class ProductAdminService {
                     },
                 },
                 status: true,
+                createdAt: true,
             },
         };
         const refunds = (await this.prismaService.refund.findMany(search)).map((item) => {
@@ -234,6 +235,7 @@ export class ProductAdminService {
                 productType: item.productPaymentHistory.product.productType,
                 amount: item.productPaymentHistory.cost,
                 status: item.status,
+                createdAt: item.createdAt,
             };
         });
         const total = await this.prismaService.refund.count({ where: search.where });

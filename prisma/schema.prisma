@@ -307,6 +307,8 @@ model File {
   basicHealthSafetyCertificate BasicHealthSafetyCertificate?
   logo                         Logo?
   specialLicense               SpecialLicense?
+  taxBill                      TaxBill?
+  cardReceipt                  CardReceipt?
 
   @@map("files")
 }
@@ -927,21 +929,62 @@ model Product {
 }
 
 model ProductPaymentHistory {
-  id             Int         @id @default(autoincrement())
-  isActive       Boolean     @default(true) @map("is_active")
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  id             Int            @id @default(autoincrement())
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
   cost           Int
-  expirationDate DateTime    @map("expiration_date")
-  remainingTimes Int         @map("remaining_times")
-  productId      Int         @map("product_id")
-  companyId      Int         @map("company_id")
-  paymentForm    PaymentForm @map("payment_form")
-  company        Company     @relation(fields: [companyId], references: [id])
-  product        Product     @relation(fields: [productId], references: [id])
+  expirationDate DateTime       @map("expiration_date")
+  remainingTimes Int            @map("remaining_times")
+  productId      Int            @map("product_id")
+  companyId      Int            @map("company_id")
+  paymentType    PaymentType    @map("payment_type")
+  company        Company        @relation(fields: [companyId], references: [id])
+  product        Product        @relation(fields: [productId], references: [id])
+  cardReceipt    CardReceipt?
+  taxBill        TaxBill?
   refund         Refund?
+  usageHistory   UsageHistory[]
 
   @@map("product_payment_histories")
+}
+
+model CardReceipt {
+  id                      Int                   @id @default(autoincrement())
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  fileId                  Int?                  @unique @map("file_id")
+  file                    File?                 @relation(fields: [fileId], references: [id])
+  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  status                  CardReceiptStatus     @default(IN_PROGRESS)
+
+  @@map("card_receipts")
+}
+
+model TaxBill {
+  id                      Int                   @id @default(autoincrement())
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+  fileId                  Int?                  @unique @map("file_id")
+  file                    File?                 @relation(fields: [fileId], references: [id])
+  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  status                  TaxBillStatus         @default(NOT_ISSUED)
+
+  @@map("tax_bills")
+}
+
+model UsageHistory {
+  id                      Int                   @id @default(autoincrement())
+  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  createdAt               DateTime              @default(now()) @map("created_at") @db.Date
+  expirationDate          DateTime              @map("expiration_date")
+  remainNumber            Int                   @map("remain_number")
+
+  @@map("usage_histories")
 }
 
 model Refund {
@@ -1290,6 +1333,11 @@ enum PaymentForm {
   BANK_TRANSFER
 }
 
+enum PaymentType {
+  CREDIT_CARD
+  BANK_TRANSFER
+}
+
 enum ProductType {
   PULL_UP
   PREMIUM_POST
@@ -1325,4 +1373,15 @@ enum RefundStatus {
   APPLY
   APPROVED
   REJECT
+}
+
+enum TaxBillStatus {
+  NOT_ISSUED
+  ISSUED_REQUESTED
+  ISSUED_COMPLETED
+  MODIFIED_ISSUED_COMPLETED
+}
+
+enum CardReceiptStatus {
+  IN_PROGRESS
 }
