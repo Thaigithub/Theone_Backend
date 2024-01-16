@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { FileResponse } from 'utils/generics/file.response';
@@ -25,7 +25,7 @@ export class ProductCompanyService {
             ...(query.productType && { product: { productType: query.productType } }),
             ...(query.taxInvoiceType &&
                 query.taxInvoiceType === ProductCompanyTaxInvoiceType.REQUEST && {
-                    taxBill: { status: TaxBillStatus.NOT_ISSUED },
+                    OR: [{ taxBill: { status: TaxBillStatus.NOT_ISSUED } }, { taxBill: null }],
                 }),
             ...(query.taxInvoiceType &&
                 query.taxInvoiceType === ProductCompanyTaxInvoiceType.WAITING && {
@@ -261,7 +261,7 @@ export class ProductCompanyService {
             },
         });
         if (!record) {
-            throw new NotFoundException('The taxbill id is not found');
+            throw new NotFoundException('The card receipt id is not found');
         }
         if (!record.cardReceipt.file) {
             throw new NotFoundException('The file is not found');
@@ -303,6 +303,46 @@ export class ProductCompanyService {
                     status: TaxBillStatus.ISSUED_REQUESTED,
                 },
             });
+        }
+    }
+
+    async createRefund(accountId: number, id: number): Promise<void> {
+        const paymentHistory = await this.prismaService.productPaymentHistory.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+                company: {
+                    accountId: accountId,
+                    isActive: true,
+                },
+            },
+            select: {
+                id: true,
+                expirationDate: true,
+                usageHistory: true,
+                refund: true,
+            },
+        });
+        if (!paymentHistory) {
+            throw new NotFoundException('The payment history id is not found');
+        }
+        if (!paymentHistory.refund) {
+            if (paymentHistory.usageHistory.length > 0) {
+                throw new BadRequestException('The product has been used');
+            }
+            const pastDate = paymentHistory.expirationDate;
+            pastDate.setDate(pastDate.getDate() + 7);
+            if (pastDate <= new Date()) {
+                throw new BadRequestException('No refund after 7 days');
+            }
+            await this.prismaService.refund.create({
+                data: {
+                    productPaymentHistoryId: paymentHistory.id,
+                    status: RefundStatus.APPLY,
+                },
+            });
+        } else {
+            throw new BadRequestException('The refund request has been handled');
         }
     }
 }
