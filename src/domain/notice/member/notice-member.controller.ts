@@ -5,34 +5,34 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { NotificationMemberService } from './notification-member.service';
-import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
-import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
+import { NoticeMemberService } from './notice-member.service';
+import { NoticeMemberGetListResponse } from './response/notice-member-get-list.response';
+import { NoticeMemberUpdateRequest } from './request/notice-member-update-request';
 
-@Controller('/member/notifications')
+@Controller('/member/notices')
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-export class NotificationMemberController {
-    constructor(private notificationMemberService: NotificationMemberService) {}
+export class NoticeMemberController {
+    constructor(private noticeMemberService: NoticeMemberService) {}
     @Get()
     async getList(
         @Req() req: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<NotificationMemberGetListResponse>> {
-        return BaseResponse.of(await this.notificationMemberService.getList(req.user.accountId, query));
+    ): Promise<BaseResponse<NoticeMemberGetListResponse>> {
+        return BaseResponse.of(await this.noticeMemberService.getList(req.user.accountId, query));
     }
 
     @Patch('/:id/status')
     async update(
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: NotificationMemberUpdateRequest,
+        @Body() body: NoticeMemberUpdateRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationMemberService.update(req.user.accountId, id, body));
+        return BaseResponse.of(await this.noticeMemberService.update(req.user.accountId, id, body));
     }
 
     @Delete('/:id')
     async delete(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationMemberService.delete(req.user.accountId, id));
+        return BaseResponse.of(await this.noticeMemberService.delete(req.user.accountId, id));
     }
 }
