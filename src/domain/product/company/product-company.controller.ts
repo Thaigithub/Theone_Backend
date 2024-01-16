@@ -40,6 +40,14 @@ export class ProductCompanyController {
         return BaseResponse.of(await this.productCompanyService.getUsageHistory(req.user.accountId, query));
     }
 
+    @Post('/payment/:id/refund')
+    async createRefund(
+        @Req() req: AccountIdExtensionRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.productCompanyService.createRefund(req.user.accountId, id));
+    }
+
     @Post('/payment/:id/taxbill')
     async createTaxBill(
         @Req() req: AccountIdExtensionRequest,
