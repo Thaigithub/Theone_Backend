@@ -8,6 +8,7 @@ class GetListRefundResponse {
     productType: Product['productType'];
     amount: ProductPaymentHistory['cost'];
     status: Refund['status'];
+    createdAt: Refund['createdAt'];
 }
 
 export class ProductAdminGetListRefundResponse extends PaginationResponse<GetListRefundResponse> {}
