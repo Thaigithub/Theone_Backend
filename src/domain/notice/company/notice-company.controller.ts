@@ -5,28 +5,28 @@ import { AccountIdExtensionRequest } from '../../../utils/generics/base.request'
 import { BaseResponse } from '../../../utils/generics/base.response';
 import { AuthJwtGuard } from '../../auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from '../../auth/auth-role.guard';
-import { NotificationCompanyGetListResponse } from './response/company-notification.response';
-import { NotificationCompanyService } from './Notification-company.service';
+import { NoticeCompanyService } from './notice-company.service';
+import { NoticeCompanyGetListResponse } from './response/company-notice.response';
 
-@Controller('/company/notifications')
+@Controller('/company/notices')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-export class NotificationCompanyController {
-    constructor(private notificationCompanyService: NotificationCompanyService) {}
+export class NoticeCompanyController {
+    constructor(private noticeCompanyService: NoticeCompanyService) {}
 
     @Get()
     async getList(
         @Query() query: PaginationRequest,
         @Request() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<NotificationCompanyGetListResponse>> {
-        return BaseResponse.of(await this.notificationCompanyService.getList(query, request.user.accountId));
+    ): Promise<BaseResponse<NoticeCompanyGetListResponse>> {
+        return BaseResponse.of(await this.noticeCompanyService.getList(query, request.user.accountId));
     }
 
     @Delete('/:id')
-    async deleteNotification(
+    async deleteNotice(
         @Param('id', ParseIntPipe) id: number,
         @Request() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationCompanyService.delete(id, request.user.accountId));
+        return BaseResponse.of(await this.noticeCompanyService.delete(id, request.user.accountId));
     }
 }
