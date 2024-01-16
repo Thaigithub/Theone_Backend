@@ -13,7 +13,6 @@ import { CompanyAdminGetDetailsResponse } from './response/company-admin-get-det
 import { CompanyAdminGetListResponse } from './response/company-admin-get-list.response';
 import { ComapnyAdminProductGetListRequest } from './request/company-admin-product-get-list.request';
 import { Prisma } from '@prisma/client';
-import { CompanyAdminProductGetListSearchCategory } from './enum/company-admin-product-get-list-.enum';
 import { CompanyAdminProductGetListResponse } from './response/company-admin-product-get-list.response';
 @Injectable()
 export class CompanyAdminService {
@@ -231,9 +230,7 @@ export class CompanyAdminService {
     async getListCompany(query: ComapnyAdminProductGetListRequest): Promise<CompanyAdminProductGetListResponse> {
         const queryFilter: Prisma.CompanyWhereInput = {
             isActive: true,
-            ...(query.searchCategory === CompanyAdminProductGetListSearchCategory.COMPANY_NAME && {
-                name: { contains: query.keyword, mode: 'insensitive' },
-            }),
+            name: { contains: query.keyword, mode: 'insensitive' },
             productPaymentHistory: {
                 some: {},
             },
