@@ -210,6 +210,7 @@ export class ProductAdminService {
                 },
             },
             select: {
+                id: true,
                 productPaymentHistory: {
                     select: {
                         company: {
@@ -229,6 +230,7 @@ export class ProductAdminService {
         };
         const refunds = (await this.prismaService.refund.findMany(search)).map((item) => {
             return {
+                id: item.id,
                 companyName: item.productPaymentHistory.company.name,
                 presentativeName: item.productPaymentHistory.company.presentativeName,
                 contact: item.productPaymentHistory.company.phone,
