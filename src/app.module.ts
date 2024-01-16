@@ -29,7 +29,7 @@ import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
 import { CareerModule } from './domain/career/career.module';
 import { CompanyModule } from './domain/company/company.module';
-import { NoticeModule } from './domain/notice/notice.module';
+import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
 
@@ -65,7 +65,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         TeamMemberInvitationModule,
         ProductModule,
         CurrencyExchangeModule,
-        NoticeModule,
+        NotificationModule,
         InterestModule,
         PreferenceModule,
     ],

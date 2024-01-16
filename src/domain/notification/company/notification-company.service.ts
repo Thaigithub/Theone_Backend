@@ -4,28 +4,28 @@ import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PrismaService } from '../../../services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { QueryPagingHelper } from '../../../utils/pagination-query';
-import { CompanyGetNoticeResponse, NoticeCompanyGetListResponse } from './response/company-notice.response';
+import { CompanyGetNotificationResponse, NotificationCompanyGetListResponse } from './response/company-notification.response';
 
 @Injectable()
-export class NoticeCompanyService {
+export class NotificationCompanyService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: PaginationRequest, accountId: number): Promise<NoticeCompanyGetListResponse> {
-        const queryFilter: Prisma.NoticeWhereInput = {
+    async getList(query: PaginationRequest, accountId: number): Promise<NotificationCompanyGetListResponse> {
+        const queryFilter: Prisma.NotificationWhereInput = {
             account: {
                 id: accountId,
                 isActive: true,
             },
             isActive: true,
         };
-        const notices = await this.prismaService.notice.findMany({
+        const notifications = await this.prismaService.notification.findMany({
             where: queryFilter,
             orderBy: {
                 createdAt: 'desc',
             },
             ...QueryPagingHelper.queryPaging(query),
         });
-        const mappedResult = notices.map(
+        const mappedResult = notifications.map(
             (item) =>
                 ({
                     id: item.id,
@@ -34,17 +34,17 @@ export class NoticeCompanyService {
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,
                     type: item.type,
-                }) as CompanyGetNoticeResponse,
+                }) as CompanyGetNotificationResponse,
         );
-        const countNotice = await this.prismaService.notice.count({
+        const countNotification = await this.prismaService.notification.count({
             where: queryFilter,
         });
 
-        return new PaginationResponse(mappedResult, new PageInfo(countNotice));
+        return new PaginationResponse(mappedResult, new PageInfo(countNotification));
     }
 
     async delete(id: number, accountId: number): Promise<void> {
-        const queryFilter: Prisma.NoticeWhereUniqueInput = {
+        const queryFilter: Prisma.NotificationWhereUniqueInput = {
             id: id,
             account: {
                 id: accountId,
@@ -52,16 +52,16 @@ export class NoticeCompanyService {
             },
             isActive: true,
         };
-        const notice = await this.prismaService.notice.findUnique({
+        const notification = await this.prismaService.notification.findUnique({
             where: queryFilter,
             select: {
                 isActive: true,
             },
         });
-        if (!notice) {
-            throw new NotFoundException('The notice is not found');
+        if (!notification) {
+            throw new NotFoundException('The Notification is not found');
         }
-        await this.prismaService.notice.update({
+        await this.prismaService.notification.update({
             where: queryFilter,
             data: {
                 isActive: false,
