@@ -5,19 +5,16 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GetListType } from './enum/product-admin-get-list.enum';
 import { ProductAdminRefundSearchCategory } from './enum/product-admin-refund-search-category.enum';
-import { ProductAdminGetListCompanyRequest } from './request/product-admin-get-list-company.request';
 import { ProductAdminGetListRefundRequest } from './request/product-admin-get-list-refund.request';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdateRefundStatusRequest } from './request/product-admin-update-refund-status.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
 import { ProductAdminGetDetailRefundResponse } from './response/product-admin-get-detail-refund.response';
-import { ProductAdminGetListCompanyResponse } from './response/product-admin-get-list-company.response';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
-import { ProductAdminGetListSearchCategory } from './dto/product-admin-get-list-company.enum';
 
 @Injectable()
 export class ProductAdminService {
@@ -154,63 +151,6 @@ export class ProductAdminService {
                 },
             });
         }
-    }
-
-    async getListCompany(query: ProductAdminGetListCompanyRequest): Promise<ProductAdminGetListCompanyResponse> {
-        const queryFilter: Prisma.CompanyWhereInput = {
-            isActive: true,
-            ...(query.searchCategory === ProductAdminGetListSearchCategory.COMPANY_NAME && {
-                name: { contains: query.keyword, mode: 'insensitive' },
-            }),
-            productPaymentHistory: {
-                some: {},
-            },
-        };
-        const companies = await this.prismaService.company.findMany({
-            include: {
-                productPaymentHistory: true,
-            },
-            where: queryFilter,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        const list = companies.map((item) => {
-            return {
-                id: item.id,
-                companyName: item.name,
-                manager: item.presentativeName,
-                contact: item.contactPhone,
-                totalPaymentAmount: item.productPaymentHistory.reduce((total, item) => {
-                    return total + item.cost;
-                }, 0),
-            };
-        });
-        const total = await this.prismaService.company.count({
-            where: queryFilter,
-        });
-        return new PaginationResponse(list, new PageInfo(total));
-    }
-
-    async getCompanyInformation(companyId: number) {
-        const company = await this.prismaService.company.findUnique({
-            include: {
-                productPaymentHistory: true,
-            },
-            where: {
-                isActive: true,
-                id: companyId,
-                productPaymentHistory: {
-                    some: {},
-                },
-            },
-        });
-        return {
-            companyName: company.name,
-            manager: company.presentativeName,
-            contact: company.contactPhone,
-            totalPaymentAmount: company.productPaymentHistory.reduce((total, item) => {
-                return total + item.cost;
-            }, 0),
-        };
     }
 
     async getCompanyProductHistory(companyId: number, usageType: UsageType) {

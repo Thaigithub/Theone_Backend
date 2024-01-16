@@ -18,10 +18,7 @@
         "test:cov": "jest --coverage",
         "test:debug": "cross-env NODE_ENV=development node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
-        "prisma:create": "dotenv -e .env.development -- npx prisma migrate dev",
         "prisma:pull": "dotenv -e .env.development -- npx prisma db pull",
-        "prisma:push": "dotenv -e .env.development -- npx prisma db push",
-        "prisma:studio": "dotenv -e .env.development -- npx prisma studio",
         "prisma:generate": "dotenv -e .env.development -- npx prisma generate"
     },
     "dependencies": {
