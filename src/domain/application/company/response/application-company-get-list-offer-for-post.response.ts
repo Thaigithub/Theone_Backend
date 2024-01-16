@@ -1,6 +1,6 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class GetListOfferByPost {
+export class GetListOfferForPost {
     applicationId: number;
     member: {
         name: string;
@@ -11,4 +11,4 @@ export class GetListOfferByPost {
         contact: string;
     };
 }
-export class ApplicationCompanyGetListOfferByPost extends PaginationResponse<GetListOfferByPost> {}
+export class ApplicationCompanyGetListOfferForPost extends PaginationResponse<GetListOfferForPost> {}

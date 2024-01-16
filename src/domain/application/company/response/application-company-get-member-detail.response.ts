@@ -1,16 +1,5 @@
 import { PostApplicationStatus } from '@prisma/client';
-import {
-    ApplicationCompanyGetBasicHealthCertificate,
-    ApplicationCompanyGetSpecialLicenses,
-} from './application-company-get-team-detail.response';
-
-class ApplicationCompanyGetCareerDetail {
-    startDate: Date;
-    endDate: Date;
-    companyName: string;
-    siteName: string;
-    occupation: string;
-}
+import { FileResponse } from 'utils/generics/file.response';
 
 export class ApplicationCompanyGetMemberDetail {
     id: number;
@@ -32,8 +21,22 @@ export class ApplicationCompanyGetMemberDetail {
     desiredOccupations: {
         codeName: string;
     }[];
-    careers: ApplicationCompanyGetCareerDetail[];
-    specialLicenses: ApplicationCompanyGetSpecialLicenses[];
-    basicHealthSafetyCertificate: ApplicationCompanyGetBasicHealthCertificate;
+    careers: {
+        startDate: Date;
+        endDate: Date;
+        companyName: string;
+        siteName: string;
+        occupation: string;
+    }[];
+    specialLicenses: {
+        id: number;
+        codeName: string;
+        licenseNumber: string;
+    }[];
+    basicHealthSafetyCertificate: {
+        registrationNumber: string;
+        dateOfCompletion: Date;
+        file: FileResponse;
+    };
     status: PostApplicationStatus;
 }

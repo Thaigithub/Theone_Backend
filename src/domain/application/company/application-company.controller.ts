@@ -9,9 +9,9 @@ import { ApplicationCompanyGetListApplicantsRequest } from './request/applicatio
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
-import { ApplicationCompanyGetListOfferByPost } from './response/application-company-get-list-offer-for-post.response';
 import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
 import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
+import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
 
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
@@ -23,7 +23,7 @@ export class ApplicationCompanyController {
     async getListOfferForPost(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() req: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<ApplicationCompanyGetListOfferByPost>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetListOfferForPost>> {
         return BaseResponse.of(await this.applicationCompanyService.getListOfferForPost(req.user.accountId, postId));
     }
 
