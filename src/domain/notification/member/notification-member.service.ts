@@ -4,14 +4,14 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { NoticeMemberUpdateRequest } from './request/notice-member-update-request';
-import { NoticeMemberGetListResponse } from './response/notice-member-get-list.response';
+import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
+import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
 
 @Injectable()
-export class NoticeMemberService {
+export class NotificationMemberService {
     constructor(private prismaService: PrismaService) {}
-    async getList(accountId: number, query: PaginationRequest): Promise<NoticeMemberGetListResponse> {
-        const queryFilter: Prisma.NoticeWhereInput = {
+    async getList(accountId: number, query: PaginationRequest): Promise<NotificationMemberGetListResponse> {
+        const queryFilter: Prisma.NotificationWhereInput = {
             account: {
                 id: accountId,
                 member: {
@@ -20,7 +20,7 @@ export class NoticeMemberService {
             },
             isActive: true,
         };
-        const notices = await this.prismaService.notice.findMany({
+        const notifications = await this.prismaService.notification.findMany({
             select: {
                 id: true,
                 createdAt: true,
@@ -32,14 +32,14 @@ export class NoticeMemberService {
             orderBy: { createdAt: 'desc' },
             ...QueryPagingHelper.queryPaging(query),
         });
-        const count = await this.prismaService.notice.count({
+        const count = await this.prismaService.notification.count({
             where: queryFilter,
         });
-        return new PaginationResponse(notices, new PageInfo(count));
+        return new PaginationResponse(notifications, new PageInfo(count));
     }
 
-    async update(accountId: number, id: number, body: NoticeMemberUpdateRequest): Promise<void> {
-        const queryFilter: Prisma.NoticeWhereUniqueInput = {
+    async update(accountId: number, id: number, body: NotificationMemberUpdateRequest): Promise<void> {
+        const queryFilter: Prisma.NotificationWhereUniqueInput = {
             id: id,
             isActive: true,
             account: {
@@ -49,17 +49,17 @@ export class NoticeMemberService {
                 },
             },
         };
-        const notice = await this.prismaService.notice.findUnique({
+        const notification = await this.prismaService.notification.findUnique({
             where: queryFilter,
             select: {
                 status: true,
             },
         });
-        if (!notice) {
-            throw new NotFoundException('The notice id is not exist');
+        if (!notification) {
+            throw new NotFoundException('The Notification id is not exist');
         }
-        if (notice.status !== body.status) {
-            await this.prismaService.notice.update({
+        if (notification.status !== body.status) {
+            await this.prismaService.notification.update({
                 where: queryFilter,
                 data: {
                     status: body.status,
@@ -69,7 +69,7 @@ export class NoticeMemberService {
     }
 
     async delete(accountId: number, id: number): Promise<void> {
-        const notice = await this.prismaService.notice.findUnique({
+        const notification = await this.prismaService.notification.findUnique({
             where: {
                 id: id,
                 isActive: true,
@@ -81,12 +81,12 @@ export class NoticeMemberService {
                 },
             },
         });
-        if (!notice) {
-            throw new NotFoundException('The notice id is not found');
+        if (!Notification) {
+            throw new NotFoundException('The Notification id is not found');
         }
-        await this.prismaService.notice.update({
+        await this.prismaService.notification.update({
             where: {
-                id: notice.id,
+                id: notification.id,
             },
             data: {
                 isActive: false,
