@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { AccountType, UsageType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -15,6 +15,12 @@ import { ProductAdminGetListFixedTermResponse } from './response/product-admin-g
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
+import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
+import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
+import { ProductAdminGetListSettlementResponse } from './response/product-admin-get-list-settlement.response';
+import { Response } from 'express';
+import { ProductAdminDownloadSettlementRequest } from './request/product-admin-download-settlement.request';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -44,13 +50,27 @@ export class ProductAdminController {
     }
 
     @Get('/company/:id/limited-count')
-    async getCompanyLimitedCountProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.LIMITED_COUNT));
+    async getCompanyLimitedCountProductHistory(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ProductAdminGetCompanyDetailLimitedCountResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getCompanyProductHistory(
+                id,
+                UsageType.LIMITED_COUNT,
+            )) as ProductAdminGetCompanyDetailLimitedCountResponse,
+        );
     }
 
     @Get('/company/:id/fixed-term')
-    async getCompanyFixedTermProductHistory(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
-        return BaseResponse.of(await this.productAdminService.getCompanyProductHistory(id, UsageType.FIX_TERM));
+    async getCompanyFixedTermProductHistory(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ProductAdminGetCompanyDetailFixedTermResponse>> {
+        return BaseResponse.of(
+            (await this.productAdminService.getCompanyProductHistory(
+                id,
+                UsageType.FIX_TERM,
+            )) as ProductAdminGetCompanyDetailFixedTermResponse,
+        );
     }
 
     @Put('/limited-count')
@@ -86,5 +106,22 @@ export class ProductAdminController {
         @Body() body: ProductAdminUpdateRefundStatusRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.productAdminService.updateRefundStatus(id, body));
+    }
+
+    @Get('settlement')
+    async getListSettlement(
+        @Query() query: ProductAdminGetListSettlementRequest,
+    ): Promise<BaseResponse<ProductAdminGetListSettlementResponse>> {
+        return BaseResponse.of(await this.productAdminService.getListSettlement(query));
+    }
+
+    @Get('settlement/download')
+    async downloadSettlement(
+        @Query() query: ProductAdminDownloadSettlementRequest,
+        @Res() response: Response,
+    ): Promise<BaseResponse<void>> {
+        const parsedIdList = query.idList.split(',').map((item) => parseInt(item));
+        await this.productAdminService.downloadSettlement(parsedIdList, response);
+        return BaseResponse.ok();
     }
 }

@@ -46,7 +46,7 @@ export class PostAdminUpdateRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     startDate: string;
 
@@ -54,7 +54,7 @@ export class PostAdminUpdateRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     endDate: string;
 
@@ -97,13 +97,13 @@ export class PostAdminUpdateRequest {
     @Expose()
     @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     startWorkDate: string;
 
     @Expose()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     @IsOptional()
     endWorkDate: string;

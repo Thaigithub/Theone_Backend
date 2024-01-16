@@ -56,7 +56,7 @@ export class SiteCompanyUpdateRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     @Expose()
     startDate: string;
@@ -64,7 +64,7 @@ export class SiteCompanyUpdateRequest {
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-        message: 'The property must be in the format yyyy-mm-dd.',
+        message: 'Date must be in the format yyyy-mm-dd.',
     })
     @Expose()
     endDate: string;

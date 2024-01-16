@@ -5,11 +5,10 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { EvaluationStatus } from './dto/evaluation-company-get-list-request.enum';
+import { EvaluationStatus } from './enum/evaluation-company-get-list-request.enum';
 import { EvaluationCompanyService } from './evaluation-company.service';
 import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-company-create-evaluation.request';
-import { EvaluationCompanyGetListMembersRequest } from './request/evaluation-company-get-list-members.request';
-import { EvaluationCompanyGetListTeamsRequest } from './request/evaluation-company-get-list-teams.request';
+import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
 import { EvaluationCompanyGetListMembersResponse } from './response/evaluation-company-get-list-members.response';
 import { EvaluationCompanyGetListTeamsResponse } from './response/evaluation-company-get-list-teams.response';
 
@@ -19,7 +18,7 @@ import { EvaluationCompanyGetListTeamsResponse } from './response/evaluation-com
 export class EvaluationCompanyController {
     constructor(private readonly evaluationCompanyService: EvaluationCompanyService) {}
 
-    @Patch('member-evaluations/:id')
+    @Patch('/member/:id')
     async evaluateMember(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -29,7 +28,7 @@ export class EvaluationCompanyController {
         return BaseResponse.ok();
     }
 
-    @Patch('team-evaluations/:id')
+    @Patch('/team/:id')
     async evaluateTeam(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
@@ -39,10 +38,10 @@ export class EvaluationCompanyController {
         return BaseResponse.ok();
     }
 
-    @Get('member-evaluations')
+    @Get('/member')
     async getMemberEvaluations(
         @Req() request: AccountIdExtensionRequest,
-        @Query() query: EvaluationCompanyGetListMembersRequest,
+        @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListMembersResponse>> {
         if (query.score && query.status === EvaluationStatus.INCOMPLETE)
             throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
@@ -52,10 +51,10 @@ export class EvaluationCompanyController {
         return BaseResponse.of(paginationResponse);
     }
 
-    @Get('team-evaluations')
+    @Get('/team')
     async getTeamEvaluations(
         @Req() request: AccountIdExtensionRequest,
-        @Query() query: EvaluationCompanyGetListTeamsRequest,
+        @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListTeamsResponse>> {
         if (query.score && query.status === EvaluationStatus.INCOMPLETE)
             throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
