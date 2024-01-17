@@ -42,6 +42,7 @@ export class ContractCompanyService {
                 id: true,
                 startDate: true,
                 endDate: true,
+                file: true,
                 application: {
                     select: {
                         member: {
@@ -78,6 +79,12 @@ export class ContractCompanyService {
                 teamLeaderName: item.application.member ? null : item.application.team.leader.name,
                 startDate: item.startDate,
                 endDate: item.endDate,
+                file: {
+                    fileName: item.file.fileName,
+                    type: item.file.type,
+                    key: item.file.key,
+                    size: Number(item.file.size),
+                },
             };
         });
         const total = await this.prismaService.contract.count({ where: query.where });

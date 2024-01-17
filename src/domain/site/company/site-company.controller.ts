@@ -20,12 +20,12 @@ import { SiteCompanyService } from './site-company.service';
 export class SiteCompanyController {
     constructor(private readonly siteCompanyService: SiteCompanyService) {}
 
-    @Get('contract-site')
-    async getListForContractSite(
+    @Get('/contract')
+    async getListContract(
         @Req() req: AccountIdExtensionRequest,
         @Query() query: SiteCompanyGetListForContractRequest,
     ): Promise<BaseResponse<SiteCompanyGetListForContractResponse>> {
-        return BaseResponse.of(await this.siteCompanyService.getListForContractSite(req.user.accountId, query));
+        return BaseResponse.of(await this.siteCompanyService.getListContract(req.user.accountId, query));
     }
 
     @Get('/:id')
@@ -37,21 +37,18 @@ export class SiteCompanyController {
     }
 
     @Patch('/:id')
-    async updateSite(
+    async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: SiteCompanyUpdateRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.updateSite(id, body, request.user.accountId);
+        await this.siteCompanyService.update(id, body, request.user.accountId);
         return BaseResponse.ok();
     }
 
     @Delete('/:id')
-    async deleteSite(
-        @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.deleteSite(id, request.user.accountId);
+    async delete(@Param('id', ParseIntPipe) id: number, @Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+        await this.siteCompanyService.delete(id, request.user.accountId);
         return BaseResponse.ok();
     }
 
@@ -67,11 +64,11 @@ export class SiteCompanyController {
     }
 
     @Post()
-    async createSite(
+    async createS(
         @Body() body: SiteCompanyCreateRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.createSite(body, request.user.accountId);
+        await this.siteCompanyService.create(body, request.user.accountId);
         return BaseResponse.ok();
     }
 }

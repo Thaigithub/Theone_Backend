@@ -24,11 +24,11 @@ export class PostCompanyController {
     constructor(private postCompanyService: PostCompanyService) {}
 
     @Get('/site/:id')
-    async getListBySite(
+    async getListSite(
         @Req() req: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) siteId: number,
     ): Promise<BaseResponse<PostCompanyGetListBySite>> {
-        return BaseResponse.of(await this.postCompanyService.getListBySite(req.user.accountId, siteId));
+        return BaseResponse.of(await this.postCompanyService.getListSite(req.user.accountId, siteId));
     }
 
     @Post('/:id/headhunting-request')
@@ -50,17 +50,17 @@ export class PostCompanyController {
     }
 
     @Get('/applicant-site')
-    async getListApplicantSite(
+    async getListApplicant(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
     ): Promise<BaseResponse<PostCompanyGetListApplicantsResponse>> {
-        const posts = await this.postCompanyService.getListApplicantSite(request.user.accountId, query);
+        const posts = await this.postCompanyService.getListApplicant(request.user.accountId, query);
         return BaseResponse.of(posts);
     }
 
     @Get('/count')
-    async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
-        return BaseResponse.of(await this.postCompanyService.countPosts(req.user.accountId));
+    async count(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<PostCompanyCountPostsResponse>> {
+        return BaseResponse.of(await this.postCompanyService.count(req.user.accountId));
     }
 
     @Get('/:id')
@@ -68,25 +68,22 @@ export class PostCompanyController {
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<PostCompanyDetailResponse>> {
-        return BaseResponse.of(await this.postCompanyService.getPostDetails(request.user.accountId, id));
+        return BaseResponse.of(await this.postCompanyService.getDetail(request.user.accountId, id));
     }
 
     @Patch('/:id')
-    async changePageInfo(
+    async update(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() payload: PostCompanyCreateRequest,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.changePostInfo(request.user.accountId, id, payload);
+        await this.postCompanyService.update(request.user.accountId, id, payload);
         return BaseResponse.ok();
     }
 
     @Delete('/:id')
-    async deletePost(
-        @Req() request: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.postCompanyService.deletePost(request.user.accountId, id));
+    async delete(@Req() request: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.postCompanyService.delete(request.user.accountId, id));
     }
 
     @Get()
