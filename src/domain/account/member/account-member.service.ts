@@ -6,7 +6,6 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberChangePasswordRequestStatus } from './enum/account-member-change-password-request-status.enum';
 import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
@@ -60,7 +59,7 @@ export class AccountMemberService {
         ip: string,
         accountId: number,
         body: AccountMemberSendOtpVerifyPhoneRequest,
-    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<string>> {
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse> {
         if (accountId) {
             const isValidPhone = await this.prismaService.account.findUnique({
                 where: {
@@ -72,15 +71,15 @@ export class AccountMemberService {
                     },
                 },
             });
-            if (!isValidPhone) return BaseResponse.of('Incorrect phone number') as BaseResponse<string>;
+            if (!isValidPhone) return { otpId: null };
         }
-        return (await this.otpService.sendOtp({
+        return await this.otpService.sendOtp({
             email: null,
             phoneNumber: body.phone,
             type: OtpType.PHONE,
             ip: ip,
             data: body.phone,
-        })) as AccountMemberSendOtpVerifyPhoneResponse;
+        });
     }
 
     async signup(request: AccountMemberSignupRequest): Promise<void> {

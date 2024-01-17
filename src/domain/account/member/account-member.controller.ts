@@ -57,7 +57,7 @@ export class AccountMemberController {
     async changePasswordVerifyPhone(
         @Req() request,
         @Body() body: AccountMemberSendOtpVerifyPhoneRequest,
-    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<string>> {
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse> {
         return await this.accountMemberService.sendOtpVerifyPhone(request.ip, request.user.accountId, body);
     }
 

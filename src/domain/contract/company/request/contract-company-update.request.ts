@@ -48,4 +48,12 @@ export class ContractCompanyUpdateRequest {
     @Expose()
     @IsString()
     department: string;
+
+    @Expose()
+    @IsString()
+    manager: string;
+
+    @Expose()
+    @IsString()
+    contact: string;
 }
