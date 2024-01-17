@@ -1,9 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CodeType, PostCategory, PostStatus, PostType, Prisma, RequestStatus } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CodeType, PostCategory, PostType, Prisma, RequestStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { PostCompanyPostCategoryFilter } from './enum/post-company-filter.enum';
 import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
@@ -22,25 +21,14 @@ export class PostCompanyService {
     constructor(private prismaService: PrismaService) {}
 
     async getList(accountId: number, query: PostCompanyGetListRequest): Promise<PostCompanyGetListResponse> {
-        const account = await this.getRequestAccount(accountId);
-
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            ...(query.type && { type: PostType[query.type] }),
-            ...(query.status && { status: PostStatus[query.status] }),
-            name: query.category
-                ? query.category === PostCompanyPostCategoryFilter.POST_NAME
-                    ? { contains: query.name, mode: 'insensitive' }
-                    : undefined
-                : { contains: query.name, mode: 'insensitive' },
-            site: {
-                name: query.category
-                    ? query.category === PostCompanyPostCategoryFilter.SITE_NAME
-                        ? { contains: query.name, mode: 'insensitive' }
-                        : undefined
-                    : { contains: query.name, mode: 'insensitive' },
+            ...(query.type && { type: query.type }),
+            ...(query.status && { status: query.status }),
+            name: query.name && { contains: query.name, mode: 'insensitive' },
+            company: {
+                accountId,
             },
-            companyId: account.company.id,
         };
 
         const postList = await this.prismaService.post.findMany({
@@ -76,7 +64,7 @@ export class PostCompanyService {
         return new PaginationResponse(postList, new PageInfo(postListCount));
     }
 
-    async countPosts(accountId: number): Promise<PostCompanyCountPostsResponse> {
+    async count(accountId: number): Promise<PostCompanyCountPostsResponse> {
         const posts = await this.prismaService.post.count({
             // Conditions based on request query
             where: {
@@ -90,7 +78,19 @@ export class PostCompanyService {
     }
 
     async create(accountId: number, request: PostCompanyCreateRequest) {
-        const account = await this.getRequestAccount(accountId);
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                company: {
+                    include: {
+                        sites: true,
+                    },
+                },
+            },
+        });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException('Site does not found');
@@ -132,14 +132,14 @@ export class PostCompanyService {
         });
     }
 
-    async getPostDetails(accountId: number, id: number): Promise<PostCompanyDetailResponse> {
-        const account = await this.getRequestAccount(accountId);
-
+    async getDetail(accountId: number, id: number): Promise<PostCompanyDetailResponse> {
         return await this.prismaService.post.findUnique({
             where: {
                 id,
                 isActive: true,
-                companyId: account.company.id,
+                company: {
+                    accountId,
+                },
             },
             include: {
                 specialOccupation: {
@@ -169,8 +169,20 @@ export class PostCompanyService {
         });
     }
 
-    async changePostInfo(accountId: number, id: number, request: PostCompanyCreateRequest) {
-        const account = await this.getRequestAccount(accountId);
+    async update(accountId: number, id: number, request: PostCompanyCreateRequest) {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                isActive: true,
+            },
+            include: {
+                company: {
+                    include: {
+                        sites: true,
+                    },
+                },
+            },
+        });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException('Site does not found');
@@ -216,14 +228,19 @@ export class PostCompanyService {
         });
     }
 
-    async deletePost(accountId: number, id: number) {
-        const account = await this.getRequestAccount(accountId);
-
+    async delete(accountId: number, id: number) {
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                company: {
+                    accountId,
+                },
+                id,
+            },
+        });
+        if (!post) throw new NotFoundException('Post not found');
         await this.prismaService.post.update({
             where: {
                 id,
-                isActive: true,
-                companyId: account.company.id,
             },
             data: {
                 isActive: false,
@@ -245,15 +262,15 @@ export class PostCompanyService {
         }
     }
 
-    async getListApplicantSite(
+    async getListApplicant(
         accountId: number,
         query: PostCompanyGetListApplicantSiteRequest,
     ): Promise<PostCompanyGetListApplicantsResponse> {
-        const account = await this.getRequestAccount(accountId);
-
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            companyId: account.company.id,
+            company: {
+                accountId,
+            },
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             ...(query.type && { type: PostType[query.type] }),
@@ -316,11 +333,11 @@ export class PostCompanyService {
         accountId: number,
         query: PostCompanyHeadhuntingRequestRequest,
     ): Promise<PostCompanyGetListHeadhuntingRequestResponse> {
-        const account = await this.getRequestAccount(accountId);
-
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
-            companyId: account.company.id,
+            company: {
+                accountId,
+            },
             category: PostCategory.HEADHUNTING,
             ...(query.category === PostCompanyHeadhuntingRequestFilter.SITE_NAME && {
                 siteName: { contains: query.keyword, mode: 'insensitive' },
@@ -369,12 +386,12 @@ export class PostCompanyService {
     }
 
     async createHeadhuntingRequest(accountId: number, body: PostCompanyCreateHeadhuntingRequestRequest, id: number) {
-        const account = await this.getRequestAccount(accountId);
-
         const post = await this.prismaService.post.findUnique({
             where: {
                 id,
-                companyId: account.company.id,
+                company: {
+                    accountId,
+                },
                 category: PostCategory.HEADHUNTING,
             },
         });
@@ -419,22 +436,7 @@ export class PostCompanyService {
         }
     }
 
-    async getRequestAccount(accountId: number) {
-        return await this.prismaService.account.findUnique({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: {
-                    include: {
-                        sites: true,
-                    },
-                },
-            },
-        });
-    }
-    async getListBySite(accountId: number, siteId: number): Promise<PostCompanyGetListBySite> {
+    async getListSite(accountId: number, siteId: number): Promise<PostCompanyGetListBySite> {
         const posts = (
             await this.prismaService.post.findMany({
                 where: {
