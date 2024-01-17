@@ -60,7 +60,7 @@ export class AccountMemberService {
         ip: string,
         accountId: number,
         body: AccountMemberSendOtpVerifyPhoneRequest,
-    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<void>> {
+    ): Promise<AccountMemberSendOtpVerifyPhoneResponse | BaseResponse<string>> {
         if (accountId) {
             const isValidPhone = await this.prismaService.account.findUnique({
                 where: {
@@ -72,7 +72,7 @@ export class AccountMemberService {
                     },
                 },
             });
-            if (!isValidPhone) return BaseResponse.error('Incorrect phone number') as BaseResponse<void>;
+            if (!isValidPhone) return BaseResponse.of('Incorrect phone number') as BaseResponse<string>;
         }
         return (await this.otpService.sendOtp({
             email: null,
