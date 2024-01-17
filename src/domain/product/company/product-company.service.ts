@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { hash } from 'bcrypt';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { FileResponse } from 'utils/generics/file.response';
@@ -335,11 +336,14 @@ export class ProductCompanyService {
                     },
                 })
             ).id;
-            const merchantId = JSON.stringify({
-                accountId: accountId,
-                createdAt: date,
-                merchantId: productPaymentHistoryId,
-            });
+            const merchantId = await hash(
+                JSON.stringify({
+                    accountId: accountId,
+                    createdAt: date,
+                    merchantId: productPaymentHistoryId,
+                }),
+                10,
+            );
             await prisma.productPaymentHistory.update({
                 where: { id: productPaymentHistoryId },
                 data: {
