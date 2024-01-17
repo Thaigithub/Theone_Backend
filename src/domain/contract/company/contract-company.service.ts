@@ -132,6 +132,17 @@ export class ContractCompanyService {
         });
         if (!application) throw new NotFoundException('Application not found or not ready');
         if (!application.post.site) throw new BadRequestException('This post has no site to create contract');
+        const existContract = await this.prismaService.contract.findUnique({
+            where: {
+                applicationId: body.applicationId,
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (existContract) {
+            throw new BadRequestException('The contract for this application id is exist');
+        }
 
         let isHeadhuntingRecommendation = false;
         const record = this.prismaService.headhuntingRecommendation.findFirst({
