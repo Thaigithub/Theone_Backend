@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, ProductType, UsageType } from '@prisma/client';
+import { PaymentStatus, Prisma, ProductType, UsageType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -219,6 +219,7 @@ export class ProductAdminService {
                                 ? { contains: query.keyword, mode: Prisma.QueryMode.insensitive }
                                 : undefined),
                     },
+                    status: PaymentStatus.COMPLETE,
                 },
             },
             select: {
@@ -324,7 +325,7 @@ export class ProductAdminService {
                 productType: query.productType,
             },
             paymentType: query.paymentMethod,
-            status: query.paymentStatus,
+            status: PaymentStatus.COMPLETE,
             ...(query.startPaymentDate && { createdAt: { gte: new Date(query.startPaymentDate) } }),
             ...(query.endPaymentDate && { createdAt: { lte: new Date(query.endPaymentDate) } }),
         };
