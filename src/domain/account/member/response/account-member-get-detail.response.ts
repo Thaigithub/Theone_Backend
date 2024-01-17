@@ -2,9 +2,11 @@ import {
     Account,
     BankAccount,
     BasicHealthSafetyCertificate,
+    City,
     Code,
     DisabledLevel,
     DisabledType,
+    District,
     ForeignWorker,
     Member,
     MemberLevel,
@@ -38,6 +40,8 @@ export class AccountMemberGetDetailResponse {
     contact: Member['contact'];
     email: Member['email'];
     desiredSalary: Member['desiredSalary'];
+    districtId: District['id'];
+    cityId: City['id'];
     account: {
         username: Account['username'];
         status: Account['status'];
