@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { PaymentType, PaymentStatus, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -42,6 +42,7 @@ export class ProductCompanyService {
                     OR: [{ status: TaxBillStatus.ISSUED_COMPLETED }, { status: TaxBillStatus.MODIFIED_ISSUED_COMPLETED }],
                 },
             }),
+            status: PaymentStatus.COMPLETE,
         };
         const histories = (
             await this.prismaService.productPaymentHistory.findMany({
@@ -113,7 +114,7 @@ export class ProductCompanyService {
                 paymentType: item.paymentType,
                 cardReceiptStatus: item.cardReceipt ? item.cardReceipt.status : null,
                 taxBillStatus: taxIssuanceStatus ? taxIssuanceStatus : null,
-                refundStatus: item.refund ? item.refund.status : RefundStatus.APPLY,
+                refundStatus: item.refund ? item.refund.status : null,
             };
         });
         const count = await this.prismaService.productPaymentHistory.count({
@@ -132,6 +133,7 @@ export class ProductCompanyService {
                     accountId: accountId,
                     isActive: true,
                 },
+                status: PaymentStatus.COMPLETE,
             },
             ...(query.productType && {
                 product: {
@@ -208,6 +210,7 @@ export class ProductCompanyService {
                     isActive: true,
                     accountId: accountId,
                 },
+                status: PaymentStatus.COMPLETE,
             },
             select: {
                 taxBill: {
@@ -250,6 +253,7 @@ export class ProductCompanyService {
                     isActive: true,
                     accountId: accountId,
                 },
+                status: PaymentStatus.COMPLETE,
             },
             select: {
                 cardReceipt: {
@@ -289,6 +293,7 @@ export class ProductCompanyService {
                 company: {
                     accountId: accountId,
                 },
+                status: PaymentStatus.COMPLETE,
             },
             select: {
                 taxBill: {
@@ -369,6 +374,7 @@ export class ProductCompanyService {
                     accountId: accountId,
                     isActive: true,
                 },
+                status: PaymentStatus.COMPLETE,
             },
             select: {
                 id: true,
