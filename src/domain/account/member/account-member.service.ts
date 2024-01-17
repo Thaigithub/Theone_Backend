@@ -198,6 +198,11 @@ export class AccountMemberService {
                 accountId,
             },
             include: {
+                district: {
+                    include: {
+                        city: true,
+                    },
+                },
                 desiredOccupations: {
                     include: {
                         code: true,
@@ -227,9 +232,10 @@ export class AccountMemberService {
                 },
             },
         });
-        const { desiredOccupations, foreignWorker, disability, basicHealthSafetyCertificate, ...rest } = member;
+        const { desiredOccupations, foreignWorker, disability, basicHealthSafetyCertificate, district, ...rest } = member;
         return {
             ...rest,
+            cityId: district ? district.city.id : null,
             desiredOccupations: desiredOccupations
                 ? desiredOccupations.map((item) => {
                       return {
