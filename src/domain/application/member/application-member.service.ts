@@ -352,7 +352,7 @@ export class ApplicationMemberService {
         if (!application) throw new NotFoundException('Application not found');
         if (
             application.status !== PostApplicationStatus.APPROVE_BY_COMPANY ||
-            application.interview.interviewStatus !== InterviewStatus.PASS
+            (application.interview && application.interview.interviewStatus !== InterviewStatus.PASS)
         )
             throw new BadRequestException('Application is not at the correct status to change');
         await this.prismaService.application.update({
