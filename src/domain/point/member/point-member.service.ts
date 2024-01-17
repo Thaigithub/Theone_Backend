@@ -5,6 +5,7 @@ import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
+import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
 import { PointMemberGetExchangePointListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetPointListResponse } from './response/point-member-get-list.response.ts';
 
@@ -12,7 +13,25 @@ import { PointMemberGetPointListResponse } from './response/point-member-get-lis
 export class PointMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    async getPointList(accountId: number, query: PaginationRequest): Promise<PointMemberGetPointListResponse> {
+    async getCount(accountId: number): Promise<PointMemberGetCountResponse> {
+        const points = await this.prismaService.member.findUnique({
+            where: {
+                accountId: accountId,
+                isActive: true,
+            },
+            select: {
+                totalPoint: true,
+            },
+        });
+        if (!points) {
+            throw new NotFoundException('The member id does not exist');
+        }
+        return {
+            count: points.totalPoint,
+        };
+    }
+
+    async getList(accountId: number, query: PaginationRequest): Promise<PointMemberGetPointListResponse> {
         const points = await this.prismaService.point.findMany({
             where: {
                 member: {

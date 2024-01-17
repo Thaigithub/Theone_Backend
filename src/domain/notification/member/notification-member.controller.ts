@@ -4,8 +4,8 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 import { NotificationMemberService } from './notification-member.service';
+import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
 import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
 
@@ -17,7 +17,7 @@ export class NotificationMemberController {
     @Get()
     async getList(
         @Req() req: AccountIdExtensionRequest,
-        @Query() query: PaginationRequest,
+        @Query() query: NotificationMemberGetListRequest,
     ): Promise<BaseResponse<NotificationMemberGetListResponse>> {
         return BaseResponse.of(await this.notificationMemberService.getList(req.user.accountId, query));
     }
