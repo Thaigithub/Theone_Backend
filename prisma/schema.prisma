@@ -755,6 +755,8 @@ model Contract {
   fileId                   Int                        @unique @map("file_id")
   applicationId            Int                        @unique @map("application_id")
   amount                   Int                        @default(0)
+  manager                  String                     @default("")
+  contact                  String                     @default("")
   department               String                     @default("")
   createdAt                DateTime                   @default(now()) @map("created_at") @db.Date
   salaryType               SalaryType                 @default(DAILY) @map("salary_type")

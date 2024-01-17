@@ -171,6 +171,8 @@ export class ContractCompanyService {
                         endDate: new Date(body.endDate),
                         salaryType: body.salaryType,
                         amount: body.amount,
+                        manager: body.manager,
+                        contact: body.contact,
                         department: body.department,
                         paymentForm: body.paymentForm,
                         settlementStatus: isHeadhuntingRecommendation ? SettlementStatus.UNSETTLED : SettlementStatus.NONE,
@@ -232,6 +234,8 @@ export class ContractCompanyService {
                 salaryType: true,
                 amount: true,
                 department: true,
+                manager: true,
+                contact: true,
                 application: {
                     select: {
                         team: {
@@ -281,8 +285,8 @@ export class ContractCompanyService {
             postName: contract.application.post.name,
             siteStartDate: contract.application.post.site.startDate,
             siteEndDate: contract.application.post.site.endDate,
-            manager: contract.application.post.site.personInCharge,
-            phoneNumber: contract.application.post.site.personInChargeContact,
+            manager: contract.manager,
+            phoneNumber: contract.contact,
             type: contract.application.member ? ContractType.INDIVIDUAL : ContractType.TEAM,
             name: contract.application.member ? contract.application.member.name : contract.application.team.name,
             contact: contract.application.member ? contract.application.member.contact : contract.application.team.leader.contact,
@@ -641,6 +645,8 @@ export class ContractCompanyService {
                 salaryType: body.salaryType,
                 paymentForm: body.paymentForm,
                 amount: body.amount,
+                manager: body.manager,
+                contact: body.contact,
                 file: {
                     update: {
                         key: body.fileKey,

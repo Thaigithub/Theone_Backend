@@ -151,6 +151,8 @@ export class ContractMemberService {
                 ],
             },
             select: {
+                manager: true,
+                contact: true,
                 createdAt: true,
                 startDate: true,
                 endDate: true,
@@ -208,6 +210,8 @@ export class ContractMemberService {
             created: contract.createdAt,
             companyName: contract.application.post.company.name,
             personInCharge: contract.application.post.site.personInCharge,
+            manager: contract.manager,
+            contact: contract.contact,
         };
     }
     async getListForSalary(

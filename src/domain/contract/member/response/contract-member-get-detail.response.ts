@@ -13,4 +13,6 @@ export class ContractMemberGetDetailResponse {
     file: FileResponse;
     companyName: string;
     personInCharge: string;
+    manager: string;
+    contact: string;
 }
