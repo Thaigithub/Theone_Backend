@@ -233,19 +233,19 @@ export class ApplicationCompanyService {
                         applicationId,
                     },
                 });
-            });
-            await this.prismaService.application.update({
-                where: {
-                    id: applicationId,
-                    post: {
-                        company: {
-                            accountId: accountId,
+                await tx.application.update({
+                    where: {
+                        id: applicationId,
+                        post: {
+                            company: {
+                                accountId: accountId,
+                            },
                         },
                     },
-                },
-                data: {
-                    status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                },
+                    data: {
+                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    },
+                });
             });
         }
     }
