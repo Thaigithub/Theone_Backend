@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
 import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
 
 @Injectable()
 export class NotificationMemberService {
     constructor(private prismaService: PrismaService) {}
-    async getList(accountId: number, query: PaginationRequest): Promise<NotificationMemberGetListResponse> {
+    async getList(accountId: number, query: NotificationMemberGetListRequest): Promise<NotificationMemberGetListResponse> {
         const queryFilter: Prisma.NotificationWhereInput = {
             account: {
                 id: accountId,
@@ -19,6 +19,7 @@ export class NotificationMemberService {
                 },
             },
             isActive: true,
+            ...(query.status && { status: query.status }),
         };
         const notifications = await this.prismaService.notification.findMany({
             select: {
