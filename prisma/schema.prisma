@@ -980,7 +980,7 @@ model TaxBill {
 
 model UsageHistory {
   id                      Int                   @id @default(autoincrement())
-  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistoryId Int                   @map("product_payment_history_id")
   productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
   createdAt               DateTime              @default(now()) @map("created_at") @db.Date
   expirationDate          DateTime              @map("expiration_date")

@@ -10,7 +10,15 @@ export class ProductCompanyUsageHistoryGetListRequest extends PaginationRequest 
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'Date must be in the format yyyy-mm-dd.',
     })
-    createdAt: string;
+    startDate: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'Date must be in the format yyyy-mm-dd.',
+    })
+    endDate: string;
 
     @Expose()
     @IsEnum(ProductType)

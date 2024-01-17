@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentType, PaymentStatus, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { PaymentStatus, PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -42,6 +42,8 @@ export class ProductCompanyService {
                     OR: [{ status: TaxBillStatus.ISSUED_COMPLETED }, { status: TaxBillStatus.MODIFIED_ISSUED_COMPLETED }],
                 },
             }),
+            ...(query.startDate && { updatedAt: { gte: new Date(query.startDate) } }),
+            ...(query.endDate && { updatedAt: { lte: new Date(query.endDate) } }),
             status: PaymentStatus.COMPLETE,
         };
         const histories = (
@@ -136,11 +138,15 @@ export class ProductCompanyService {
                 status: PaymentStatus.COMPLETE,
             },
             ...(query.productType && {
-                product: {
-                    productType: query.productType,
+                productPaymentHistory: {
+                    product: {
+                        productType: query.productType,
+                    },
+                    status: PaymentStatus.COMPLETE,
                 },
             }),
-            ...(query.createdAt && { createdAt: new Date(query.createdAt) }),
+            ...(query.startDate && { createdAt: { lte: new Date(query.startDate) } }),
+            ...(query.endDate && { createdAt: { gte: new Date(query.endDate) } }),
         };
 
         const histories = await this.prismaService.usageHistory.groupBy({
@@ -154,8 +160,11 @@ export class ProductCompanyService {
                 expirationDate: true,
             },
             orderBy: { createdAt: 'desc' },
-            skip: (query.pageNumber - 1) * query.pageSize,
-            take: query.pageSize,
+            ...(query.pageSize &&
+                query.pageNumber && {
+                    skip: (query.pageNumber - 1) * query.pageSize,
+                    take: query.pageSize,
+                }),
         });
         const result = await Promise.all(
             histories.map(async (item) => {
