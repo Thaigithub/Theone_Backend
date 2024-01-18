@@ -4,8 +4,6 @@ import {
     BasicHealthSafetyCertificate,
     City,
     Code,
-    DisabledLevel,
-    DisabledType,
     District,
     ForeignWorker,
     Member,
@@ -26,10 +24,7 @@ class ForeignWorkerType {
     dateOfIssue: ForeignWorker['dateOfIssue'];
     file: FileResponse;
 }
-class DisabilityType {
-    disableType: DisabledType[];
-    disableLevel: DisabledLevel;
-}
+class DisabilityType extends FileResponse {}
 class BasicHealthSafetyCertificateType {
     registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
     dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];

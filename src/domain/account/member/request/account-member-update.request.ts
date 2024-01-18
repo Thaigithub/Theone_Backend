@@ -26,5 +26,6 @@ export class AccountMemberUpdateRequest {
 
     @IsNumber()
     @Expose()
+    @IsOptional()
     districtId: number;
 }

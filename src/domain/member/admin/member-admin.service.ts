@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerType, Member as MemberPrisma } from '@prisma/client';
+import { CareerCertificationType, CareerType, Member as MemberPrisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -130,12 +130,18 @@ export class MemberAdminService {
             },
         });
 
+        const healthInsuranceList = member.career.filter(
+            (item) => item.certificationType === CareerCertificationType.HEALTH_INSURANCE,
+        );
+        const employmentInsuranceList = member.career.filter(
+            (item) => item.certificationType === CareerCertificationType.EMPLOYMENT_INSURANCE,
+        );
+
         return {
             name: member.name,
             contact: member.contact,
             username: member.account.username,
             status: member.account.status,
-            obstacle: member.disability ? member.disability.disableType : null,
             joinDate: member.createdAt.toISOString().split('T')[0],
             level: member.level,
             bankAccount: {
@@ -198,6 +204,26 @@ export class MemberAdminService {
                     ? member.basicHealthSafetyCertificate.dateOfCompletion
                     : null,
             },
+            healthInsuranceList:
+                healthInsuranceList.length !== 0
+                    ? healthInsuranceList.map((item) => {
+                          return {
+                              startDate: item.startDate.toISOString().split('T')[0],
+                              endDate: item.endDate.toISOString().split('T')[0],
+                              companyName: item.companyName,
+                          };
+                      })
+                    : [],
+            employmentInsuranceList:
+                employmentInsuranceList.length !== 0
+                    ? employmentInsuranceList.map((item) => {
+                          return {
+                              startDate: item.startDate.toISOString().split('T')[0],
+                              endDate: item.endDate.toISOString().split('T')[0],
+                              companyName: item.companyName,
+                          };
+                      })
+                    : [],
         };
     }
 

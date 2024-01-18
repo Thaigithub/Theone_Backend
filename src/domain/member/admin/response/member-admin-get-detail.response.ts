@@ -5,7 +5,6 @@ import {
     Career,
     Code,
     Company,
-    Disability,
     ForeignWorker,
     Member,
     SpecialLicense,
@@ -17,7 +16,6 @@ export class MemberAdminGetDetailResponse {
     contact: Member['contact'];
     username: Account['username'];
     status: Account['status'];
-    obstacle: Disability['disableType'];
     joinDate: string;
     level: Member['level'];
     bankAccount: {
@@ -54,4 +52,14 @@ export class MemberAdminGetDetailResponse {
         registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];
         dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
     };
+    healthInsuranceList: {
+        companyName: Career['companyName'];
+        startDate: string;
+        endDate: string;
+    }[];
+    employmentInsuranceList: {
+        companyName: Career['companyName'];
+        startDate: string;
+        endDate: string;
+    }[];
 }
