@@ -13,7 +13,7 @@ import { PointAdminGetMemberListResponse } from './response/point-admin-get-memb
 @Controller('/admin/points')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
-export class PointAdminrController {
+export class PointAdminController {
     constructor(private pointAdminService: PointAdminService) {}
     @Get('/members')
     async getMemberList(@Query() query: PointAdminGetListRequest): Promise<BaseResponse<PointAdminGetMemberListResponse>> {

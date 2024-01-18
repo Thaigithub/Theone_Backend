@@ -42,8 +42,10 @@ export class ProductCompanyService {
                     OR: [{ status: TaxBillStatus.ISSUED_COMPLETED }, { status: TaxBillStatus.MODIFIED_ISSUED_COMPLETED }],
                 },
             }),
-            ...(query.startDate && { updatedAt: { gte: new Date(query.startDate) } }),
-            ...(query.endDate && { updatedAt: { lte: new Date(query.endDate) } }),
+            AND: [
+                { ...(query.startDate && { updatedAt: { gte: new Date(query.startDate) } }) },
+                { ...(query.endDate && { updatedAt: { lte: new Date(query.endDate) } }) },
+            ],
             status: PaymentStatus.COMPLETE,
         };
         const histories = (
@@ -136,17 +138,12 @@ export class ProductCompanyService {
                     isActive: true,
                 },
                 status: PaymentStatus.COMPLETE,
+                ...(query.productType && { product: { productType: query.productType } }),
             },
-            ...(query.productType && {
-                productPaymentHistory: {
-                    product: {
-                        productType: query.productType,
-                    },
-                    status: PaymentStatus.COMPLETE,
-                },
-            }),
-            ...(query.startDate && { createdAt: { lte: new Date(query.startDate) } }),
-            ...(query.endDate && { createdAt: { gte: new Date(query.endDate) } }),
+            AND: [
+                { ...(query.startDate && { createdAt: { gte: new Date(query.startDate) } }) },
+                { ...(query.endDate && { createdAt: { lte: new Date(query.endDate) } }) },
+            ],
         };
 
         const histories = await this.prismaService.usageHistory.groupBy({
@@ -160,14 +157,18 @@ export class ProductCompanyService {
                 expirationDate: true,
             },
             orderBy: { createdAt: 'desc' },
-            ...(query.pageSize &&
-                query.pageNumber && {
-                    skip: (query.pageNumber - 1) * query.pageSize,
-                    take: query.pageSize,
-                }),
         });
+        const count = histories.length;
+        let pageHistories = null;
+        if (query.pageNumber && query.pageSize) {
+            const startIndex = (query.pageNumber - 1) * query.pageSize;
+            const endIndex = startIndex + query.pageSize;
+            pageHistories = histories.slice(startIndex, endIndex);
+        } else {
+            pageHistories = histories;
+        }
         const result = await Promise.all(
-            histories.map(async (item) => {
+            pageHistories.map(async (item) => {
                 const product = await this.prismaService.productPaymentHistory.findUnique({
                     where: {
                         id: item.productPaymentHistoryId,
@@ -199,10 +200,6 @@ export class ProductCompanyService {
                 };
             }),
         );
-
-        const count = await this.prismaService.usageHistory.count({
-            where: queryFilter,
-        });
         return new PaginationResponse(result, new PageInfo(count));
     }
 

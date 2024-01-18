@@ -165,6 +165,7 @@ export class ContractCompanyService {
         if (record) {
             isHeadhuntingRecommendation = true;
         }
+
         await this.prismaService.file.create({
             data: {
                 key: body.fileKey,
