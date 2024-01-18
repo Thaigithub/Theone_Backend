@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentStatus } from '@prisma/client';
 import { PORTONE_API_KEY, PORTONE_API_SECRET, PORTONE_HOST } from 'app.config';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import { PrismaService } from 'services/prisma/prisma.service';
 
 @Injectable()
 export class PortoneService {
-    private prismaService: PrismaService;
+    constructor(private prismaService: PrismaService) {}
     private access_token: string;
     private async login(): Promise<void> {
         this.access_token = (
@@ -39,35 +39,36 @@ export class PortoneService {
         });
     }
 
-    async verifyPayment(imp_uid: string, merchantId: string): Promise<boolean> {
+    async verifyPayment(imp_uid: string): Promise<boolean> {
         await this.login();
-        const data = (
-            await axios({
-                url: `${PORTONE_HOST}/payments/${imp_uid}`,
-                method: 'get',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.access_token}`,
-                },
-            })
-        ).data;
-        const { amount, merchant_uid, status } = data;
-        if (status === 'paid') {
-            const payment = await this.prismaService.productPaymentHistory.findUnique({
-                where: {
-                    merchantId: merchant_uid,
-                    cost: amount,
-                    isActive: true,
-                    status: PaymentStatus.PROCESSING,
-                },
-                select: {
-                    product: true,
-                    merchantId: true,
-                    id: true,
-                },
-            });
-            if (payment) {
-                if (payment.merchantId === merchantId) {
+        try {
+            const data = (
+                await axios({
+                    url: `${PORTONE_HOST}/payments/${imp_uid}`,
+                    method: 'get',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${this.access_token}`,
+                    },
+                })
+            ).data.response;
+            const { amount, merchant_uid, status } = data;
+            console.log(data);
+            if (status === 'ready') {
+                const payment = await this.prismaService.productPaymentHistory.findUnique({
+                    where: {
+                        merchantId: merchant_uid,
+                        cost: amount,
+                        isActive: true,
+                        status: PaymentStatus.PROCESSING,
+                    },
+                    select: {
+                        product: true,
+                        merchantId: true,
+                        id: true,
+                    },
+                });
+                if (payment) {
                     const expirationDate = new Date();
                     expirationDate.setMonth(new Date().getMonth() + payment.product.monthLimit);
                     await this.prismaService.productPaymentHistory.update({
@@ -82,6 +83,9 @@ export class PortoneService {
                     return true;
                 }
             }
+        } catch (e) {
+            console.log(e);
+            throw new NotFoundException('Payment not found');
         }
     }
 }
