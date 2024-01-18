@@ -6,7 +6,7 @@ import { BannerMemberGetListResponse } from './response/banner-member-get-list.r
 @Injectable()
 export class BannerMemberService {
     constructor(private prismaService: PrismaService) {}
-    async getList(): Promise<BannerMemberGetListResponse> {
+    async getList(accountId: number): Promise<BannerMemberGetListResponse> {
         const advertising = (
             await this.prismaService.advertisingBanner.findMany({
                 where: {
@@ -112,6 +112,14 @@ export class BannerMemberService {
                                     },
                                 },
                             },
+                            interested: {
+                                where: {
+                                    member: {
+                                        accountId,
+                                        isActive: true,
+                                    },
+                                },
+                            },
                         },
                     },
                 },
@@ -137,6 +145,7 @@ export class BannerMemberService {
                 siteName: item.post.site?.name || null,
                 siteAddress: item.post.site?.address || null,
                 postName: item.post.name,
+                isInterested: accountId ? (item.post.interested.length !== 0 ? true : false) : null,
             };
         });
         return { advertising: advertising, post: post };
