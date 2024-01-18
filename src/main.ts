@@ -38,13 +38,13 @@ async function bootstrap() {
                 parameterLimit: 50000,
             }),
         );
-        app.use(
-            rateLimit({
-                windowMs: 1000 * 60 * 60,
-                max: 1000, // 1000 requests per windowMs
-                message: '🚫  Too many request created from this IP, please try again after an hour',
-            }),
-        );
+        // app.use(
+        //     rateLimit({
+        //         windowMs: 1000 * 60 * 60,
+        //         max: 1000, // 1000 requests per windowMs
+        //         message: '🚫  Too many request created from this IP, please try again after an hour',
+        //     }),
+        // );
 
         app.useGlobalInterceptors(new LoggingInterceptor());
         app.useGlobalPipes(new ValidationPipe());
