@@ -15,5 +15,6 @@ export class BannerMemberGetListResponse {
         siteName: string;
         endDate: Date;
         siteAddress: string;
+        isInterested: boolean;
     }[];
 }
