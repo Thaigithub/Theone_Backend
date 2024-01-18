@@ -88,6 +88,14 @@ export class BannerMemberService {
                     postId: true,
                     post: {
                         select: {
+                            name: true,
+                            endDate: true,
+                            site: {
+                                select: {
+                                    name: true,
+                                    address: true,
+                                },
+                            },
                             company: {
                                 select: {
                                     logo: {
@@ -125,6 +133,10 @@ export class BannerMemberService {
                           type: item.post.company.logo.file.type,
                       }
                     : null,
+                endDate: item.post.endDate,
+                siteName: item.post.site?.name || null,
+                siteAddress: item.post.site?.address || null,
+                postName: item.post.name,
             };
         });
         return { advertising: advertising, post: post };

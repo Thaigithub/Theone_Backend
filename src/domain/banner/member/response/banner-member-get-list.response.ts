@@ -11,5 +11,9 @@ export class BannerMemberGetListResponse {
         file: FileResponse;
         postId: number;
         logoFile: FileResponse;
+        postName: string;
+        siteName: string;
+        endDate: Date;
+        siteAddress: string;
     }[];
 }
