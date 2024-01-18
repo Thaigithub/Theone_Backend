@@ -193,20 +193,31 @@ export class AccountCompanyService {
         });
         if (userCount !== 0) throw new ConflictException('Username has been used');
         await this.prismaService.$transaction(async (tx) => {
-            await tx.file.deleteMany({
-                where: {
-                    attachment: {
-                        company: {
-                            accountId,
+            const listFile = (
+                await tx.file.findMany({
+                    where: {
+                        attachment: {
+                            company: {
+                                accountId,
+                            },
                         },
                     },
-                },
-            });
-
+                    select: {
+                        id: true,
+                    },
+                })
+            ).map((item) => item.id);
             await tx.attachment.deleteMany({
                 where: {
                     company: {
                         accountId,
+                    },
+                },
+            });
+            await tx.file.deleteMany({
+                where: {
+                    id: {
+                        in: listFile,
                     },
                 },
             });

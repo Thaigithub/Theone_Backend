@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AnnouncementModule } from 'domain/announcement/announcement.module';
 import { ApplicationModule } from 'domain/application/application.module';
 import { BannerModule } from 'domain/banner/banner.module';
 import { CodeModule } from 'domain/code/code.module';
@@ -17,7 +18,6 @@ import { PointModule } from 'domain/point/point.module';
 import { PostModule } from 'domain/post/post.module';
 import { PreferenceModule } from 'domain/preference/preference.module';
 import { ProductModule } from 'domain/product/product.module';
-import { RecommendationModule } from 'domain/recommendation/recommendation.module';
 import { RegionModule } from 'domain/region/region.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
@@ -32,7 +32,6 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
-import { AnnouncementModule } from 'domain/announcement/announcement.module';
 
 @Module({
     imports: [
@@ -53,7 +52,6 @@ import { AnnouncementModule } from 'domain/announcement/announcement.module';
         FileModule,
         ApplicationModule,
         SiteModule,
-        RecommendationModule,
         InterviewModule,
         HeadhuntingModule,
         ContractModule,

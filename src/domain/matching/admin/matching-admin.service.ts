@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InterviewStatus, Prisma, SupportCategory } from '@prisma/client';
+import { ApplicationCategory, InterviewStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -52,10 +52,10 @@ export class MatchingAdminService {
                 },
                 applicants: {
                     select: {
+                        category: true,
                         interview: {
                             select: {
-                                supportCategory: true,
-                                interviewStatus: true,
+                                status: true,
                             },
                         },
                     },
@@ -81,12 +81,12 @@ export class MatchingAdminService {
                 paymentDate: null, //TODO: Adjust this field
                 remainingNumber: null, // TODO: Adjust this field
                 numberOfInterviewRequests: item.applicants.filter(
-                    (applicant) => applicant.interview?.supportCategory === SupportCategory.MATCHING,
+                    (applicant) => applicant.category === ApplicationCategory.MATCHING,
                 ).length,
                 numberOfInterviewRejections: item.applicants.filter(
                     (applicant) =>
-                        applicant.interview?.supportCategory === SupportCategory.MATCHING &&
-                        applicant.interview?.interviewStatus === InterviewStatus.FAIL,
+                        applicant.category === ApplicationCategory.MATCHING &&
+                        applicant.interview?.status === InterviewStatus.FAIL,
                 ).length,
             };
             return res;

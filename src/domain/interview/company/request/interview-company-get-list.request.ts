@@ -1,17 +1,17 @@
-import { InterviewStatus, RequestObject, SupportCategory } from '@prisma/client';
+import { ApplicationCategory, InterviewStatus, RequestObject } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class InterviewCompantGetListRequest extends PaginationRequest {
+export class InterviewCompanyGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(RequestObject)
     object: RequestObject;
 
     @Expose()
-    @IsEnum(SupportCategory)
+    @IsEnum(ApplicationCategory)
     @IsOptional()
-    supportCategory: SupportCategory;
+    category: ApplicationCategory;
 
     @Expose()
     @IsString()
@@ -21,15 +21,15 @@ export class InterviewCompantGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    interviewRequestStartDate: string;
+    startDate: string;
 
     @Expose()
     @IsString()
     @IsOptional()
-    interviewRequestEndDate: string;
+    endDate: string;
 
     @Expose()
     @IsEnum(InterviewStatus)
     @IsOptional()
-    interviewResult: InterviewStatus;
+    result: InterviewStatus;
 }

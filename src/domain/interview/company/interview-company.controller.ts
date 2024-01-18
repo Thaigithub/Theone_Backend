@@ -1,16 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { AccountType, InterviewStatus } from '@prisma/client';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { AccountType } from '@prisma/client';
 import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-team-detail.response';
-import { BaseResponse } from 'utils/generics/base.response';
-
-import { InterviewCompanyService } from './interview-company.service';
-import { InterviewCompantGetListRequest } from './request/interview-company-get-list.request';
-import { InterviewCompanyGetItemResponse } from './response/interview-company-get-item.response';
-import { InterviewCompanyProposeRequest } from './request/interview-company-propose.request';
+import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-detail-applicant.response';
 import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseResponse } from 'utils/generics/base.response';
+import { InterviewCompanyService } from './interview-company.service';
+import { InterviewCompanyProposeRequest } from './request/interview-company-create.request';
+import { InterviewCompanyGetListRequest } from './request/interview-company-get-list.request';
+import { InterviewCompanyUpdateStatusRequest } from './request/interview-company-update-status.request';
+import { InterviewCompanyGetListResponse } from './response/interview-company-get-list.response';
 
 @Controller('/company/interviews')
 @Roles(AccountType.COMPANY)
@@ -21,52 +21,41 @@ export class InterviewCompanyController {
     @Get()
     async getList(
         @Req() request: AccountIdExtensionRequest,
-        @Query() query: InterviewCompantGetListRequest,
-    ): Promise<BaseResponse<InterviewCompanyGetItemResponse>> {
-        const interviews = await this.interviewCompanyService.getList(request.user.accountId, query);
-        return BaseResponse.of(interviews);
+        @Query() query: InterviewCompanyGetListRequest,
+    ): Promise<BaseResponse<InterviewCompanyGetListResponse>> {
+        return BaseResponse.of(await this.interviewCompanyService.getList(request.user.accountId, query));
     }
 
     @Get('/:id/member')
-    async getMemberDetail(
+    async getDetailMember(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
-        return BaseResponse.of(await this.interviewCompanyService.getMemberDetail(request.user.accountId, id));
+        return BaseResponse.of(await this.interviewCompanyService.getDetailMember(request.user.accountId, id));
     }
 
     @Get('/:id/team')
-    async getTeamDetail(
+    async getDetailTeam(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
-        return BaseResponse.of(await this.interviewCompanyService.getTeamDetail(request.user.accountId, id));
+        return BaseResponse.of(await this.interviewCompanyService.getDetailTeam(request.user.accountId, id));
     }
 
-    @Put('/:id/pass')
-    async passInteview(
+    @Patch('/:id/status')
+    async updateStatus(
         @Req() request: AccountIdExtensionRequest,
         @Param('id', ParseIntPipe) id: number,
+        @Body() body: InterviewCompanyUpdateStatusRequest,
     ): Promise<BaseResponse<void>> {
-        const posts = await this.interviewCompanyService.resultInterview(request.user.accountId, id, InterviewStatus.PASS);
-        return BaseResponse.of(posts);
+        return BaseResponse.of(await this.interviewCompanyService.updateStatus(request.user.accountId, id, body.status));
     }
 
-    @Put('/:id/fail')
-    async failInteview(
-        @Req() request: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
-        const posts = await this.interviewCompanyService.resultInterview(request.user.accountId, id, InterviewStatus.FAIL);
-        return BaseResponse.of(posts);
-    }
-
-    @Post('manpower')
-    async proposeTeamInterview(
+    @Post()
+    async create(
         @Body() body: InterviewCompanyProposeRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<void>> {
-        await this.interviewCompanyService.proposeInterview(body, request.user.accountId);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.interviewCompanyService.create(body, request.user.accountId));
     }
 }

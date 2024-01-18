@@ -58,7 +58,7 @@ export class ApplicationAdminService {
                 assignedAt: true,
                 interview: {
                     select: {
-                        interviewStatus: true,
+                        status: true,
                     },
                 },
             },
@@ -80,7 +80,7 @@ export class ApplicationAdminService {
                 totalExperienceMonths,
                 desiredSalary,
                 assignedAt: assignedAt,
-                interviewStatus: interview ? interview?.interviewStatus : null,
+                interviewStatus: interview ? interview?.status : null,
             };
         });
         const applicationListCount = await this.prismaService.application.count({
@@ -127,7 +127,7 @@ export class ApplicationAdminService {
                 },
                 interview: {
                     select: {
-                        interviewRequestDate: true,
+                        requestDate: true,
                     },
                 },
             },
@@ -148,9 +148,7 @@ export class ApplicationAdminService {
                 : ApplicationAdminContractStatus.CONTRACT_NOT_FOUND,
             startDate: application.contract ? application.contract.startDate : null,
             endDate: application.contract ? application.contract.endDate : null,
-            interviewRequestDate: application.interview?.interviewRequestDate
-                ? application.interview?.interviewRequestDate
-                : null,
+            interviewRequestDate: application.interview?.requestDate ? application.interview?.requestDate : null,
         };
         return applicationInfor;
     }

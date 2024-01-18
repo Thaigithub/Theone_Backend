@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InterviewStatus, PostApplicationStatus, Prisma, SupportCategory } from '@prisma/client';
+import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -9,9 +9,9 @@ import { ApplicationCompanyGetListApplicantsRequest } from './request/applicatio
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
+import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
 import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
 import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
-import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -225,27 +225,24 @@ export class ApplicationCompanyService {
                 },
             });
         } else {
-            await this.prismaService.$transaction(async (tx) => {
-                await tx.interview.create({
-                    data: {
-                        interviewStatus: InterviewStatus.INTERVIEWING,
-                        supportCategory: SupportCategory.MANPOWER,
-                        applicationId,
-                    },
-                });
-                await tx.application.update({
-                    where: {
-                        id: applicationId,
-                        post: {
-                            company: {
-                                accountId: accountId,
-                            },
+            await this.prismaService.application.update({
+                where: {
+                    id: applicationId,
+                    post: {
+                        company: {
+                            accountId: accountId,
                         },
                     },
-                    data: {
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                },
+                data: {
+                    category: ApplicationCategory.MANPOWER,
+                    status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                    interview: {
+                        create: {
+                            status: InterviewStatus.INTERVIEWING,
+                        },
                     },
-                });
+                },
             });
         }
     }

@@ -130,11 +130,7 @@ export class ContractCompanyService {
                         id: true,
                     },
                 },
-                interview: {
-                    select: {
-                        supportCategory: true,
-                    },
-                },
+                category: true,
             },
         });
         if (!application) throw new NotFoundException('Application not found or not ready');
