@@ -214,7 +214,11 @@ export class AccountMemberService {
                         file: true,
                     },
                 },
-                disability: true,
+                disability: {
+                    include: {
+                        file: true,
+                    },
+                },
                 basicHealthSafetyCertificate: {
                     include: {
                         file: true,
@@ -256,8 +260,10 @@ export class AccountMemberService {
                 },
             },
             disability: {
-                disableType: disability ? disability.disableType : null,
-                disableLevel: disability ? disability.disableLevel : null,
+                fileName: disability ? disability.file.fileName : null,
+                type: disability ? disability.file.type : null,
+                key: disability ? disability.file.key : null,
+                size: disability ? Number(disability.file.size) : null,
             },
             basicHealthSafetyCertificate: {
                 registrationNumber: basicHealthSafetyCertificate ? basicHealthSafetyCertificate.registrationNumber : null,
@@ -512,22 +518,25 @@ export class AccountMemberService {
     }
 
     async upsertDisability(id: number, request: AccountMemberUpsertDisabilityRequest): Promise<void> {
-        await this.prismaService.member.update({
-            where: { accountId: id },
-            data: {
-                disability: {
-                    upsert: {
-                        update: {
-                            disableLevel: request.disabledLevel,
-                            disableType: request.disabledTypeList,
-                        },
-                        create: {
-                            disableLevel: request.disabledLevel,
-                            disableType: request.disabledTypeList,
+        await this.prismaService.$transaction(async (tx) => {
+            const file = await tx.file.create({
+                data: request,
+            });
+            await tx.member.update({
+                where: { accountId: id },
+                data: {
+                    disability: {
+                        upsert: {
+                            update: {
+                                fileId: file.id,
+                            },
+                            create: {
+                                fileId: file.id,
+                            },
                         },
                     },
                 },
-            },
+            });
         });
     }
 

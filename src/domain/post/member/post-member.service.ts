@@ -236,9 +236,8 @@ export class PostMemberService {
                 specialOccupation: true,
                 interested: {
                     where: {
-                        NOT: { member: null },
                         member: {
-                            accountId: accountId,
+                            accountId,
                             isActive: true,
                         },
                     },

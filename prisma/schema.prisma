@@ -264,14 +264,14 @@ model BankAccount {
 }
 
 model Disability {
-  id           Int            @id @default(autoincrement())
-  memberId     Int            @unique @map("member_id")
-  isActive     Boolean        @default(true) @map("is_active")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
-  disableLevel DisabledLevel  @map("disable_level")
-  disableType  DisabledType[] @map("disable_type")
-  member       Member         @relation(fields: [memberId], references: [id])
+  id        Int      @id @default(autoincrement())
+  memberId  Int      @unique @map("member_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  file      File     @relation(fields: [fileId], references: [id])
+  fileId    Int      @map("file_id")
+  member    Member   @relation(fields: [memberId], references: [id])
 
   @@map("disabilities")
 }
@@ -311,6 +311,7 @@ model File {
   taxBill                      TaxBill?
   cardReceipt                  CardReceipt?
   announcementFile             AnnouncementFile?
+  Disability                   Disability[]
 
   @@map("files")
 }
@@ -1192,24 +1193,6 @@ enum TeamStatus {
   GENERAL
   STOPPED
   WAITING_FOR_ACTIVITY
-}
-
-enum DisabledType {
-  BURN
-  NONE
-  VISION_IMPAIRMENT
-  VISUAL_FIELD_EFFECT
-  HEARING_IMPAIRMENT
-  BALANCE_DYSFUNCTION
-  SPEECH_IMPEDIMENT
-  ABSTRACTION_OF_FACTIAL_AREA
-  DEPRESSION
-  DISORDERS_CAUSE_BY_DEFORMITIES
-}
-
-enum DisabledLevel {
-  MILD
-  SEVERE
 }
 
 enum CertificateStatus {
