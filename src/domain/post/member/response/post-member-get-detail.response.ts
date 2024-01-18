@@ -26,6 +26,8 @@ export class PostMemberGetDetailResponse {
         siteAddress: Site['address'];
         startDate: string;
         endDate: string;
+        longitude: Site['longitude'];
+        latitude: Site['latitude'];
         originalBuilding: Site['originalBuilding'];
         originalContractor: Site['contractStatus'];
         isInterest: boolean;
