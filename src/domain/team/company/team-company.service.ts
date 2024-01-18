@@ -1,16 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateStatus, ExperienceType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { TeamCompanyManpowerGetListRequest } from './request/team-company-manpower-get-list.request';
-import { TeamCompanyManpowerGetDetailResponse } from './response/team-company-manpower-get-detail.response';
-import { ManpowerListTeamsResponse } from './response/team-company-manpower-get-list.response';
+import { TeamCompanyGetListRequest } from './request/team-company-get-list.request';
+import { TeamCompanyGetDetailResponse } from './response/team-company-get-detail.response';
+import { TeamCompanyGetListResponse } from './response/team-company-get-list.response';
 
 @Injectable()
 export class TeamCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    private parseConditionFromQuery(query: TeamCompanyManpowerGetListRequest): Prisma.TeamWhereInput {
+    private parseConditionFromQuery(query: TeamCompanyGetListRequest): Prisma.TeamWhereInput {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupation?.map((item) => parseInt(item));
         const districtList = query.regionList?.map((item) => parseInt(item.split('-')[1]));
@@ -142,20 +143,21 @@ export class TeamCompanyService {
         return membersSpecialLicences;
     }
 
-    async getList(query: TeamCompanyManpowerGetListRequest): Promise<ManpowerListTeamsResponse[]> {
-        const teams = await this.prismaService.team.findMany({
-            include: {
-                leader: true,
-                district: {
-                    include: {
-                        city: true,
+    async getList(query: TeamCompanyGetListRequest): Promise<TeamCompanyGetListResponse> {
+        const teams = (
+            await this.prismaService.team.findMany({
+                include: {
+                    leader: true,
+                    district: {
+                        include: {
+                            city: true,
+                        },
                     },
                 },
-            },
-            where: this.parseConditionFromQuery(query),
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        return teams.map((item) => {
+                where: this.parseConditionFromQuery(query),
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 name: item.name,
@@ -168,15 +170,13 @@ export class TeamCompanyService {
                 desiredSalary: item.desiredSalary,
             };
         });
-    }
-
-    async getTotal(query: TeamCompanyManpowerGetListRequest): Promise<number> {
-        return await this.prismaService.team.count({
+        const total = await this.prismaService.team.count({
             where: this.parseConditionFromQuery(query),
         });
+        return new PaginationResponse(teams, new PageInfo(total));
     }
 
-    async getTeamDetailManpower(id: number): Promise<TeamCompanyManpowerGetDetailResponse> {
+    async getDetail(id: number): Promise<TeamCompanyGetDetailResponse> {
         const teamExist = await this.prismaService.team.count({
             where: {
                 isActive: true,

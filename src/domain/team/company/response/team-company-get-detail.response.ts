@@ -1,6 +1,6 @@
 import { City, Code, District, Member, SpecialLicense, Team } from '@prisma/client';
 
-export class TeamCompanyManpowerGetDetailResponse {
+export class TeamCompanyGetDetailResponse {
     name: Team['name'];
     totalMembers: Team['totalMembers'];
     cityKoreanName: City['koreanName'];

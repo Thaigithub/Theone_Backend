@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Company, Member, RequestObject, Team } from '@prisma/client';
+import { RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { MatchingCompanyGetListDateEnum } from './dto/matching-company-get-list-date.enum';
 import { MatchingCompanyGetListRecommendationRequest } from './request/matching-company-get-list-recommendation.request';
@@ -22,21 +22,8 @@ export class MatchingCompanyService {
         const regionIds = (query.region && query.region.split(',')) || null;
 
         console.log('MATCHING QUERY', query, occupationIds, specialNoteIds, regionIds);
-
-        const account = await this.prismaService.account.findUnique({
-            where: {
-                id: accountId,
-                isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
         const dateQuery: Date = new Date();
         switch (query.date) {
-            case MatchingCompanyGetListDateEnum.TODAY:
-                break;
             case MatchingCompanyGetListDateEnum.ONE_DAY_AGO:
                 dateQuery.setDate(dateQuery.getDate() - 1);
                 break;
@@ -49,14 +36,14 @@ export class MatchingCompanyService {
             default:
                 break;
         }
-
         const existMatching = await this.prismaService.matchingRecommendation.findMany({
             where: {
                 assignedAt: dateQuery,
             },
-            include: {
+            select: {
                 member: {
-                    include: {
+                    select: {
+                        id: true,
                         specialLicenses: true,
                         applyPosts: {
                             include: {
@@ -66,7 +53,8 @@ export class MatchingCompanyService {
                     },
                 },
                 team: {
-                    include: {
+                    select: {
+                        id: true,
                         leader: true,
                         members: {
                             include: {
@@ -100,8 +88,6 @@ export class MatchingCompanyService {
         }
 
         if (!existMatching.length && query.date === MatchingCompanyGetListDateEnum.TODAY) {
-            //TODO: Apply Algorithm for AutoMatching
-            // Fake for now
             const members = await this.prismaService.member.findMany({
                 include: {
                     specialLicenses: true,
@@ -139,9 +125,25 @@ export class MatchingCompanyService {
                 },
                 take: 5,
             });
-
-            //Save history
-            await this.addHistory(account.company, members, teams);
+            await this.prismaService.company.update({
+                data: {
+                    matchingRecommendation: {
+                        createMany: {
+                            data: [
+                                ...members.map((member) => {
+                                    return { memberId: member.id };
+                                }),
+                                ...teams.map((team) => {
+                                    return { teamId: team.id };
+                                }),
+                            ],
+                        },
+                    },
+                },
+                where: {
+                    accountId,
+                },
+            });
 
             return this.mappingResponseDTO(members, teams);
         }
@@ -162,18 +164,6 @@ export class MatchingCompanyService {
         });
 
         return listSpecial;
-    }
-    async addHistory(company: Company, members: Member[], teams: Team[]) {
-        await this.prismaService.matchingRecommendation.createMany({
-            data: [
-                ...members.map((member) => {
-                    return { memberId: member.id, companyId: company.id };
-                }),
-                ...teams.map((team) => {
-                    return { teamId: team.id, companyId: company.id };
-                }),
-            ],
-        });
     }
 
     mappingResponseDTO(members, teams): MatchingCompanyGetListRecommendation {

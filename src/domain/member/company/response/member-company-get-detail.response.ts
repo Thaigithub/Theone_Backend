@@ -1,7 +1,7 @@
 import { Account, BasicHealthSafetyCertificate, Career, City, Code, District, Member, SpecialLicense } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
-export class MemberCompanyManpowerGetDetailResponse {
+export class MemberCompanyGetDetailResponse {
     name: Member['name'];
     username: Account['username'];
     contact: Member['contact'];

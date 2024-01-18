@@ -10,5 +10,5 @@ export class ApplicationAdminGetDetailResponse {
     contractStatus: ApplicationAdminContractStatus;
     startDate: Post['startDate'];
     endDate: Post['endDate'];
-    interviewRequestDate: Interview['interviewRequestDate'];
+    interviewRequestDate: Interview['requestDate'];
 }

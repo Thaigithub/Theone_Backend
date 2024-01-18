@@ -14,26 +14,20 @@ import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './respo
 export class HeadhuntingCompanyController {
     constructor(private readonly headhuntingCompanyService: HeadhuntingCompanyService) {}
 
-    @Get('/:postId/recommendation')
+    @Get('/post/:postId/recommendation')
     async getListRecommendation(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: AccountIdExtensionRequest,
         @Query() query: HeadhuntingGetListRecommendationRequest,
     ): Promise<BaseResponse<RecommendationCompanyGetListHeadhuntingApprovedResponse>> {
-        const recommendationApplicants = await this.headhuntingCompanyService.getListRecommendation(
-            request.user.accountId,
-            postId,
-            query,
-        );
-        return BaseResponse.of(recommendationApplicants);
+        return BaseResponse.of(await this.headhuntingCompanyService.getListRecommendation(request.user.accountId, postId, query));
     }
 
-    @Get('/:postId/request')
+    @Get('/post/:postId/request')
     async getDetailRequest(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<any>> {
-        const recommendationApplicants = await this.headhuntingCompanyService.getDetailRequest(request.user.accountId, postId);
-        return BaseResponse.of(recommendationApplicants);
+        return BaseResponse.of(await this.headhuntingCompanyService.getDetailRequest(request.user.accountId, postId));
     }
 }

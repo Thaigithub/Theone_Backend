@@ -629,6 +629,7 @@ model Application {
   status     PostApplicationStatus @default(APPLY)
   assignedAt DateTime              @default(now())
   updatedAt  DateTime              @updatedAt @map("updated_at")
+  category   ApplicationCategory   @default(MANPOWER)
   member     Member?               @relation(fields: [memberId], references: [id])
   post       Post                  @relation(fields: [postId], references: [id])
   team       Team?                 @relation(fields: [teamId], references: [id])
@@ -718,15 +719,14 @@ model HeadhuntingRequest {
 }
 
 model Interview {
-  id                   Int             @id @default(autoincrement())
-  isActive             Boolean         @default(true) @map("is_active")
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
-  supportCategory      SupportCategory @map("interview_category")
-  applicationId        Int             @unique
-  interviewStatus      InterviewStatus @map("interview_status")
-  interviewRequestDate DateTime        @default(now()) @map("interview_request_date") @db.Date
-  application          Application     @relation(fields: [applicationId], references: [id])
+  id            Int             @id @default(autoincrement())
+  isActive      Boolean         @default(true) @map("is_active")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  applicationId Int             @unique @map("application_id")
+  status        InterviewStatus
+  requestDate   DateTime        @default(now()) @map("request_date") @db.Date
+  application   Application     @relation(fields: [applicationId], references: [id])
 
   @@map("interviews")
 }
@@ -1312,7 +1312,7 @@ enum RequestObject {
   TEAM
 }
 
-enum SupportCategory {
+enum ApplicationCategory {
   MATCHING
   HEADHUNTING
   MANPOWER

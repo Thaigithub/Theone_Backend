@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { QueryPagingHelper } from 'utils/pagination-query';
-import { MemberCompanyManpowerGetListRequest } from './request/member-company-manpower-get-list.request';
-import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
-import { MemberCompanyManpowerGetDetailResponse } from './response/member-company-manpower-get-detail.response';
-import { ManpowerListMembersResponse } from './response/member-company-manpower-get-list.response';
 import { RegionService } from 'domain/region/region.service';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { MemberCompanyGetListRequest } from './request/member-company-get-list.request';
+import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
+import { MemberCompanyGetDetailResponse } from './response/member-company-get-detail.response';
+import { MemberCompanyGetListResponse } from './response/member-company-get-list.response';
 
 @Injectable()
 export class MemberCompanyService {
@@ -15,7 +16,7 @@ export class MemberCompanyService {
         private readonly regionService: RegionService,
     ) {}
 
-    private async parseConditionFromQuery(query: MemberCompanyManpowerGetListRequest): Promise<Prisma.MemberWhereInput> {
+    private async parseConditionFromQuery(query: MemberCompanyGetListRequest): Promise<Prisma.MemberWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupation?.map((item) => parseInt(item));
         const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
@@ -106,21 +107,21 @@ export class MemberCompanyService {
         };
     }
 
-    async getList(query: MemberCompanyManpowerGetListRequest): Promise<ManpowerListMembersResponse[]> {
-        const members = await this.prismaService.member.findMany({
-            include: {
-                specialLicenses: true,
-                district: {
-                    include: {
-                        city: true,
+    async getList(query: MemberCompanyGetListRequest): Promise<MemberCompanyGetListResponse> {
+        const members = (
+            await this.prismaService.member.findMany({
+                include: {
+                    specialLicenses: true,
+                    district: {
+                        include: {
+                            city: true,
+                        },
                     },
                 },
-            },
-            where: await this.parseConditionFromQuery(query),
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        return members.map((item) => {
+                where: await this.parseConditionFromQuery(query),
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 name: item.name,
@@ -133,15 +134,13 @@ export class MemberCompanyService {
                 specialLicenses: item.specialLicenses,
             };
         });
-    }
-
-    async getTotal(query: MemberCompanyManpowerGetListRequest): Promise<number> {
-        return await this.prismaService.member.count({
+        const total = await this.prismaService.member.count({
             where: await this.parseConditionFromQuery(query),
         });
+        return new PaginationResponse(members, new PageInfo(total));
     }
 
-    async getMemberDetailManpower(id: number): Promise<MemberCompanyManpowerGetDetailResponse> {
+    async getMemberDetailManpower(id: number): Promise<MemberCompanyGetDetailResponse> {
         const memberExist = await this.prismaService.member.count({
             where: {
                 isActive: true,

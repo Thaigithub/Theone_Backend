@@ -37,14 +37,14 @@ export class ApplicationMemberService {
                 ? {
                       status: PostApplicationStatus.REJECT_BY_COMPANY,
                       interview: {
-                          interviewStatus: InterviewStatus.FAIL,
+                          status: InterviewStatus.FAIL,
                       },
                   }
                 : query.status === ApplicationMemberStatus.PASS
                   ? {
                         status: PostApplicationStatus.APPROVE_BY_COMPANY,
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                     }
                   : query.status === ApplicationMemberStatus.APPLY
@@ -344,7 +344,7 @@ export class ApplicationMemberService {
                 status: true,
                 interview: {
                     select: {
-                        interviewStatus: true,
+                        status: true,
                     },
                 },
             },
@@ -352,7 +352,7 @@ export class ApplicationMemberService {
         if (!application) throw new NotFoundException('Application not found');
         if (
             application.status !== PostApplicationStatus.APPROVE_BY_COMPANY ||
-            (application.interview && application.interview.interviewStatus !== InterviewStatus.PASS)
+            (application.interview && application.interview.status !== InterviewStatus.PASS)
         )
             throw new BadRequestException('Application is not at the correct status to change');
         await this.prismaService.application.update({
@@ -400,7 +400,7 @@ export class ApplicationMemberService {
                 status: true,
                 interview: {
                     select: {
-                        interviewStatus: true,
+                        status: true,
                     },
                 },
                 post: {
@@ -455,7 +455,7 @@ export class ApplicationMemberService {
                             accountId,
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -472,7 +472,7 @@ export class ApplicationMemberService {
                             },
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -492,7 +492,7 @@ export class ApplicationMemberService {
                             accountId,
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -509,7 +509,7 @@ export class ApplicationMemberService {
                             },
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -529,7 +529,7 @@ export class ApplicationMemberService {
                             accountId,
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -549,7 +549,7 @@ export class ApplicationMemberService {
                             },
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -576,7 +576,7 @@ export class ApplicationMemberService {
                         },
                     },
                     interview: {
-                        interviewStatus: InterviewStatus.PASS,
+                        status: InterviewStatus.PASS,
                     },
                     post: {
                         name: {
@@ -597,7 +597,7 @@ export class ApplicationMemberService {
                             accountId,
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -614,7 +614,7 @@ export class ApplicationMemberService {
                             },
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -634,7 +634,7 @@ export class ApplicationMemberService {
                             accountId,
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {
@@ -650,7 +650,7 @@ export class ApplicationMemberService {
                             },
                         },
                         interview: {
-                            interviewStatus: InterviewStatus.PASS,
+                            status: InterviewStatus.PASS,
                         },
                         post: {
                             name: {

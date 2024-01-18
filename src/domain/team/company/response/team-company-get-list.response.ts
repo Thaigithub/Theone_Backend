@@ -1,7 +1,7 @@
 import { City, District, Member, Team } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class ManpowerListTeamsResponse {
+export class GetListResponse {
     id: Team['id'];
     name: Team['name'];
     totalMembers: Team['totalMembers'];
@@ -13,4 +13,4 @@ export class ManpowerListTeamsResponse {
     desiredSalary: Member['desiredSalary'];
 }
 
-export class TeamCompanyManpowerGetListResponse extends PaginationResponse<ManpowerListTeamsResponse> {}
+export class TeamCompanyGetListResponse extends PaginationResponse<GetListResponse> {}

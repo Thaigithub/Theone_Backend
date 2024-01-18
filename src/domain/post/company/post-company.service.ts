@@ -442,6 +442,7 @@ export class PostCompanyService {
                         accountId,
                     },
                     siteId,
+                    isActive: true,
                 },
                 select: {
                     id: true,

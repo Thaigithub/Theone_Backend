@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 import { IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class MemberCompanyManpowerGetListRequest extends PaginationRequest {
+export class MemberCompanyGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()

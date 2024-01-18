@@ -37,16 +37,14 @@ export class PostCompanyController {
         @Body() body: PostCompanyCreateHeadhuntingRequestRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.createHeadhuntingRequest(request.user.accountId, body, id);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.postCompanyService.createHeadhuntingRequest(request.user.accountId, body, id));
     }
     @Get('/headhunting-request')
     async getListHeadhuntingRequest(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyHeadhuntingRequestRequest,
     ): Promise<BaseResponse<PostCompanyGetListHeadhuntingRequestResponse>> {
-        const posts = await this.postCompanyService.getListHeadhuntingRequest(request.user.accountId, query);
-        return BaseResponse.of(posts);
+        return BaseResponse.of(await this.postCompanyService.getListHeadhuntingRequest(request.user.accountId, query));
     }
 
     @Get('/applicant-site')
@@ -54,8 +52,7 @@ export class PostCompanyController {
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListApplicantSiteRequest,
     ): Promise<BaseResponse<PostCompanyGetListApplicantsResponse>> {
-        const posts = await this.postCompanyService.getListApplicant(request.user.accountId, query);
-        return BaseResponse.of(posts);
+        return BaseResponse.of(await this.postCompanyService.getListApplicant(request.user.accountId, query));
     }
 
     @Get('/count')
@@ -77,8 +74,7 @@ export class PostCompanyController {
         @Param('id', ParseIntPipe) id: number,
         @Body() payload: PostCompanyCreateRequest,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.update(request.user.accountId, id, payload);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.postCompanyService.update(request.user.accountId, id, payload));
     }
 
     @Delete('/:id')
@@ -91,8 +87,7 @@ export class PostCompanyController {
         @Req() request: AccountIdExtensionRequest,
         @Query() query: PostCompanyGetListRequest,
     ): Promise<BaseResponse<PostCompanyGetListResponse>> {
-        const posts = await this.postCompanyService.getList(request.user.accountId, query);
-        return BaseResponse.of(posts);
+        return BaseResponse.of(await this.postCompanyService.getList(request.user.accountId, query));
     }
 
     @Post()
@@ -100,7 +95,6 @@ export class PostCompanyController {
         @Req() userRequest: AccountIdExtensionRequest,
         @Body() request: PostCompanyCreateRequest,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.create(userRequest.user.accountId, request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.postCompanyService.create(userRequest.user.accountId, request));
     }
 }
