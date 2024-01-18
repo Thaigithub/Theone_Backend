@@ -1,18 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
-import { SiteMemberGetNearByRequest } from './request/site-member-get-nearby.request';
 import { SiteMemberGetDetailResponse } from './response/site-member-get-detail.response';
-import { SiteMemberNearByGetListResponse } from './response/site-member-get-list-nearby.response';
 import { SiteMemberGetListResponse } from './response/site-member-get-list.response';
 import { SiteMemberUpdateInterestResponse } from './response/site-member-update-interest.response';
 
 @Injectable()
 export class SiteMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly regionService: RegionService,
+    ) {}
     async checkExist(id: number) {
         const siteRecord = await this.prismaService.site.findUnique({
             where: {
@@ -75,108 +77,28 @@ export class SiteMemberService {
     }
 
     async getList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
-        const entireCity = await (async () => {
-            if (!query.districtId) {
-                return null;
-            }
-            return await this.prismaService.district.findUnique({
-                where: {
-                    id: query.districtId,
-                    englishName: 'All',
-                },
-            });
-        })();
-
+        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
         const queryFilter: Prisma.SiteWhereInput = {
-            ...(query.name && { name: { contains: query.name, mode: 'insensitive' } }),
-            ...(query.districtId &&
-                entireCity && {
-                    district: {
-                        city: {
-                            id: entireCity.id,
-                        },
-                    },
-                }),
-            ...(query.districtId &&
-                !entireCity && {
-                    district: {
-                        id: query.districtId,
-                    },
-                }),
+            ...(query.keyword && { name: { contains: query.keyword, mode: 'insensitive' } }),
+            ...(query.regionList && {
+                OR: [
+                    districtsList.length
+                        ? {
+                              district: { id: { in: districtsList } },
+                          }
+                        : {},
+                    citiesList.length
+                        ? {
+                              district: { cityId: { in: citiesList } },
+                          }
+                        : {},
+                ],
+            }),
             isActive: true,
         };
-        const sites = await this.prismaService.site.findMany({
-            select: {
-                id: true,
-                name: true,
-                startDate: true,
-                endDate: true,
-                numberOfWorkers: true,
-                longitude: true,
-                latitude: true,
-                interestMember: {
-                    where: {
-                        member: {
-                            accountId: accountId,
-                            isActive: true,
-                        },
-                    },
-                    select: {
-                        id: true,
-                    },
-                    take: 1,
-                },
-                district: {
-                    select: {
-                        koreanName: true,
-                        englishName: true,
-                        city: {
-                            select: {
-                                koreanName: true,
-                                englishName: true,
-                            },
-                        },
-                    },
-                },
-            },
-            where: queryFilter,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        const siteList = sites.map((item) => {
-            return {
-                id: item.id,
-                name: item.name,
-                startDate: item.startDate,
-                endDate: item.endDate,
-                numberOfWorkers: item.numberOfWorkers,
-                longitude: item.longitude,
-                latitude: item.latitude,
-                isInterested: item.interestMember.length > 0 && accountId ? true : false,
-                district: {
-                    koreanName: item.district.koreanName,
-                    englishName: item.district.englishName,
-                },
-                city: {
-                    koreanName: item.district.city.koreanName,
-                    englishName: item.district.city.englishName,
-                },
-            };
-        });
-        const siteListCount = await this.prismaService.site.count({
-            where: queryFilter,
-        });
-        return new PaginationResponse(siteList, new PageInfo(siteListCount));
-    }
-
-    async getListNearBy(
-        accountId: number | undefined,
-        query: SiteMemberGetNearByRequest,
-    ): Promise<SiteMemberNearByGetListResponse> {
-        const meshList = (
+        const sites = (
             await this.prismaService.site.findMany({
-                where: {
-                    isActive: true,
-                },
+                where: queryFilter,
                 ...QueryPagingHelper.queryPaging(query),
                 select: {
                     id: true,
@@ -222,7 +144,6 @@ export class SiteMemberService {
                             occupation: true,
                             endDate: true,
                         },
-                        ...(query.numberOfPost && { take: query.numberOfPost }),
                     },
                     interestMember: {
                         where: {
@@ -262,15 +183,28 @@ export class SiteMemberService {
                           key: item.company.logo.file.key,
                       }
                     : null,
-                posts: item.post.map((post) => {
-                    return {
-                        id: post.id,
-                        name: post.name,
-                        isPulledUp: post.isPulledUp,
-                        endDate: post.endDate,
-                        occupationName: post.occupation?.codeName || null,
-                    };
-                }),
+                posts: query.numberOfPost
+                    ? item.post
+                          .map((post) => {
+                              return {
+                                  id: post.id,
+                                  name: post.name,
+                                  isPulledUp: post.isPulledUp,
+                                  endDate: post.endDate,
+                                  occupationName: post.occupation?.codeName || null,
+                              };
+                          })
+                          .slice(0, query.numberOfPost)
+                    : item.post.map((post) => {
+                          return {
+                              id: post.id,
+                              name: post.name,
+                              isPulledUp: post.isPulledUp,
+                              endDate: post.endDate,
+                              occupationName: post.occupation?.codeName || null,
+                          };
+                      }),
+                countPost: item.post.length,
                 isInterested: accountId && item.interestMember.length > 0 ? true : false,
                 status: item.status,
                 longitude: item.longitude,
@@ -279,10 +213,10 @@ export class SiteMemberService {
                 endDate: item.endDate,
             };
         });
-
-        return {
-            data: meshList,
-        };
+        const siteListCount = await this.prismaService.site.count({
+            where: queryFilter,
+        });
+        return new PaginationResponse(sites, new PageInfo(siteListCount));
     }
 
     async getDetail(accountId: number, id: number): Promise<SiteMemberGetDetailResponse> {
