@@ -257,7 +257,6 @@ export class PostAdminService {
             category: request.category,
             status: request.status,
             name: request.name,
-            workLocation: request.workLocation,
             startDate: request.startDate && new Date(request.startDate),
             endDate: request.endDate && new Date(request.endDate),
             experienceType: request.experienceType,

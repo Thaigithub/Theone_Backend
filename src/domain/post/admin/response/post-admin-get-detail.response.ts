@@ -4,7 +4,6 @@ import { PostAdminCodeDTO } from '../dto/post-admin-code.dto';
 export class PostAdminGetDetailResponse {
     type: PostType;
     name: string;
-    workLocation: string;
     startDate: Date;
     endDate: Date;
     experienceType: ExperienceType;

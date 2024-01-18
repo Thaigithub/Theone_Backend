@@ -26,6 +26,26 @@ export class BannerMemberService {
                     },
                     urlLink: true,
                     title: true,
+                    request: {
+                        select: {
+                            company: {
+                                select: {
+                                    logo: {
+                                        select: {
+                                            file: {
+                                                select: {
+                                                    fileName: true,
+                                                    key: true,
+                                                    type: true,
+                                                    size: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
             })
         ).map((item) => {
@@ -36,6 +56,14 @@ export class BannerMemberService {
                     type: item.banner.file.type,
                     size: Number(item.banner.file.size),
                 },
+                logoFile: item.request?.company.logo?.file
+                    ? {
+                          fileName: item.request?.company.logo.file.fileName,
+                          key: item.request.company.logo.file.fileName,
+                          type: item.request.company.logo.file.type,
+                          size: Number(item.request.company.logo.file.size),
+                      }
+                    : null,
                 urlLink: item.urlLink,
                 title: item.title,
             };
@@ -58,6 +86,26 @@ export class BannerMemberService {
                         },
                     },
                     postId: true,
+                    post: {
+                        select: {
+                            company: {
+                                select: {
+                                    logo: {
+                                        select: {
+                                            file: {
+                                                select: {
+                                                    fileName: true,
+                                                    key: true,
+                                                    type: true,
+                                                    size: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
             })
         ).map((item) => {
@@ -69,6 +117,14 @@ export class BannerMemberService {
                     size: Number(item.banner.file.size),
                 },
                 postId: item.postId,
+                logoFile: item.post.company.logo
+                    ? {
+                          fileName: item.post.company.logo.file.fileName,
+                          key: item.post.company.logo.file.key,
+                          size: Number(item.post.company.logo.file.size),
+                          type: item.post.company.logo.file.type,
+                      }
+                    : null,
             };
         });
         return { advertising: advertising, post: post };

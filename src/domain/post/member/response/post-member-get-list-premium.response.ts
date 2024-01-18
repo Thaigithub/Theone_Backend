@@ -8,7 +8,7 @@ class GetListPremium {
     siteName: string | null;
     occupationName: string;
     endDate: Date;
-    workLocation: string;
+    siteAddress: string;
     isInterested: boolean | null;
 }
 export class PostMemberGetListPremiumResponse extends PaginationResponse<GetListPremium> {}

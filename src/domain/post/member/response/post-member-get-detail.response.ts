@@ -30,7 +30,5 @@ export class PostMemberGetDetailResponse {
         originalContractor: Site['contractStatus'];
         isInterest: boolean;
     };
-
-    workLocation: Post['workLocation'];
     isInterest: boolean;
 }
