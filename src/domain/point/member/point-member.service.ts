@@ -1,13 +1,14 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CurrencyExchangeStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { PointMemberStatus } from './enum/point-member-request-status.enum';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
-import { PointMemberGetExchangePointListResponse } from './response/point-member-get-exchange-list.response';
-import { PointMemberGetPointListResponse } from './response/point-member-get-list.response.ts';
+import { PointMemberExchangeGetListResponse } from './response/point-member-get-exchange-list.response';
+import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Injectable()
 export class PointMemberService {
@@ -24,14 +25,39 @@ export class PointMemberService {
             },
         });
         if (!points) {
-            throw new NotFoundException('The member id does not exist');
+            throw new NotFoundException('The member id not exist');
         }
         return {
             count: points.totalPoint,
         };
     }
 
-    async getList(accountId: number, query: PaginationRequest): Promise<PointMemberGetPointListResponse> {
+    async checkApplyApplication(accountId: number) {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                accountId: accountId,
+                isActive: true,
+            },
+            select: {
+                applyPosts: true,
+            },
+        });
+        if (!member) {
+            throw new NotFoundException('The member id is not found');
+        }
+        if (!member.applyPosts || member.applyPosts.length < 1) {
+            return false;
+        }
+        return true;
+    }
+
+    async getList(accountId: number, query: PaginationRequest): Promise<PointMemberGetListResponse> {
+        if (!(await this.checkApplyApplication(accountId))) {
+            return {
+                status: PointMemberStatus.NOT_REQUESTED,
+                data: null,
+            };
+        }
         const points = await this.prismaService.point.findMany({
             where: {
                 member: {
@@ -57,10 +83,19 @@ export class PointMemberService {
                 isActive: true,
             },
         });
-        return new PaginationResponse(points, new PageInfo(pointCount));
+        return {
+            status: PointMemberStatus.REQUESTED,
+            data: new PaginationResponse(points, new PageInfo(pointCount)),
+        };
     }
 
-    async getExchangePointList(accountId: number, query: PaginationRequest): Promise<PointMemberGetExchangePointListResponse> {
+    async getExchangeList(accountId: number, query: PaginationRequest): Promise<PointMemberExchangeGetListResponse> {
+        if (!(await this.checkApplyApplication(accountId))) {
+            return {
+                status: PointMemberStatus.NOT_REQUESTED,
+                data: null,
+            };
+        }
         const points = await this.prismaService.currencyExchange.findMany({
             where: {
                 member: {
@@ -88,10 +123,16 @@ export class PointMemberService {
                 isActive: true,
             },
         });
-        return new PaginationResponse(points, new PageInfo(exchangeCount));
+        return {
+            status: PointMemberStatus.NOT_REQUESTED,
+            data: new PaginationResponse(points, new PageInfo(exchangeCount)),
+        };
     }
 
     async createCurrencyExchange(accountId: number, body: PointMemberCreateCurrencyExchangeRequest) {
+        if (!(await this.checkApplyApplication(accountId))) {
+            throw new BadRequestException(`Member hasn't applied any post yet`);
+        }
         await this.prismaService.$transaction(async (prisma) => {
             const bankAccount = await prisma.bankAccount.findUnique({
                 where: {

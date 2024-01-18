@@ -1,11 +1,17 @@
 import { CurrencyExchangeStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
+import { PointMemberStatus } from '../enum/point-member-request-status.enum';
 
-export class PointMemberExchangePointResponse {
+class PointMemberExchangeResponse {
     createdAt: Date;
     updatedAt: Date;
     amount: number;
     exchangeStatus: CurrencyExchangeStatus;
 }
 
-export class PointMemberGetExchangePointListResponse extends PaginationResponse<PointMemberExchangePointResponse> {}
+class PointMemberGetExchangeListResponse extends PaginationResponse<PointMemberExchangeResponse> {}
+
+export class PointMemberExchangeGetListResponse {
+    status: PointMemberStatus;
+    data: PointMemberGetExchangeListResponse;
+}
