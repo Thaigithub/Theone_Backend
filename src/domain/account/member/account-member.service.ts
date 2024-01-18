@@ -351,14 +351,16 @@ export class AccountMemberService {
             });
         }
 
-        const isEntireCityId = await this.prismaService.district.findUnique({
-            where: {
-                isActive: true,
-                id: body.districtId,
-                englishName: 'All',
-            },
-        });
-        if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+        if (body.districtId) {
+            const isEntireCityId = await this.prismaService.district.findUnique({
+                where: {
+                    isActive: true,
+                    id: body.districtId,
+                    englishName: 'All',
+                },
+            });
+            if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+        }
 
         await this.prismaService.member.update({
             data: {
