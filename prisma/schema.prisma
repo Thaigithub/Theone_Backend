@@ -22,6 +22,7 @@ model Account {
   company                Company?
   member                 Member?
   notifications          Notification[]
+  announcements          Announcement[]
 
   @@map("accounts")
 }
@@ -309,6 +310,7 @@ model File {
   specialLicense               SpecialLicense?
   taxBill                      TaxBill?
   cardReceipt                  CardReceipt?
+  announcementFile             AnnouncementFile?
 
   @@map("files")
 }
@@ -886,6 +888,30 @@ model Notification {
   account   Account            @relation(fields: [accountId], references: [id])
 
   @@map("notifications")
+}
+
+model Announcement {
+  id                Int                @id @default(autoincrement())
+  title             String
+  content           String?
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  accountId         Int                @map("account_id")
+  account           Account            @relation(fields: [accountId], references: [id])
+  announcementFiles AnnouncementFile[]
+
+  @@map("Announcement_files")
+}
+
+model AnnouncementFile {
+  id            Int          @id @default(autoincrement())
+  anouncementId Int
+  fileId        Int          @unique
+  announcement  Announcement @relation(fields: [anouncementId], references: [id])
+  file          File         @relation(fields: [fileId], references: [id])
+
+  @@map("announcement_files")
 }
 
 model Point {
