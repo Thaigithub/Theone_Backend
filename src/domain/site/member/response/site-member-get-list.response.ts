@@ -1,23 +1,33 @@
-import { City, District, Site } from '@prisma/client';
+import { Site } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class SiteResponse {
-    id: number;
-    name: string;
-    startDate: Site['startDate'];
-    endDate: Site['endDate'];
-    numberOfWorkers: number;
-    isInterested: boolean;
-    longitude: Site['longitude'];
-    latitude: Site['latitude'];
-    district: {
-        koreanName: District['koreanName'];
-        englishName: District['englishName'];
+    id: Site['id'];
+    name: Site['name'];
+    dictrict: {
+        koreanName: string;
+        englishName: string;
     };
     city: {
-        koreanName: City['koreanName'];
-        englishName: City['englishName'];
+        koreanName: string;
+        englishName: string;
     };
+    file: FileResponse;
+    posts: {
+        id: number;
+        name: string;
+        isPulledUp: boolean;
+        endDate: Date;
+        occupationName: string;
+    }[];
+    isInterested: boolean;
+    status: Site['status'];
+    longitude: Site['longitude'];
+    latitude: Site['latitude'];
+    startDate: Date;
+    endDate: Date;
+    countPost: number;
 }
 
 export class SiteMemberGetListResponse extends PaginationResponse<SiteResponse> {}
