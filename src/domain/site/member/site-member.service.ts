@@ -126,6 +126,18 @@ export class SiteMemberService {
                     },
                     take: 1,
                 },
+                district: {
+                    select: {
+                        koreanName: true,
+                        englishName: true,
+                        city: {
+                            select: {
+                                koreanName: true,
+                                englishName: true,
+                            },
+                        },
+                    },
+                },
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
@@ -140,6 +152,14 @@ export class SiteMemberService {
                 longitude: item.longitude,
                 latitude: item.latitude,
                 isInterested: item.interestMember.length > 0 && accountId ? true : false,
+                district: {
+                    koreanName: item.district.koreanName,
+                    englishName: item.district.englishName,
+                },
+                city: {
+                    koreanName: item.district.city.koreanName,
+                    englishName: item.district.city.englishName,
+                },
             };
         });
         const siteListCount = await this.prismaService.site.count({
@@ -261,7 +281,7 @@ export class SiteMemberService {
         });
 
         return {
-            sites: meshList,
+            data: meshList,
         };
     }
 
