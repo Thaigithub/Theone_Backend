@@ -126,7 +126,6 @@ export class PostCompanyService {
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor || '',
                 siteId: request.siteId || null,
-                workLocation: request.workLocation,
                 companyId: account.company.id,
             },
         });
@@ -222,7 +221,6 @@ export class PostCompanyService {
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor,
-                workLocation: request.workLocation,
                 siteId: request.siteId,
             },
         });

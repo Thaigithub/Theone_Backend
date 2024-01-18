@@ -281,7 +281,6 @@ export class PostMemberService {
                 originalContractor: post.site ? post.site.contractStatus : null,
                 isInterest: post.site && accountId && post.site?.interestMember.length !== 0 ? true : false,
             },
-            workLocation: post.workLocation,
             isInterest: accountId && post.interested.length !== 0 ? true : false,
         };
     }
@@ -450,8 +449,12 @@ export class PostMemberService {
                 name: true,
                 endDate: true,
                 id: true,
-                site: true,
-                workLocation: true,
+                site: {
+                    select: {
+                        name: true,
+                        address: true,
+                    },
+                },
                 occupation: true,
                 interested: {
                     where: {
@@ -474,7 +477,7 @@ export class PostMemberService {
                 endDate: item.endDate,
                 id: item.id,
                 siteName: item.site?.name || null,
-                workLocation: item.workLocation,
+                siteAddress: item.site?.address || null,
                 isInterested: accountId ? (item.interested.length === 0 ? false : true) : null,
                 occupationName: item.occupation?.codeName || null,
             };

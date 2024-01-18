@@ -19,5 +19,4 @@ export class MatchingMemberGetDetailResponse {
     siteEndDate: string;
     originalContractor: string;
     originalBuilding: string;
-    workLocation: string;
 }

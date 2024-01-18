@@ -413,7 +413,6 @@ export class ApplicationMemberService {
                                 },
                             },
                         },
-                        workLocation: true,
                         endDate: true,
                         name: true,
                         occupation: {
@@ -683,7 +682,6 @@ export class ApplicationMemberService {
                 siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site ? item.post.site.address : '',
                 occupationName: item.post.occupation ? item.post.occupation.codeName : '',
-                workLocation: item.post.workLocation,
                 isInterested: item.post.interested.length === 0 ? false : true,
             };
         });

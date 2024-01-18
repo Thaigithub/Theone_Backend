@@ -88,7 +88,6 @@ export class MatchingMemberService {
                     select: {
                         id: true,
                         name: true,
-                        workLocation: true,
                         startDate: true,
                         endDate: true,
                         company: {
@@ -114,6 +113,7 @@ export class MatchingMemberService {
                         site: {
                             select: {
                                 name: true,
+                                address: true,
                             },
                         },
                         interested: {
@@ -185,7 +185,7 @@ export class MatchingMemberService {
                 id: item.id,
                 postName: item.post.name,
                 sitename: item.post.site?.name || null,
-                location: item.post.workLocation,
+                location: item.post.site?.address || null,
                 occupation: item.post.occupation?.codeName || null,
                 deadline: item.post.endDate < new Date() ? 'deadline' : item.post.endDate,
                 isRefuse: item.isRefuse,
@@ -216,7 +216,17 @@ export class MatchingMemberService {
             include: {
                 post: {
                     include: {
-                        site: true,
+                        site: {
+                            select: {
+                                name: true,
+                                address: true,
+                                personInCharge: true, 
+                                personInChargeContact: true,
+                                startDate: true,
+                                endDate: true,
+                                originalBuilding: true,
+                            },
+                        },
                         occupation: true,
                         interested: {
                             include: {
@@ -250,7 +260,6 @@ export class MatchingMemberService {
             siteEndDate: matchingPost.post.site?.endDate.toISOString() || null,
             originalBuilding: matchingPost.post.site?.originalBuilding || null,
             originalContractor: null, //??
-            workLocation: matchingPost.post.workLocation,
             isInterested: matchingPost.post.interested.map((item) => item.member.id).includes(account.member.id),
         };
 

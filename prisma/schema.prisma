@@ -545,7 +545,6 @@ model Post {
   endWorkTime               DateTime?                   @map("end_work_time") @db.Time(6)
   postEditor                String?                     @map("post_editor")
   view                      Int                         @default(0)
-  workLocation              String?                     @map("work_location")
   companyId                 Int                         @map("company_id")
   occupationId              Int?                        @map("occupation_id")
   siteId                    Int?                        @map("site_id")

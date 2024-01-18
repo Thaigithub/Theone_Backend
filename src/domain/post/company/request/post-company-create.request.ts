@@ -100,9 +100,4 @@ export class PostCompanyCreateRequest {
     @MaxLength(1000, { message: 'Post name should be maximum 1000 characters' })
     @IsOptional()
     postEditor: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    workLocation: string;
 }

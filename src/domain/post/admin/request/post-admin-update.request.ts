@@ -37,12 +37,6 @@ export class PostAdminUpdateRequest {
     isHidden: boolean;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Work Location is required' })
-    @IsOptional()
-    workLocation: string;
-
-    @Expose()
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
