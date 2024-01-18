@@ -304,11 +304,10 @@ export class ApplicationCompanyService {
         const member = await this.prismaService.application.findUnique({
             where: {
                 id: id,
+                NOT: { memberId: null },
                 post: {
-                    isActive: true,
                     company: {
                         accountId: accountId,
-                        isActive: true,
                     },
                 },
             },
@@ -466,15 +465,11 @@ export class ApplicationCompanyService {
         const team = await this.prismaService.application.findUnique({
             where: {
                 id: id,
+                NOT: { teamId: null },
                 post: {
-                    isActive: true,
                     company: {
                         accountId: accountId,
-                        isActive: true,
                     },
-                },
-                team: {
-                    isActive: true,
                 },
             },
             select: {

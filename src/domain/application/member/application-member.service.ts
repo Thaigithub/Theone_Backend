@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InterviewStatus, PostApplicationStatus } from '@prisma/client';
+import { InterviewStatus, PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -63,85 +63,83 @@ export class ApplicationMemberService {
                             status: undefined,
                             interview: undefined,
                         };
-        const search = {
-            ...QueryPagingHelper.queryPaging(query),
-            where: {
-                OR: [
-                    {
-                        member: {
-                            account: {
-                                id,
-                            },
-                        },
-                        ...status,
-                        assignedAt: {
-                            gt: query.startDate && new Date(query.startDate),
-                            lt: query.endDate && new Date(query.endDate),
+        const queryFilter: Prisma.ApplicationWhereInput = {
+            OR: [
+                {
+                    member: {
+                        account: {
+                            id,
                         },
                     },
-                    {
-                        team: {
-                            id: {
-                                in: teams,
-                            },
-                        },
-                        ...status,
-                        assignedAt: {
-                            gt: query.startDate && new Date(query.startDate),
-                            lt: query.endDate && new Date(query.endDate),
+                    ...status,
+                },
+                {
+                    team: {
+                        id: {
+                            in: teams,
                         },
                     },
-                ],
-            },
-            select: {
-                id: true,
-                status: true,
-                assignedAt: true,
-                post: {
-                    select: {
-                        interested: {
-                            where: {
-                                member: {
-                                    accountId: id,
+                    ...status,
+                },
+            ],
+            AND: [
+                { assignedAt: { gt: query.startDate && new Date(query.startDate) } },
+                { assignedAt: { lt: query.endDate && new Date(query.endDate) } },
+            ],
+        };
+        const application = (
+            await this.prismaService.application.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    status: true,
+                    assignedAt: true,
+                    post: {
+                        select: {
+                            interested: {
+                                where: {
+                                    member: {
+                                        accountId: id,
+                                    },
                                 },
                             },
-                        },
-                        id: true,
-                        name: true,
-                        endDate: true,
-                        status: true,
-                        occupation: {
-                            select: {
-                                codeName: true,
-                                id: true,
+                            id: true,
+                            name: true,
+                            endDate: true,
+                            status: true,
+                            occupation: {
+                                select: {
+                                    codeName: true,
+                                    id: true,
+                                },
                             },
-                        },
 
-                        site: {
-                            select: {
-                                name: true,
-                                contact: true,
-                                address: true,
-                                personInCharge: true,
-                                originalBuilding: true,
+                            site: {
+                                select: {
+                                    name: true,
+                                    contact: true,
+                                    address: true,
+                                    personInCharge: true,
+                                    originalBuilding: true,
+                                },
                             },
-                        },
-                        company: {
-                            select: {
-                                id: true,
-                                name: true,
-                                logo: {
-                                    select: {
-                                        file: true,
+                            company: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    logo: {
+                                        select: {
+                                            file: true,
+                                        },
                                     },
                                 },
                             },
                         },
                     },
                 },
-            },
-        };
-        const application = (await this.prismaService.application.findMany(search)).map((item) => {
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 applicationId: item.id,
                 companyLogo: {
@@ -163,7 +161,7 @@ export class ApplicationMemberService {
                 isInterested: item.post.interested.length === 0 ? false : true,
             };
         });
-        const total = await this.prismaService.application.count({ where: search.where });
+        const total = await this.prismaService.application.count({ where: queryFilter });
         return new PaginationResponse(application, new PageInfo(total));
     }
 
