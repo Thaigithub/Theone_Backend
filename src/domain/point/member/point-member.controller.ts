@@ -7,9 +7,9 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PointMemberService } from './point-member.service';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
-import { PointMemberGetExchangePointListResponse } from './response/point-member-get-exchange-list.response';
-import { PointMemberGetPointListResponse } from './response/point-member-get-list.response.ts';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
+import { PointMemberExchangeGetListResponse } from './response/point-member-get-exchange-list.response';
+import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Controller('/member/points')
 @Roles(AccountType.MEMBER)
@@ -23,11 +23,11 @@ export class PointMemberController {
     }
 
     @Get('/exchanges')
-    async getExchangePointList(
+    async getExchangeList(
         @Req() req: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<PointMemberGetExchangePointListResponse>> {
-        return BaseResponse.of(await this.pointMemberService.getExchangePointList(req.user.accountId, query));
+    ): Promise<BaseResponse<PointMemberExchangeGetListResponse>> {
+        return BaseResponse.of(await this.pointMemberService.getExchangeList(req.user.accountId, query));
     }
 
     @Post('/exchanges')
@@ -42,7 +42,7 @@ export class PointMemberController {
     async getList(
         @Req() req: AccountIdExtensionRequest,
         @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<PointMemberGetPointListResponse>> {
+    ): Promise<BaseResponse<PointMemberGetListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getList(req.user.accountId, query));
     }
 }

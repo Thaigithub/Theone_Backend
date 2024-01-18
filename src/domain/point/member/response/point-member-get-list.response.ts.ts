@@ -1,9 +1,14 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
-
-export class PointMemberPointResponse {
+import { PointMemberStatus } from '../enum/point-member-request-status.enum';
+class PointMemberResponse {
     createdAt: Date;
     reasonEarn: string;
     amount: number;
 }
 
-export class PointMemberGetPointListResponse extends PaginationResponse<PointMemberPointResponse> {}
+class PointMemberListResponse extends PaginationResponse<PointMemberResponse> {}
+
+export class PointMemberGetListResponse {
+    status: PointMemberStatus;
+    data: PointMemberListResponse;
+}
