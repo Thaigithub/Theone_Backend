@@ -29,5 +29,5 @@ export class SiteNearByResponse {
 }
 
 export class SiteMemberNearByGetListResponse {
-    sites: SiteNearByResponse[];
+    data: SiteNearByResponse[];
 }
