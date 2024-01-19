@@ -44,7 +44,12 @@ export class MatchingCompanyService {
                 member: {
                     select: {
                         id: true,
+                        name: true,
+                        contact: true,
                         specialLicenses: true,
+                        address: true,
+                        totalExperienceMonths: true,
+                        totalExperienceYears: true,
                         applyPosts: {
                             include: {
                                 contract: true,
@@ -54,8 +59,11 @@ export class MatchingCompanyService {
                 },
                 team: {
                     select: {
+                        name: true,
                         id: true,
                         leader: true,
+                        totalExperienceMonths: true,
+                        totalExperienceYears: true,
                         members: {
                             include: {
                                 member: {
@@ -83,7 +91,6 @@ export class MatchingCompanyService {
         if (existMatching.length > 0) {
             const allMembers = existMatching.filter((matching) => !matching.team).map((matching) => matching.member);
             const allTeams = existMatching.filter((matching) => !matching.member).map((matching) => matching.team);
-
             return this.mappingResponseDTO(allMembers, allTeams);
         }
 
@@ -144,7 +151,6 @@ export class MatchingCompanyService {
                     accountId,
                 },
             });
-
             return this.mappingResponseDTO(members, teams);
         }
     }
