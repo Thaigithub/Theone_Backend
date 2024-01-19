@@ -969,6 +969,7 @@ export class BannerAdminService {
             },
         });
         if (!request) throw new NotFoundException('Banner request Id not found');
+        if (request.status !== RequestBannerStatus.PENDING) throw new BadRequestException('Banner has been approved or rejected');
         if (!isAdvertising) {
             const count = await this.prismaService.postBanner.count({
                 where: {
