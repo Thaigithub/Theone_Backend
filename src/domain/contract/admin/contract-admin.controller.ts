@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -12,39 +12,33 @@ import { ContractAdminGetTotalContractsResponse } from './response/contract-admi
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@Controller('admin/contract')
+@Controller('/admin/contracts')
 export class ContractAdminController {
     constructor(private readonly contractAdminService: ContractAdminService) {}
 
     @Get()
     async getList(@Query() query: ContractAdminGetListRequest): Promise<BaseResponse<ContractAdminGetListResponse>> {
-        const code = await this.contractAdminService.getList(query);
+        return BaseResponse.of(await this.contractAdminService.getList(query));
+    }
+
+    @Get('/count')
+    async getTotal(@Query() query: ContractAdminGetListRequest): Promise<BaseResponse<ContractAdminGetTotalContractsResponse>> {
+        const code = await this.contractAdminService.getTotal(query);
         return BaseResponse.of(code);
     }
 
-    @Get('/contract-count')
-    async getTotalContracts(
-        @Query() query: ContractAdminGetListRequest,
-    ): Promise<BaseResponse<ContractAdminGetTotalContractsResponse>> {
-        const code = await this.contractAdminService.getTotalContracts(query);
-        return BaseResponse.of(code);
-    }
-
-    @Get(':id')
+    @Get('/:id')
     async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ContractAdminGetDetailResponse>> {
-        const code = await this.contractAdminService.getDetail(id);
-        return BaseResponse.of(code);
+        return BaseResponse.of(await this.contractAdminService.getDetail(id));
     }
 
-    @Post(':id/registration')
-    async registrationContract(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
-        const upload = await this.contractAdminService.registrationContract(id, body);
-        return BaseResponse.of(upload);
+    @Post('/:id/file')
+    async createFile(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
+        return BaseResponse.of(await this.contractAdminService.createFile(id, body));
     }
 
-    @Post(':id/edit')
-    async editContract(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
-        const upload = await this.contractAdminService.editContract(id, body);
-        return BaseResponse.of(upload);
+    @Put('/:id')
+    async update(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminRegistrationRequest) {
+        return BaseResponse.of(await this.contractAdminService.update(id, body));
     }
 }
