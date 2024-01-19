@@ -95,7 +95,7 @@ export class BannerCompanyService {
             } else {
                 if (item.status === RequestBannerStatus.APPROVED && item.postBanner.banner.endDate < new Date())
                     status = BannerCompanyBannerStatus.EXPOSE_END;
-                if (item.status === RequestBannerStatus.APPROVED && item.advertisingBanner.banner.startDate > new Date())
+                if (item.status === RequestBannerStatus.APPROVED && item.postBanner.banner.startDate > new Date())
                     status = BannerCompanyBannerStatus.APPROVED;
                 if (
                     item.status === RequestBannerStatus.APPROVED &&
