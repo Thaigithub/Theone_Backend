@@ -179,6 +179,7 @@ export class MemberAuthService {
                 audience: GOOGLE_CLIENT_ID,
             })
         ).getPayload();
+        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -209,6 +210,7 @@ export class MemberAuthService {
         const kid = json.header.kid;
         const applekey = (await appleClient.getSigningKey(kid)).getPublicKey();
         const payload = await this.jwtService.verify(applekey, json);
+        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -241,6 +243,7 @@ export class MemberAuthService {
                 'Content-Type': 'application/json; charset=utf-8',
             },
         }).then((response) => response.data)['kakao_account'];
+        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -273,6 +276,7 @@ export class MemberAuthService {
                 'Content-Type': 'application/json; charset=utf-8',
             },
         }).then((response) => response.data)['reponse'];
+        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
