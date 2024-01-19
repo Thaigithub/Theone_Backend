@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CodeType, PostCategory, PostType, Prisma, RequestStatus } from '@prisma/client';
+import { CodeType, PostCategory, PostType, Prisma, ProductType, RequestStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -15,10 +15,16 @@ import { PostCompanyGetListApplicantsResponse } from './response/post-company-ge
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
+import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
+import { PostCompanyServiceType } from './enum/post-company-service.enum';
+import { ProductCompanyService } from 'domain/product/company/product-company.service';
 
 @Injectable()
 export class PostCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly productCompanyService: ProductCompanyService,
+    ) {}
 
     async getList(accountId: number, query: PostCompanyGetListRequest): Promise<PostCompanyGetListResponse> {
         const queryFilter: Prisma.PostWhereInput = {
@@ -456,5 +462,132 @@ export class PostCompanyService {
             };
         });
         return new PaginationResponse(posts, new PageInfo(posts.length));
+    }
+
+    async checkPullUpAvailability(postId: number, accountId: number): Promise<PostCompanyCheckPullUpAvailabilityResponse> {
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                isActive: true,
+                id: postId,
+                company: {
+                    accountId,
+                },
+            },
+        });
+        if (!post) throw new NotFoundException('Post does not exist');
+        if (post.freePullUp) return { isAvailable: true };
+        else {
+            const availablePullUp = await this.prismaService.productPaymentHistory.findFirst({
+                where: {
+                    isActive: true,
+                    company: {
+                        accountId,
+                    },
+                    product: {
+                        productType: ProductType.PULL_UP,
+                    },
+                    remainingTimes: { gt: 0 },
+                },
+            });
+            return availablePullUp ? { isAvailable: true } : { isAvailable: false };
+        }
+    }
+
+    async serviceOnPost(postId: number, accountId: number, serviceType: PostCompanyServiceType): Promise<void> {
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                isActive: true,
+                id: postId,
+                company: {
+                    accountId,
+                },
+            },
+        });
+        if (!post) throw new NotFoundException('Post does not exist');
+
+        switch (serviceType) {
+            case PostCompanyServiceType.PULL_UP:
+                const availablePullUp = await this.checkPullUpAvailability(postId, accountId);
+                if (availablePullUp) {
+                    if (post.freePullUp) {
+                        await this.prismaService.post.update({
+                            data: {
+                                freePullUp: false,
+                            },
+                            where: {
+                                isActive: true,
+                                id: postId,
+                                company: {
+                                    accountId,
+                                },
+                            },
+                        });
+                    } else {
+                        const earliestPullUpProduct = await this.prismaService.productPaymentHistory.findFirst({
+                            where: {
+                                isActive: true,
+                                product: {
+                                    productType: ProductType.PULL_UP,
+                                },
+                                expirationDate: { gte: new Date() },
+                                remainingTimes: { gt: 0 },
+                            },
+                            orderBy: {
+                                expirationDate: 'asc',
+                            },
+                        });
+                        await this.prismaService.productPaymentHistory.update({
+                            data: {
+                                remainingTimes: earliestPullUpProduct.remainingTimes - 1,
+                            },
+                            where: {
+                                isActive: true,
+                                id: earliestPullUpProduct.id,
+                            },
+                        });
+                    }
+                } else throw new BadRequestException("You don't have free pull up or any PULL_UP produdct");
+                break;
+            case PostCompanyServiceType.PREMIUM:
+                const availablePremium = await this.productCompanyService.checkPremiumAvailability(accountId);
+                if (availablePremium.isAvailable) {
+                    const earliestPremiumProduct = await this.prismaService.productPaymentHistory.findFirst({
+                        where: {
+                            isActive: true,
+                            product: {
+                                productType: ProductType.PREMIUM_POST,
+                            },
+                            expirationDate: { gte: new Date() },
+                            remainingTimes: { gt: 0 },
+                        },
+                        orderBy: {
+                            expirationDate: 'asc',
+                        },
+                    });
+                    await this.prismaService.productPaymentHistory.update({
+                        data: {
+                            remainingTimes: earliestPremiumProduct.remainingTimes - 1,
+                        },
+                        where: {
+                            isActive: true,
+                            id: earliestPremiumProduct.id,
+                        },
+                    });
+                } else throw new BadRequestException("You don't have free pull up or any PREMIUM_POST produdct");
+        }
+
+        await this.prismaService.post.update({
+            data: {
+                isPulledUp: serviceType === PostCompanyServiceType.PULL_UP ? true : undefined,
+                type: serviceType === PostCompanyServiceType.PREMIUM ? PostType.PREMIUM : undefined,
+            },
+            where: {
+                isActive: true,
+                id: postId,
+                company: {
+                    accountId,
+                },
+            },
+        });
     }
 }
