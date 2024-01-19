@@ -100,9 +100,14 @@ export class PostAdminService {
                 isHidden: true,
             },
             where: queryFilter,
-            orderBy: {
-                createdAt: 'desc',
-            },
+            orderBy: [
+                {
+                    type: 'desc',
+                },
+                {
+                    createdAt: 'desc',
+                },
+            ],
             ...QueryPagingHelper.queryPaging(query),
         });
         const postListCount = await this.prismaService.post.count({
