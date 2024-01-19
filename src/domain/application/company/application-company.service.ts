@@ -131,6 +131,7 @@ export class ApplicationCompanyService {
                 assignedAt: item.assignedAt,
                 member: item.member
                     ? {
+                          id: item.member.id,
                           name: item.member.name,
                           contact: item.member.contact,
                           totalExperienceMonths: item.member.totalExperienceYears,
@@ -154,6 +155,7 @@ export class ApplicationCompanyService {
                     : null,
                 team: item.team
                     ? {
+                          id: item.team.id,
                           name: item.team.name,
                           city: {
                               englishName: item.team.district?.city.englishName || null,
