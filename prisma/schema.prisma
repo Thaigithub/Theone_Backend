@@ -901,7 +901,7 @@ model Announcement {
   account           Account            @relation(fields: [accountId], references: [id])
   announcementFiles AnnouncementFile[]
 
-  @@map("Announcement_files")
+  @@map("annoucements")
 }
 
 model AnnouncementFile {

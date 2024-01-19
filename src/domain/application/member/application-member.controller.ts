@@ -19,22 +19,20 @@ export class ApplicationMemberController {
     constructor(private applicationMemberService: ApplicationMemberService) {}
 
     @Patch('/:id/status')
-    async acceptApplicationStatus(
+    async updateStatus(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: AccountIdExtensionRequest,
         @Body() body: ApplicationMemberUpdateStatusRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(
-            await this.applicationMemberService.changeApplicationStatus(id, request.user.accountId, body.status),
-        );
+        return BaseResponse.of(await this.applicationMemberService.updateStatus(id, request.user.accountId, body.status));
     }
 
     @Get('/offer')
-    async getApplicationOfferList(
+    async getListOffer(
         @Query() body: ApplicationMemberGetListOfferRequest,
         @Req() request: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ApplicationMemberGetListOfferResponse>> {
-        return BaseResponse.of(await this.applicationMemberService.getApplicationOfferList(request.user.accountId, body));
+        return BaseResponse.of(await this.applicationMemberService.getListOffer(request.user.accountId, body));
     }
 
     @Get('/count')
@@ -48,18 +46,18 @@ export class ApplicationMemberController {
     }
 
     @Get('/:id')
-    async getDetailApplication(
+    async getDetail(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: AccountIdExtensionRequest,
     ): Promise<BaseResponse<ApplicationMemberGetDetailResponse>> {
-        return BaseResponse.of(await this.applicationMemberService.getDetailApplication(id, req.user.accountId));
+        return BaseResponse.of(await this.applicationMemberService.getDetail(id, req.user.accountId));
     }
 
     @Get()
-    async getApplicationList(
+    async getList(
         @Req() request: AccountIdExtensionRequest,
         @Query() query: ApplicationMemberGetListRequest,
     ): Promise<BaseResponse<ApplicationMemberGetListResponse>> {
-        return BaseResponse.of(await this.applicationMemberService.getApplicationList(request.user.accountId, query));
+        return BaseResponse.of(await this.applicationMemberService.getList(request.user.accountId, query));
     }
 }

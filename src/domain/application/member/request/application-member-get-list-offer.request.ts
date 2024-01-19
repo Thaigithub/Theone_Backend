@@ -12,5 +12,5 @@ export class ApplicationMemberGetListOfferRequest extends PaginationRequest {
     @IsEnum(ApplicationMemberGetListOfferFilter)
     @Expose()
     @IsOptional()
-    filter: ApplicationMemberGetListOfferFilter;
+    status: ApplicationMemberGetListOfferFilter;
 }
