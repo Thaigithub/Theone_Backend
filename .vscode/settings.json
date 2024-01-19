@@ -1,7 +1,14 @@
 {
-  "git.ignoreLimitWarning": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true,
-  "files.autoSave": "onFocusChange",
-  "files.refactoring.autoSave": true
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[typescript]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll.eslint": "explicit"
+        }
+    },
+    "files.eol": "\n",
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma"
+    }
 }

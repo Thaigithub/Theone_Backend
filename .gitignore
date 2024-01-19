@@ -39,3 +39,6 @@ package-lock.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/prisma/migrations
+package-lock.json
+yarn.lock

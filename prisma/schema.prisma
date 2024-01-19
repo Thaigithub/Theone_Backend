@@ -11,28 +11,48 @@ datasource db {
 }
 
 model Account {
-  id        Int           @id @default(autoincrement())
-  username  String        @unique
-  password  String
-  type      AccountType
-  status    AccountStatus
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  admin     Admin?
-  company   Company?
-  member    Member?
-  otp       OtpProvider?
+  id                     Int                    @id @default(autoincrement())
+  username               String                 @unique
+  password               String
+  type                   AccountType
+  status                 AccountStatus
+  isActive               Boolean                @default(true) @map("is_active")
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @updatedAt @map("updated_at")
+  lastAccessAt           DateTime               @default(now()) @map("last_access_at")
+  accountStatusHistories AccountStatusHistory[]
+  admin                  Admin?
+  company                Company?
+  member                 Member?
+  notifications          Notification[]
+  announcements          Announcement[]
 
   @@map("accounts")
 }
 
+model AccountStatusHistory {
+  id        Int           @id @default(autoincrement())
+  accountId Int           @map("account_id")
+  status    AccountStatus
+  message   String        @default("")
+  isActive  Boolean       @default(true) @map("is_active")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  account   Account       @relation(fields: [accountId], references: [id])
+
+  @@map("account_status_histories")
+}
+
 model OtpProvider {
-  id        Int       @id @default(autoincrement())
-  updatedAt DateTime? @updatedAt @map("updated_at")
-  otpCode   String?   @map("otp_code")
-  accountId Int       @unique @map("account_id")
-  account   Account   @relation(fields: [accountId], references: [id])
+  id        Int      @id @default(autoincrement())
+  otpCode   String   @map("otp_code")
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  ip        String
+  type      OtpType
+  data      String?
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isUsed    Boolean  @default(false) @map("is_used")
 
   @@map("otp_providers")
 }
@@ -42,73 +62,148 @@ model Admin {
   name        String
   level       AdminLevel
   accountId   Int          @unique @map("account_id")
-  isActive    Boolean      @default(true)
+  isActive    Boolean      @default(true) @map("is_active")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
-  permissions Permission[]
   account     Account      @relation(fields: [accountId], references: [id])
+  permissions Permission[]
 
   @@map("admins")
 }
 
 model Member {
-  id                 Int              @id @default(autoincrement())
-  name               String
-  accountId          Int              @unique @map("account_id")
-  isActive           Boolean          @default(true)
-  createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  contact            String
-  level              MemberLevel
-  disabled           DisabledType
-  withdrawDate       DateTime?        @db.Date
-  bankName           String?
-  accountNumber      String?
-  authenticationDate DateTime?        @db.Date
-  registrationNumber String?
-  serialNumber       String?
-  dateOfIssue        DateTime?        @db.Date
-  certificates       Certificate[]
-  account            Account          @relation(fields: [accountId], references: [id])
-  teams              MembersOnTeams[]
-  leader             Team[]
+  id                           Int                           @id @default(autoincrement())
+  name                         String
+  accountId                    Int                           @unique @map("account_id")
+  isActive                     Boolean                       @default(true) @map("is_active")
+  createdAt                    DateTime                      @default(now()) @map("created_at")
+  updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  contact                      String?
+  email                        String?                       @unique
+  totalExperienceYears         Int?                          @map("total_experience_years")
+  totalExperienceMonths        Int?                          @map("total_experience_months")
+  signupMethod                 SignupMethodType              @map("signup_method")
+  level                        MemberLevel
+  withdrawnDate                DateTime?                     @map("withdrawn_date") @db.Date
+  districtId                   Int?                          @map("district_id")
+  address                      String?
+  desiredSalary                Int?                          @map("desired_salary")
+  totalPoint                   Int                           @default(0) @map("total_point")
+  isContactVerfied             Boolean                       @default(false) @map("is_contact_verified")
+  applyPosts                   Application[]
+  bankAccount                  BankAccount?
+  careerCertificationRequest   CareerCertificationRequest?
+  career                       Career[]
+  currencyExchange             CurrencyExchange[]
+  disability                   Disability?
+  foreignWorker                ForeignWorker?
+  headhuntingRecommendation    HeadhuntingRecommendation[]
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  interestSites                Interest[]
+  matchingRecommendation       MatchingRecommendation[]
+  memberEvaluation             MemberEvaluation?
+  memberMatching               MemberMatching[]
+  account                      Account                       @relation(fields: [accountId], references: [id])
+  district                     District?                     @relation(fields: [districtId], references: [id])
+  desiredOccupations           MembersOnCodes[]
+  teams                        MembersOnTeams[]
+  point                        Point[]
+  specialLicenses              SpecialLicense[]
+  teamMemberInvitation         TeamMemberInvitation[]
+  leader                       Team[]
+  memberPreference             MemberPreference?
 
   @@map("members")
 }
 
 model Company {
-  id                 Int         @id @default(autoincrement())
-  accountId          Int         @unique @map("account_id")
-  account            Account     @relation(fields: [accountId], references: [id])
-  name               String
-  address            String
-  estDate            DateTime    @map("est_date")
-  businessRegNumber  String      @unique @map("buss_reg_number")
-  corporateRegNumber String      @unique @map("corp_reg_number")
-  type               CompanyType
-  email              String      @unique
-  phone              String
-  presentativeName   String      @map("pres_name")
-  contactPhone       String      @map("contact_phone")
-  contactName        String      @map("contact_name")
-  isActive           Boolean     @default(true)
-  createdAt          DateTime    @default(now()) @map("created_at")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
+  id                     Int                      @id @default(autoincrement())
+  accountId              Int                      @unique @map("account_id")
+  name                   String
+  address                String
+  estDate                DateTime                 @map("est_date")
+  businessRegNumber      String                   @unique @map("buss_reg_number")
+  corporateRegNumber     String                   @unique @map("corp_reg_number")
+  type                   CompanyType
+  email                  String                   @unique
+  phone                  String
+  contactPhone           String                   @map("contact_phone")
+  contactName            String                   @map("contact_name")
+  isActive               Boolean                  @default(true) @map("is_active")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+  presentativeName       String                   @map("presentative_name")
+  insurance              String?
+  attachments            Attachment[]
+  bannerRequests         BannerRequest[]
+  account                Account                  @relation(fields: [accountId], references: [id])
+  contactCard            ContactCard?
+  logo                   Logo?
+  matchingRecommendation MatchingRecommendation[]
+  posts                  Post[]
+  productPaymentHistory  ProductPaymentHistory[]
+  sites                  Site[]
 
   @@map("companies")
 }
 
+model Attachment {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  fileId    Int     @unique
+  company   Company @relation(fields: [companyId], references: [id])
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("attachments")
+}
+
+model Logo {
+  id        Int     @id @default(autoincrement())
+  companyId Int     @unique @map("company_id")
+  fileId    Int     @unique @map("file_id")
+  company   Company @relation(fields: [companyId], references: [id])
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("logos")
+}
+
+model ContactCard {
+  id        Int     @id @default(autoincrement())
+  companyId Int     @unique @map("company_id")
+  fileId    Int     @unique @map("file_id")
+  company   Company @relation(fields: [companyId], references: [id])
+  file      File    @relation(fields: [fileId], references: [id])
+
+  @@map("contact_cards")
+}
+
 model Team {
-  id        Int              @id @default(autoincrement())
-  code      String
-  name      String
-  leaderId  Int              @map("leader_id")
-  isActive  Boolean          @default(true)
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  status    TeamStatus
-  members   MembersOnTeams[]
-  leader    Member           @relation(fields: [leaderId], references: [id])
+  id                        Int                         @id @default(autoincrement())
+  name                      String
+  introduction              String?
+  leaderId                  Int                         @map("leader_id")
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  status                    TeamStatus                  @default(GENERAL)
+  totalMembers              Int                         @default(0) @map("total_members")
+  exposureStatus            Boolean                     @default(false) @map("exposure_status")
+  numberOfRecruitments      Int                         @default(0) @map("number_of_recruitments")
+  totalExperienceMonths     Int?                        @map("total_experience_months")
+  totalExperienceYears      Int?                        @map("total_experience_years")
+  districtId                Int                         @map("district_id")
+  codeId                    Int                         @map("code_id")
+  teamCode                  String                      @default("") @map("team_code")
+  desiredSalary             Int?                        @map("desired_salary")
+  posts                     Application[]
+  headhuntingRecommendation HeadhuntingRecommendation[]
+  matchingRecommendation    MatchingRecommendation[]
+  members                   MembersOnTeams[]
+  teamEvaluation            TeamEvaluation?
+  teamMemberInvitation      TeamMemberInvitation[]
+  code                      Code                        @relation(fields: [codeId], references: [id])
+  district                  District                    @relation(fields: [districtId], references: [id])
+  leader                    Member                      @relation(fields: [leaderId], references: [id])
 
   @@map("teams")
 }
@@ -116,7 +211,7 @@ model Team {
 model MembersOnTeams {
   teamId    Int      @map("team_id")
   memberId  Int      @map("member_id")
-  isActive  Boolean  @default(true)
+  isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   member    Member   @relation(fields: [memberId], references: [id])
@@ -126,83 +221,929 @@ model MembersOnTeams {
   @@map("members_on_teams")
 }
 
-model File {
+model TeamMemberInvitation {
+  teamId           Int               @map("team_id")
+  memberId         Int               @map("member_id")
+  isActive         Boolean           @default(true) @map("is_active")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  invitationStatus InvitationStatus?
+  id               Int               @id @default(autoincrement())
+  member           Member            @relation(fields: [memberId], references: [id])
+  team             Team              @relation(fields: [teamId], references: [id])
+
+  @@map("team_member_invitations")
+}
+
+model ForeignWorker {
+  id                 Int      @id @default(autoincrement())
+  englishName        String   @map("english_name")
+  registrationNumber String   @map("registration_number")
+  serialNumber       String   @map("serial_number")
+  dateOfIssue        DateTime @map("date_of_issue") @db.Date
+  memberId           Int      @unique @map("member_id")
+  fileId             Int      @unique @map("file_id")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  file               File     @relation(fields: [fileId], references: [id])
+  member             Member   @relation(fields: [memberId], references: [id])
+
+  @@map("foreign_workers")
+}
+
+model BankAccount {
   id            Int      @id @default(autoincrement())
-  type          FileType
-  key           String?
-  fileName      String?  @map("file_name")
-  size          BigInt
-  isDeactivated Boolean  @default(false) @map("is_deactivated")
+  accountHolder String   @map("account_holder")
+  accountNumber String   @map("account_number")
+  bankName      String   @map("bank_name")
+  memberId      Int      @unique @map("member_id")
+  isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  member        Member   @relation(fields: [memberId], references: [id])
+
+  @@map("bank_accounts")
+}
+
+model Disability {
+  id        Int      @id @default(autoincrement())
+  memberId  Int      @unique @map("member_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  file      File     @relation(fields: [fileId], references: [id])
+  fileId    Int      @map("file_id")
+  member    Member   @relation(fields: [memberId], references: [id])
+
+  @@map("disabilities")
+}
+
+model BasicHealthSafetyCertificate {
+  id                 Int      @id @default(autoincrement())
+  registrationNumber String   @map("registration_number")
+  dateOfCompletion   DateTime @map("date_of_completion") @db.Date
+  memberId           Int      @unique @map("member_id")
+  fileId             Int      @unique @map("file_id")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  file               File     @relation(fields: [fileId], references: [id])
+  member             Member   @relation(fields: [memberId], references: [id])
+
+  @@map("hst_certificates")
+}
+
+model File {
+  id                           Int                           @id @default(autoincrement())
+  type                         FileType
+  key                          String?
+  fileName                     String?                       @map("file_name")
+  size                         BigInt
+  isDeactivated                Boolean                       @default(false) @map("is_deactivated")
+  createdAt                    DateTime                      @default(now()) @map("created_at")
+  updatedAt                    DateTime                      @updatedAt @map("updated_at")
+  attachment                   Attachment?
+  banner                       Banner?
+  contactCard                  ContactCard?
+  contract                     Contract?
+  foreignWorker                ForeignWorker?
+  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
+  logo                         Logo?
+  specialLicense               SpecialLicense?
+  taxBill                      TaxBill?
+  cardReceipt                  CardReceipt?
+  announcementFile             AnnouncementFile?
+  Disability                   Disability[]
 
   @@map("files")
 }
 
 model Permission {
-  id         Int      @id @default(autoincrement())
   adminId    Int      @map("admin_id")
+  functionId Int      @map("function_id")
   admin      Admin    @relation(fields: [adminId], references: [id])
-  functionId Int      @unique @map("function_id")
   function   Function @relation(fields: [functionId], references: [id])
 
+  @@id([adminId, functionId])
   @@map("permissions")
 }
 
 model Function {
   id         Int          @id @default(autoincrement())
   name       FunctionName
-  permission Permission?
   createdAt  DateTime     @default(now()) @map("created_at")
   updatedAt  DateTime     @updatedAt @map("updated_at")
+  permission Permission[]
 
   @@map("functions")
 }
 
-model Certificate {
+model SpecialLicense {
   id              Int               @id @default(autoincrement())
-  name            String
-  photo           String
-  status          CertificateStatus
+  status          CertificateStatus @default(REQUESTING)
+  licenseNumber   String            @map("license_number")
   acquisitionDate DateTime          @map("acquisition_date")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
   memberId        Int               @map("member_id")
+  codeId          Int?              @map("code_id")
+  fileId          Int               @unique @map("file_id")
+  code            Code?             @relation(fields: [codeId], references: [id])
+  file            File              @relation(fields: [fileId], references: [id])
   member          Member            @relation(fields: [memberId], references: [id])
+
+  @@map("special_licenses")
+}
+
+model Career {
+  id                Int                      @id @default(autoincrement())
+  companyName       String                   @map("company_name")
+  siteName          String                   @map("site_name")
+  startDate         DateTime                 @map("start_date")
+  endDate           DateTime                 @map("end_date")
+  type              CareerType
+  isExperienced     Boolean                  @map("is_experienced")
+  experiencedYears  Int                      @default(0)
+  experiencedMonths Int                      @default(0)
+  occupationId      Int?
+  isActive          Boolean                  @default(true) @map("is_active")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  memberId          Int                      @map("member_id")
+  certificationType CareerCertificationType?
+  member            Member                   @relation(fields: [memberId], references: [id])
+  occupation        Code?                    @relation(fields: [occupationId], references: [id])
+
+  @@map("careers")
+}
+
+model CareerCertificationRequest {
+  id        Int                              @id @default(autoincrement())
+  createdAt DateTime                         @default(now()) @map("created_at")
+  updatedAt DateTime                         @updatedAt @map("updated_at")
+  memberId  Int                              @unique
+  status    CareerCertificationRequestStatus @default(REQUESTING) @map("status")
+  member    Member                           @relation(fields: [memberId], references: [id])
+
+  @@map("career_certification_requests")
+}
+
+model Banner {
+  id                Int                @id @default(autoincrement())
+  status            BannerStatus       @default(HIDE)
+  fileId            Int                @unique
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  endDate           DateTime           @map("end_date") @db.Date
+  startDate         DateTime           @map("start_date") @db.Date
+  advertisingBanner AdvertisingBanner?
+  file              File               @relation(fields: [fileId], references: [id])
+  postBanner        PostBanner?
+
+  @@map("banners")
+}
+
+model AdvertisingBanner {
+  id       Int            @unique
+  urlLink  String         @map("url_link")
+  title    String
+  priority Int?
+  type     BannerType
+  banner   Banner         @relation(fields: [id], references: [id])
+  request  BannerRequest?
+
+  @@map("advertising_banners")
+}
+
+model PostBanner {
+  id       Int            @unique
+  priority Int?
+  postId   Int            @map("post_id")
+  type     BannerType
+  request  BannerRequest?
+  banner   Banner         @relation(fields: [id], references: [id])
+  post     Post           @relation(fields: [postId], references: [id])
+
+  @@map("post_banners")
+}
+
+model BannerRequest {
+  id                     Int                    @id @default(autoincrement())
+  acceptDate             DateTime?              @map("accept_date") @db.Date
+  detail                 String?
+  status                 RequestBannerStatus    @default(PENDING)
+  companyId              Int
+  advertisingBannerId    Int?                   @unique
+  postBannerId           Int?                   @unique
+  requestDate            DateTime               @default(now()) @map("request_date") @db.Date
+  isActive               Boolean                @default(true) @map("is_active")
+  requestBannerHistories BannerRequestHistory[]
+  advertisingBanner      AdvertisingBanner?     @relation(fields: [advertisingBannerId], references: [id])
+  company                Company                @relation(fields: [companyId], references: [id])
+  postBanner             PostBanner?            @relation(fields: [postBannerId], references: [id])
+
+  @@map("banner_requests")
+}
+
+model BannerRequestHistory {
+  id              Int                 @id @default(autoincrement())
+  status          RequestBannerStatus
+  reason          String?
+  createdAt       DateTime            @default(now()) @map("created_at")
+  bannerRequestId Int?
+  BannerRequest   BannerRequest?      @relation(fields: [bannerRequestId], references: [id])
+
+  @@map("banner_request_histories")
+}
+
+model Code {
+  id             Int              @id @default(autoincrement())
+  isActive       Boolean          @default(true) @map("is_active")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  code           String           @unique
+  codeName       String           @map("code_name")
+  codeType       CodeType         @map("code_type")
+  career         Career[]
+  membersOnCodes MembersOnCodes[]
+  asGeneral      Post[]           @relation("post_occupation")
+  asSpecial      Post[]           @relation("post_special")
+  specialLicense SpecialLicense[]
+  team           Team[]
+
+  @@map("codes")
+}
+
+model Site {
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  status                    SiteStatus                  @default(REVIEWING)
+  type                      SiteType                    @default(REGISTERED)
+  name                      String?
+  address                   String?
+  longitude                 Float?
+  latitude                  Float?
+  contact                   String?
+  personInCharge            String?                     @map("person_in_charge")
+  personInChargeContact     String?                     @map("person_in_charge_contact")
+  originalBuilding          String?                     @map("original_building")
+  email                     String?
+  taxInvoiceEmail           String?                     @map("tax_invoice_email")
+  siteManagementNumber      String?                     @map("site_management_number")
+  contractStatus            ContractStatus?             @map("contract_status")
+  startDate                 DateTime?                   @map("start_date") @db.Date
+  endDate                   DateTime?                   @map("end_date") @db.Date
+  companyId                 Int                         @map("company_id")
+  numberOfContract          Int                         @default(0)
+  districtId                Int                         @map("district_id")
+  numberOfWorkers           Int                         @default(0)
+  interestMember            Interest[]
+  memberEvaluationByCompany MemberEvaluationByCompany[]
+  post                      Post[]
+  siteEvaluation            SiteEvaluation?
+  siteHistory               SiteHistory[]
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  district                  District                    @relation(fields: [districtId], references: [id])
+  teamEvaluationByCompany   TeamEvaluationByCompany[]
+
+  @@map("sites")
+}
+
+model SiteHistory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  content   String
+  siteId    Int      @map("site_id")
+  site      Site     @relation(fields: [siteId], references: [id])
+
+  @@map("site_histories")
+}
+
+model Post {
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  isPulledUp                Boolean                     @default(false) @map("is_pulled_up")
+  isHidden                  Boolean                     @default(false) @map("is_hidden")
+  type                      PostType
+  category                  PostCategory
+  status                    PostStatus
+  name                      String
+  startDate                 DateTime                    @map("start_date") @db.Date
+  endDate                   DateTime                    @map("end_date") @db.Date
+  experienceType            ExperienceType              @map("experience_type")
+  numberOfPeople            Int                         @map("number_of_people")
+  otherInformation          String                      @map("other_information")
+  salaryType                SalaryType?                 @map("salary_type")
+  salaryAmount              Int?                        @map("salary_amount")
+  startWorkDate             DateTime?                   @map("start_work_date") @db.Date
+  endWorkDate               DateTime?                   @map("end_work_date") @db.Date
+  workday                   Workday[]
+  startWorkTime             DateTime?                   @map("start_work_time") @db.Time(6)
+  endWorkTime               DateTime?                   @map("end_work_time") @db.Time(6)
+  postEditor                String?                     @map("post_editor")
+  freePullUp                Boolean                     @default(true) @map("free_pull_up")
+  view                      Int                         @default(0)
+  companyId                 Int                         @map("company_id")
+  occupationId              Int?                        @map("occupation_id")
+  siteId                    Int?                        @map("site_id")
+  specialOccupationId       Int?                        @map("special_occupation_id")
+  applicants                Application[]
+  headhuntingRecommendation HeadhuntingRecommendation[]
+  headhuntingRequest        HeadhuntingRequest?
+  interested                Interest[]
+  memberMatchings           MemberMatching[]
+  postBanner                PostBanner[]
+  postHistory               PostHistory[]
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  occupation                Code?                       @relation("post_occupation", fields: [occupationId], references: [id])
+  site                      Site?                       @relation(fields: [siteId], references: [id])
+  specialOccupation         Code?                       @relation("post_special", fields: [specialOccupationId], references: [id])
+
+  @@map("posts")
+}
+
+model PostHistory {
+  id          Int             @id @default(autoincrement())
+  createdAt   DateTime        @updatedAt @map("updated_at")
+  historyType PostHistoryType @map("history_type")
+  content     String          @map("content")
+  postId      Int             @map("post_id")
+  post        Post            @relation(fields: [postId], references: [id])
+
+  @@map("post_histories")
+}
+
+model SiteEvaluation {
+  id                       Int                        @id @default(autoincrement())
+  isActive                 Boolean                    @default(true) @map("is_active")
+  createdAt                DateTime                   @default(now()) @map("created_at")
+  updatedAt                DateTime                   @updatedAt @map("updated_at")
+  totalEvaluators          Int                        @default(0) @map("total_evaluator")
+  totalScore               Int?                       @map("total_score")
+  averageScore             Float?                     @map("average_score") @db.Real
+  siteId                   Int                        @unique @map("site_id")
+  site                     Site                       @relation(fields: [siteId], references: [id])
+  siteEvaluationByContract SiteEvaluationByContract[]
+
+  @@map("site_evaluations")
+}
+
+model SiteEvaluationByContract {
+  id               Int            @id @default(autoincrement())
+  isActive         Boolean        @default(true) @map("is_active")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  score            Int?           @db.SmallInt
+  siteEvaluationId Int            @map("site_evaluation_id")
+  contractId       Int            @map("contract_id")
+  contract         Contract       @relation(fields: [contractId], references: [id])
+  siteEvaluation   SiteEvaluation @relation(fields: [siteEvaluationId], references: [id])
+
+  @@unique([siteEvaluationId, contractId])
+  @@map("site_evaluations_by_contract")
+}
+
+model Interest {
+  id         Int      @id @default(autoincrement())
+  memberId   Int      @map("member_id")
+  siteId     Int?     @map("site_id")
+  postId     Int?     @map("post_id")
+  assignedAt DateTime @default(now())
+  member     Member   @relation(fields: [memberId], references: [id])
+  post       Post?    @relation(fields: [postId], references: [id])
+  site       Site?    @relation(fields: [siteId], references: [id])
+
+  @@unique([memberId, postId])
+  @@unique([memberId, siteId])
+  @@map("interests")
+}
+
+model Application {
+  id         Int                   @id @default(autoincrement())
+  memberId   Int?                  @map("member_id")
+  teamId     Int?                  @map("team_id")
+  postId     Int                   @map("post_id")
+  status     PostApplicationStatus @default(APPLY)
+  assignedAt DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt @map("updated_at")
+  category   ApplicationCategory   @default(MANPOWER)
+  member     Member?               @relation(fields: [memberId], references: [id])
+  post       Post                  @relation(fields: [postId], references: [id])
+  team       Team?                 @relation(fields: [teamId], references: [id])
+  contract   Contract?
+  interview  Interview?
+
+  @@unique([memberId, postId])
+  @@unique([teamId, postId])
+  @@map("applications")
+}
+
+model TeamEvaluation {
+  id                      Int                       @id @default(autoincrement())
+  isActive                Boolean                   @default(true) @map("is_active")
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  totalEvaluators         Int                       @default(0) @map("total_evaluator")
+  totalScore              Int?                      @map("total_score")
+  averageScore            Float?                    @map("average_score") @db.Real
+  teamId                  Int                       @unique @map("team_id")
+  team                    Team                      @relation(fields: [teamId], references: [id])
+  teamEvaluationByCompany TeamEvaluationByCompany[]
+
+  @@map("team_evaluations")
+}
+
+model TeamEvaluationByCompany {
+  isActive         Boolean        @default(true) @map("is_active")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  score            Int?           @db.SmallInt
+  teamEvaluationId Int            @map("team_evaluation_id")
+  siteId           Int            @map("site_id")
+  id               Int            @id @default(autoincrement())
+  site             Site           @relation(fields: [siteId], references: [id])
+  teamEvaluation   TeamEvaluation @relation(fields: [teamEvaluationId], references: [id])
+
+  @@unique([teamEvaluationId, siteId])
+  @@map("team_evaluations_by_company")
+}
+
+model MemberEvaluation {
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  totalEvaluators           Int                         @default(0) @map("total_evaluator")
+  totalScore                Int?                        @map("total_score")
+  averageScore              Float?                      @map("average_score") @db.Real
+  memberId                  Int                         @unique @map("member_id")
+  member                    Member                      @relation(fields: [memberId], references: [id])
+  memberEvaluationByCompany MemberEvaluationByCompany[]
+
+  @@map("member_evaluations")
+}
+
+model MemberEvaluationByCompany {
+  isActive           Boolean          @default(true) @map("is_active")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  score              Int?             @db.SmallInt
+  memberEvaluationId Int              @map("member_evaluation_id")
+  siteId             Int              @map("site_id")
+  id                 Int              @id @default(autoincrement())
+  memberEvaluation   MemberEvaluation @relation(fields: [memberEvaluationId], references: [id])
+  site               Site             @relation(fields: [siteId], references: [id])
+
+  @@unique([memberEvaluationId, siteId])
+  @@map("member_evaluations_by_company")
+}
+
+model HeadhuntingRequest {
+  id                        Int                         @id @default(autoincrement())
+  isActive                  Boolean                     @default(true) @map("is_active")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  postId                    Int                         @unique
+  date                      DateTime                    @default(now()) @db.Date
+  status                    RequestStatus
+  object                    RequestObject
+  detail                    String                      @default("")
+  rejectReason              String                      @default("") @map("reject_reason")
+  headhuntingRecommendation HeadhuntingRecommendation[]
+  post                      Post                        @relation(fields: [postId], references: [id])
+
+  @@map("headhunting_requests")
+}
+
+model Interview {
+  id            Int             @id @default(autoincrement())
+  isActive      Boolean         @default(true) @map("is_active")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  applicationId Int             @unique @map("application_id")
+  status        InterviewStatus
+  requestDate   DateTime        @default(now()) @map("request_date") @db.Date
+  application   Application     @relation(fields: [applicationId], references: [id])
+
+  @@map("interviews")
+}
+
+model HeadhuntingRecommendation {
+  id                   Int                @id @default(autoincrement())
+  memberId             Int?               @map("member_id")
+  teamId               Int?               @map("team_id")
+  postId               Int                @map("post_id")
+  assignedAt           DateTime           @default(now()) @map("assigned_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  headhuntingRequestId Int                @map("headhunting_requestId")
+  headhuntingRequest   HeadhuntingRequest @relation(fields: [headhuntingRequestId], references: [id])
+  member               Member?            @relation(fields: [memberId], references: [id])
+  post                 Post               @relation(fields: [postId], references: [id])
+  team                 Team?              @relation(fields: [teamId], references: [id])
+
+  @@unique([memberId, postId])
+  @@unique([teamId, postId])
+  @@map("headhunting_recommendations")
+}
+
+model Contract {
+  id                       Int                        @id @default(autoincrement())
+  paymentForm              PaymentForm                @default(ON_SITE) @map("payment_form")
+  startDate                DateTime                   @map("start_date") @db.Date
+  endDate                  DateTime                   @map("end_date") @db.Date
+  fileId                   Int                        @unique @map("file_id")
+  applicationId            Int                        @unique @map("application_id")
+  amount                   Int                        @default(0)
+  manager                  String                     @default("")
+  contact                  String                     @default("")
+  department               String                     @default("")
+  createdAt                DateTime                   @default(now()) @map("created_at") @db.Date
+  salaryType               SalaryType                 @default(DAILY) @map("salary_type")
+  application              Application                @relation(fields: [applicationId], references: [id])
+  file                     File                       @relation(fields: [fileId], references: [id])
+  labor                    Labor?
+  SiteEvaluationByContract SiteEvaluationByContract[]
+  settlementCompleteDate   DateTime?                  @map("settlement_complete")
+  settlementStatus         SettlementStatus           @default(NONE) @map("settlement_status")
+
+  @@map("contracts")
+}
+
+model City {
+  id          Int        @id @default(autoincrement())
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+  koreanName  String     @map("korean_name")
+  englishName String     @map("english_name")
+  district    District[]
+
+  @@map("city")
+}
+
+model District {
+  id          Int      @id @default(autoincrement())
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  koreanName  String   @map("korean_name")
+  englishName String   @map("english_name")
+  cityId      Int      @map("city_id")
+  city        City     @relation(fields: [cityId], references: [id])
+  member      Member[]
+  site        Site[]
+  team        Team[]
+
+  @@map("district")
+}
+
+model MatchingRecommendation {
+  id         Int      @id @default(autoincrement())
+  memberId   Int?     @map("member_id")
+  teamId     Int?     @map("team_id")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  companyId  Int      @map("company_id")
+  company    Company  @relation(fields: [companyId], references: [id])
+  member     Member?  @relation(fields: [memberId], references: [id])
+  team       Team?    @relation(fields: [teamId], references: [id])
+
+  @@unique([memberId, assignedAt])
+  @@unique([teamId, assignedAt])
+  @@map("matching_recommendations")
+}
+
+model MemberMatching {
+  id         Int      @id @default(autoincrement())
+  postId     Int      @map("post_id")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Date
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isRefuse   Boolean  @default(false)
+  memberId   Int      @map("member_id")
+  member     Member   @relation(fields: [memberId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id])
+
+  @@unique([postId, assignedAt, memberId])
+  @@map("member_matching")
+}
+
+model Labor {
+  id              Int             @id @default(autoincrement())
+  contractId      Int             @unique @map("contract_id")
+  contract        Contract        @relation(fields: [contractId], references: [id])
+  salaryHistories SalaryHistory[]
+  workDates       WorkDate[]
+
+  @@map("labors")
+}
+
+model WorkDate {
+  id      Int      @id @default(autoincrement())
+  laborId Int      @map("labor_id")
+  date    DateTime @db.Date
+  hours   Int
+  labor   Labor    @relation(fields: [laborId], references: [id])
+
+  @@unique([laborId, date])
+  @@map("work_dates")
+}
+
+model SalaryHistory {
+  id                  Int      @id @default(autoincrement())
+  laborId             Int      @map("labor_id")
+  base                Int      @default(0)
+  otherAllowance      Int      @default(0) @map("other_allowance")
+  overtimePay         Int      @default(0) @map("overtime_pay")
+  meals               Int      @default(0)
+  totalPayment        Int      @default(0) @map("total_payment")
+  nationalPension     Int      @default(0) @map("national_pension")
+  healthInsurance     Int      @default(0) @map("health_insurance")
+  longTermCare        Int      @default(0) @map("long_term_care")
+  employmentInsurance Int      @default(0) @map("employment_insurance")
+  retirementDeduction Int      @default(0) @map("retirement_deduction")
+  incomeTax           Int      @default(0) @map("income_tax")
+  residentTax         Int      @default(0) @map("resident_tax")
+  totalDeductible     Int      @default(0) @map("total_deductible")
+  actualPayment       Int      @default(0) @map("actual_payment")
+  date                DateTime
+  labor               Labor    @relation(fields: [laborId], references: [id])
+
+  @@unique([laborId, date])
+  @@map("salary_histories")
+}
+
+model Notification {
+  id        Int                @id @default(autoincrement())
+  title     String
+  content   String?
+  isActive  Boolean            @default(true) @map("is_active")
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  type      NotificationType
+  accountId Int                @map("account_id")
+  status    NotificationStatus @default(NOT_READ) @map("status")
+  account   Account            @relation(fields: [accountId], references: [id])
+
+  @@map("notifications")
+}
+
+model Announcement {
+  id                Int                @id @default(autoincrement())
+  title             String
+  content           String?
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  accountId         Int                @map("account_id")
+  account           Account            @relation(fields: [accountId], references: [id])
+  announcementFiles AnnouncementFile[]
+
+  @@map("annoucements")
+}
+
+model AnnouncementFile {
+  id            Int          @id @default(autoincrement())
+  anouncementId Int
+  fileId        Int          @unique
+  announcement  Announcement @relation(fields: [anouncementId], references: [id])
+  file          File         @relation(fields: [fileId], references: [id])
+
+  @@map("announcement_files")
+}
+
+model Point {
+  id           Int      @id @default(autoincrement())
+  memberId     Int      @map("member_id")
+  isActive     Boolean  @default(true) @map("is_active")
+  reasonEarn   String?  @map("reason_earn")
+  createdAt    DateTime @default(now()) @map("created_at")
+  amount       Int      @default(0) @map("amount")
+  remainAmount Int      @default(0) @map("remain_amount")
+  member       Member   @relation(fields: [memberId], references: [id])
+
+  @@map("points")
+}
+
+model CurrencyExchange {
+  id             Int                    @id @default(autoincrement())
+  memberId       Int?                   @map("member_id")
+  isActive       Boolean                @default(true) @map("is_active")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  amount         Int                    @default(0) @map("amount")
+  exchangeStatus CurrencyExchangeStatus @map("exchange_status")
+  member         Member?                @relation(fields: [memberId], references: [id])
+
+  @@map("currency_exchanges")
+}
+
+model Product {
+  id                    Int                     @id @default(autoincrement())
+  isActive              Boolean                 @default(true) @map("is_active")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  productType           ProductType             @map("product_type")
+  price                 Int
+  usageCycle            Int                     @default(0) @map("usage_cycle")
+  countLimit            Int                     @map("count_limit")
+  monthLimit            Int                     @map("month_limit")
+  usageType             UsageType               @map("usage_type")
+  productPaymentHistory ProductPaymentHistory[]
+
+  @@map("products")
+}
+
+model ProductPaymentHistory {
+  id             Int            @id @default(autoincrement())
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  cost           Int
+  status         PaymentStatus  @default(PROCESSING)
+  merchantId     String?        @unique @map("merchant_id")
+  expirationDate DateTime       @map("expiration_date") @db.Date()
+  remainingTimes Int            @map("remaining_times")
+  productId      Int            @map("product_id")
+  companyId      Int            @map("company_id")
+  paymentType    PaymentType?   @map("payment_type")
+  company        Company        @relation(fields: [companyId], references: [id])
+  product        Product        @relation(fields: [productId], references: [id])
+  cardReceipt    CardReceipt?
+  taxBill        TaxBill?
+  refund         Refund?
+  usageHistory   UsageHistory[]
+
+  @@map("product_payment_histories")
+}
+
+model CardReceipt {
+  id                      Int                   @id @default(autoincrement())
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  fileId                  Int?                  @unique @map("file_id")
+  file                    File?                 @relation(fields: [fileId], references: [id])
+  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  status                  CardReceiptStatus     @default(IN_PROGRESS)
+
+  @@map("card_receipts")
+}
+
+model TaxBill {
+  id                      Int                   @id @default(autoincrement())
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+  fileId                  Int?                  @unique @map("file_id")
+  file                    File?                 @relation(fields: [fileId], references: [id])
+  productPaymentHistoryId Int                   @unique @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  status                  TaxBillStatus         @default(NOT_ISSUED)
+
+  @@map("tax_bills")
+}
+
+model UsageHistory {
+  id                      Int                   @id @default(autoincrement())
+  productPaymentHistoryId Int                   @map("product_payment_history_id")
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  createdAt               DateTime              @default(now()) @map("created_at") @db.Date
+  expirationDate          DateTime              @map("expiration_date")
+  remainNumber            Int                   @map("remain_number")
+
+  @@map("usage_histories")
+}
+
+model Refund {
+  id                      Int                   @id @default(autoincrement())
+  isActive                Boolean               @default(true) @map("is_active")
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+  productPaymentHistoryId Int                   @unique
+  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
+  status                  RefundStatus
+  refundHistory           RefundHistory[]
+
+  @@map("refunds")
+}
+
+model RefundHistory {
+  id        Int          @id @default(autoincrement())
+  createdAt DateTime     @default(now()) @map("created_at")
+  refundId  Int          @map("refund_id")
+  refund    Refund       @relation(fields: [refundId], references: [id])
+  status    RefundStatus
+  reason    String?
+
+  @@map("refund_histories")
+}
+
+model Bank {
+  id        Int      @id @default(autoincrement())
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  name      String
+
+  @@map("banks")
+}
+
+model MembersOnCodes {
+  codeId    Int      @map("code_id")
+  memberId  Int      @map("member_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  code      Code     @relation(fields: [codeId], references: [id])
+  member    Member   @relation(fields: [memberId], references: [id])
+
+  @@id([memberId, codeId])
+  @@map("members_on_codes")
+}
+
+model MemberPreference {
+  id                                     Int      @id @default(autoincrement())
+  memberId                               Int      @unique @map("member_id")
+  isActive                               Boolean  @default(true) @map("is_active")
+  createdAt                              DateTime @default(now()) @map("created_at")
+  updatedAt                              DateTime @updatedAt @map("updated_at")
+  isPushNotificationActive               Boolean  @default(true) @map("is_push_notification_active")
+  isNotificationSoundActive              Boolean  @default(true) @map("is_notification_sound_active")
+  isNoticeNotificationActive             Boolean  @default(true) @map("is_notice_notification_active")
+  isServiceNotificationActive            Boolean  @default(true) @map("is_service_notification_active")
+  isTeamNotificationActive               Boolean  @default(true) @map("is_team_notification_active")
+  isSearchByMemberLocationAllowed        Boolean  @default(false) @map("is_search_by_member_location_allowed")
+  isMemberLocationSearchedBySitesAllowed Boolean  @default(false) @map("is_member_location_searched_by_sites_allowed")
+  member                                 Member   @relation(fields: [memberId], references: [id])
+
+  @@map("member_preferences")
+}
+
+enum CurrencyExchangeStatus {
+  REQUESTED
+  COMPLETE
+  DENY
+}
+
+enum BannerStatus {
+  HIDE
+  EXPOSE
+}
+
+enum NotificationType {
+  ON_SITE_APPROVAL
+  ON_SITE_STOP
+  FIELD_REFUSAL
+  ANNOUNCEMENT_SUPPORT
+  HEADHUNTING_APPROVED
+  HEADHUNTING_PETITION
+  NOTICE_REJECTION
+  ACCEPT_INTERVIEW
+  REJECTION_INTERVIEW
+  CHANGE_PAYMENT_PRODUCT
+}
+
+enum RequestBannerStatus {
+  PENDING
+  DENY
+  APPROVED
+}
+
+enum PostBannerType {
+  ADMIN
+  COMPANY
 }
 
 enum FunctionName {
   MEMBER_MANAGEMENT
   TEAM_MANAGEMENT
-  COMPANY_LIST
-  SPECIAL_APPLICATION
-  CERTIFICATION_APPLICATION
-  DISABLED_REGISTRATION
-  CAREER_REGISTRATION
-  SITE_APPLICATION
-  ANNOUNCEMENT_MANAGEMENT
-  GENERAL_SUPPORT_MANAGEMENT
-  MATCHING_SETTING_MANAGEMENT
-  MATCHING_SETTING
-  HEADHUNTING_REQUEST
-  HEADHUNTING_MANAGEMENT
-  HEADHUNTING_MANPOWER
+  COMPANY_MANAGEMENT
+  MATCHING_SETTINGS_MANAGEMENT
+  THE_ONE_HEADHUNTING_MANAGEMENT
+  NOTICE_MANAGEMENT
+  APPLICATION_MANAGEMENT
   CONTRACT_MANAGEMENT
+  WORK_MANAGEMENT
   EVALUATION_MANAGEMENT
   PRODUCT_PAYMENT_MANAGEMENT
   PRODUCT_POSSESSION_STATUS
-  PRODUCT_USAGE_STATUS
   REFUND_MANAGEMENT
   SETTLEMENT_MANAGEMENT
   POINT_MANAGEMENT
+  CURRENT_EXCHANGE_REQUEST_MANAGEMENT
   BANNER_MANAGEMENT
-  PRODUCT_BANNER_MANAGEMENT
-  PRODUCT_BANNER_INQUIRY
+  BANNER_INQUIRY_MANAGEMENT
   CODE_MANAGEMENT
-  ADVERTISING_BANNER_MANAGEMENT
   ANNOUNCEMENTS
-  FAQ
-  INQUIRY
+  FREQUENTLY_ASKED_QUESTIONS
+  ONE_TO_ONE_INQUIRY
   TERMS_AND_CONDITIONS
   LABOR_CONSULTATION_MANAGEMENT
   REPORT_MANAGEMENT
@@ -217,7 +1158,6 @@ enum AccountType {
 }
 
 enum AccountStatus {
-  PENDING
   APPROVED
   SUSPENDED
   WITHDRAWN
@@ -228,20 +1168,12 @@ enum AdminLevel {
   GENERAL
 }
 
-enum AuthenticationProviderType {
-  KAKAO
-  NAVER
-  GOOGLE
-  APPLE
-  FACEBOOK
-}
-
 enum MemberLevel {
   PLATINUM
   GOLD
-  SIVER
-  TWO
-  THREE
+  SILVER
+  SECOND
+  THIRD
 }
 
 enum CompanyType {
@@ -264,15 +1196,7 @@ enum FileType {
 enum TeamStatus {
   GENERAL
   STOPPED
-  NOT_EXPOSED
-  WAITING_ACTIVITY
-  DELETED
-}
-
-enum DisabledType {
-  DISABLED
-  NONE
-  MODERATE
+  WAITING_FOR_ACTIVITY
 }
 
 enum CertificateStatus {
@@ -280,4 +1204,206 @@ enum CertificateStatus {
   REJECTED
   APPROVED
   REAPPLY
+}
+
+enum SignupMethodType {
+  GENERAL
+  GOOGLE
+  APPLE
+  KAKAO
+  NAVER
+}
+
+enum CareerType {
+  GENERAL
+  CERTIFICATION
+}
+
+enum CareerCertificationType {
+  NONE
+  HEALTH_INSURANCE
+  EMPLOYMENT_INSURANCE
+  THE_ONE_SITE
+}
+
+enum OtpType {
+  EMAIL
+  PHONE
+}
+
+enum CodeType {
+  SPECIAL
+  GENERAL
+}
+
+enum ContractStatus {
+  PRIMARY
+  SUB_CONTRACT
+  DROP_BOX
+}
+
+enum PostType {
+  COMMON
+  PREMIUM
+}
+
+enum PostCategory {
+  GENERAL
+  MATCHING
+  HEADHUNTING
+}
+
+enum PostStatus {
+  PREPARE
+  RECRUITING
+  DEADLINE
+}
+
+enum ExperienceType {
+  SHORT
+  MEDIUM
+  LONG
+  REGARDLESS
+}
+
+enum SalaryType {
+  DAILY
+  MONTHLY
+}
+
+enum Workday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+  AGREEMENT
+}
+
+enum PostApplicationStatus {
+  APPLY
+  REJECT_BY_COMPANY
+  PROPOSAL_INTERVIEW
+  REJECT_BY_MEMBER
+  APPROVE_BY_MEMBER
+  APPROVE_BY_COMPANY
+}
+
+enum CareerCertificationRequestStatus {
+  REQUESTING
+  APPROVED
+  REFUSED
+}
+
+enum SiteStatus {
+  REVIEWING
+  REJECTED
+  APPROVED
+  SUSPENDED
+}
+
+enum RequestStatus {
+  APPLY
+  APPROVED
+  REJECTED
+  RE_APPLY
+}
+
+enum RequestObject {
+  INDIVIDUAL
+  TEAM
+}
+
+enum ApplicationCategory {
+  MATCHING
+  HEADHUNTING
+  MANPOWER
+}
+
+enum InterviewStatus {
+  INTERVIEWING
+  PASS
+  FAIL
+}
+
+enum SiteType {
+  REGISTERED
+  UNREGISTERED
+}
+
+enum InvitationStatus {
+  ACCEPTED
+  REQUESTED
+  DECLIENED
+}
+
+enum PostHistoryType {
+  EDITED
+  DELETED
+}
+
+enum PaymentForm {
+  ON_SITE
+  BANK_TRANSFER
+}
+
+enum PaymentType {
+  CREDIT_CARD
+  BANK_TRANSFER
+}
+
+enum ProductType {
+  PULL_UP
+  PREMIUM_POST
+  WORKER_VERIFICATION
+  LABOR_CONSULTATION
+  BANNER
+  HEADHUNTING_SERVICE
+  COMPANY_MATCHING_SERVICE
+}
+
+enum UsageType {
+  LIMITED_COUNT
+  FIX_TERM
+}
+
+enum NotificationStatus {
+  NOT_READ
+  READ
+}
+
+enum BannerType {
+  ADMIN
+  COMPANY
+}
+
+enum SettlementStatus {
+  UNSETTLED
+  SETTLED
+  NONE
+}
+
+enum RefundStatus {
+  APPLY
+  APPROVED
+  REJECT
+}
+
+enum TaxBillStatus {
+  NOT_ISSUED
+  ISSUED_REQUESTED
+  ISSUED_COMPLETED
+  MODIFIED_ISSUED_COMPLETED
+}
+
+enum CardReceiptStatus {
+  IN_PROGRESS
+}
+
+enum PaymentStatus {
+  PROCESSING
+  COMPLETE
+  FAIL
 }

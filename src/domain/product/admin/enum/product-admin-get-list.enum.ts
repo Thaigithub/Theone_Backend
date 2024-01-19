@@ -1,0 +1,5 @@
+export enum GetListType {
+    LIMITED_COUNT = 'LIMITED_COUNT',
+    FIXED_TERM = 'FIXED_TERM',
+    USAGE_CYCLE = 'USAGE_CYCLE',
+}
