@@ -1,12 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CodeType } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { CodeAdminFilter } from './dto/code-admin-filter.enum';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
-import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
+import { CodeAdminGetDetailResponse } from './response/code-admin-get-detail.response';
 import { CodeAdminGetListResponse } from './response/code-admin-get-list.response';
 
 @Injectable()
@@ -16,35 +14,29 @@ export class CodeAdminService {
     async getList(query: CodeAdminGetListRequest): Promise<CodeAdminGetListResponse> {
         const queryFilter = {
             isActive: true,
-            ...(query.codeType !== CodeAdminFilter.ALL && { codeType: CodeType[query.codeType] }),
+            ...(query.codeType && { codeType: query.codeType }),
         };
 
-        try {
-            const codeList = await this.prismaService.code.findMany({
-                select: {
-                    id: true,
-                    code: true,
-                    codeName: true,
-                    codeType: true,
-                },
-                where: queryFilter,
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                // Pagination
-                // If both pageNumber and pageSize is provided then handle the pagination
-                ...QueryPagingHelper.queryPaging(query),
-            });
+        const codeList = await this.prismaService.code.findMany({
+            select: {
+                id: true,
+                code: true,
+                codeName: true,
+                codeType: true,
+            },
+            where: queryFilter,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        });
 
-            const codeListCount = await this.prismaService.code.count({
-                // Conditions based on request query
-                where: queryFilter,
-            });
+        const codeListCount = await this.prismaService.code.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
 
-            return new PaginationResponse(codeList, new PageInfo(codeListCount));
-        } catch (error) {
-            throw new InternalServerErrorException(error);
-        }
+        return new PaginationResponse(codeList, new PageInfo(codeListCount));
     }
 
     async create(request: CodeAdminUpsertRequest): Promise<void> {
@@ -57,7 +49,7 @@ export class CodeAdminService {
         });
     }
 
-    async changeCodeInfo(id: number, payload: CodeAdminUpsertRequest) {
+    async update(id: number, payload: CodeAdminUpsertRequest) {
         await this.prismaService.code.update({
             where: {
                 id,
@@ -71,7 +63,7 @@ export class CodeAdminService {
         });
     }
 
-    async getCodeDetail(id: number): Promise<CodeAdminGetItemResponse> {
+    async getDetail(id: number): Promise<CodeAdminGetDetailResponse> {
         return await this.prismaService.code.findUnique({
             where: {
                 id,
@@ -80,7 +72,7 @@ export class CodeAdminService {
         });
     }
 
-    async deleteCode(ids: number[]) {
+    async delete(ids: number[]) {
         await this.prismaService.code.deleteMany({
             where: {
                 id: {

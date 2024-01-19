@@ -1,16 +1,4 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    ParseArrayPipe,
-    ParseIntPipe,
-    Patch,
-    Post,
-    Query,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -18,46 +6,40 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { CodeAdminService } from './code-admin.service';
 import { CodeAdminGetListRequest } from './request/code-admin-get-list.request';
 import { CodeAdminUpsertRequest } from './request/code-admin-upsert.request';
-import { CodeAdminGetItemResponse } from './response/code-admin-get-item.response';
+import { CodeAdminGetDetailResponse } from './response/code-admin-get-detail.response';
 import { CodeAdminGetListResponse } from './response/code-admin-get-list.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@Controller('admin/code')
+@Controller('/admin/code')
 export class CodeAdminController {
     constructor(private readonly codeAdminService: CodeAdminService) {}
 
     @Get()
     async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeAdminGetListResponse>> {
-        const code = await this.codeAdminService.getList(query);
-        return BaseResponse.of(code);
+        return BaseResponse.of(await this.codeAdminService.getList(query));
     }
 
-    @Post('/create')
+    @Post()
     async create(@Body() request: CodeAdminUpsertRequest): Promise<BaseResponse<void>> {
-        await this.codeAdminService.create(request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.codeAdminService.create(request));
     }
 
-    @Get(':id')
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<CodeAdminGetItemResponse>> {
-        return BaseResponse.of(await this.codeAdminService.getCodeDetail(id));
+    @Get('/:id')
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<CodeAdminGetDetailResponse>> {
+        return BaseResponse.of(await this.codeAdminService.getDetail(id));
     }
 
-    @Patch(':id')
-    async changeCodeInfo(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() payload: CodeAdminUpsertRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.codeAdminService.changeCodeInfo(id, payload);
-        return BaseResponse.ok();
+    @Put('/:id')
+    async update(@Param('id', ParseIntPipe) id: number, @Body() payload: CodeAdminUpsertRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.codeAdminService.update(id, payload));
     }
 
     @Delete()
-    async deleteCode(
+    async delete(
         @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
         ids: number[],
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.codeAdminService.deleteCode(ids));
+        return BaseResponse.of(await this.codeAdminService.delete(ids));
     }
 }

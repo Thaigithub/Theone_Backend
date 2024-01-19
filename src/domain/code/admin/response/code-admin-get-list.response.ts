@@ -1,4 +1,4 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { CodeAdminGetItemResponse } from './code-admin-get-item.response';
+import { CodeAdminGetDetailResponse } from './code-admin-get-detail.response';
 
-export class CodeAdminGetListResponse extends PaginationResponse<CodeAdminGetItemResponse> {}
+export class CodeAdminGetListResponse extends PaginationResponse<CodeAdminGetDetailResponse> {}
