@@ -227,6 +227,7 @@ export class MemberAuthService {
                 },
             },
         });
+        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -258,6 +259,7 @@ export class MemberAuthService {
                 },
             },
         });
+        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -289,6 +291,7 @@ export class MemberAuthService {
                 },
             },
         });
+        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
