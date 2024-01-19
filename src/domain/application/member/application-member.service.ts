@@ -17,46 +17,48 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    async getApplicationList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
-        const teams = (
-            await this.prismaService.member.findUnique({
-                where: {
-                    accountId: id,
-                },
-                select: {
-                    teams: {
-                        select: {
-                            teamId: true,
-                        },
+    async getList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
+        const teams = await this.prismaService.member.findUnique({
+            where: {
+                accountId: id,
+            },
+            select: {
+                teams: {
+                    select: {
+                        teamId: true,
                     },
                 },
-            })
-        ).teams.map((item) => item.teamId);
+                leader: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        const teamIds = [...teams.leader.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
         const status =
             query.status === ApplicationMemberStatus.FAIL
                 ? {
                       status: PostApplicationStatus.REJECT_BY_COMPANY,
-                      interview: {
-                          status: InterviewStatus.FAIL,
-                      },
+                      interview: undefined,
                   }
                 : query.status === ApplicationMemberStatus.PASS
                   ? {
-                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                        status: undefined,
                         interview: {
                             status: InterviewStatus.PASS,
                         },
                     }
                   : query.status === ApplicationMemberStatus.APPLY
                     ? {
-                          status: PostApplicationStatus.APPLY,
+                          status: undefined,
                           interview: null,
                       }
                     : query.status === ApplicationMemberStatus.PROPOSAL_INTERVIEW
                       ? {
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                            interview: {
-                                isNot: null,
+                            NOT: {
+                                interview: null,
                             },
                         }
                       : {
@@ -76,15 +78,15 @@ export class ApplicationMemberService {
                 {
                     team: {
                         id: {
-                            in: teams,
+                            in: teamIds,
                         },
                     },
                     ...status,
                 },
             ],
             AND: [
-                { assignedAt: { gt: query.startDate && new Date(query.startDate) } },
-                { assignedAt: { lt: query.endDate && new Date(query.endDate) } },
+                { assignedAt: { gte: query.startDate && new Date(query.startDate) } },
+                { assignedAt: { lte: query.endDate && new Date(query.endDate) } },
             ],
         };
         const application = (
@@ -165,7 +167,7 @@ export class ApplicationMemberService {
         return new PaginationResponse(application, new PageInfo(total));
     }
 
-    async getDetailApplication(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
+    async getDetail(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
         const teams = (
             await this.prismaService.member.findUnique({
                 where: {
@@ -320,7 +322,7 @@ export class ApplicationMemberService {
         };
     }
 
-    async changeApplicationStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
+    async updateStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
         const application = await this.prismaService.application.findFirst({
             where: {
                 OR: [
@@ -366,26 +368,47 @@ export class ApplicationMemberService {
         });
     }
 
-    async getApplicationOfferList(
+    async getListOffer(
         accountId: number,
         body: ApplicationMemberGetListOfferRequest,
     ): Promise<ApplicationMemberGetListOfferResponse> {
-        const teams = (
-            await this.prismaService.member.findUnique({
-                where: {
-                    accountId,
-                },
-                select: {
-                    teams: {
-                        select: {
-                            teamId: true,
-                        },
+        const teams = await this.prismaService.member.findUnique({
+            where: {
+                accountId,
+            },
+            select: {
+                teams: {
+                    select: {
+                        teamId: true,
                     },
                 },
-            })
-        ).teams.map((item) => item.teamId);
+                leader: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        const teamIds = [...teams.leader.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
         const query = {
-            where: {},
+            where: {
+                OR: [
+                    {
+                        team: {
+                            id: {
+                                in: teamIds,
+                            },
+                        },
+                        member: null,
+                    },
+                    {
+                        member: {
+                            accountId,
+                        },
+                        team: null,
+                    },
+                ],
+            },
             select: {
                 id: true,
                 team: {
@@ -445,13 +468,11 @@ export class ApplicationMemberService {
             },
             ...QueryPagingHelper.queryPaging(body),
         };
-        switch (body.filter) {
+        switch (body.status) {
             case ApplicationMemberGetListOfferFilter.ACCEPTED: {
-                query.where['OR'] = [
-                    {
-                        member: {
-                            accountId,
-                        },
+                query.where = {
+                    ...query.where,
+                    ...{
                         interview: {
                             status: InterviewStatus.PASS,
                         },
@@ -463,32 +484,13 @@ export class ApplicationMemberService {
                         },
                         status: PostApplicationStatus.APPROVE_BY_MEMBER,
                     },
-                    {
-                        team: {
-                            leader: {
-                                accountId,
-                            },
-                        },
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
-                        post: {
-                            name: {
-                                contains: body.postName,
-                                mode: 'insensitive',
-                            },
-                        },
-                        status: PostApplicationStatus.APPROVE_BY_MEMBER,
-                    },
-                ];
+                };
                 break;
             }
             case ApplicationMemberGetListOfferFilter.REJECTED: {
-                query.where['OR'] = [
-                    {
-                        member: {
-                            accountId,
-                        },
+                query.where = {
+                    ...query.where,
+                    ...{
                         interview: {
                             status: InterviewStatus.PASS,
                         },
@@ -500,32 +502,13 @@ export class ApplicationMemberService {
                         },
                         status: PostApplicationStatus.REJECT_BY_MEMBER,
                     },
-                    {
-                        team: {
-                            leader: {
-                                accountId,
-                            },
-                        },
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
-                        post: {
-                            name: {
-                                contains: body.postName,
-                                mode: 'insensitive',
-                            },
-                        },
-                        status: PostApplicationStatus.REJECT_BY_MEMBER,
-                    },
-                ];
+                };
                 break;
             }
             case ApplicationMemberGetListOfferFilter.DEADLINE: {
-                query.where['OR'] = [
-                    {
-                        member: {
-                            accountId,
-                        },
+                query.where = {
+                    ...query.where,
+                    ...{
                         interview: {
                             status: InterviewStatus.PASS,
                         },
@@ -534,66 +517,42 @@ export class ApplicationMemberService {
                                 contains: body.postName,
                                 mode: 'insensitive',
                             },
-                            endDate: {
-                                lt: new Date().toISOString(),
-                            },
                         },
-                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
+                        NOT: {
+                            OR: [
+                                { status: PostApplicationStatus.APPROVE_BY_MEMBER },
+                                { status: PostApplicationStatus.REJECT_BY_MEMBER },
+                            ],
+                        },
                     },
-                    {
-                        team: {
-                            leader: {
-                                accountId,
-                            },
-                        },
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
-                        post: {
-                            name: {
-                                contains: body.postName,
-                                mode: 'insensitive',
-                            },
-                            endDate: {
-                                lt: new Date().toISOString(),
-                            },
-                        },
-                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
-                    },
-                ];
+                };
                 break;
             }
             case ApplicationMemberGetListOfferFilter.TEAM_LEADER_WAITING: {
+                query.where.OR[0].team.id.in = teams.teams.map((item) => item.teamId);
                 query.where = {
-                    team: {
-                        id: {
-                            in: teams,
+                    ...query.where,
+                    ...{
+                        interview: {
+                            status: InterviewStatus.PASS,
                         },
-                        leaderId: {
-                            not: accountId,
+                        post: {
+                            name: {
+                                contains: body.postName,
+                                mode: 'insensitive',
+                            },
+                            endDate: {
+                                gt: Date(),
+                            },
                         },
+                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
                     },
-                    interview: {
-                        status: InterviewStatus.PASS,
-                    },
-                    post: {
-                        name: {
-                            contains: body.postName,
-                            mode: 'insensitive',
-                        },
-                        endDate: {
-                            gt: Date(),
-                        },
-                    },
-                    status: PostApplicationStatus.APPROVE_BY_COMPANY,
                 };
             }
             case ApplicationMemberGetListOfferFilter.WAITING: {
-                query.where['OR'] = [
-                    {
-                        member: {
-                            accountId,
-                        },
+                query.where = {
+                    ...query.where,
+                    ...{
                         interview: {
                             status: InterviewStatus.PASS,
                         },
@@ -605,32 +564,13 @@ export class ApplicationMemberService {
                         },
                         status: PostApplicationStatus.APPROVE_BY_COMPANY,
                     },
-                    {
-                        team: {
-                            leader: {
-                                accountId,
-                            },
-                        },
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
-                        post: {
-                            name: {
-                                contains: body.postName,
-                                mode: 'insensitive',
-                            },
-                        },
-                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
-                    },
-                ];
+                };
                 break;
             }
             default: {
-                query.where['OR'] = [
-                    {
-                        member: {
-                            accountId,
-                        },
+                query.where = {
+                    ...query.where,
+                    ...{
                         interview: {
                             status: InterviewStatus.PASS,
                         },
@@ -641,23 +581,7 @@ export class ApplicationMemberService {
                             },
                         },
                     },
-                    {
-                        team: {
-                            id: {
-                                in: teams,
-                            },
-                        },
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
-                        post: {
-                            name: {
-                                contains: body.postName,
-                                mode: 'insensitive',
-                            },
-                        },
-                    },
-                ];
+                };
                 break;
             }
         }
