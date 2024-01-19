@@ -545,6 +545,7 @@ model Post {
   startWorkTime             DateTime?                   @map("start_work_time") @db.Time(6)
   endWorkTime               DateTime?                   @map("end_work_time") @db.Time(6)
   postEditor                String?                     @map("post_editor")
+  freePullUp                Boolean                     @default(true) @map("free_pull_up")
   view                      Int                         @default(0)
   companyId                 Int                         @map("company_id")
   occupationId              Int?                        @map("occupation_id")

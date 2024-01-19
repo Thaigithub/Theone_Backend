@@ -13,6 +13,6 @@ import { ProductWebhookService } from './webhook/product-webhook.service';
     imports: [PrismaModule, PortoneModule, ExcelModule],
     controllers: [ProductAdminController, ProductCompanyController, ProductWebhookController],
     providers: [ProductAdminService, ProductCompanyService, ProductWebhookService],
-    exports: [],
+    exports: [ProductCompanyService],
 })
 export class ProductModule {}

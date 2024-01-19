@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentStatus, PaymentType, Prisma, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { PaymentStatus, PaymentType, Prisma, ProductType, RefundStatus, TaxBillStatus } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -12,6 +12,7 @@ import { ProductCompanyUsageHistoryGetListRequest } from './request/product-comp
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
+import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 @Injectable()
 export class ProductCompanyService {
     constructor(
@@ -364,6 +365,7 @@ export class ProductCompanyService {
             merchantId: merchantId,
         };
     }
+
     async createRefund(accountId: number, id: number): Promise<void> {
         const paymentHistory = await this.prismaService.productPaymentHistory.findUnique({
             where: {
@@ -403,5 +405,21 @@ export class ProductCompanyService {
         } else {
             throw new BadRequestException('The refund request has been handled');
         }
+    }
+
+    async checkPremiumAvailability(accountId: number): Promise<ProductCompanyCheckPremiumAvailabilityResponse> {
+        const availablePremium = await this.prismaService.productPaymentHistory.findFirst({
+            where: {
+                isActive: true,
+                company: {
+                    accountId,
+                },
+                product: {
+                    productType: ProductType.PREMIUM_POST,
+                },
+                remainingTimes: { gt: 0 },
+            },
+        });
+        return availablePremium ? { isAvailable: true } : { isAvailable: false };
     }
 }

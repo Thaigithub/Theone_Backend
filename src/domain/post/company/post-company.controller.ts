@@ -16,6 +16,8 @@ import { PostCompanyGetListApplicantsResponse } from './response/post-company-ge
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
+import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
+import { PostCompanyServiceType } from './enum/post-company-service.enum';
 
 @Controller('/company/posts')
 @Roles(AccountType.COMPANY)
@@ -96,5 +98,25 @@ export class PostCompanyController {
         @Body() request: PostCompanyCreateRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postCompanyService.create(userRequest.user.accountId, request));
+    }
+
+    @Get('/:id/pullup/availability')
+    async checkPullUpAvailability(
+        @Param('id') postId: number,
+        @Req() request: AccountIdExtensionRequest,
+    ): Promise<BaseResponse<PostCompanyCheckPullUpAvailabilityResponse>> {
+        return BaseResponse.of(await this.postCompanyService.checkPullUpAvailability(postId, request.user.accountId));
+    }
+
+    @Patch('/:id/pullup')
+    async pullUpPost(@Param('id') postId: number, @Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+        await this.postCompanyService.serviceOnPost(postId, request.user.accountId, PostCompanyServiceType.PULL_UP);
+        return BaseResponse.ok();
+    }
+
+    @Patch('/:id/type')
+    async makePostPremium(@Param('id') postId: number, @Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+        await this.postCompanyService.serviceOnPost(postId, request.user.accountId, PostCompanyServiceType.PREMIUM);
+        return BaseResponse.ok();
     }
 }
