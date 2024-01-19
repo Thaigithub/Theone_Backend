@@ -9,7 +9,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './enum/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.enum';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
-import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';
+import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
 import { ContractAdminGetDetailContractorResponse } from './response/contract-admin-get-detail-contractor.response';
 import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
@@ -223,7 +223,7 @@ export class ContractAdminService {
         return null;
     }
 
-    async createFile(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+    async createFile(id: number, body: ContractAdminUpsertFileRequest): Promise<void> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
@@ -247,7 +247,7 @@ export class ContractAdminService {
         });
     }
 
-    async update(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+    async updateFile(id: number, body: ContractAdminUpsertFileRequest): Promise<void> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
