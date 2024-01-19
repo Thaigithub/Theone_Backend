@@ -6,8 +6,8 @@ import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ContractAdminGetListCategory } from './dto/contract-admin-get-list-category.enum';
-import { ContractAdminGetListSort } from './dto/contract-admin-get-list-sort.enum';
+import { ContractAdminGetListCategory } from './enum/contract-admin-get-list-category.enum';
+import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.enum';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminRegistrationRequest } from './request/contract-admin-registration.request';
 import { ContractAdminGetDetailContractorResponse } from './response/contract-admin-get-detail-contractor.response';
@@ -107,7 +107,7 @@ export class ContractAdminService {
         return new PaginationResponse(listResponse, new PageInfo(count));
     }
 
-    async getTotalContracts(query: ContractAdminGetListRequest): Promise<ContractAdminGetTotalContractsResponse> {
+    async getTotal(query: ContractAdminGetListRequest): Promise<ContractAdminGetTotalContractsResponse> {
         const count = await this.prismaService.site.aggregate({
             _sum: {
                 numberOfContract: true,
@@ -190,7 +190,7 @@ export class ContractAdminService {
                         contact: contractor.application.member.contact,
                         contractStartDate: contractor.startDate?.toISOString() || null,
                         contractEndDate: contractor.endDate?.toISOString() || null,
-                        contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
+                        contractStatus: this.getStatus(contractor.startDate, contractor.endDate),
                         key: contractor.file?.key || null,
                     };
 
@@ -203,7 +203,7 @@ export class ContractAdminService {
                         contact: contractor.application.team.leader.contact,
                         contractStartDate: contractor.startDate?.toISOString() || null,
                         contractEndDate: contractor.endDate?.toISOString() || null,
-                        contractStatus: this.getContractStatus(contractor.startDate, contractor.endDate),
+                        contractStatus: this.getStatus(contractor.startDate, contractor.endDate),
                         key: contractor.file?.key || null,
                     };
 
@@ -215,16 +215,15 @@ export class ContractAdminService {
         return detailResponse;
     }
 
-    getContractStatus(startDate: Date, endDate: Date): ContractStatus {
+    getStatus(startDate: Date, endDate: Date): ContractStatus {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        if (startDate && endDate) {
-            if (startDate <= now && now <= endDate) return ContractStatus.UNDER_CONTRACT;
-            if (endDate < now) return ContractStatus.CONTRACT_TERMINATED;
-        }
+        if (startDate <= now && now <= endDate) return ContractStatus.UNDER_CONTRACT;
+        if (endDate < now) return ContractStatus.CONTRACT_TERMINATED;
+        return null;
     }
 
-    async registrationContract(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+    async createFile(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
@@ -248,7 +247,7 @@ export class ContractAdminService {
         });
     }
 
-    async editContract(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
+    async update(id: number, body: ContractAdminRegistrationRequest): Promise<void> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
