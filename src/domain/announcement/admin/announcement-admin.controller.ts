@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AnnouncementAdminService } from './announcement-admin.service';
 import { AnnouncementAdminCreateRequest } from './request/announcement-admin-create.request';
@@ -27,7 +27,7 @@ export class AnnouncementAdminController {
     }
 
     @Post()
-    async createAnnouncement(@Req() request: AccountIdExtensionRequest, @Body() body: AnnouncementAdminCreateRequest) {
+    async createAnnouncement(@Req() request: BaseRequest, @Body() body: AnnouncementAdminCreateRequest) {
         return BaseResponse.of(await this.announcementAdminService.createAnnouncement(request.user.accountId, body));
     }
 }

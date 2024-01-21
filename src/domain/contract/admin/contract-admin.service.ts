@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { ContractStatus } from 'utils/enum/contract-status.enum';
-import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { getSiteStatus } from 'utils/get-site-status';
+import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './enum/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.enum';
@@ -14,6 +12,7 @@ import { ContractAdminGetDetailContractorResponse } from './response/contract-ad
 import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
 import { ContractAdminGetTotalContractsResponse } from './response/contract-admin-get-total-contracts.response';
+import { ContractAdminStatus } from './enum/contract-admin-status.enum';
 
 @Injectable()
 export class ContractAdminService {
@@ -215,11 +214,11 @@ export class ContractAdminService {
         return detailResponse;
     }
 
-    getStatus(startDate: Date, endDate: Date): ContractStatus {
+    getStatus(startDate: Date, endDate: Date): ContractAdminStatus {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        if (startDate <= now && now <= endDate) return ContractStatus.UNDER_CONTRACT;
-        if (endDate < now) return ContractStatus.CONTRACT_TERMINATED;
+        if (startDate <= now && now <= endDate) return ContractAdminStatus.UNDER_CONTRACT;
+        if (endDate < now) return ContractAdminStatus.CONTRACT_TERMINATED;
         return null;
     }
 

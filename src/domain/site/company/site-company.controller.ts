@@ -2,19 +2,17 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { SiteCompanyCreateRequest } from './request/site-company-create.request';
-import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract.request';
+import { SiteCompanyGetListContractRequest } from './request/site-company-get-list-contract.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
-import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
+import { SiteCompanyUpsertRequest } from './request/site-company-upsert.request';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
-import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract.response';
+import { SiteCompanyGetListContractResponse } from './response/site-company-get-list-contract.response';
 import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
 import { SiteCompanyService } from './site-company.service';
 
-@Controller('company/sites')
+@Controller('/company/sites')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
 export class SiteCompanyController {
@@ -22,16 +20,16 @@ export class SiteCompanyController {
 
     @Get('/contract')
     async getListContract(
-        @Req() req: AccountIdExtensionRequest,
-        @Query() query: SiteCompanyGetListForContractRequest,
-    ): Promise<BaseResponse<SiteCompanyGetListForContractResponse>> {
+        @Req() req: BaseRequest,
+        @Query() query: SiteCompanyGetListContractRequest,
+    ): Promise<BaseResponse<SiteCompanyGetListContractResponse>> {
         return BaseResponse.of(await this.siteCompanyService.getListContract(req.user.accountId, query));
     }
 
     @Get('/:id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<SiteCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.siteCompanyService.getDetail(id, request.user.accountId));
     }
@@ -39,36 +37,27 @@ export class SiteCompanyController {
     @Patch('/:id')
     async update(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: SiteCompanyUpdateRequest,
-        @Req() request: AccountIdExtensionRequest,
+        @Body() body: SiteCompanyUpsertRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.update(id, body, request.user.accountId);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.siteCompanyService.update(id, body, request.user.accountId));
     }
 
     @Delete('/:id')
-    async delete(@Param('id', ParseIntPipe) id: number, @Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.delete(id, request.user.accountId);
-        return BaseResponse.ok();
+    async delete(@Param('id', ParseIntPipe) id: number, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.siteCompanyService.delete(id, request.user.accountId));
     }
 
     @Get()
     async getList(
         @Query() query: SiteCompanyGetListRequest,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<SiteCompanyGetListResponse>> {
-        const list = await this.siteCompanyService.getList(query, request.user.accountId);
-        const total = await this.siteCompanyService.getTotal(query, request.user.accountId);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+        return BaseResponse.of(await this.siteCompanyService.getList(query, request.user.accountId));
     }
 
     @Post()
-    async createS(
-        @Body() body: SiteCompanyCreateRequest,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<void>> {
-        await this.siteCompanyService.create(body, request.user.accountId);
-        return BaseResponse.ok();
+    async create(@Body() body: SiteCompanyUpsertRequest, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.siteCompanyService.create(body, request.user.accountId));
     }
 }

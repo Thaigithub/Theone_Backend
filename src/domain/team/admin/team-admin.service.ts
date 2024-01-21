@@ -5,69 +5,54 @@ import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { SearchCategoryForSearch, SearchSortForSearch, TeamStatusForSearch } from './dto/team-search';
-import { AdminTeamDownloadListRequest, AdminTeamDownloadRequest } from './request/team-admin-download.request';
-import { AdminTeamGetListRequest } from './request/team-admin-get-list.request';
-import { GetAdminTeamResponse, GetTeamDetailsResponse, GetTeamMemberDetails } from './response/admin-team.response';
+import { TeamAdminGetListCategory } from './dto/team-admin-get-list-category.enum';
+import { TeamAdminGetListSort } from './dto/team-admin-get-list-sort.enum';
+import { TeamAdminGetListStatus } from './dto/team-admin-get-list-status.enum';
+import { TeamAdminGetListRequest } from './request/team-admin-get-list.request';
+import { TeamAdminGetDetailResponse } from './response/team-admin-get-detail.response';
+import { TeamAdminGetListResponse } from './response/team-admin-get-list.response';
 @Injectable()
-export class AdminTeamService {
+export class TeamAdminService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly excelService: ExcelService,
     ) {}
+
     getStatus(item: any) {
         if (!item.isActive) {
-            return TeamStatusForSearch.DELETED;
+            return TeamAdminGetListStatus.DELETED;
         } else if (item.status == TeamStatus.STOPPED) {
-            return TeamStatusForSearch.STOPPED;
+            return TeamAdminGetListStatus.STOPPED;
         } else if (!item.exposureStatus) {
-            return TeamStatusForSearch.NOT_EXPOSED;
+            return TeamAdminGetListStatus.NOT_EXPOSED;
         } else if (item.status == TeamStatus.WAITING_FOR_ACTIVITY) {
-            return TeamStatusForSearch.WAITING_FOR_ACTIVITY;
+            return TeamAdminGetListStatus.WAITING_FOR_ACTIVITY;
         }
-        return TeamStatusForSearch.GENERAL;
+        return TeamAdminGetListStatus.GENERAL;
     }
-    async getTeamWithIds(ids: number[]): Promise<GetAdminTeamResponse[]> {
-        const teams = this.prismaService.team.findMany({
-            where: {
-                id: {
-                    in: ids,
-                },
-            },
-            select: {
-                id: true,
-                name: true,
-                teamCode: true,
-                leader: {
-                    select: {
-                        name: true,
-                        contact: true,
-                    },
-                },
-                isActive: true,
-                exposureStatus: true,
-                totalMembers: true,
-                status: true,
-            },
-        });
-        if (!teams) {
-            throw new NotFoundException('No team was found');
-        }
-        const result = (await teams).map(
-            (team) =>
-                ({
-                    id: team.id,
-                    teamCode: team.teamCode,
-                    name: team.name,
-                    leaderName: team.leader.name,
-                    leaderContact: team.leader.contact,
-                    totalMembers: team.totalMembers,
-                    status: this.getStatus(team),
-                }) as GetAdminTeamResponse,
-        );
-        return result;
+
+    async downloadDetail(teamId: number, response: Response, memberIds: string | string[]): Promise<void> {
+        const memberlist = [];
+        if (Array.isArray(memberIds)) {
+            memberlist.push(...memberIds.map((item) => parseInt(item)));
+        } else if (typeof memberIds === 'string') {
+            memberlist.push(parseInt(memberIds));
+        } else throw new BadRequestException('MemberIds required');
+        const teamDetails = await this.getDetail(teamId);
+        if (teamDetails.members.length === 0) throw new NotFoundException('No members found');
+        const excelData = teamDetails.members
+            .filter((item) => memberlist.includes(item.id))
+            .map((member) => {
+                delete member.id;
+                return member;
+            });
+        const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
+        response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
+        excelStream.pipe(response);
     }
-    async getTeamDetail(id: number): Promise<GetTeamDetailsResponse> {
+
+    async getDetail(id: number): Promise<TeamAdminGetDetailResponse> {
         const team = await this.prismaService.team.findUniqueOrThrow({
             where: {
                 id,
@@ -103,30 +88,28 @@ export class AdminTeamService {
         return {
             teamName: team.name,
             teamCode: team.teamCode,
-            members: members.map(
-                (memberInfo) =>
-                    ({
-                        rank: memberInfo.member.id === team.leaderId ? 'TEAM LEADER' : 'TEAM MEMBER',
-                        id: memberInfo.member.id,
-                        userName: memberInfo.member.account.username,
-                        name: memberInfo.member.name,
-                        level: memberInfo.member.level,
-                        contact: memberInfo.member.contact,
-                        memberStatus: memberInfo.member.account.status,
-                    }) as GetTeamMemberDetails,
-            ),
+            members: members.map((memberInfo) => ({
+                rank: memberInfo.member.id === team.leaderId ? 'TEAM LEADER' : 'TEAM MEMBER',
+                id: memberInfo.member.id,
+                userName: memberInfo.member.account.username,
+                name: memberInfo.member.name,
+                level: memberInfo.member.level,
+                contact: memberInfo.member.contact,
+                memberStatus: memberInfo.member.account.status,
+            })),
         };
     }
-    async searchTeamFilter(query: AdminTeamGetListRequest): Promise<PaginationResponse<GetAdminTeamResponse>> {
+
+    async getList(query: TeamAdminGetListRequest): Promise<TeamAdminGetListResponse> {
         const queryFilter: Prisma.TeamWhereInput = {
-            ...(query.teamStatus == TeamStatusForSearch.NOT_EXPOSED && {
+            ...(query.teamStatus == TeamAdminGetListStatus.NOT_EXPOSED && {
                 exposureStatus: false,
             }),
-            ...(query.teamStatus && query.teamStatus != TeamStatusForSearch.DELETED && { isActive: true }),
-            ...(query.teamStatus == TeamStatusForSearch.DELETED && { isActive: true }),
-            ...(query.teamStatus == TeamStatusForSearch.GENERAL && { status: TeamStatus.GENERAL }),
-            ...(query.teamStatus == TeamStatusForSearch.STOPPED && { status: TeamStatus.STOPPED }),
-            ...(query.teamStatus == TeamStatusForSearch.WAITING_FOR_ACTIVITY && { status: TeamStatus.WAITING_FOR_ACTIVITY }),
+            ...(query.teamStatus && query.teamStatus != TeamAdminGetListStatus.DELETED && { isActive: true }),
+            ...(query.teamStatus == TeamAdminGetListStatus.DELETED && { isActive: true }),
+            ...(query.teamStatus == TeamAdminGetListStatus.GENERAL && { status: TeamStatus.GENERAL }),
+            ...(query.teamStatus == TeamAdminGetListStatus.STOPPED && { status: TeamStatus.STOPPED }),
+            ...(query.teamStatus == TeamAdminGetListStatus.WAITING_FOR_ACTIVITY && { status: TeamStatus.WAITING_FOR_ACTIVITY }),
             ...(!query.searchCategory && query.searchKeyword
                 ? {
                       OR: [
@@ -136,13 +119,13 @@ export class AdminTeamService {
                       ],
                   }
                 : {}),
-            ...(query.searchCategory == SearchCategoryForSearch.TEAM_CODE && {
+            ...(query.searchCategory == TeamAdminGetListCategory.TEAM_CODE && {
                 teamCode: { contains: query.searchKeyword, mode: 'insensitive' },
             }),
-            ...(query.searchCategory == SearchCategoryForSearch.TEAM_NAME && {
+            ...(query.searchCategory == TeamAdminGetListCategory.TEAM_NAME && {
                 name: { contains: query.searchKeyword, mode: 'insensitive' },
             }),
-            ...(query.searchCategory == SearchCategoryForSearch.TEAM_LEADER && {
+            ...(query.searchCategory == TeamAdminGetListCategory.TEAM_LEADER && {
                 leader: { name: { contains: query.searchKeyword, mode: 'insensitive' } },
             }),
         };
@@ -165,8 +148,8 @@ export class AdminTeamService {
             },
             where: queryFilter,
             orderBy: {
-                ...(query.searchSort == SearchSortForSearch.LARGEST && { totalMembers: 'desc' }),
-                ...(query.searchSort == SearchSortForSearch.SMALLEST && { totalMembers: 'asc' }),
+                ...(query.searchSort == TeamAdminGetListSort.LARGEST && { totalMembers: 'desc' }),
+                ...(query.searchSort == TeamAdminGetListSort.SMALLEST && { totalMembers: 'asc' }),
             },
             ...QueryPagingHelper.queryPaging(query),
         });
@@ -186,24 +169,8 @@ export class AdminTeamService {
         });
         return new PaginationResponse(results, new PageInfo(teamListCount));
     }
-    async downloadTeamDetails(teamId: number, response: Response, memberIds: string | string[]): Promise<void> {
-        const memberlist = [];
-        if (Array.isArray(memberIds)) {
-            memberlist.push(...memberIds.map((item) => parseInt(item)));
-        } else if (typeof memberIds === 'string') {
-            memberlist.push(parseInt(memberIds));
-        } else throw new BadRequestException('MemberIds required');
-        const teamDetails = await this.getTeamDetail(teamId);
-        if (teamDetails.members.length === 0) throw new NotFoundException('No members found');
-        const excelData: Omit<GetTeamMemberDetails, 'id'>[] = teamDetails.members
-            .filter((item) => memberlist.includes(item.id))
-            .map(({ id, ...rest }) => rest);
-        const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
-        response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
-        excelStream.pipe(response);
-    }
-    async download(query: AdminTeamDownloadListRequest | AdminTeamDownloadRequest, response: Response): Promise<void> {
+
+    async download(query: string | string[], response: Response): Promise<void> {
         const list = [];
         if (Array.isArray(query)) {
             list.push(...query.map((item) => parseInt(item)));
@@ -211,9 +178,39 @@ export class AdminTeamService {
             list.push(parseInt(query));
         }
         if (list.length === 0) throw new BadRequestException('Missing teamIds');
-        const teams = await this.getTeamWithIds(list);
-        const excelData: Omit<GetAdminTeamResponse, 'id'>[] = teams.map(({ id, ...rest }) => rest);
-        const excelStream = await this.excelService.createExcelFile(excelData, 'Teams');
+        const teams = (
+            await this.prismaService.team.findMany({
+                where: {
+                    id: {
+                        in: list,
+                    },
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    teamCode: true,
+                    leader: {
+                        select: {
+                            name: true,
+                            contact: true,
+                        },
+                    },
+                    isActive: true,
+                    exposureStatus: true,
+                    totalMembers: true,
+                    status: true,
+                },
+            })
+        ).map((team) => ({
+            teamCode: team.teamCode,
+            name: team.name,
+            leaderName: team.leader.name,
+            leaderContact: team.leader.contact,
+            totalMembers: team.totalMembers,
+            status: this.getStatus(team),
+        }));
+        if (teams.length === 0) throw new NotFoundException('Team not found');
+        const excelStream = await this.excelService.createExcelFile(teams, 'Teams');
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');
         excelStream.pipe(response);

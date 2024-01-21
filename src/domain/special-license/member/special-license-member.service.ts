@@ -11,6 +11,7 @@ import { SpecialLicenseMemberGetListResponse } from './response/special-license-
 @Injectable()
 export class SpecialLicenseService {
     constructor(private readonly prismaService: PrismaService) {}
+
     async create(accountId: number, request: SpecialLicenseMemberUpsertRequest): Promise<void> {
         const count = await this.prismaService.specialLicense.count({
             where: {
@@ -50,6 +51,7 @@ export class SpecialLicenseService {
             },
         });
     }
+
     async getList(accountId: number, request: SpecialLicenseMemberGetListRequest): Promise<SpecialLicenseMemberGetListResponse> {
         const member = await this.prismaService.account.findUnique({
             where: { id: accountId },

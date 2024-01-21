@@ -21,9 +21,6 @@ import { ProductModule } from 'domain/product/product.module';
 import { RegionModule } from 'domain/region/region.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
-import { TeamMemberInvitationModule } from 'domain/team-member-invitation/team-member-invitation.module';
-import { WorkModule } from 'domain/work/work.module';
-import { WorkDateModule } from 'domain/workdate/workdate.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -58,10 +55,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         MatchingModule,
         RegionModule,
         LaborModule,
-        WorkModule,
-        WorkDateModule,
         PointModule,
-        TeamMemberInvitationModule,
         ProductModule,
         CurrencyExchangeModule,
         NotificationModule,

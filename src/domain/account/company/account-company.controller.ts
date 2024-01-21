@@ -3,7 +3,7 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { AccountIdExtensionRequest } from '../../../utils/generics/base.request';
+import { BaseRequest } from '../../../utils/generics/base.request';
 import { AccountCompanyService } from './account-company.service';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
 import { AccountCompanyUpdateRequest } from './request/account-company-update.request';
@@ -34,17 +34,14 @@ export class AccountCompanyController {
     @Get()
     @Roles(AccountType.COMPANY)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async getDetail(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountCompanyGetDetailResponse>> {
+    async getDetail(@Req() request: BaseRequest): Promise<BaseResponse<AccountCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.accountCompanyService.getDetail(request.user.accountId));
     }
 
     @Put()
     @Roles(AccountType.COMPANY)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async updateDetail(
-        @Body() body: AccountCompanyUpdateRequest,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<void>> {
+    async updateDetail(@Body() body: AccountCompanyUpdateRequest, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountCompanyService.update(request.user.accountId, body));
     }
 }

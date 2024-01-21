@@ -4,58 +4,33 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { MemberCreateTeamRequest, MemberUpdateExposureStatusTeamRequest } from './request/member-upsert-team.request';
-import { TeamGetMemberRequest } from './request/team-member-get-member.request';
-import {
-    GetTeamMemberDetail,
-    GetTeamMemberInvitation,
-    GetTeamsResponse,
-    MemberResponse,
-    TeamMemberDetailResponse,
-    TeamsResponse,
-} from './response/team-member-get.response';
+import { TeamMemberCreateInvitationRequest } from './request/team-member-get-invite.request';
+import { TeamMemberUpdateExposureRequest } from './request/team-member-update-exposure.request';
+import { TeamMemberUpdateInvitationStatus } from './request/team-member-update-invitation-status.request';
+import { TeamMemberUpsertRequest } from './request/team-member-upsert.request';
+import { TeamMemberGetDetailResponse } from './response/team-member-get-detail.response';
+import { TeamMemberGetListInvitationResponse } from './response/team-member-get-list-invitation.response';
+import { TeamMemberGetListResponse } from './response/team-member-get-list.response';
 
 @Injectable()
-export class MemberTeamService {
+export class TeamMemberService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    getCurrentDateAsString(): string {
+    getTeamCode(sequenceDigit: string): string {
         const currentDate = new Date();
         const year = currentDate.getFullYear().toString().slice(0, 2);
         const month = currentDate.getMonth() < 10 ? '0' + currentDate.getMonth().toString() : currentDate.getMonth().toString();
         const day = currentDate.getDate() < 10 ? '0' + currentDate.getDate().toString() : currentDate.getDate().toString();
-
-        return `${year}${month}${day}`;
+        return `${year}${month}${day}${sequenceDigit}`;
     }
 
-    isStringFiveDigitNumber(str: string): boolean {
-        return /^\d{5}$/.test(str);
-    }
-
-    async checkExistMember(accountId: number) {
-        const member = await this.prismaService.member.findFirst({
-            where: {
-                accountId,
-                isActive: true,
-            },
-            select: {
-                id: true,
-            },
-            // ...(selectOption || {}),
-            // ...(includeOption || {}),
-        });
-        if (!member) {
-            throw new NotFoundException(`Member with accountId ${accountId} not found`);
-        }
-        return member;
-    }
-
-    async checkTeamPermission(accountId: number, teamId: number, isTeamLeader: boolean) {
-        const member = await this.checkExistMember(accountId);
+    async checkTeamPermission(accountId: number, teamId: number): Promise<void> {
         const team = await this.prismaService.team.findUnique({
             where: {
                 id: teamId,
-                ...(isTeamLeader && { leaderId: member.id }),
+                leader: {
+                    accountId,
+                },
                 isActive: true,
             },
             select: {
@@ -68,14 +43,9 @@ export class MemberTeamService {
         if (team.status == TeamStatus.STOPPED) {
             throw new BadRequestException('The team had been forced to be stopped activity by administrator');
         }
-        return member;
     }
 
-    async saveTeam(accountId: number, request: MemberCreateTeamRequest): Promise<void> {
-        const member = await this.checkExistMember(accountId);
-        if (!this.isStringFiveDigitNumber(request.sequenceDigit)) {
-            throw new BadRequestException('Invalid sequence number');
-        }
+    async create(accountId: number, request: TeamMemberUpsertRequest): Promise<void> {
         await this.prismaService.$transaction(async (prisma) => {
             await prisma.team.create({
                 data: {
@@ -87,7 +57,7 @@ export class MemberTeamService {
                     },
                     leader: {
                         connect: {
-                            id: member.id,
+                            accountId,
                         },
                     },
                     introduction: request.introduction,
@@ -96,33 +66,35 @@ export class MemberTeamService {
                             id: request.codeId,
                         },
                     },
-                    teamCode: this.getCurrentDateAsString() + request.sequenceDigit,
+                    teamCode: this.getTeamCode(request.sequenceDigit),
                     totalMembers: 1,
                 },
             });
         });
     }
 
-    async getTeams(accountId: number, query: PaginationRequest): Promise<GetTeamsResponse> {
-        const member = await this.checkExistMember(accountId);
-        const queryFilter: Prisma.TeamWhereInput = {
-            OR: [
-                {
-                    leaderId: member.id,
-                },
-                {
-                    members: {
-                        some: {
-                            memberId: member.id,
-                            isActive: true,
+    async getList(accountId: number, query: PaginationRequest): Promise<TeamMemberGetListResponse> {
+        const search = {
+            where: {
+                OR: [
+                    {
+                        leader: {
+                            accountId,
                         },
                     },
-                },
-            ],
-            isActive: true,
-        };
-        const teams = await this.prismaService.team.findMany({
-            where: queryFilter,
+                    {
+                        members: {
+                            some: {
+                                member: {
+                                    accountId,
+                                },
+                                isActive: true,
+                            },
+                        },
+                    },
+                ],
+                isActive: true,
+            },
             include: {
                 leader: true,
                 code: {
@@ -146,74 +118,66 @@ export class MemberTeamService {
                 },
             },
             orderBy: {
-                createdAt: 'desc',
+                createdAt: Prisma.SortOrder.desc,
             },
             ...QueryPagingHelper.queryPaging(query),
-        });
-        const result = teams.map(
-            (team) =>
-                ({
-                    id: team.id,
-                    name: team.name,
-                    status: team.status,
-                    code: team.code,
-                    exposureStatus: team.exposureStatus,
-                    isActive: team.isActive,
-                    numberOfRecruitments: team.numberOfRecruitments,
-                    leaderName: team.leader.name,
-                    isLeader: accountId === team.leader.id ? true : false,
-                    totalMembers: team.totalMembers,
-                    createdAt: team.createdAt,
-                    memberInfors: team.members
-                        .filter((item) => item.member.isActive)
-                        .map((item) => {
-                            return {
-                                id: item.member.id,
-                                name: item.member.name,
-                                contact: item.member.contact,
-                            } as MemberResponse;
-                        })
-                        .concat({
-                            id: team.leaderId,
-                            name: team.leader.name,
-                            contact: team.leader.contact,
-                        } as MemberResponse),
-                }) as TeamsResponse,
-        );
+        };
+        const teams = (await this.prismaService.team.findMany(search)).map((team) => ({
+            id: team.id,
+            name: team.name,
+            status: team.status,
+            code: team.code,
+            exposureStatus: team.exposureStatus,
+            isActive: team.isActive,
+            numberOfRecruitments: team.numberOfRecruitments,
+            leaderName: team.leader.name,
+            isLeader: accountId === team.leader.id ? true : false,
+            totalMembers: team.totalMembers,
+            createdAt: team.createdAt,
+            memberInfors: team.members
+                .filter((item) => item.member.isActive)
+                .map((item) => {
+                    return {
+                        id: item.member.id,
+                        name: item.member.name,
+                        contact: item.member.contact,
+                    };
+                })
+                .concat({
+                    id: team.leaderId,
+                    name: team.leader.name,
+                    contact: team.leader.contact,
+                }),
+        }));
         const teamListCount = await this.prismaService.team.count({
-            where: queryFilter,
+            where: search.where,
         });
-        return new PaginationResponse(result, new PageInfo(teamListCount));
+        return new PaginationResponse(teams, new PageInfo(teamListCount));
     }
 
-    async getTeamDetails(accountId: number, id: number): Promise<TeamMemberDetailResponse> {
-        /*
-            Get from a team:
-            - team name, activity area, team creation date, code, introduction
-            Get from members of team:
-            - leader name, leader contact
-            - member name, member contact ...
-            Get fromt team invitations:
-            - member id, Invitation status, member name, member contact
-         */
-        const member = await this.checkExistMember(accountId);
-        const queryFilter: Prisma.TeamWhereUniqueInput = {
-            id: id,
-            isActive: true,
-            OR: [
-                { leaderId: member.id },
-                {
-                    members: {
-                        some: {
-                            memberId: member.id,
-                            isActive: true,
+    async getDetail(accountId: number, id: number): Promise<TeamMemberGetDetailResponse> {
+        const team = await this.prismaService.team.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+                OR: [
+                    {
+                        leader: {
+                            accountId,
                         },
                     },
-                },
-            ],
-        };
-        const team = await this.prismaService.team.findUnique({
-            where: queryFilter,
+                    {
+                        members: {
+                            some: {
+                                member: {
+                                    accountId,
+                                },
+                                isActive: true,
+                            },
+                        },
+                    },
+                ],
+            },
             select: {
                 code: {
                     select: {
@@ -248,9 +212,8 @@ export class MemberTeamService {
                 },
             },
         });
-        if (!team) {
-            throw new NotFoundException(`Team with id ${id} not found`);
-        }
+        if (!team) throw new NotFoundException(`Team with id ${id} not found`);
+
         const members = await this.prismaService.membersOnTeams.findMany({
             where: {
                 teamId: id,
@@ -305,29 +268,23 @@ export class MemberTeamService {
 
             members: members
                 .filter((memberInfor) => memberInfor.member.id !== team.leader.id)
-                .map(
-                    (memberInfo) =>
-                        ({
-                            id: memberInfo.member.id,
-                            name: memberInfo.member.name,
-                            contact: memberInfo.member.contact,
-                        }) as GetTeamMemberDetail,
-                ),
-            memberInvitations: memberInvitaions.map(
-                (memberInfor) =>
-                    ({
-                        id: memberInfor.id,
-                        memberId: memberInfor.member.id,
-                        name: memberInfor.member.name,
-                        contact: memberInfor.member.contact,
-                        invitationStatus: memberInfor.invitationStatus,
-                    }) as GetTeamMemberInvitation,
-            ),
+                .map((memberInfo) => ({
+                    id: memberInfo.member.id,
+                    name: memberInfo.member.name,
+                    contact: memberInfo.member.contact,
+                })),
+            memberInvitations: memberInvitaions.map((memberInfor) => ({
+                id: memberInfor.id,
+                memberId: memberInfor.member.id,
+                name: memberInfor.member.name,
+                contact: memberInfor.member.contact,
+                invitationStatus: memberInfor.invitationStatus,
+            })),
         };
     }
 
-    async update(accountId: number, teamId: number, request: MemberCreateTeamRequest): Promise<void> {
-        this.checkTeamPermission(accountId, teamId, true);
+    async update(accountId: number, teamId: number, request: TeamMemberUpsertRequest): Promise<void> {
+        await this.checkTeamPermission(accountId, teamId);
         await this.prismaService.team.update({
             where: {
                 id: teamId,
@@ -351,12 +308,14 @@ export class MemberTeamService {
         });
     }
 
-    async changeExposureStatus(accountId: number, teamId: number, payload: MemberUpdateExposureStatusTeamRequest) {
-        const member = await this.checkTeamPermission(accountId, teamId, true);
+    async updateExposure(accountId: number, teamId: number, payload: TeamMemberUpdateExposureRequest): Promise<void> {
+        await this.checkTeamPermission(accountId, teamId);
         const team = await this.prismaService.team.findUnique({
             where: {
                 id: teamId,
-                leaderId: member.id,
+                leader: {
+                    accountId,
+                },
                 isActive: true,
             },
             select: {
@@ -367,161 +326,104 @@ export class MemberTeamService {
             await this.prismaService.team.update({
                 where: {
                     id: teamId,
-                    leaderId: member.id,
+                    leader: {
+                        accountId,
+                    },
                     isActive: true,
                 },
                 data: {
                     exposureStatus: payload.exposureStatus,
                 },
             });
-        } else {
-            throw new HttpException(
-                'The exposure status of the team in the database matches the provided exposure status',
-                HttpStatus.OK,
-            );
         }
     }
 
-    async searchMember(query: TeamGetMemberRequest): Promise<GetTeamMemberDetail> {
-        const member = await this.prismaService.member.findFirst({
-            where: {
-                name: query.username,
-                contact: query.contact,
-            },
-            select: {
-                id: true,
-                name: true,
-                contact: true,
-            },
-        });
-        if (!member) {
-            return {
-                id: null,
-                name: null,
-                contact: null,
-            };
-        }
-        return member;
-    }
-
-    async inviteMember(accountId: number, teamId: number, memberId: number) {
-        /*
-            @Param:
-            accountId: the account of the member of the team
-            teamId: id of the team
-            memberId: id of the member that accountId want to invite to teamId
-        */
-        await this.checkTeamPermission(accountId, teamId, false);
+    async createInvitation(accountId: number, teamId: number, body: TeamMemberCreateInvitationRequest) {
+        await this.checkTeamPermission(accountId, teamId);
         const member = await this.prismaService.member.findUnique({
             where: {
-                id: memberId,
+                id: body.id,
             },
         });
-        if (!member) {
-            throw new NotFoundException(`Member ${memberId} does not exist`);
-        }
-        const memberOnTeam = await this.prismaService.membersOnTeams.findUnique({
+        if (!member) throw new NotFoundException('Member not found');
+        const memberOnTeam = await this.prismaService.team.findMany({
             where: {
-                memberId_teamId: {
-                    memberId: memberId,
-                    teamId: teamId,
-                },
-                isActive: true,
+                OR: [
+                    {
+                        members: {
+                            some: {
+                                memberId: body.id,
+                            },
+                        },
+                    },
+                    {
+                        leader: {
+                            id: body.id,
+                        },
+                    },
+                ],
             },
         });
-        if (memberOnTeam) {
-            throw new HttpException(`This member has already been joined the team id = ${teamId}`, HttpStatus.OK);
-        }
-        const team = await this.prismaService.team.findUnique({
-            where: {
-                id: teamId,
-                isActive: true,
-            },
-            select: {
-                leaderId: true,
-            },
-        });
-        if (team && team.leaderId === memberId) {
-            throw new HttpException(`This member has already been joined the team id = ${teamId}`, HttpStatus.OK);
-        }
+        if (memberOnTeam.length !== 0) throw new BadRequestException('Member has been on team');
         const teamMemberInvitation = await this.prismaService.teamMemberInvitation.findFirst({
             where: {
-                memberId: memberId,
+                memberId: body.id,
                 teamId: teamId,
-                isActive: true,
             },
             select: {
+                isActive: true,
                 id: true,
                 invitationStatus: true,
             },
         });
         if (teamMemberInvitation) {
-            if (teamMemberInvitation.invitationStatus === InvitationStatus.REQUESTED) {
-                throw new HttpException(`This member has already been invited and is waiting for acceptance`, HttpStatus.OK);
-            } else if (teamMemberInvitation.invitationStatus === InvitationStatus.ACCEPTED) {
-                throw new HttpException(`This member has already been accepted`, HttpStatus.OK);
+            if (teamMemberInvitation.isActive) {
+                if (teamMemberInvitation.invitationStatus === InvitationStatus.DECLIENED) {
+                    await this.prismaService.teamMemberInvitation.update({
+                        where: {
+                            id: teamMemberInvitation.id,
+                            isActive: true,
+                        },
+                        data: {
+                            invitationStatus: InvitationStatus.REQUESTED,
+                            updatedAt: new Date(),
+                        },
+                    });
+                }
             } else {
                 await this.prismaService.teamMemberInvitation.update({
                     where: {
                         id: teamMemberInvitation.id,
-                        isActive: true,
                     },
                     data: {
+                        isActive: true,
                         invitationStatus: InvitationStatus.REQUESTED,
                         updatedAt: new Date(),
                     },
                 });
             }
         } else {
-            const unActiveInvitation = await this.prismaService.teamMemberInvitation.findFirst({
-                where: {
-                    memberId: memberId,
-                    teamId: teamId,
-                },
-                select: {
-                    id: true,
-                    invitationStatus: true,
+            await this.prismaService.teamMemberInvitation.create({
+                data: {
+                    isActive: true,
+                    invitationStatus: InvitationStatus.REQUESTED,
+                    member: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                    team: {
+                        connect: {
+                            id: teamId,
+                        },
+                    },
                 },
             });
-            if (unActiveInvitation) {
-                await this.prismaService.teamMemberInvitation.update({
-                    where: {
-                        id: unActiveInvitation.id,
-                        memberId: memberId,
-                        teamId: teamId,
-                    },
-                    data: {
-                        isActive: true,
-                        invitationStatus: InvitationStatus.REQUESTED,
-                        updatedAt: new Date(),
-                    },
-                });
-            } else {
-                await this.prismaService.teamMemberInvitation.create({
-                    data: {
-                        isActive: true,
-                        invitationStatus: InvitationStatus.REQUESTED,
-                        member: {
-                            connect: {
-                                id: memberId,
-                            },
-                        },
-                        team: {
-                            connect: {
-                                id: teamId,
-                            },
-                        },
-                    },
-                });
-            }
         }
     }
 
-    async cancelInvitation(accountId: number, teamId: number, inviteId: number) {
-        /*
-        The accountId of team member can cancel the invitation that has been sent to the memberId.
-        */
-        await this.checkTeamPermission(accountId, teamId, false);
+    async deleteInvitation(accountId: number, teamId: number, inviteId: number) {
+        await this.checkTeamPermission(accountId, teamId);
         await this.prismaService.$transaction(async (prisma) => {
             const memberInvitaion = await prisma.teamMemberInvitation.findUnique({
                 where: {
@@ -533,23 +435,20 @@ export class MemberTeamService {
                 await prisma.teamMemberInvitation.update({
                     where: {
                         id: inviteId,
-                        isActive: true,
                     },
                     data: {
                         isActive: false,
                         updatedAt: new Date(),
                     },
                 });
-            } else if (memberInvitaion.invitationStatus === InvitationStatus.ACCEPTED) {
-                throw new NotFoundException(`The invitation has been accepted by other team member`);
             } else {
-                throw new NotFoundException(`The invitation is not exist or has been rejected by other team member`);
+                throw new NotFoundException(`The invitation has been accepted by other team member`);
             }
         });
     }
 
-    async deleteTeam(accountId: number, teamId: number) {
-        await this.checkTeamPermission(accountId, teamId, true);
+    async delete(accountId: number, teamId: number) {
+        await this.checkTeamPermission(accountId, teamId);
         const applications = await this.prismaService.application.findFirst({
             where: {
                 team: {
@@ -566,9 +465,7 @@ export class MemberTeamService {
                 },
             },
         });
-        if (applications) {
-            throw new ConflictException(`Cannot delete team because some team's contracts are active`);
-        }
+        if (applications) throw new ConflictException(`Cannot delete team because some team's contracts are active`);
         await this.prismaService.$transaction(async (prisma) => {
             await prisma.team.update({
                 where: {
@@ -597,5 +494,179 @@ export class MemberTeamService {
                 ...queryInput,
             });
         });
+    }
+
+    async getListInvitation(accountId: number, query: PaginationRequest): Promise<TeamMemberGetListInvitationResponse> {
+        const search = {
+            where: {
+                member: {
+                    accountId,
+                },
+                isActive: true,
+            },
+            select: {
+                teamId: true,
+                memberId: true,
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        leader: {
+                            select: {
+                                name: true,
+                                contact: true,
+                            },
+                        },
+                        introduction: true,
+                    },
+                },
+                invitationStatus: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            orderBy: {
+                createdAt: Prisma.SortOrder.desc,
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        };
+        const invitations = (await this.prismaService.teamMemberInvitation.findMany(search)).map((invitation) => {
+            return {
+                teamId: invitation.teamId,
+                memberId: invitation.memberId,
+                teamName: invitation.team.name,
+                leaderName: invitation.team.leader.name,
+                contact: invitation.team.leader.contact,
+                invitationDate: invitation.updatedAt ? invitation.updatedAt : invitation.createdAt,
+                introduction: invitation.team.introduction,
+                invitationStatus: invitation.invitationStatus,
+            };
+        });
+        const invitaionListCount = await this.prismaService.teamMemberInvitation.count({
+            where: search.where,
+        });
+        return new PaginationResponse(invitations, new PageInfo(invitaionListCount));
+    }
+
+    async updateInvitationStatus(accountId: number, inviteId: number, body: TeamMemberUpdateInvitationStatus): Promise<void> {
+        const teamInvitation = await this.prismaService.teamMemberInvitation.findUnique({
+            where: {
+                id: inviteId,
+                isActive: true,
+                team: {
+                    isActive: true,
+                },
+                member: {
+                    accountId,
+                },
+            },
+            select: {
+                teamId: true,
+                team: {
+                    select: {
+                        totalMembers: true,
+                    },
+                },
+                invitationStatus: true,
+            },
+        });
+        if (!teamInvitation) throw new NotFoundException(`The invitation is not exist`);
+        if (teamInvitation.invitationStatus === InvitationStatus.REQUESTED)
+            throw new ConflictException(`The invitation had been accept or reject`);
+        if (body.status === InvitationStatus.DECLIENED) {
+            await this.prismaService.teamMemberInvitation.update({
+                where: {
+                    id: inviteId,
+                },
+                data: {
+                    invitationStatus: InvitationStatus.DECLIENED,
+                    updatedAt: new Date(),
+                },
+            });
+        }
+        if (body.status === InvitationStatus.ACCEPTED) {
+            await this.prismaService.$transaction(async (prisma) => {
+                const memberOnTeam = await prisma.membersOnTeams.findFirst({
+                    where: {
+                        member: {
+                            accountId,
+                        },
+                        teamId: teamInvitation.teamId,
+                    },
+                    select: {
+                        isActive: true,
+                    },
+                });
+                if (memberOnTeam && memberOnTeam.isActive) {
+                    await prisma.teamMemberInvitation.update({
+                        where: {
+                            id: inviteId,
+                            isActive: true,
+                        },
+                        data: {
+                            invitationStatus: InvitationStatus.ACCEPTED,
+                            updatedAt: new Date(),
+                        },
+                    });
+                    throw new HttpException(`The invitation had been accept`, HttpStatus.ACCEPTED);
+                } else if (memberOnTeam && !memberOnTeam.isActive) {
+                    await prisma.membersOnTeams.updateMany({
+                        where: {
+                            member: {
+                                accountId,
+                            },
+                            teamId: teamInvitation.teamId,
+                        },
+                        data: {
+                            updatedAt: new Date(),
+                            isActive: true,
+                        },
+                    });
+                    await this.prismaService.team.update({
+                        where: {
+                            id: teamInvitation.teamId,
+                            isActive: true,
+                        },
+                        data: {
+                            totalMembers: teamInvitation.team.totalMembers + 1,
+                        },
+                    });
+                } else {
+                    await prisma.membersOnTeams.create({
+                        data: {
+                            member: {
+                                connect: {
+                                    accountId,
+                                },
+                            },
+                            team: {
+                                connect: {
+                                    id: teamInvitation.teamId,
+                                },
+                            },
+                            isActive: true,
+                        },
+                    });
+                    await this.prismaService.team.update({
+                        where: {
+                            id: teamInvitation.teamId,
+                            isActive: true,
+                        },
+                        data: {
+                            totalMembers: teamInvitation.team.totalMembers + 1,
+                        },
+                    });
+                }
+                await prisma.teamMemberInvitation.update({
+                    where: {
+                        id: inviteId,
+                        isActive: true,
+                    },
+                    data: {
+                        invitationStatus: InvitationStatus.ACCEPTED,
+                        updatedAt: new Date(),
+                    },
+                });
+            });
+        }
     }
 }

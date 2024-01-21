@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 import { IsDateString, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class SiteCompanyGetListForContractRequest extends PaginationRequest {
+export class SiteCompanyGetListContractRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()

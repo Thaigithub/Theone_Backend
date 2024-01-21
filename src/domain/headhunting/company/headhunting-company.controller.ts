@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@ne
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { HeadhuntingCompanyService } from './headhunting-company.service';
 import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
@@ -17,7 +17,7 @@ export class HeadhuntingCompanyController {
     @Get('/post/:postId/recommendation')
     async getListRecommendation(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: HeadhuntingGetListRecommendationRequest,
     ): Promise<BaseResponse<RecommendationCompanyGetListHeadhuntingApprovedResponse>> {
         return BaseResponse.of(await this.headhuntingCompanyService.getListRecommendation(request.user.accountId, postId, query));
@@ -26,7 +26,7 @@ export class HeadhuntingCompanyController {
     @Get('/post/:postId/request')
     async getDetailRequest(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<any>> {
         return BaseResponse.of(await this.headhuntingCompanyService.getDetailRequest(request.user.accountId, postId));
     }

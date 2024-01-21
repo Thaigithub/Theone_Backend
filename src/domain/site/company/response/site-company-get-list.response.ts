@@ -1,7 +1,7 @@
 import { City, District, File, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class SiteResponse {
+export class GetListResponse {
     id: Site['id'];
     name: Site['name'];
     personInCharge: Site['personInCharge'];
@@ -16,4 +16,4 @@ export class SiteResponse {
     companyLogoKey: File['key'];
 }
 
-export class SiteCompanyGetListResponse extends PaginationResponse<SiteResponse> {}
+export class SiteCompanyGetListResponse extends PaginationResponse<GetListResponse> {}

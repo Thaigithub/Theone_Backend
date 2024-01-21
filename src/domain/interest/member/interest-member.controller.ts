@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Query, Req, UseGuar
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { InterestMemberService } from './interest-member.service';
 import { InterestMemberDeleteRequest } from './request/interest-member-delete.request';
@@ -16,7 +16,7 @@ export class InterestMemberController {
     constructor(private interestMemberService: InterestMemberService) {}
     @Get()
     async getList(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: InterestMemberGetListRequest,
     ): Promise<BaseResponse<InterestMemberGetListResponse>> {
         return BaseResponse.of(await this.interestMemberService.getList(req.user.accountId, query));
@@ -24,7 +24,7 @@ export class InterestMemberController {
 
     @Delete('/:id')
     async delete(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: InterestMemberDeleteRequest,
     ): Promise<BaseResponse<void>> {

@@ -3,15 +3,15 @@ import { SalaryType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { LaborType } from './enum/labor-company-labor-type.enum';
+import { LaborCompanyGetListType } from './enum/labor-company-get-list-type.enum';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
 import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upsert-workdate.request';
+import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-get-detail-salary.response';
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
+import { LaborCompanyGetListWorkDateResponse } from './response/labor-company-get-list-workdates.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
-import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-salary-get-detail';
-import { LaborCompanyWorkDatesGetListResponse } from './response/labor-company-workdates-get-list.response';
 
 @Injectable()
 export class LaborCompanyService {
@@ -21,8 +21,8 @@ export class LaborCompanyService {
             where: {
                 NOT: {
                     application: {
-                        member: query.type && (query.type === LaborType.INDIVIDUAL ? null : undefined),
-                        team: query.type && (query.type === LaborType.TEAM ? null : undefined),
+                        member: query.type && (query.type === LaborCompanyGetListType.INDIVIDUAL ? null : undefined),
+                        team: query.type && (query.type === LaborCompanyGetListType.TEAM ? null : undefined),
                     },
                 },
                 application: {
@@ -86,7 +86,7 @@ export class LaborCompanyService {
             return {
                 contractId: item.id,
                 laborId: item.labor ? item.labor.id : null,
-                type: item.application.member ? LaborType.INDIVIDUAL : LaborType.TEAM,
+                type: item.application.member ? LaborCompanyGetListType.INDIVIDUAL : LaborCompanyGetListType.TEAM,
                 name: item.application.member ? item.application.member.name : item.application.team.name,
                 siteName: item.application.post.site.name,
                 startDate: item.startDate,
@@ -340,7 +340,7 @@ export class LaborCompanyService {
                     hours: item.hours,
                 };
             }),
-            type: labor.contract.application.member ? LaborType.INDIVIDUAL : LaborType.TEAM,
+            type: labor.contract.application.member ? LaborCompanyGetListType.INDIVIDUAL : LaborCompanyGetListType.TEAM,
             name: labor.contract.application.member
                 ? labor.contract.application.member.name
                 : labor.contract.application.team.name,
@@ -452,7 +452,7 @@ export class LaborCompanyService {
         }
     }
 
-    async getWorkDates(accountId: number, id: number): Promise<LaborCompanyWorkDatesGetListResponse> {
+    async getWorkDates(accountId: number, id: number): Promise<LaborCompanyGetListWorkDateResponse> {
         const workDates = await this.prismaService.workDate.findMany({
             where: {
                 laborId: id,

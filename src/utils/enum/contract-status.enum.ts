@@ -1,4 +1,0 @@
-export enum ContractStatus {
-    UNDER_CONTRACT = 'UNDER_CONTRACT',
-    CONTRACT_TERMINATED = 'CONTRACT_TERMINATED',
-}

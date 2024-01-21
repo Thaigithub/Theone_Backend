@@ -4,11 +4,16 @@ import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { SiteAdminSearchCategory } from './dto/site-admin-category.dto';
+import { SiteAdminGetListCategory } from './enum/site-admin-get-list-category.enum';
+import { SiteAdminGetListLaborCategory } from './enum/site-admin-get_list-labor-category.enum';
+import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
-import { SiteAdminUpdateRequest } from './request/site-admin-update.request';
+import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
+import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detail-labor.response';
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
+import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
 
 @Injectable()
@@ -33,13 +38,13 @@ export class SiteAdminService {
                       ],
                   }
                 : {}),
-            ...(query.category == SiteAdminSearchCategory.SITE_NAME && {
+            ...(query.category == SiteAdminGetListCategory.SITE_NAME && {
                 name: { contains: query.searchKeyword, mode: 'insensitive' },
             }),
-            ...(query.category == SiteAdminSearchCategory.COMPANY_NAME && {
+            ...(query.category == SiteAdminGetListCategory.COMPANY_NAME && {
                 company: { name: { contains: query.searchKeyword, mode: 'insensitive' } },
             }),
-            ...(query.category == SiteAdminSearchCategory.REPRESENTATIVE_NAME && {
+            ...(query.category == SiteAdminGetListCategory.REPRESENTATIVE_NAME && {
                 personInCharge: { contains: query.searchKeyword, mode: 'insensitive' },
             }),
         };
@@ -62,7 +67,7 @@ export class SiteAdminService {
         return new PaginationResponse(sites, new PageInfo(count));
     }
 
-    async getDetails(id: number): Promise<SiteAdminGetDetailResponse> {
+    async getDetail(id: number): Promise<SiteAdminGetDetailResponse> {
         const site = await this.prismaService.site.findUnique({
             where: {
                 id: id,
@@ -165,5 +170,113 @@ export class SiteAdminService {
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         response.setHeader('Content-Disposition', `attachment; filename=SiteManagement.xlsx`);
         excelStream.pipe(response);
+    }
+
+    async getListLabor(query: SiteAdminGetListLaborRequest): Promise<SiteAdminGetListLaborResponse> {
+        const search = {
+            select: {
+                id: true,
+                name: true,
+                status: true,
+                company: {
+                    select: {
+                        name: true,
+                    },
+                },
+                numberOfWorkers: true,
+                startDate: true,
+                endDate: true,
+            },
+            where: {
+                isActive: true,
+                ...(query.siteStatus === SitePeriodStatus.REVIEWING && {
+                    status: SiteStatus[query.siteStatus],
+                }),
+                ...(query.siteStatus === SitePeriodStatus.REJECTED && {
+                    status: SiteStatus[query.siteStatus],
+                }),
+                ...(query.siteStatus === SitePeriodStatus.APPROVED && {
+                    status: SiteStatus[query.siteStatus],
+                }),
+                ...(query.siteStatus === SitePeriodStatus.PREPARE && {
+                    AND: [{ status: SiteStatus.APPROVED }, { startDate: { gt: new Date() } }],
+                }),
+                ...(query.siteStatus === SitePeriodStatus.PROCEEDING && {
+                    AND: [{ status: SiteStatus.APPROVED }, { startDate: { lte: new Date() } }, { endDate: { gte: new Date() } }],
+                }),
+                ...(query.siteStatus === SitePeriodStatus.END && {
+                    AND: [{ status: SiteStatus.APPROVED }, { endDate: { lt: new Date() } }],
+                }),
+                ...(query.category === SiteAdminGetListLaborCategory.COMPANY_NAME && {
+                    company: {
+                        name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
+                    },
+                }),
+                ...(query.category === SiteAdminGetListLaborCategory.SITE_NAME && {
+                    name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
+                }),
+                ...(!query.category && {
+                    OR: [
+                        {
+                            name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
+                        },
+                        {
+                            company: {
+                                name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
+                            },
+                        },
+                    ],
+                }),
+            },
+            orderBy: {
+                ...(query.numberOfWorkers && {
+                    numberOfWorkers: SiteAdminGetListLaborCategory[query.numberOfWorkers],
+                }),
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        };
+        const lists = (await this.prismaService.site.findMany(search)).map((list) => {
+            return {
+                id: list.id,
+                companyName: list.company.name,
+                siteName: list.name,
+                numberOfWorkers: list.numberOfWorkers,
+                status: getSiteStatus(list.status, list.startDate, list.endDate),
+            };
+        });
+
+        const count = await this.prismaService.site.count({
+            where: search.where,
+        });
+
+        return new PaginationResponse(lists, new PageInfo(count));
+    }
+
+    async getDetailLabor(id: number): Promise<SiteAdminGetDetailLaborResponse> {
+        const detailSite = await this.prismaService.site.findUnique({
+            where: {
+                id,
+                isActive: true,
+            },
+            select: {
+                name: true,
+                startDate: true,
+                endDate: true,
+                personInCharge: true,
+                contact: true,
+                email: true,
+                address: true,
+                personInChargeContact: true,
+            },
+        });
+        return {
+            siteName: detailSite.name,
+            startDate: detailSite.startDate?.toISOString() || null,
+            endDate: detailSite.endDate?.toISOString() || null,
+            siteAddress: detailSite.address,
+            siteContact: detailSite.contact,
+            manager: detailSite.personInCharge,
+            managerContact: detailSite.personInChargeContact,
+        };
     }
 }

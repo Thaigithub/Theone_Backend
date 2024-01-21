@@ -4,7 +4,7 @@ import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/re
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-detail-applicant.response';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { InterviewCompanyService } from './interview-company.service';
 import { InterviewCompanyProposeRequest } from './request/interview-company-create.request';
@@ -20,7 +20,7 @@ export class InterviewCompanyController {
 
     @Get()
     async getList(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: InterviewCompanyGetListRequest,
     ): Promise<BaseResponse<InterviewCompanyGetListResponse>> {
         return BaseResponse.of(await this.interviewCompanyService.getList(request.user.accountId, query));
@@ -28,7 +28,7 @@ export class InterviewCompanyController {
 
     @Get('/:id/member')
     async getDetailMember(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
         return BaseResponse.of(await this.interviewCompanyService.getDetailMember(request.user.accountId, id));
@@ -36,7 +36,7 @@ export class InterviewCompanyController {
 
     @Get('/:id/team')
     async getDetailTeam(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
         return BaseResponse.of(await this.interviewCompanyService.getDetailTeam(request.user.accountId, id));
@@ -44,7 +44,7 @@ export class InterviewCompanyController {
 
     @Patch('/:id/status')
     async updateStatus(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: InterviewCompanyUpdateStatusRequest,
     ): Promise<BaseResponse<void>> {
@@ -52,10 +52,7 @@ export class InterviewCompanyController {
     }
 
     @Post()
-    async create(
-        @Body() body: InterviewCompanyProposeRequest,
-        @Req() request: AccountIdExtensionRequest,
-    ): Promise<BaseResponse<void>> {
+    async create(@Body() body: InterviewCompanyProposeRequest, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.interviewCompanyService.create(body, request.user.accountId));
     }
 }

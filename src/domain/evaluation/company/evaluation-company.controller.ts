@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { EvaluationStatus } from './enum/evaluation-company-get-list-request.enum';
@@ -20,7 +20,7 @@ export class EvaluationCompanyController {
 
     @Patch('/member/:id')
     async evaluateMember(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
@@ -30,7 +30,7 @@ export class EvaluationCompanyController {
 
     @Patch('/team/:id')
     async evaluateTeam(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
@@ -40,7 +40,7 @@ export class EvaluationCompanyController {
 
     @Get('/member')
     async getMemberEvaluations(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListMembersResponse>> {
         if (query.score && query.status === EvaluationStatus.INCOMPLETE)
@@ -53,7 +53,7 @@ export class EvaluationCompanyController {
 
     @Get('/team')
     async getTeamEvaluations(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListTeamsResponse>> {
         if (query.score && query.status === EvaluationStatus.INCOMPLETE)

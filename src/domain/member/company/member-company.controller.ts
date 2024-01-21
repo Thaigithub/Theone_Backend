@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGu
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MemberCompanyService } from './member-company.service';
 import { MemberCompanyGetListRequest } from './request/member-company-get-list.request';
@@ -17,7 +17,7 @@ export class MemberCompanyController {
     constructor(private memberCompanyService: MemberCompanyService) {}
 
     @Get('/worker/count')
-    async countPosts(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
+    async countPosts(@Req() req: BaseRequest): Promise<BaseResponse<MemberCompanyCountWorkersResponse>> {
         return BaseResponse.of(await this.memberCompanyService.countWorkers(req.user.accountId));
     }
 

@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsArray, IsNumber } from 'class-validator';
-import { SalaryHistory } from '../dto/labor-company-salary.dto';
-import { WorkDate } from '../dto/labor-company-workdate.dto';
+import { LaborCompanySalaryDTO } from '../dto/labor-company-salary.dto';
+import { LaborCompanyWorkDateDTO } from '../dto/labor-company-workdate.dto';
 
 export class LaborCompanyCreateRequest {
     @Expose()
@@ -10,9 +10,9 @@ export class LaborCompanyCreateRequest {
 
     @Expose()
     @IsArray()
-    workDate: WorkDate[];
+    workDate: LaborCompanyWorkDateDTO[];
 
     @Expose()
     @IsArray()
-    salaryHistory: SalaryHistory[];
+    salaryHistory: LaborCompanySalaryDTO[];
 }

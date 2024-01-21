@@ -1,5 +1,5 @@
-import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PaginationResponse } from 'utils/generics/pagination.response';
+import { SitePeriodStatus } from 'utils/get-site-status';
 
 export class ContractAdminGetItemResponse {
     id: number;
