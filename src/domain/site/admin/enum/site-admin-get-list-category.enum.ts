@@ -1,0 +1,5 @@
+export enum SiteAdminGetListCategory {
+    SITE_NAME = 'SITE_NAME',
+    COMPANY_NAME = 'COMPANY_NAME',
+    REPRESENTATIVE_NAME = 'REPRESENTATIVE_NAME',
+}

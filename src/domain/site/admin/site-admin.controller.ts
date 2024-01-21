@@ -4,17 +4,30 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
+import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
-import { SiteAdminUpdateRequest } from './request/site-admin-update.request';
+import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
+import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detail-labor.response';
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
+import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
 import { SiteAdminService } from './site-admin.service';
 
-@Controller('admin/sites')
+@Controller('/admin/sites')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class SiteAdminController {
     constructor(private readonly siteAdminService: SiteAdminService) {}
+
+    @Get('/:id/labor')
+    async getDetailLabor(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailLaborResponse>> {
+        return BaseResponse.of(await this.siteAdminService.getDetailLabor(id));
+    }
+
+    @Patch('/:id/status')
+    async updateStatus(@Param('id', ParseIntPipe) id: number, @Body() body: SiteAdminUpdateRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.siteAdminService.updateStatus(id, body));
+    }
 
     @Get('/download')
     async download(@Query('ids', ParseArrayPipe) query: string[], @Res() response: Response): Promise<BaseResponse<void>> {
@@ -26,16 +39,18 @@ export class SiteAdminController {
         );
     }
 
-    @Patch('/:id/status')
-    async updateStatus(@Param('id', ParseIntPipe) id: number, @Body() body: SiteAdminUpdateRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.siteAdminService.updateStatus(id, body));
+    @Get('/labor')
+    async getListLabor(@Query() query: SiteAdminGetListLaborRequest): Promise<BaseResponse<SiteAdminGetListLaborResponse>> {
+        return BaseResponse.of(await this.siteAdminService.getListLabor(query));
     }
+
     @Get('/:id')
-    async getDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.siteAdminService.getDetails(id));
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailResponse>> {
+        return BaseResponse.of(await this.siteAdminService.getDetail(id));
     }
+
     @Get()
-    async getSites(@Query() query: SiteAdminGetListRequest): Promise<BaseResponse<SiteAdminGetListResponse>> {
+    async getList(@Query() query: SiteAdminGetListRequest): Promise<BaseResponse<SiteAdminGetListResponse>> {
         return BaseResponse.of(await this.siteAdminService.getList(query));
     }
 }

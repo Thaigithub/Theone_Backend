@@ -22,7 +22,6 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { DbType } from 'utils/constants/account.constant';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
@@ -143,7 +142,7 @@ export class MemberAuthService {
     }
 
     fakeUidAccount(accountId: number): string {
-        return new UID(accountId, DbType.Account, 0).toString();
+        return new UID(accountId, 1, 0).toString();
     }
 
     async verifyPayload(accountId: number): Promise<AuthJwtPayloadData> {

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/comm
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PointMemberService } from './point-member.service';
@@ -18,13 +18,13 @@ export class PointMemberController {
     constructor(private pointMemberService: PointMemberService) {}
 
     @Get('/count')
-    async getCount(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<PointMemberGetCountResponse>> {
+    async getCount(@Req() req: BaseRequest): Promise<BaseResponse<PointMemberGetCountResponse>> {
         return BaseResponse.of(await this.pointMemberService.getCount(req.user.accountId));
     }
 
     @Get('/exchanges')
     async getExchangeList(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: PaginationRequest,
     ): Promise<BaseResponse<PointMemberExchangeGetListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getExchangeList(req.user.accountId, query));
@@ -33,16 +33,13 @@ export class PointMemberController {
     @Post('/exchanges')
     async createCurrencyExchange(
         @Body() body: PointMemberCreateCurrencyExchangeRequest,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.pointMemberService.createCurrencyExchange(request.user.accountId, body));
     }
 
     @Get()
-    async getList(
-        @Req() req: AccountIdExtensionRequest,
-        @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<PointMemberGetListResponse>> {
+    async getList(@Req() req: BaseRequest, @Query() query: PaginationRequest): Promise<BaseResponse<PointMemberGetListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getList(req.user.accountId, query));
     }
 }

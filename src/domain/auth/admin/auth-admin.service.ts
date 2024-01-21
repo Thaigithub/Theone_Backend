@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountType } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { DbType } from 'utils/constants/account.constant';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request';
@@ -55,7 +54,7 @@ export class AdminAuthService {
     }
 
     fakeUidAccount(accountId: number): string {
-        return new UID(accountId, DbType.Account, 0).toString();
+        return new UID(accountId, 1, 0).toString();
     }
 
     async verifyPayload(accountId: number): Promise<AuthJwtPayloadData> {

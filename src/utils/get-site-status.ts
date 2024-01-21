@@ -1,5 +1,12 @@
 import { SiteStatus } from '@prisma/client';
-import { SitePeriodStatus } from './enum/site-status.enum';
+export enum SitePeriodStatus {
+    PREPARE = 'PREPARE',
+    PROCEEDING = 'PROCEEDING',
+    END = 'END',
+    REVIEWING = 'REVIEWING',
+    REJECTED = 'REJECTED',
+    APPROVED = 'APPROVED',
+}
 
 export function getSiteStatus(status: SiteStatus, startDate: Date, endDate: Date): SitePeriodStatus {
     const now = new Date();

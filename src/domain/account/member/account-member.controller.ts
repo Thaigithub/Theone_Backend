@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards } from '
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
 import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
@@ -14,13 +14,13 @@ import { AccountMemberUpsertBankAccountRequest } from './request/account-member-
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
+import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
+import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
-import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
-import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
@@ -44,10 +44,7 @@ export class AccountMemberController {
     @Patch()
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async update(
-        @Req() request: AccountIdExtensionRequest,
-        @Body() body: AccountMemberUpdateRequest,
-    ): Promise<BaseResponse<void>> {
+    async update(@Req() request: BaseRequest, @Body() body: AccountMemberUpdateRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
     }
 
@@ -92,7 +89,7 @@ export class AccountMemberController {
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async verifyOTPToVerifyPhone(
         @Req() req,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Body() body: AccountMemberVerifyOtpVerifyPhoneRequest,
     ): Promise<BaseResponse<AccountMemberVerifyOtpVerifyPhoneResponse>> {
         return BaseResponse.of(await this.accountMemberService.verifyOtpVerifyPhone(req.ip, request.user.accountId, body));
@@ -102,7 +99,7 @@ export class AccountMemberController {
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async upsertBankAccount(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Body() bankAccount: AccountMemberUpsertBankAccountRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.upsertBankAccount(request.user.accountId, bankAccount));
@@ -111,7 +108,7 @@ export class AccountMemberController {
     @Get('/bank-account')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async getBankAccount(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountMemberGetBankDetailResponse>> {
+    async getBankAccount(@Req() request: BaseRequest): Promise<BaseResponse<AccountMemberGetBankDetailResponse>> {
         return BaseResponse.of(await this.accountMemberService.getBankAccount(request.user.accountId));
     }
 
@@ -119,7 +116,7 @@ export class AccountMemberController {
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async upsertHSTCertificate(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Body() hstCertificate: AccountMemberUpsertHSTCertificateRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.upsertHSTCertificate(request.user.accountId, hstCertificate));
@@ -129,7 +126,7 @@ export class AccountMemberController {
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async upsertForeignWorker(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Body() foreigWworker: AccountMemberUpsertForeignWorkerRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.upsertForeignWorker(request.user.accountId, foreigWworker));
@@ -139,7 +136,7 @@ export class AccountMemberController {
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async upsertDisability(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Body() disability: AccountMemberUpsertDisabilityRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.upsertDisability(request.user.accountId, disability));
@@ -148,14 +145,14 @@ export class AccountMemberController {
     @Get()
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async getDetail(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<AccountMemberGetDetailResponse>> {
+    async getDetail(@Req() request: BaseRequest): Promise<BaseResponse<AccountMemberGetDetailResponse>> {
         return BaseResponse.of(await this.accountMemberService.getDetail(request.user.accountId));
     }
 
     @Patch('/cancel-membership')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async cancelMembership(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<void>> {
+    async cancelMembership(@Req() request: BaseRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.accountMemberService.cancelMembership(request.user.accountId));
     }
 }

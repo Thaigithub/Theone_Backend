@@ -5,7 +5,6 @@ import { OTP_VERIFICATION_VALID_TIME } from 'app.config';
 import { compare, hash } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { DbType } from 'utils/constants/account.constant';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
@@ -133,7 +132,7 @@ export class CompanyAuthService {
     }
 
     fakeUidAccount(accountId: number): string {
-        return new UID(accountId, DbType.Account, 0).toString();
+        return new UID(accountId, 1, 0).toString();
     }
 
     signToken(payloadData: AuthJwtFakePayloadData): string {

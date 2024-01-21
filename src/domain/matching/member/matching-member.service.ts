@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common/exceptions';
 import { Prisma } from '@prisma/client';
 import { PostMemberService } from 'domain/post/member/post-member.service';
-import { MemberTeamService } from 'domain/team/member/team-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -18,7 +17,6 @@ export class MatchingMemberService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly postMemberService: PostMemberService,
-        private readonly memberTeamService: MemberTeamService,
     ) {}
 
     async getList(accountId: number, query: MatchingMemberGetListRequest): Promise<MatchingMemberGetListResponse> {
@@ -220,7 +218,7 @@ export class MatchingMemberService {
                             select: {
                                 name: true,
                                 address: true,
-                                personInCharge: true, 
+                                personInCharge: true,
                                 personInChargeContact: true,
                                 startDate: true,
                                 endDate: true,

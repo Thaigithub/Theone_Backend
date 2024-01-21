@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, 
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { NotificationMemberService } from './notification-member.service';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
@@ -16,7 +16,7 @@ export class NotificationMemberController {
     constructor(private notificationMemberService: NotificationMemberService) {}
     @Get()
     async getList(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: NotificationMemberGetListRequest,
     ): Promise<BaseResponse<NotificationMemberGetListResponse>> {
         return BaseResponse.of(await this.notificationMemberService.getList(req.user.accountId, query));
@@ -24,7 +24,7 @@ export class NotificationMemberController {
 
     @Patch('/:id/status')
     async update(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: NotificationMemberUpdateRequest,
     ): Promise<BaseResponse<void>> {
@@ -32,7 +32,7 @@ export class NotificationMemberController {
     }
 
     @Delete('/:id')
-    async delete(@Req() req: AccountIdExtensionRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+    async delete(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.notificationMemberService.delete(req.user.accountId, id));
     }
 }

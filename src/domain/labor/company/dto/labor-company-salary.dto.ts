@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsNumber, Matches } from 'class-validator';
 
-export class SalaryHistory {
+export class LaborCompanySalaryDTO {
     @Expose()
     @IsNumber()
     base: number;

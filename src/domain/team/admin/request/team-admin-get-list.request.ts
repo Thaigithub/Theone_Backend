@@ -1,23 +1,25 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { SearchCategoryForSearch, SearchSortForSearch, TeamStatusForSearch } from '../dto/team-search';
+import { TeamAdminGetListCategory } from '../dto/team-admin-get-list-category.enum';
+import { TeamAdminGetListSort } from '../dto/team-admin-get-list-sort.enum';
+import { TeamAdminGetListStatus } from '../dto/team-admin-get-list-status.enum';
 
-export class AdminTeamGetListRequest extends PaginationRequest {
+export class TeamAdminGetListRequest extends PaginationRequest {
     @IsOptional()
-    @IsEnum(TeamStatusForSearch)
+    @IsEnum(TeamAdminGetListStatus)
     @Expose()
-    teamStatus: TeamStatusForSearch;
+    teamStatus: TeamAdminGetListStatus;
 
-    @IsEnum(SearchCategoryForSearch)
-    @Expose()
-    @IsOptional()
-    searchCategory: SearchCategoryForSearch;
-
-    @IsEnum(SearchSortForSearch)
+    @IsEnum(TeamAdminGetListCategory)
     @Expose()
     @IsOptional()
-    searchSort: SearchSortForSearch;
+    searchCategory: TeamAdminGetListCategory;
+
+    @IsEnum(TeamAdminGetListSort)
+    @Expose()
+    @IsOptional()
+    searchSort: TeamAdminGetListSort;
 
     @Expose()
     @IsString()

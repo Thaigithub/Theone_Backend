@@ -7,6 +7,5 @@ import { SpecialLicenseService } from './member/special-license-member.service';
     imports: [PrismaModule],
     controllers: [MemberSpecialLicenseController],
     providers: [SpecialLicenseService],
-    exports: [SpecialLicenseService],
 })
 export class SpecialLicenseModule {}

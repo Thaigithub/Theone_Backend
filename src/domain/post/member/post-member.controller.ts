@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PostMemberService } from './post-member.service';
 import { PostMemberGetListPremiumRequest } from './request/post-member-get-list-premium.request';
@@ -19,7 +19,7 @@ export class PostMemberController {
     constructor(private postMemberService: PostMemberService) {}
 
     private async getListPost(
-        request: AccountIdExtensionRequest,
+        request: BaseRequest,
         query: PostMemberGetListRequest,
         occupationList: [string] | undefined,
         constructionMachineryList: [string],
@@ -39,7 +39,7 @@ export class PostMemberController {
         @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
         @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         return await this.getListPost(
             request,
@@ -61,7 +61,7 @@ export class PostMemberController {
         @Query('constructionMachineryList', new ParseArrayPipe({ optional: true })) constructionMachineryList: [string],
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
         @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         return await this.getListPost(
             request,
@@ -76,7 +76,7 @@ export class PostMemberController {
 
     @Get('/premium')
     async getPremium(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: PostMemberGetListPremiumRequest,
     ): Promise<BaseResponse<PostMemberGetListPremiumResponse>> {
         return BaseResponse.of(await this.postMemberService.getListPremium(req.user.accountId, query));
@@ -86,23 +86,20 @@ export class PostMemberController {
     @Get(':id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<PostMemberGetDetailResponse>> {
         return BaseResponse.of(await this.postMemberService.getDetail(id, request.user?.accountId));
     }
 
     // Apply
     @Post(':id/apply/member')
-    async addApplyPostMember(
-        @Req() request: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
+    async addApplyPostMember(@Req() request: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postMemberService.addApplyPostMember(request.user.accountId, id));
     }
 
     @Post(':id/apply/team/:teamId')
     async addApplyPost(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Param('teamId', ParseIntPipe) teamId: number,
     ): Promise<BaseResponse<any>> {
@@ -112,7 +109,7 @@ export class PostMemberController {
     // Interest
     @Post('/:id/interest')
     async updateInterest(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<PostMemberUpdateInterestResponse>> {
         return BaseResponse.of(await this.postMemberService.updateInterest(request.user.accountId, id));

@@ -1,9 +1,9 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { SitePeriodStatus } from 'utils/enum/site-status.enum';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { ContractAdminGetListCategory } from '../enum/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from '../enum/contract-admin-get-list-sort.enum';
+import { SitePeriodStatus } from 'utils/get-site-status';
 
 export class ContractAdminGetListRequest extends PaginationRequest {
     @Expose()

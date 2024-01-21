@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
@@ -19,7 +19,7 @@ export class EvaluationMemberController {
 
     @Patch(':id')
     async evaluateSite(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationMemberCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
@@ -28,13 +28,13 @@ export class EvaluationMemberController {
     }
 
     @Get('count-completed')
-    async getTotalCompletedEvaluation(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+    async getTotalCompletedEvaluation(@Req() request: BaseRequest): Promise<BaseResponse<number>> {
         return BaseResponse.of(await this.evaluationMemberService.getTotalCompletedEvaluation(request.user.accountId));
     }
 
     @Get()
     async getMemberEvaluations(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: EvaluationMemberGetListRequest,
     ): Promise<BaseResponse<EvaluationMemberGetListResponse>> {
         if (query.score && query.status === EvaluationStatus.INCOMPLETE)

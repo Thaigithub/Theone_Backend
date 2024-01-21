@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } fro
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { FileResponse } from 'utils/generics/file.response';
 import { GetListType } from '../admin/enum/product-admin-get-list.enum';
@@ -12,10 +12,10 @@ import { ProductCompanyGetListFixedTermResponse } from './request/product-compan
 import { ProductCompanyGetListLimitedCountResponse } from './request/product-company-get-list-limited-count.response';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
-import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -28,7 +28,7 @@ export class ProductCompanyController {
 
     @Get('/payment')
     async getPaymentHistoryList(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: ProductCompanyGetPaymentHistoryListRequest,
     ): Promise<BaseResponse<ProductCompanyPaymentHistoryGetListResponse>> {
         return BaseResponse.of(await this.productCompanyService.getPaymentHistoryList(req.user.accountId, query));
@@ -36,7 +36,7 @@ export class ProductCompanyController {
 
     @Get('/usage')
     async getUsageHistory(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Query() query: ProductCompanyUsageHistoryGetListRequest,
     ): Promise<BaseResponse<ProductCompanyUsageHistoryGetListResponse>> {
         return BaseResponse.of(await this.productCompanyService.getUsageHistory(req.user.accountId, query));
@@ -45,40 +45,28 @@ export class ProductCompanyController {
     @Post('/:id/payment')
     async create(
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
     ): Promise<BaseResponse<ProductCompanyPaymentCreateResponse>> {
         return BaseResponse.of(await this.productCompanyService.createPaymentHistory(id, req.user.accountId));
     }
 
     @Post('/payment/:id/refund')
-    async createRefund(
-        @Req() req: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
+    async createRefund(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.productCompanyService.createRefund(req.user.accountId, id));
     }
 
     @Post('/payment/:id/taxbill')
-    async createTaxBill(
-        @Req() req: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<void>> {
+    async createTaxBill(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.productCompanyService.createTaxBillRequest(req.user.accountId, id));
     }
 
     @Get('/payment/:id/taxbill')
-    async getTaxBill(
-        @Req() req: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<FileResponse>> {
+    async getTaxBill(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<FileResponse>> {
         return BaseResponse.of(await this.productCompanyService.getTaxBill(req.user.accountId, id));
     }
 
     @Get('/payment/:id/card-receipt')
-    async getcardReceipt(
-        @Req() req: AccountIdExtensionRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<FileResponse>> {
+    async getcardReceipt(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<FileResponse>> {
         return BaseResponse.of(await this.productCompanyService.getcardReceipt(req.user.accountId, id));
     }
 
@@ -98,7 +86,7 @@ export class ProductCompanyController {
 
     @Get('/premium/availability')
     async checkPremiumAvailability(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
     ): Promise<BaseResponse<ProductCompanyCheckPremiumAvailabilityResponse>> {
         return BaseResponse.of(await this.productCompanyService.checkPremiumAvailability(request.user.accountId));
     }

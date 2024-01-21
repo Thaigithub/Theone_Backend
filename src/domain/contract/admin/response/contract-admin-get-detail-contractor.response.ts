@@ -1,5 +1,5 @@
 import { RequestObject } from '@prisma/client';
-import { ContractStatus } from 'utils/enum/contract-status.enum';
+import { ContractAdminStatus } from '../enum/contract-admin-status.enum';
 
 export class ContractAdminGetDetailContractorResponse {
     object: RequestObject;
@@ -8,6 +8,6 @@ export class ContractAdminGetDetailContractorResponse {
     contact: string;
     contractStartDate: string;
     contractEndDate: string;
-    contractStatus: ContractStatus;
+    contractStatus: ContractAdminStatus;
     key: string;
 }

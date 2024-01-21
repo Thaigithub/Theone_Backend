@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@ne
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ContractMemberService } from './contract-member.service';
 import { ContractMemberGetListForSalaryRequest } from './request/contract-member-get-list-for-salary.request';
@@ -20,7 +20,7 @@ export class ContractMemberController {
 
     @Get(':id/salary-site')
     async geDetailForSalary(
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ContractMemberGetDetailForSalaryResponse>> {
         return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
@@ -29,20 +29,20 @@ export class ContractMemberController {
     @Get('salary-site')
     async getListForSalary(
         @Query() query: ContractMemberGetListForSalaryRequest,
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
     ): Promise<BaseResponse<ContractMemberGetListForSalaryResponse>> {
         return BaseResponse.of(await this.contractMemberService.getListForSalary(req.user.accountId, query));
     }
 
     @Get('count')
-    async getTotal(@Req() request: AccountIdExtensionRequest): Promise<BaseResponse<number>> {
+    async getTotal(@Req() request: BaseRequest): Promise<BaseResponse<number>> {
         return BaseResponse.of(await this.contractMemberService.getTotal(request.user.accountId));
     }
 
     @Get(':id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
     ): Promise<BaseResponse<ContractMemberGetDetailResponse>> {
         return BaseResponse.of(await this.contractMemberService.getDetail(req.user.accountId, id));
     }
@@ -50,7 +50,7 @@ export class ContractMemberController {
     @Get()
     async getList(
         @Query() query: ContractMemberGetListRequest,
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
     ): Promise<BaseResponse<ContractMemberGetListResponse>> {
         return BaseResponse.of(await this.contractMemberService.getList(req.user.accountId, query));
     }

@@ -1,10 +1,10 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { LaborType } from '../enum/labor-company-labor-type.enum';
+import { LaborCompanyGetListType } from '../enum/labor-company-get-list-type.enum';
 
 class GetListResponse {
     contractId: number;
     laborId: number;
-    type: LaborType;
+    type: LaborCompanyGetListType;
     name: string;
     siteName: string;
     startDate: Date;

@@ -1,51 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ProgressStatus } from './dto/site-company-progress-status.enum';
-import { SiteCompanyCreateRequest } from './request/site-company-create.request';
-import { SiteCompanyGetListForContractRequest } from './request/site-company-get-list-contract.request';
+import { SiteCompanyGetListStatus } from './enum/site-company-get-list-status.enum';
+import { SiteCompanyGetListContractRequest } from './request/site-company-get-list-contract.request';
 import { SiteCompanyGetListRequest } from './request/site-company-get-list.request';
-import { SiteCompanyUpdateRequest } from './request/site-company-update.request';
+import { SiteCompanyUpsertRequest } from './request/site-company-upsert.request';
 import { SiteCompanyGetDetailResponse } from './response/site-company-get-detail.response';
-import { SiteCompanyGetListForContractResponse } from './response/site-company-get-list-contract.response';
-import { SiteResponse } from './response/site-company-get-list.response';
+import { SiteCompanyGetListContractResponse } from './response/site-company-get-list-contract.response';
+import { SiteCompanyGetListResponse } from './response/site-company-get-list.response';
 
 @Injectable()
 export class SiteCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    private parseConditionFromQuery(accountId: number, query: SiteCompanyGetListRequest): Prisma.SiteWhereInput {
-        const siteWhereInput: Prisma.SiteWhereInput = {
-            isActive: true,
-            company: {
-                accountId,
-            },
-        };
-        switch (query.progressStatus) {
-            case ProgressStatus.WAITING:
-                siteWhereInput.startDate = { gt: new Date() };
-                break;
-            case ProgressStatus.IN_PROGRESS:
-                siteWhereInput.startDate = { lte: new Date() };
-                siteWhereInput.endDate = { gte: new Date() };
-                break;
-            case ProgressStatus.END:
-                siteWhereInput.endDate = { lt: new Date() };
-                break;
-        }
-        return siteWhereInput;
-    }
-
-    async getTotal(query: SiteCompanyGetListRequest, accountId: number): Promise<number> {
-        return await this.prismaService.site.count({
-            where: this.parseConditionFromQuery(accountId, query),
-        });
-    }
-
-    async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteResponse[]> {
-        const companies = await this.prismaService.site.findMany({
+    async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteCompanyGetListResponse> {
+        const search = {
             include: {
                 district: {
                     include: {
@@ -62,11 +32,28 @@ export class SiteCompanyService {
                     },
                 },
             },
-            where: this.parseConditionFromQuery(accountId, query),
+            where: {
+                isActive: true,
+                company: {
+                    accountId,
+                },
+            },
             ...QueryPagingHelper.queryPaging(query),
-        });
+        };
+        switch (query.progressStatus) {
+            case SiteCompanyGetListStatus.WAITING:
+                search['startDate'] = { gt: new Date() };
+                break;
+            case SiteCompanyGetListStatus.IN_PROGRESS:
+                search['startDate'] = { lte: new Date() };
+                search['endDate'] = { gte: new Date() };
+                break;
+            case SiteCompanyGetListStatus.END:
+                search['endDate'] = { lt: new Date() };
+                break;
+        }
 
-        return companies.map((item) => {
+        const sites = (await this.prismaService.site.findMany(search)).map((item) => {
             return {
                 id: item.id,
                 name: item.name,
@@ -82,6 +69,8 @@ export class SiteCompanyService {
                 companyLogoKey: item.company.logo ? item.company.logo.file.key : null,
             };
         });
+        const total = await this.prismaService.site.count({ where: search.where });
+        return new PaginationResponse(sites, new PageInfo(total));
     }
 
     async getDetail(id: number, accountId: number): Promise<SiteCompanyGetDetailResponse> {
@@ -132,7 +121,7 @@ export class SiteCompanyService {
         };
     }
 
-    async create(body: SiteCompanyCreateRequest, accountId: number): Promise<void> {
+    async create(body: SiteCompanyUpsertRequest, accountId: number): Promise<void> {
         const company = await this.prismaService.company.findUnique({
             select: {
                 id: true,
@@ -153,7 +142,7 @@ export class SiteCompanyService {
         });
     }
 
-    async update(id: number, body: SiteCompanyUpdateRequest, accountId: number): Promise<void> {
+    async update(id: number, body: SiteCompanyUpsertRequest, accountId: number): Promise<void> {
         const siteExist = await this.prismaService.site.count({
             where: {
                 isActive: true,
@@ -209,8 +198,8 @@ export class SiteCompanyService {
 
     async getListContract(
         accountId: number,
-        request: SiteCompanyGetListForContractRequest,
-    ): Promise<SiteCompanyGetListForContractResponse> {
+        request: SiteCompanyGetListContractRequest,
+    ): Promise<SiteCompanyGetListContractResponse> {
         const query = {
             where: {
                 company: {

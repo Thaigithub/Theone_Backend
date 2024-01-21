@@ -2,7 +2,7 @@ import { ContractStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { SiteAdminSearchCategory } from '../dto/site-admin-category.dto';
+import { SiteAdminGetListCategory } from '../enum/site-admin-get-list-category.enum';
 
 export class SiteAdminGetListRequest extends PaginationRequest {
     @Expose()
@@ -27,9 +27,9 @@ export class SiteAdminGetListRequest extends PaginationRequest {
     endDate: string;
 
     @Expose()
-    @IsEnum(SiteAdminSearchCategory)
+    @IsEnum(SiteAdminGetListCategory)
     @IsOptional()
-    category: SiteAdminSearchCategory;
+    category: SiteAdminGetListCategory;
 
     @Expose()
     @IsString()

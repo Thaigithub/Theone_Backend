@@ -2,16 +2,16 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuard
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { AccountIdExtensionRequest } from 'utils/generics/base.request';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApplicationCompanyService } from './application-company.service';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
 import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
 import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
+import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
 import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
 import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
-import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
 
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
@@ -22,20 +22,20 @@ export class ApplicationCompanyController {
     @Get('/offer/post/:postId')
     async getListOfferForPost(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() req: AccountIdExtensionRequest,
+        @Req() req: BaseRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListOfferForPost>> {
         return BaseResponse.of(await this.applicationCompanyService.getListOfferForPost(req.user.accountId, postId));
     }
 
     @Get('/count')
-    async count(@Req() req: AccountIdExtensionRequest): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
+    async count(@Req() req: BaseRequest): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.count(req.user.accountId));
     }
 
     @Get('/post/:postId')
     async getListForPost(
         @Param('postId', ParseIntPipe) postId: number,
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.getListForPost(request.user.accountId, query, postId));
@@ -43,7 +43,7 @@ export class ApplicationCompanyController {
 
     @Get('/:id/member')
     async getDetailMember(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
         return BaseResponse.of(await this.applicationCompanyService.getDetailMember(request.user.accountId, id));
@@ -51,7 +51,7 @@ export class ApplicationCompanyController {
 
     @Get('/:id/team')
     async getDetailTeam(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ApplicationCompanyGetTeamDetail>> {
         return BaseResponse.of(await this.applicationCompanyService.getDetailTeam(request.user.accountId, id));
@@ -59,7 +59,7 @@ export class ApplicationCompanyController {
 
     @Patch('/:id/status')
     async updateStatus(
-        @Req() request: AccountIdExtensionRequest,
+        @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) applicationId: number,
         @Body() body: ApplicationCompanyUpdateStatusRequest,
     ): Promise<BaseResponse<void>> {

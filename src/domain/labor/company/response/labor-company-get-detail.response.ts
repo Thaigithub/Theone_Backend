@@ -1,5 +1,5 @@
 import { SalaryType } from '@prisma/client';
-import { LaborType } from '../enum/labor-company-labor-type.enum';
+import { LaborCompanyGetListType } from '../enum/labor-company-get-list-type.enum';
 
 export class SalaryHistory {
     base: number;
@@ -25,7 +25,7 @@ class WorkDate {
 }
 export class LaborCompanyGetDetailResponse {
     id: number;
-    type: LaborType;
+    type: LaborCompanyGetListType;
     name: string;
     contact: string;
     siteName: string;
