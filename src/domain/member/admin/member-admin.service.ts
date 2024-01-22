@@ -122,6 +122,9 @@ export class MemberAdminService {
                     },
                 },
                 specialLicenses: {
+                    where: {
+                        isActive: true,
+                    },
                     include: {
                         code: true,
                     },

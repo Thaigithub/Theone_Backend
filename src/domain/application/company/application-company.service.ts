@@ -55,6 +55,9 @@ export class ApplicationCompanyService {
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
                         specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
                             select: {
                                 code: {
                                     select: {
@@ -90,6 +93,9 @@ export class ApplicationCompanyService {
                                 totalExperienceYears: true,
                                 desiredSalary: true,
                                 specialLicenses: {
+                                    where: {
+                                        isActive: true,
+                                    },
                                     select: {
                                         code: {
                                             select: {
@@ -360,6 +366,9 @@ export class ApplicationCompanyService {
                     },
                 },
                 specialLicenses: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
                         id: true,
                         code: {
@@ -531,6 +540,9 @@ export class ApplicationCompanyService {
                             orderBy: { updatedAt: 'desc' },
                         },
                         specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
                             select: {
                                 id: true,
                                 code: {
@@ -583,6 +595,9 @@ export class ApplicationCompanyService {
                                 totalExperienceYears: true,
                                 totalExperienceMonths: true,
                                 specialLicenses: {
+                                    where: {
+                                        isActive: true,
+                                    },
                                     select: {
                                         id: true,
                                         code: {

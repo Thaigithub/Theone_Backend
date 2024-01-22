@@ -79,6 +79,9 @@ export class InterviewCompanyService {
                                 name: true,
                                 contact: true,
                                 specialLicenses: {
+                                    where: {
+                                        isActive: true,
+                                    },
                                     select: {
                                         code: {
                                             select: {
@@ -96,6 +99,9 @@ export class InterviewCompanyService {
                                     select: {
                                         contact: true,
                                         specialLicenses: {
+                                            where: {
+                                                isActive: true,
+                                            },
                                             select: {
                                                 code: {
                                                     select: {

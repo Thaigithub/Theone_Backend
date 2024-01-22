@@ -87,6 +87,7 @@ export class TeamCompanyService {
                             },
                             where: {
                                 status: CertificateStatus.APPROVED,
+                                isActive: true,
                             },
                         },
                     },
@@ -101,6 +102,7 @@ export class TeamCompanyService {
                                     },
                                     where: {
                                         status: CertificateStatus.APPROVED,
+                                        isActive: true,
                                     },
                                 },
                             },

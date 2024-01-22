@@ -111,7 +111,11 @@ export class MemberCompanyService {
         const members = (
             await this.prismaService.member.findMany({
                 include: {
-                    specialLicenses: true,
+                    specialLicenses: {
+                        where: {
+                            isActive: true,
+                        },
+                    },
                     district: {
                         include: {
                             city: true,
@@ -168,6 +172,9 @@ export class MemberCompanyService {
                     },
                 },
                 specialLicenses: {
+                    where: {
+                        isActive: true,
+                    },
                     include: {
                         code: true,
                     },

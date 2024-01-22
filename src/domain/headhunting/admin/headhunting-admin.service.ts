@@ -260,7 +260,11 @@ export class HeadhuntingAdminService {
                         },
                     },
                 },
-                specialLicenses: true,
+                specialLicenses: {
+                    where: {
+                        isActive: true,
+                    },
+                },
                 account: {
                     select: {
                         username: true,
@@ -385,7 +389,11 @@ export class HeadhuntingAdminService {
                                 },
                             },
                         },
-                        specialLicenses: true,
+                        specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
+                        },
                         level: true,
                         memberEvaluation: {
                             select: {
@@ -586,6 +594,9 @@ export class HeadhuntingAdminService {
                             },
                         },
                         specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
                             include: {
                                 code: true,
                             },
@@ -669,6 +680,9 @@ export class HeadhuntingAdminService {
                                             },
                                         },
                                         specialLicenses: {
+                                            where: {
+                                                isActive: true,
+                                            },
                                             include: {
                                                 code: true,
                                             },

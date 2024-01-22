@@ -67,6 +67,9 @@ export class HeadhuntingCompanyService {
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
                         specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
                             select: {
                                 licenseNumber: true,
                                 code: {
@@ -101,6 +104,9 @@ export class HeadhuntingCompanyService {
                                 totalExperienceMonths: true,
                                 totalExperienceYears: true,
                                 specialLicenses: {
+                                    where: {
+                                        isActive: true,
+                                    },
                                     select: {
                                         code: {
                                             select: {
