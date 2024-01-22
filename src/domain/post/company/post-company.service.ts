@@ -129,7 +129,6 @@ export class PostCompanyService {
 
         await this.prismaService.post.create({
             data: {
-                type: request.type,
                 category: request.category,
                 status: request.status,
                 name: request.name,
@@ -227,7 +226,6 @@ export class PostCompanyService {
                 companyId: account.company.id,
             },
             data: {
-                type: request.type,
                 category: request.category,
                 status: request.status,
                 name: request.name,
