@@ -9,6 +9,7 @@ import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FileModule } from 'domain/file/file.module';
 import { FilterModule } from 'domain/filter/filter.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
+import { InquiryModule } from 'domain/inquiry/inquiry.module';
 import { InterestModule } from 'domain/interest/interest.module';
 import { InterviewModule } from 'domain/interview/interview.module';
 import { LaborModule } from 'domain/labor/labor.module';
@@ -62,6 +63,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterestModule,
         PreferenceModule,
         AnnouncementModule,
+        InquiryModule,
     ],
 })
 export class AppModule {}

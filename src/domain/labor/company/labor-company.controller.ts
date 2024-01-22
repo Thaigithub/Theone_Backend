@@ -7,7 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { LaborCompanyService } from './labor-company.service';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
-import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
+import { LaborCompanyUpsertSalaryRequest } from './request/labor-company-upsert-salary.request';
 import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upsert-workdate.request';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-get-detail-salary.response';
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
@@ -19,6 +19,16 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class LaborCompanyController {
     constructor(private laborCompanyService: LaborCompanyService) {}
+    @Put('/:id/salary/:salaryId')
+    async updateSalary(
+        @Param('id', ParseIntPipe) laborId: number,
+        @Param('salaryId', ParseIntPipe) salaryId: number,
+        @Req() req: BaseRequest,
+        @Body() body: LaborCompanyUpsertSalaryRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.laborCompanyService.updateSalary(req.user.accountId, laborId, salaryId, body));
+    }
+
     @Get('/:id/salary/:salaryId')
     async getDetailSalary(
         @Param('id', ParseIntPipe) laborId: number,
@@ -32,7 +42,7 @@ export class LaborCompanyController {
     async createSalary(
         @Param('id', ParseIntPipe) id: number,
         @Req() req: BaseRequest,
-        @Body() body: LaborCompanyCreateSalaryRequest,
+        @Body() body: LaborCompanyUpsertSalaryRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborCompanyService.createSalary(req.user.accountId, id, body));
     }
