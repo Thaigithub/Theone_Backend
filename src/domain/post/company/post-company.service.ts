@@ -498,7 +498,7 @@ export class PostCompanyService {
             return { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.FREE_PULL_UP_AVAILABLE, remainingTimes: null };
         else {
             const availablePullUp = await this.prismaService.productPaymentHistory.aggregate({
-                _count: {
+                _sum: {
                     remainingTimes: true,
                 },
                 where: {
@@ -513,10 +513,10 @@ export class PostCompanyService {
                 },
             });
 
-            return availablePullUp._count.remainingTimes
+            return availablePullUp
                 ? {
                       pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE,
-                      remainingTimes: availablePullUp._count.remainingTimes,
+                      remainingTimes: availablePullUp._sum.remainingTimes,
                   }
                 : { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE, remainingTimes: null };
         }
@@ -583,29 +583,30 @@ export class PostCompanyService {
 
     async updateType(postId: number, accountId: number, body: PostCompanyUpdateTypeRequest): Promise<void> {
         await this.checkPostExist(postId, accountId);
-
         const availablePremium = await this.productCompanyService.checkPremiumAvailability(accountId);
+
         if (availablePremium.isAvailable) {
-            const earliestPremiumProduct = await this.prismaService.productPaymentHistory.findFirst({
+            const productPaymentHistory = await this.prismaService.productPaymentHistory.findUnique({
                 where: {
                     isActive: true,
+                    id: body.productPaymentHistoryId,
                     product: {
                         productType: ProductType.PREMIUM_POST,
                     },
                     expirationDate: { gte: new Date() },
                     remainingTimes: { gt: 0 },
                 },
-                orderBy: {
-                    expirationDate: 'asc',
-                },
             });
+            if (!productPaymentHistory)
+                throw new NotFoundException(`Can not find PREMIUM product with id ${body.productPaymentHistoryId}`);
+
             await this.prismaService.productPaymentHistory.update({
                 data: {
-                    remainingTimes: earliestPremiumProduct.remainingTimes - 1,
+                    remainingTimes: productPaymentHistory.remainingTimes - 1,
                 },
                 where: {
                     isActive: true,
-                    id: earliestPremiumProduct.id,
+                    id: productPaymentHistory.id,
                 },
             });
         } else throw new BadRequestException("You don't have any PREMIUM_POST produdct");
