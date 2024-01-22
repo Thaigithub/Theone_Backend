@@ -3,7 +3,6 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
-
 import { BaseResponse } from 'utils/generics/base.response';
 import { InquiryCompanyService } from './inquiry-company.service';
 import { InquiryCompanyCreateRequest } from './request/inquiry-company-create.request';
