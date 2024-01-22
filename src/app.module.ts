@@ -22,6 +22,7 @@ import { ProductModule } from 'domain/product/product.module';
 import { RegionModule } from 'domain/region/region.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
+import { TermModule } from 'domain/term/term.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -64,6 +65,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         PreferenceModule,
         AnnouncementModule,
         InquiryModule,
+        TermModule,
     ],
 })
 export class AppModule {}
