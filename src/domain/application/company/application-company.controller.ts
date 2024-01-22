@@ -20,11 +20,11 @@ export class ApplicationCompanyController {
     constructor(private applicationCompanyService: ApplicationCompanyService) {}
 
     @Get('/offer/post/:postId')
-    async getListOfferForPost(
+    async getListOfferPost(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() req: BaseRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListOfferForPost>> {
-        return BaseResponse.of(await this.applicationCompanyService.getListOfferForPost(req.user.accountId, postId));
+        return BaseResponse.of(await this.applicationCompanyService.getListOfferPost(req.user.accountId, postId));
     }
 
     @Get('/count')
@@ -33,12 +33,12 @@ export class ApplicationCompanyController {
     }
 
     @Get('/post/:postId')
-    async getListForPost(
+    async getListPost(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: BaseRequest,
         @Query() query: ApplicationCompanyGetListApplicantsRequest,
     ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
-        return BaseResponse.of(await this.applicationCompanyService.getListForPost(request.user.accountId, query, postId));
+        return BaseResponse.of(await this.applicationCompanyService.getListPost(request.user.accountId, query, postId));
     }
 
     @Get('/:id/member')

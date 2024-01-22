@@ -3,7 +3,6 @@ import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } f
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ApplicationCompanyApplicantsSearch } from './enum/application-company-applicants-search.enum';
 import { ApplicationCompanyStatus } from './enum/application-company-update-status.enum';
 import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
@@ -17,7 +16,7 @@ import { ApplicationCompanyGetTeamDetail } from './response/application-company-
 export class ApplicationCompanyService {
     constructor(private prismaService: PrismaService) {}
 
-    async getListForPost(
+    async getListPost(
         accountId: number,
         query: ApplicationCompanyGetListApplicantsRequest,
         postId: number,
@@ -31,20 +30,18 @@ export class ApplicationCompanyService {
             },
             ...(query.startDate && { assignedAt: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { assignedAt: { lte: new Date(query.endDate) } }),
-            ...(query.category == ApplicationCompanyApplicantsSearch.NAME && {
-                OR: [
-                    {
-                        member: {
-                            name: { contains: query.keyword, mode: 'insensitive' },
-                        },
+            OR: [
+                {
+                    member: {
+                        name: { contains: query.keyword, mode: 'insensitive' },
                     },
-                    {
-                        team: {
-                            name: { contains: query.keyword, mode: 'insensitive' },
-                        },
+                },
+                {
+                    team: {
+                        name: { contains: query.keyword, mode: 'insensitive' },
                     },
-                ],
-            }),
+                },
+            ],
         };
         const applicationList = await this.prismaService.application.findMany({
             select: {
@@ -249,7 +246,7 @@ export class ApplicationCompanyService {
         }
     }
 
-    async getListOfferForPost(accountId: number, postId: number): Promise<ApplicationCompanyGetListOfferForPost> {
+    async getListOfferPost(accountId: number, postId: number): Promise<ApplicationCompanyGetListOfferForPost> {
         const offer = (
             await this.prismaService.application.findMany({
                 where: {
