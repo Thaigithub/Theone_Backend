@@ -42,14 +42,14 @@ export class SiteCompanyService {
         };
         switch (query.progressStatus) {
             case SiteCompanyGetListStatus.WAITING:
-                search['startDate'] = { gt: new Date() };
+                search.where['startDate'] = { gt: new Date() };
                 break;
             case SiteCompanyGetListStatus.IN_PROGRESS:
-                search['startDate'] = { lte: new Date() };
-                search['endDate'] = { gte: new Date() };
+                search.where['startDate'] = { lte: new Date() };
+                search.where['endDate'] = { gte: new Date() };
                 break;
             case SiteCompanyGetListStatus.END:
-                search['endDate'] = { lt: new Date() };
+                search.where['endDate'] = { lt: new Date() };
                 break;
         }
 

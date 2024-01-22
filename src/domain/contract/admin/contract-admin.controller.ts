@@ -6,6 +6,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { ContractAdminService } from './contract-admin.service';
 import { ContractAdminGetListSettlementRequest } from './request/contract-admin-get-list-settlement.request';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
+import { ContractAdminUpdateSettlementStatusRequest } from './request/contract-admin-update-settlement-status.request';
 import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
 import { ContractAdminGetDetailSettlementResponse } from './response/contract-admin-get-detail-settlement.response';
 import { ContractAdminGetListSettlementResponse } from './response/contract-admin-get-list-settlement.response';
@@ -40,6 +41,14 @@ export class ContractAdminController {
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ContractAdminGetDetailSettlementResponse>> {
         return BaseResponse.of(await this.contractAdminService.getDetailSettlement(id));
+    }
+
+    @Patch('/:id/settlement/status')
+    async updateSettlementStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: ContractAdminUpdateSettlementStatusRequest,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.contractAdminService.updateSettlementStatus(id, body));
     }
 
     @Post('/:id/file')

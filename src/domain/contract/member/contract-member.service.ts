@@ -13,6 +13,7 @@ import { ContractMemberGetListResponse } from './response/contract-member-get-li
 @Injectable()
 export class ContractMemberService {
     constructor(private prismaService: PrismaService) {}
+
     async getList(accountId: number, query: ContractMemberGetListRequest): Promise<ContractMemberGetListResponse> {
         const search = {
             ...QueryPagingHelper.queryPaging(query),
@@ -123,6 +124,7 @@ export class ContractMemberService {
         const total = await this.prismaService.contract.count({ where: search.where });
         return new PaginationResponse(contracts, new PageInfo(total));
     }
+
     async getDetail(accountId: number, id: number): Promise<ContractMemberGetDetailResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
@@ -214,6 +216,7 @@ export class ContractMemberService {
             contact: contract.contact,
         };
     }
+
     async getListForSalary(
         accountId: number,
         query: ContractMemberGetListForSalaryRequest,
@@ -347,6 +350,7 @@ export class ContractMemberService {
         const total = await this.prismaService.contract.count({ where: search.where });
         return new PaginationResponse(contracts, new PageInfo(total));
     }
+
     async getTotal(accountId: number): Promise<number> {
         const memberExist = await this.prismaService.member.count({
             where: {
@@ -366,6 +370,7 @@ export class ContractMemberService {
             },
         });
     }
+
     async getDetailForSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
