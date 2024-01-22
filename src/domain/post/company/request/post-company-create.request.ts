@@ -1,12 +1,8 @@
-import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
+import { ExperienceType, PostCategory, PostStatus, SalaryType, Workday } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 
 export class PostCompanyCreateRequest {
-    @Expose()
-    @IsEnum(PostType)
-    type: PostType;
-
     @Expose()
     @IsEnum(PostCategory)
     category: PostCategory;
