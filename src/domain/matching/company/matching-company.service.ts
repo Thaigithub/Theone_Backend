@@ -46,7 +46,11 @@ export class MatchingCompanyService {
                         id: true,
                         name: true,
                         contact: true,
-                        specialLicenses: true,
+                        specialLicenses: {
+                            where: {
+                                isActive: true,
+                            },
+                        },
                         address: true,
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
@@ -68,7 +72,11 @@ export class MatchingCompanyService {
                             include: {
                                 member: {
                                     include: {
-                                        specialLicenses: true,
+                                        specialLicenses: {
+                                            where: {
+                                                isActive: true,
+                                            },
+                                        },
                                         desiredOccupations: {
                                             include: {
                                                 code: true,
@@ -97,7 +105,11 @@ export class MatchingCompanyService {
         if (!existMatching.length && query.date === MatchingCompanyGetListDateEnum.TODAY) {
             const members = await this.prismaService.member.findMany({
                 include: {
-                    specialLicenses: true,
+                    specialLicenses: {
+                        where: {
+                            isActive: true,
+                        },
+                    },
                     applyPosts: {
                         include: {
                             contract: true,
@@ -114,7 +126,11 @@ export class MatchingCompanyService {
                         include: {
                             member: {
                                 include: {
-                                    specialLicenses: true,
+                                    specialLicenses: {
+                                        where: {
+                                            isActive: true,
+                                        },
+                                    },
                                     desiredOccupations: {
                                         include: {
                                             code: true,

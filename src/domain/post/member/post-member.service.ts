@@ -183,6 +183,9 @@ export class PostMemberService {
             const memberSpecialLicenseList = await this.prismaService.member.findUnique({
                 select: {
                     specialLicenses: {
+                        where: {
+                            isActive: true,
+                        },
                         select: {
                             code: {
                                 select: {

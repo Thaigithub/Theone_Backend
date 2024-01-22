@@ -1,4 +1,18 @@
-import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post, Put, Query, Req, Request, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Inject,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
+    Req,
+    Request,
+    UseGuards,
+} from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -43,5 +57,10 @@ export class MemberSpecialLicenseController {
         @Body() request: SpecialLicenseMemberUpsertRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.specialLicenseService.update(req.user.accountId, id, request));
+    }
+
+    @Delete('/:id')
+    async delete(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.specialLicenseService.delete(req.user.accountId, id));
     }
 }

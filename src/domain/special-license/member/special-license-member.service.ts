@@ -16,6 +16,7 @@ export class SpecialLicenseService {
         const count = await this.prismaService.specialLicense.count({
             where: {
                 codeId: request.codeId,
+                isActive: true,
             },
         });
         if (count !== 0) throw new ConflictException('Special License has been registered');
@@ -60,6 +61,7 @@ export class SpecialLicenseService {
         const search = {
             where: {
                 memberId: member.member.id,
+                isActive: true,
             },
             ...QueryPagingHelper.queryPaging(request),
             select: {
@@ -101,6 +103,7 @@ export class SpecialLicenseService {
             where: {
                 id,
                 memberId: member.member.id,
+                isActive: true,
             },
         });
         if (!specialLicense) throw new BadRequestException('Special License not found');
@@ -118,6 +121,7 @@ export class SpecialLicenseService {
         const file = await this.prismaService.specialLicense.update({
             where: {
                 id,
+                isActive: true,
             },
             data: {
                 status: CertificateStatus.REQUESTING,
@@ -147,6 +151,7 @@ export class SpecialLicenseService {
         const result = await this.prismaService.specialLicense.findUniqueOrThrow({
             where: {
                 id,
+                isActive: true,
             },
             include: {
                 file: true,
@@ -167,5 +172,29 @@ export class SpecialLicenseService {
                 size: Number(result.file.size),
             },
         };
+    }
+
+    async delete(accountId: number, id: number): Promise<void> {
+        const record = await this.prismaService.specialLicense.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+                member: {
+                    isActive: true,
+                    accountId: accountId,
+                },
+            },
+        });
+        if (!record) {
+            throw new NotFoundException('The special license does not exist');
+        }
+        await this.prismaService.specialLicense.update({
+            where: {
+                id: id,
+            },
+            data: {
+                isActive: false,
+            },
+        });
     }
 }
