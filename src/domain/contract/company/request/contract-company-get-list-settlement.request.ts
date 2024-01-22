@@ -4,7 +4,7 @@ import { PaginationRequest } from 'utils/generics/pagination.request';
 import { ContractCompanySettlementStatus } from '../enum/contract-company-settlement-status.enum';
 import { ContractType } from '../enum/contract-company-type-contract.enum';
 
-export class ContractCompanySettlementGetListRequest extends PaginationRequest {
+export class ContractCompanyGetListSettlementRequest extends PaginationRequest {
     @Expose()
     @IsEnum(ContractCompanySettlementStatus)
     @IsOptional()

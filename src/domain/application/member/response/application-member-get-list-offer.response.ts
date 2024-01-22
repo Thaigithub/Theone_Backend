@@ -3,6 +3,7 @@ import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 import { OfferType } from '../enum/application-member-get-list-offer-type.enum';
 export class GetOfferResponse {
+    isLeader: boolean;
     type: OfferType;
     teamName: string | null;
     companyLogo: FileResponse;

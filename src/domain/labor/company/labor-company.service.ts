@@ -286,6 +286,7 @@ export class LaborCompanyService {
                 salaryHistories: true,
                 contract: {
                     select: {
+                        paymentForm: true,
                         amount: true,
                         salaryType: true,
                         startDate: true,
@@ -340,6 +341,7 @@ export class LaborCompanyService {
                     hours: item.hours,
                 };
             }),
+            paymentForm: labor.contract.paymentForm,
             type: labor.contract.application.member ? LaborCompanyGetListType.INDIVIDUAL : LaborCompanyGetListType.TEAM,
             name: labor.contract.application.member
                 ? labor.contract.application.member.name
@@ -434,11 +436,15 @@ export class LaborCompanyService {
             },
         });
         if (!salary) throw new NotFoundException('Salary not found');
+        const { date, ...rest } = body;
         await this.prismaService.salaryHistory.update({
             where: {
                 id: salaryId,
             },
-            data: body,
+            data: {
+                ...rest,
+                date: new Date(date),
+            },
         });
     }
     async updateWorkDate(accountId: number, id: number, body: LaborCompanyUpsertWorkDateRequest): Promise<void> {

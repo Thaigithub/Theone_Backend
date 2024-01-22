@@ -774,7 +774,8 @@ model Contract {
   file                     File                       @relation(fields: [fileId], references: [id])
   labor                    Labor?
   SiteEvaluationByContract SiteEvaluationByContract[]
-  settlementCompleteDate   DateTime?                  @map("settlement_complete")
+  settlementCompleteDate   DateTime?                  @map("settlement_complete_date")
+  settlementRequestDate    DateTime?                  @map("settlement_request_date")
   settlementStatus         SettlementStatus           @default(NONE) @map("settlement_status")
 
   @@map("contracts")

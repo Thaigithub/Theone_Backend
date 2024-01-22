@@ -70,7 +70,7 @@ export class TeamMemberController {
         return BaseResponse.of(await this.teamMemberService.createInvitation(req.user.accountId, id, body));
     }
 
-    @Get('/invitaion')
+    @Get('/invitation')
     async getListInvitation(
         @Req() request: BaseRequest,
         @Query() query: PaginationRequest,

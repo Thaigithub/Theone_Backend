@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
 import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
+import { SiteAdminGetDetailContractResponse } from './response/site-admin-get-detail-contract.response';
 import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detail-labor.response';
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
 import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
@@ -27,6 +28,11 @@ export class SiteAdminController {
     @Patch('/:id/status')
     async updateStatus(@Param('id', ParseIntPipe) id: number, @Body() body: SiteAdminUpdateRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.siteAdminService.updateStatus(id, body));
+    }
+
+    @Get('/:id/contract')
+    async getDetailContract(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailContractResponse>> {
+        return BaseResponse.of(await this.siteAdminService.getDetailContract(id));
     }
 
     @Get('/download')

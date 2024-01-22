@@ -3,6 +3,7 @@ import { FileResponse } from 'utils/generics/file.response';
 import { Member, Team } from '../dto/application-member-teamtype.response.dto';
 
 export class ApplicationMemberGetDetailResponse {
+    isLeader: boolean;
     companyName: Company['name'];
     companyId: Company['id'];
     companyLogo: FileResponse;
