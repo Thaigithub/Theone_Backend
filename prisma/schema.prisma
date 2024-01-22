@@ -631,7 +631,7 @@ model Application {
   teamId     Int?                  @map("team_id")
   postId     Int                   @map("post_id")
   status     PostApplicationStatus @default(APPLY)
-  assignedAt DateTime              @default(now())
+  assignedAt DateTime              @default(now()) @db.Date
   updatedAt  DateTime              @updatedAt @map("updated_at")
   category   ApplicationCategory   @default(MANPOWER)
   member     Member?               @relation(fields: [memberId], references: [id])
