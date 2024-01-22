@@ -4,13 +4,14 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PostCompanyServiceType } from './enum/post-company-service.enum';
 import { PostCompanyService } from './post-company.service';
 import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
 import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-get-list-applicant-site.request';
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
+import { PostCompanyUpdatePullUpStatusRequest } from './request/post-company-update-pull-up-status.request';
+import { PostCompanyUpdateTypeRequest } from './request/post-company-update-type.request';
 import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
@@ -99,21 +100,29 @@ export class PostCompanyController {
 
     @Get('/:id/pullup/availability')
     async checkPullUpAvailability(
-        @Param('id') postId: number,
+        @Param('id', ParseIntPipe) postId: number,
         @Req() request: BaseRequest,
     ): Promise<BaseResponse<PostCompanyCheckPullUpAvailabilityResponse>> {
         return BaseResponse.of(await this.postCompanyService.checkPullUpAvailability(postId, request.user.accountId));
     }
 
     @Patch('/:id/pullup')
-    async pullUpPost(@Param('id') postId: number, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
-        await this.postCompanyService.serviceOnPost(postId, request.user.accountId, PostCompanyServiceType.PULL_UP);
+    async updatePullUpStatus(
+        @Param('id', ParseIntPipe) postId: number,
+        @Req() request: BaseRequest,
+        @Body() body: PostCompanyUpdatePullUpStatusRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.updatePullUpStatus(postId, request.user.accountId, body);
         return BaseResponse.ok();
     }
 
     @Patch('/:id/type')
-    async makePostPremium(@Param('id') postId: number, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
-        await this.postCompanyService.serviceOnPost(postId, request.user.accountId, PostCompanyServiceType.PREMIUM);
+    async updateType(
+        @Param('id', ParseIntPipe) postId: number,
+        @Req() request: BaseRequest,
+        @Body() body: PostCompanyUpdateTypeRequest,
+    ): Promise<BaseResponse<void>> {
+        await this.postCompanyService.updateType(postId, request.user.accountId, body);
         return BaseResponse.ok();
     }
 }
