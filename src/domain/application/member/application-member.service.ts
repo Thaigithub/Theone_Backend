@@ -225,6 +225,11 @@ export class ApplicationMemberService {
                                 },
                             },
                         },
+                        leader: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
                     },
                 },
                 post: {
@@ -281,6 +286,7 @@ export class ApplicationMemberService {
         });
         if (!application) throw new NotFoundException('Application not found');
         return {
+            isLeader: application.team?.leader.accountId === accountId || null,
             companyLogo: {
                 fileName: application.post.company.logo.file.fileName,
                 type: application.post.company.logo.file.type,
@@ -414,6 +420,11 @@ export class ApplicationMemberService {
                 team: {
                     select: {
                         name: true,
+                        leader: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
                     },
                 },
                 memberId: true,
@@ -587,6 +598,7 @@ export class ApplicationMemberService {
         }
         const offer = (await this.prismaService.application.findMany(query)).map((item) => {
             return {
+                isLeader: item.team ? item.team.leader.accountId === accountId : null,
                 postId: item.post.id,
                 endDate: item.post.endDate,
                 type: item.team ? OfferType.TEAM : OfferType.INDIVIDUAL,

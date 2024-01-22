@@ -21,5 +21,5 @@ export class TeamMemberUpsertRequest {
     @Expose()
     @IsString()
     @Length(5)
-    sequenceDigit: string;
+    sequence: string;
 }

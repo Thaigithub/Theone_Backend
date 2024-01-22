@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, SiteStatus } from '@prisma/client';
+import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -11,10 +11,12 @@ import { SiteAdminGetListLaborCategory } from './enum/site-admin-get_list-labor-
 import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
 import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
+import { SiteAdminGetDetailContractResponse } from './response/site-admin-get-detail-contract.response';
 import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detail-labor.response';
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
 import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
+import { SiteAdminGetDetailContractStatus } from './enum/stie-admin-get-detail-contract-status.enum';
 
 @Injectable()
 export class SiteAdminService {
@@ -278,5 +280,111 @@ export class SiteAdminService {
             manager: detailSite.personInCharge,
             managerContact: detailSite.personInChargeContact,
         };
+    }
+
+    async getDetailContract(id: number): Promise<SiteAdminGetDetailContractResponse> {
+        const detailSite = await this.prismaService.site.findUnique({
+            where: {
+                id,
+                isActive: true,
+            },
+            select: {
+                name: true,
+                startDate: true,
+                endDate: true,
+                personInCharge: true,
+                contact: true,
+                email: true,
+            },
+        });
+        if (!detailSite) throw new NotFoundException('Site not found');
+        const detailContractors = await this.prismaService.contract.findMany({
+            where: {
+                application: {
+                    post: {
+                        isActive: true,
+                        siteId: id,
+                    },
+                },
+            },
+            select: {
+                startDate: true,
+                endDate: true,
+                application: {
+                    select: {
+                        member: {
+                            select: {
+                                name: true,
+                                contact: true,
+                            },
+                        },
+                        team: {
+                            select: {
+                                name: true,
+                                leader: {
+                                    select: {
+                                        name: true,
+                                        contact: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                file: {
+                    select: {
+                        key: true,
+                    },
+                },
+            },
+        });
+
+        const detailResponse = {
+            siteName: detailSite.name,
+            startDate: detailSite.startDate?.toISOString() || null,
+            endDate: detailSite.endDate?.toISOString() || null,
+            manager: detailSite.personInCharge,
+            siteContact: detailSite.contact,
+            siteEmail: detailSite.email,
+            contractors: detailContractors.map((contractor) => {
+                if (contractor.application.member) {
+                    const contractorResponse = {
+                        object: RequestObject.INDIVIDUAL,
+                        name: contractor.application.member.name,
+                        leaderName: null,
+                        contact: contractor.application.member.contact,
+                        contractStartDate: contractor.startDate?.toISOString() || null,
+                        contractEndDate: contractor.endDate?.toISOString() || null,
+                        contractStatus: this.getStatusContract(contractor.startDate, contractor.endDate),
+                        key: contractor.file?.key || null,
+                    };
+
+                    return contractorResponse;
+                } else {
+                    const contractorResponse = {
+                        object: RequestObject.TEAM,
+                        name: contractor.application.team.name,
+                        leaderName: contractor.application.team.leader.name,
+                        contact: contractor.application.team.leader.contact,
+                        contractStartDate: contractor.startDate?.toISOString() || null,
+                        contractEndDate: contractor.endDate?.toISOString() || null,
+                        contractStatus: this.getStatusContract(contractor.startDate, contractor.endDate),
+                        key: contractor.file?.key || null,
+                    };
+
+                    return contractorResponse;
+                }
+            }),
+        };
+
+        return detailResponse;
+    }
+
+    getStatusContract(startDate: Date, endDate: Date): SiteAdminGetDetailContractStatus {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        if (startDate <= now && now <= endDate) return SiteAdminGetDetailContractStatus.UNDER_CONTRACT;
+        if (endDate < now) return SiteAdminGetDetailContractStatus.CONTRACT_TERMINATED;
+        return null;
     }
 }

@@ -4,11 +4,13 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ContractAdminService } from './contract-admin.service';
+import { ContractAdminGetListSettlementRequest } from './request/contract-admin-get-list-settlement.request';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
-import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
+import { ContractAdminGetDetailSettlementResponse } from './response/contract-admin-get-detail-settlement.response';
+import { ContractAdminGetListSettlementResponse } from './response/contract-admin-get-list-settlement.response';
 import { ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
-import { ContractAdminGetTotalContractsResponse } from './response/contract-admin-get-total-contracts.response';
+import { ContractAdminGetTotalResponse } from './response/contract-admin-get-total.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -22,14 +24,22 @@ export class ContractAdminController {
     }
 
     @Get('/count')
-    async getTotal(@Query() query: ContractAdminGetListRequest): Promise<BaseResponse<ContractAdminGetTotalContractsResponse>> {
-        const code = await this.contractAdminService.getTotal(query);
-        return BaseResponse.of(code);
+    async getTotal(@Query() query: ContractAdminGetListRequest): Promise<BaseResponse<ContractAdminGetTotalResponse>> {
+        return BaseResponse.of(await this.contractAdminService.getTotal(query));
     }
 
-    @Get('/:id')
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<ContractAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.contractAdminService.getDetail(id));
+    @Get('/settlement')
+    async getListSettlement(
+        @Query() query: ContractAdminGetListSettlementRequest,
+    ): Promise<BaseResponse<ContractAdminGetListSettlementResponse>> {
+        return BaseResponse.of(await this.contractAdminService.getListSettlement(query));
+    }
+
+    @Get('/:id/settlement')
+    async getDetailSettlement(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<ContractAdminGetDetailSettlementResponse>> {
+        return BaseResponse.of(await this.contractAdminService.getDetailSettlement(id));
     }
 
     @Post('/:id/file')
@@ -38,7 +48,7 @@ export class ContractAdminController {
     }
 
     @Patch('/:id/file')
-    async update(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminUpsertFileRequest) {
+    async updateFile(@Param('id', ParseIntPipe) id: number, @Body() body: ContractAdminUpsertFileRequest) {
         return BaseResponse.of(await this.contractAdminService.updateFile(id, body));
     }
 }

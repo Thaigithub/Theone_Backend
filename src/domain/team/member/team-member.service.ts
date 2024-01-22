@@ -66,7 +66,7 @@ export class TeamMemberService {
                             id: request.codeId,
                         },
                     },
-                    teamCode: this.getTeamCode(request.sequenceDigit),
+                    teamCode: this.getTeamCode(request.sequence),
                     totalMembers: 1,
                 },
             });

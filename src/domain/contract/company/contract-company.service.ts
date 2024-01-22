@@ -1,28 +1,28 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PostApplicationStatus, Prisma, SettlementStatus } from '@prisma/client';
+import { ApplicationCategory, PostApplicationStatus, Prisma, SettlementStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractType } from './enum/contract-company-type-contract.enum';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
-import { ContractCompanyGetListForSiteRequest } from './request/contract-company-get-list-for-site.request';
-import { ContractCompanySettlementGetListRequest } from './request/contract-company-settlement-get-list.request';
-import { ContractCompanySettlementUpdateRequest } from './request/contract-company-settlement-update.request';
+import { ContractCompanyGetListSiteRequest } from './request/contract-company-get-list-for-site.request';
+import { ContractCompanyGetListSettlementRequest } from './request/contract-company-get-list-settlement.request';
+import { ContractCompanyUpdateSettlementStatusRequest } from './request/contract-company-update-settlement-status.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
-import { ContractCompanyCountContractsResponse } from './response/contract-company-get-count-contract.response';
+import { ContractCompanyGetDetailSettlementMemberResponse } from './response/contract-company-get-detail-settlement-member.response';
+import { ContractCompanyGetDetailSettlementTeamResponse } from './response/contract-company-get-detail-settlement-team.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
 import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { ContractCompanySettlementGetListResponse } from './response/contract-company-settlement-get-list.response';
-import { ContractCompanySettlementGetMemberDetailResponse } from './response/contract-company-settlement-get-member-detail.response';
-import { ContractCompanySettlementGetTeamDetailResponse } from './response/contract-company-settlement-get-team-detail.response';
+import { ContractCompanyGetListSettlementResponse } from './response/contract-company-get-list-settlement.response';
+import { ContractCompanyGetTotalResponse } from './response/contract-company-get-total.response';
 
 @Injectable()
 export class ContractCompanyService {
     constructor(private prismaService: PrismaService) {}
-    async getContractOnSite(
+    async getListSite(
         siteId: number,
         accountId: number,
-        request: ContractCompanyGetListForSiteRequest,
+        request: ContractCompanyGetListSiteRequest,
     ): Promise<ContractCompanyGetListForSiteResponse> {
         const query = {
             where: {
@@ -91,7 +91,7 @@ export class ContractCompanyService {
         return new PaginationResponse(contracts, new PageInfo(total));
     }
 
-    async createContract(accountId: number, body: ContractCompanyCreateRequest): Promise<void> {
+    async create(accountId: number, body: ContractCompanyCreateRequest): Promise<void> {
         const application = await this.prismaService.application.findFirst({
             where: {
                 id: body.applicationId,
@@ -197,7 +197,7 @@ export class ContractCompanyService {
         });
     }
 
-    async countContracts(accountId: number): Promise<ContractCompanyCountContractsResponse> {
+    async count(accountId: number): Promise<ContractCompanyGetTotalResponse> {
         const contracts = await this.prismaService.contract.count({
             where: {
                 startDate: {
@@ -309,16 +309,17 @@ export class ContractCompanyService {
         };
     }
 
-    async getSettlementList(
+    async getListSettlement(
         accountId: number,
-        query: ContractCompanySettlementGetListRequest,
-    ): Promise<ContractCompanySettlementGetListResponse> {
+        query: ContractCompanyGetListSettlementRequest,
+    ): Promise<ContractCompanyGetListSettlementResponse> {
         const queryFilter: Prisma.ContractWhereInput = {
             ...(query.settlementStatus && { settlementStatus: query.settlementStatus }),
             ...(!query.settlementStatus && { NOT: { settlementStatus: SettlementStatus.NONE } }),
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
             application: {
+                category: ApplicationCategory.HEADHUNTING,
                 ...(query.object === ContractType.INDIVIDUAL && {
                     AND: [
                         { NOT: { memberId: null } },
@@ -402,7 +403,7 @@ export class ContractCompanyService {
         return new PaginationResponse(contracts, new PageInfo(countContract));
     }
 
-    async getTeamSettlementDetail(accountId: number, id: number): Promise<ContractCompanySettlementGetTeamDetailResponse> {
+    async getDetailSettlementTeam(accountId: number, id: number): Promise<ContractCompanyGetDetailSettlementTeamResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id: id,
@@ -520,7 +521,7 @@ export class ContractCompanyService {
         };
     }
 
-    async getMemberSettlementDetail(accountId: number, id: number): Promise<ContractCompanySettlementGetMemberDetailResponse> {
+    async getDetailSettlementMember(accountId: number, id: number): Promise<ContractCompanyGetDetailSettlementMemberResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id: id,
@@ -663,7 +664,11 @@ export class ContractCompanyService {
         });
     }
 
-    async updateSettlementStatus(accountId: number, id: number, body: ContractCompanySettlementUpdateRequest): Promise<void> {
+    async updateSettlementStatus(
+        accountId: number,
+        id: number,
+        body: ContractCompanyUpdateSettlementStatusRequest,
+    ): Promise<void> {
         await this.prismaService.$transaction(async (prisma) => {
             const contract = await prisma.contract.findUnique({
                 where: {
@@ -704,7 +709,7 @@ export class ContractCompanyService {
                         },
                     },
                     data: {
-                        settlementCompleteDate: new Date(),
+                        settlementRequestDate: new Date(),
                         settlementStatus: body.settlementStatus,
                     },
                 });

@@ -3,7 +3,7 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 import { ContractCompanyMember } from '../dto/contract-company-member.dto';
 import { ContractCompanyTeam } from '../dto/contract-company-team.dto';
 
-export class ContractCompanySettlementResponse {
+class GetListSettlementResponse {
     id: number;
     memberInfor: ContractCompanyMember;
     teamInfor: ContractCompanyTeam;
@@ -11,4 +11,4 @@ export class ContractCompanySettlementResponse {
     settlementCompleteDate: Date;
 }
 
-export class ContractCompanySettlementGetListResponse extends PaginationResponse<ContractCompanySettlementResponse> {}
+export class ContractCompanyGetListSettlementResponse extends PaginationResponse<GetListSettlementResponse> {}

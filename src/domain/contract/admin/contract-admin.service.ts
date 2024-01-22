@@ -1,18 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
+import { ApplicationCategory, Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractAdminGetListCategory } from './enum/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.enum';
+import { ContractAdminStatus } from './enum/contract-admin-status.enum';
+import { ContractAdminGetListSettlementRequest } from './request/contract-admin-get-list-settlement.request';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
-import { ContractAdminGetDetailContractorResponse } from './response/contract-admin-get-detail-contractor.response';
-import { ContractAdminGetDetailResponse } from './response/contract-admin-get-detail.response';
+import { ContractAdminGetDetailSettlementResponse } from './response/contract-admin-get-detail-settlement.response';
+import { ContractAdminGetListSettlementResponse } from './response/contract-admin-get-list-settlement.response';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
-import { ContractAdminGetTotalContractsResponse } from './response/contract-admin-get-total-contracts.response';
-import { ContractAdminStatus } from './enum/contract-admin-status.enum';
+import { ContractAdminGetTotalResponse } from './response/contract-admin-get-total.response';
 
 @Injectable()
 export class ContractAdminService {
@@ -47,7 +48,7 @@ export class ContractAdminService {
             ...(query.category === ContractAdminGetListCategory.SITE_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(query.category === ContractAdminGetListCategory.ALL && {
+            ...(!query.category && {
                 OR: [
                     {
                         name: { contains: query.keyword, mode: 'insensitive' },
@@ -106,7 +107,7 @@ export class ContractAdminService {
         return new PaginationResponse(listResponse, new PageInfo(count));
     }
 
-    async getTotal(query: ContractAdminGetListRequest): Promise<ContractAdminGetTotalContractsResponse> {
+    async getTotal(query: ContractAdminGetListRequest): Promise<ContractAdminGetTotalResponse> {
         const count = await this.prismaService.site.aggregate({
             _sum: {
                 numberOfContract: true,
@@ -114,104 +115,7 @@ export class ContractAdminService {
             where: this.queryFilter(query),
         });
 
-        return { totalContracts: count._sum.numberOfContract } as ContractAdminGetTotalContractsResponse;
-    }
-
-    async getDetail(id: number): Promise<ContractAdminGetDetailResponse> {
-        const detailSite = await this.prismaService.site.findUnique({
-            where: {
-                id,
-                isActive: true,
-            },
-            select: {
-                name: true,
-                startDate: true,
-                endDate: true,
-                personInCharge: true,
-                contact: true,
-                email: true,
-            },
-        });
-        const detailContractors = await this.prismaService.contract.findMany({
-            where: {
-                application: {
-                    post: {
-                        isActive: true,
-                        siteId: id,
-                    },
-                },
-            },
-            select: {
-                startDate: true,
-                endDate: true,
-                application: {
-                    select: {
-                        member: {
-                            select: {
-                                name: true,
-                                contact: true,
-                            },
-                        },
-                        team: {
-                            select: {
-                                name: true,
-                                leader: {
-                                    select: {
-                                        name: true,
-                                        contact: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                file: {
-                    select: {
-                        key: true,
-                    },
-                },
-            },
-        });
-
-        const detailResponse: ContractAdminGetDetailResponse = {
-            siteName: detailSite.name,
-            startDate: detailSite.startDate?.toISOString() || null,
-            endDate: detailSite.endDate?.toISOString() || null,
-            manager: detailSite.personInCharge,
-            siteContact: detailSite.contact,
-            siteEmail: detailSite.email,
-            contractors: detailContractors.map((contractor) => {
-                if (contractor.application.member) {
-                    const contractorResponse: ContractAdminGetDetailContractorResponse = {
-                        object: RequestObject.INDIVIDUAL,
-                        name: contractor.application.member.name,
-                        leaderName: null,
-                        contact: contractor.application.member.contact,
-                        contractStartDate: contractor.startDate?.toISOString() || null,
-                        contractEndDate: contractor.endDate?.toISOString() || null,
-                        contractStatus: this.getStatus(contractor.startDate, contractor.endDate),
-                        key: contractor.file?.key || null,
-                    };
-
-                    return contractorResponse;
-                } else {
-                    const contractorResponse: ContractAdminGetDetailContractorResponse = {
-                        object: RequestObject.TEAM,
-                        name: contractor.application.team.name,
-                        leaderName: contractor.application.team.leader.name,
-                        contact: contractor.application.team.leader.contact,
-                        contractStartDate: contractor.startDate?.toISOString() || null,
-                        contractEndDate: contractor.endDate?.toISOString() || null,
-                        contractStatus: this.getStatus(contractor.startDate, contractor.endDate),
-                        key: contractor.file?.key || null,
-                    };
-
-                    return contractorResponse;
-                }
-            }),
-        };
-
-        return detailResponse;
+        return { totalContracts: count._sum.numberOfContract };
     }
 
     getStatus(startDate: Date, endDate: Date): ContractAdminStatus {
@@ -269,5 +173,150 @@ export class ContractAdminService {
                 fileName: body.fileName,
             },
         });
+    }
+
+    async getListSettlement(query: ContractAdminGetListSettlementRequest): Promise<ContractAdminGetListSettlementResponse> {
+        const search = {
+            where: {
+                settlementStatus: query.status,
+                application: {
+                    category: ApplicationCategory.HEADHUNTING,
+                    NOT: {
+                        team: query.type && (query.type === RequestObject.TEAM ? null : undefined),
+                        member: query.type && (query.type === RequestObject.INDIVIDUAL ? null : undefined),
+                    },
+                    ...(query.category
+                        ? query.category === RequestObject.TEAM
+                            ? { team: { name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } } }
+                            : { member: { name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } } }
+                        : {
+                              OR: [
+                                  { team: { name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } } },
+                                  { member: { name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } } },
+                              ],
+                          }),
+                },
+                settlementRequestDate: query.requestDate && new Date(query.requestDate),
+            },
+            ...QueryPagingHelper.queryPaging(query),
+            select: {
+                id: true,
+                application: {
+                    select: {
+                        team: {
+                            select: {
+                                name: true,
+                                leader: {
+                                    select: {
+                                        contact: true,
+                                    },
+                                },
+                            },
+                        },
+                        member: true,
+                    },
+                },
+                settlementRequestDate: true,
+                settlementCompleteDate: true,
+                settlementStatus: true,
+            },
+        };
+        const contract = (await this.prismaService.contract.findMany(search)).map((item) => {
+            return {
+                type: item.application.member ? RequestObject.INDIVIDUAL : RequestObject.TEAM,
+                name: item.application.member?.name || item.application.team.name,
+                contact: item.application.member?.contact || item.application.team.leader.contact,
+                requestDate: item.settlementRequestDate,
+                status: item.settlementStatus,
+                completeDate: item.settlementCompleteDate || null,
+            };
+        });
+        const total = await this.prismaService.contract.count({ where: search.where });
+        return new PaginationResponse(contract, new PageInfo(total));
+    }
+
+    async getDetailSettlement(id: number): Promise<ContractAdminGetDetailSettlementResponse> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id,
+                application: {
+                    category: ApplicationCategory.HEADHUNTING,
+                },
+            },
+            select: {
+                startDate: true,
+                endDate: true,
+                labor: {
+                    select: {
+                        workDates: true,
+                        salaryHistories: true,
+                    },
+                },
+                application: {
+                    select: {
+                        team: {
+                            select: {
+                                leader: {
+                                    select: {
+                                        name: true,
+                                        contact: true,
+                                    },
+                                },
+                                name: true,
+                            },
+                        },
+                        member: {
+                            select: {
+                                name: true,
+                                contact: true,
+                            },
+                        },
+                        post: {
+                            select: {
+                                site: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!contract) throw new NotFoundException('Settlement not found');
+        return {
+            siteName: contract.application.post.site.name,
+            siteStartDate: contract.application.post.site.startDate,
+            siteEndDate: contract.application.post.site.endDate,
+            contractStartDate: contract.startDate,
+            contractEndDate: contract.endDate,
+            contractstatus: this.getStatus(contract.startDate, contract.endDate),
+            workDate: contract.labor.workDates.map((item) => {
+                return { date: item.date, hour: item.hours };
+            }),
+            numberOfWorkDate: contract.labor.workDates.length,
+            numberOfWorkHour: contract.labor.workDates.reduce((accum, current) => {
+                return accum + current.hours;
+            }, 0),
+            wage: contract.labor.salaryHistories.reduce((accum, current) => {
+                return accum + current.base;
+            }, 0),
+            deductible: contract.labor.salaryHistories.reduce((accum, current) => {
+                return accum + current.totalDeductible;
+            }, 0),
+            actual: contract.labor.salaryHistories.reduce((accum, current) => {
+                return accum + current.actualPayment;
+            }, 0),
+            member: contract.application.member
+                ? {
+                      name: contract.application.member.name,
+                      contact: contract.application.member.contact,
+                  }
+                : null,
+            team: contract.application.team
+                ? {
+                      name: contract.application.team.name,
+                      leaderName: contract.application.team.leader.name,
+                      contact: contract.application.team.leader.contact,
+                  }
+                : null,
+        };
     }
 }
