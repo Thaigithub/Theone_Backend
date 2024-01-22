@@ -494,9 +494,13 @@ export class PostCompanyService {
             },
         });
         if (!post) throw new NotFoundException('Post does not exist');
-        if (post.freePullUp) return { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.FREE_PULL_UP_AVAILABLE };
+        if (post.freePullUp)
+            return { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.FREE_PULL_UP_AVAILABLE, remainingTimes: null };
         else {
-            const availablePullUp = await this.prismaService.productPaymentHistory.findFirst({
+            const availablePullUp = await this.prismaService.productPaymentHistory.aggregate({
+                _count: {
+                    remainingTimes: true,
+                },
                 where: {
                     isActive: true,
                     company: {
@@ -508,9 +512,13 @@ export class PostCompanyService {
                     remainingTimes: { gt: 0 },
                 },
             });
-            return availablePullUp
-                ? { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE }
-                : { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE };
+
+            return availablePullUp._count.remainingTimes
+                ? {
+                      pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE,
+                      remainingTimes: availablePullUp._count.remainingTimes,
+                  }
+                : { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE, remainingTimes: null };
         }
     }
 

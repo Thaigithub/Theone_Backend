@@ -408,7 +408,10 @@ export class ProductCompanyService {
     }
 
     async checkPremiumAvailability(accountId: number): Promise<ProductCompanyCheckPremiumAvailabilityResponse> {
-        const availablePremium = await this.prismaService.productPaymentHistory.findFirst({
+        const availablePremium = await this.prismaService.productPaymentHistory.aggregate({
+            _count: {
+                remainingTimes: true,
+            },
             where: {
                 isActive: true,
                 company: {
@@ -420,6 +423,8 @@ export class ProductCompanyService {
                 remainingTimes: { gt: 0 },
             },
         });
-        return availablePremium ? { isAvailable: true } : { isAvailable: false };
+        return availablePremium._count.remainingTimes
+            ? { isAvailable: true, remainingTimes: availablePremium._count.remainingTimes }
+            : { isAvailable: false, remainingTimes: null };
     }
 }
