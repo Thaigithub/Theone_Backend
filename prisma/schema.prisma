@@ -113,6 +113,7 @@ model Member {
   leader                       Team[]
   memberPreference             MemberPreference?
   inquiries                    Inquiry[]
+  memos                        Memo[]
 
   @@map("members")
 }
@@ -1138,6 +1139,15 @@ model Term {
   content   String
 
   @@map("terms")
+}
+
+model Memo {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id])
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  note      String?
 }
 
 enum CurrencyExchangeStatus {
