@@ -140,6 +140,9 @@ export class ApplicationMemberService {
                     },
                 },
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    assignedAt: 'desc',
+                },
             })
         ).map((item) => {
             return {
