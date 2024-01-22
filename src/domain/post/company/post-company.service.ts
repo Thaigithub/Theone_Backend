@@ -524,9 +524,9 @@ export class PostCompanyService {
 
     async updatePullUpStatus(postId: number, accountId: number, body: PostCompanyUpdatePullUpStatusRequest): Promise<void> {
         const post = await this.checkPostExist(postId, accountId);
-
         const availablePullUp = await this.checkPullUpAvailability(postId, accountId);
-        if (availablePullUp) {
+
+        if (availablePullUp.pullUpAvailableStatus !== PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE) {
             if (post.freePullUp) {
                 await this.prismaService.post.update({
                     data: {
@@ -554,15 +554,17 @@ export class PostCompanyService {
                         expirationDate: 'asc',
                     },
                 });
-                await this.prismaService.productPaymentHistory.update({
-                    data: {
-                        remainingTimes: earliestPullUpProduct.remainingTimes - 1,
-                    },
-                    where: {
-                        isActive: true,
-                        id: earliestPullUpProduct.id,
-                    },
-                });
+                if (availablePullUp.pullUpAvailableStatus === PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE) {
+                    await this.prismaService.productPaymentHistory.update({
+                        data: {
+                            remainingTimes: earliestPullUpProduct.remainingTimes - 1,
+                        },
+                        where: {
+                            isActive: true,
+                            id: earliestPullUpProduct.id,
+                        },
+                    });
+                }
             }
         } else throw new BadRequestException("You don't have free pull up or any PULL_UP produdct");
         await this.prismaService.post.update({
