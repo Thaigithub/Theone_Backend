@@ -121,7 +121,6 @@ export class ProductAdminController {
         @Res() response: Response,
     ): Promise<BaseResponse<void>> {
         const parsedIdList = query.idList.split(',').map((item) => parseInt(item));
-        await this.productAdminService.downloadSettlement(parsedIdList, response);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.productAdminService.downloadSettlement(parsedIdList, response));
     }
 }

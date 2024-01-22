@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CodeType, Post, PostCategory, PostType, Prisma, ProductType, RequestStatus } from '@prisma/client';
+import { CodeType, PaymentStatus, Post, PostCategory, PostType, Prisma, ProductType, RequestStatus } from '@prisma/client';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -503,6 +503,7 @@ export class PostCompanyService {
                 },
                 where: {
                     isActive: true,
+                    status: PaymentStatus.COMPLETE,
                     company: {
                         accountId,
                     },

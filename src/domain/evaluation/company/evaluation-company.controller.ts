@@ -24,8 +24,7 @@ export class EvaluationCompanyController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
-        await this.evaluationCompanyService.evaluateMember(request.user.accountId, id, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.evaluationCompanyService.evaluateMember(request.user.accountId, id, body));
     }
 
     @Patch('/team/:id')
@@ -34,8 +33,7 @@ export class EvaluationCompanyController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
-        await this.evaluationCompanyService.evaluateTeam(request.user.accountId, id, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.evaluationCompanyService.evaluateTeam(request.user.accountId, id, body));
     }
 
     @Get('/member')
