@@ -273,7 +273,7 @@ model Disability {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   file      File     @relation(fields: [fileId], references: [id])
-  fileId    Int      @map("file_id")
+  fileId    Int      @unique @map("file_id")
   member    Member   @relation(fields: [memberId], references: [id])
 
   @@map("disabilities")
@@ -314,7 +314,7 @@ model File {
   taxBill                      TaxBill?
   cardReceipt                  CardReceipt?
   announcementFile             AnnouncementFile?
-  Disability                   Disability[]
+  disability                   Disability?
 
   @@map("files")
 }
