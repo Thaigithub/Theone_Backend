@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PreferenceMemberUpdateRequest } from './request/preference-member-update.request';
 import { PreferenceMemberGetDetailResponse } from './response/preference-member-get-preference.response';
 
 @Injectable()
@@ -38,5 +39,24 @@ export class PreferenceMemberService {
             isSearchByMemberLocationAllowed: preference.isSearchByMemberLocationAllowed,
             isMemberLocationSearchedBySitesAllowed: preference.isMemberLocationSearchedBySitesAllowed,
         };
+    }
+
+    async update(accountId: number, body: PreferenceMemberUpdateRequest): Promise<void> {
+        await this.prismaService.memberPreference.updateMany({
+            where: {
+                member: {
+                    accountId,
+                },
+            },
+            data: {
+                isPushNotificationActive: body.isPushNotificationActive,
+                isNotificationSoundActive: body.isNotificationSoundActive,
+                isNoticeNotificationActive: body.isNoticeNotificationActive,
+                isServiceNotificationActive: body.isServiceNotificationActive,
+                isTeamNotificationActive: body.isTeamNotificationActive,
+                isSearchByMemberLocationAllowed: body.isSearchByMemberLocationAllowed,
+                isMemberLocationSearchedBySitesAllowed: body.isMemberLocationSearchedBySitesAllowed,
+            },
+        });
     }
 }
