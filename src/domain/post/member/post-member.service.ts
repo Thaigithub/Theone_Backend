@@ -64,6 +64,8 @@ export class PostMemberService {
             experienceType: query.experienceTypeList && { in: experienceTypeList },
             occupationId: query.occupationList && { in: occupationList },
             specialOccupationId: query.constructionMachineryList && { in: constructionMachineryList },
+            startDate: { lte: new Date() },
+            endDate: { gte: new Date() },
         };
     }
 
