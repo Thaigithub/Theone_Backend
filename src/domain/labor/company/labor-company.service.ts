@@ -6,7 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborCompanyGetListType } from './enum/labor-company-get-list-type.enum';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
-import { LaborCompanyCreateSalaryRequest } from './request/labor-company-salary-create.request';
+import { LaborCompanyUpsertSalaryRequest } from './request/labor-company-upsert-salary.request';
 import { LaborCompanyUpsertWorkDateRequest } from './request/labor-company-upsert-workdate.request';
 import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-get-detail-salary.response';
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
@@ -378,7 +378,7 @@ export class LaborCompanyService {
             date: salary.date,
         };
     }
-    async createSalary(accountId: number, id: number, body: LaborCompanyCreateSalaryRequest): Promise<void> {
+    async createSalary(accountId: number, id: number, body: LaborCompanyUpsertSalaryRequest): Promise<void> {
         const labor = await this.prismaService.labor.findUnique({
             where: {
                 id,
@@ -408,6 +408,37 @@ export class LaborCompanyService {
                 ...rest,
                 date: new Date(date),
             },
+        });
+    }
+    async updateSalary(
+        accountId: number,
+        laborId: number,
+        salaryId: number,
+        body: LaborCompanyUpsertSalaryRequest,
+    ): Promise<void> {
+        const salary = await this.prismaService.salaryHistory.findUnique({
+            where: {
+                id: salaryId,
+                laborId: laborId,
+                labor: {
+                    contract: {
+                        application: {
+                            post: {
+                                company: {
+                                    accountId,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!salary) throw new NotFoundException('Salary not found');
+        await this.prismaService.salaryHistory.update({
+            where: {
+                id: salaryId,
+            },
+            data: body,
         });
     }
     async updateWorkDate(accountId: number, id: number, body: LaborCompanyUpsertWorkDateRequest): Promise<void> {

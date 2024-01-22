@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsNumber, Matches } from 'class-validator';
 
-export class LaborCompanyCreateSalaryRequest {
+export class LaborCompanyUpsertSalaryRequest {
     @Expose()
     @IsNumber()
     base: number;
