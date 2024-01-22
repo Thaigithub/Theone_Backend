@@ -172,6 +172,7 @@ export class ProductAdminService {
             },
             where: {
                 companyId,
+                status: PaymentStatus.COMPLETE,
                 product: {
                     usageType,
                 },

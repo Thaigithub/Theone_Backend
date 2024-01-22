@@ -411,6 +411,7 @@ export class ProductCompanyService {
         const availablePremiumList = await this.prismaService.productPaymentHistory.findMany({
             where: {
                 isActive: true,
+                status: PaymentStatus.COMPLETE,
                 company: {
                     accountId,
                 },

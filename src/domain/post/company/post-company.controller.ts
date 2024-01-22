@@ -112,8 +112,7 @@ export class PostCompanyController {
         @Req() request: BaseRequest,
         @Body() body: PostCompanyUpdatePullUpStatusRequest,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.updatePullUpStatus(postId, request.user.accountId, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.postCompanyService.updatePullUpStatus(postId, request.user.accountId, body));
     }
 
     @Patch('/:id/type')
@@ -122,7 +121,6 @@ export class PostCompanyController {
         @Req() request: BaseRequest,
         @Body() body: PostCompanyUpdateTypeRequest,
     ): Promise<BaseResponse<void>> {
-        await this.postCompanyService.updateType(postId, request.user.accountId, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.postCompanyService.updateType(postId, request.user.accountId, body));
     }
 }

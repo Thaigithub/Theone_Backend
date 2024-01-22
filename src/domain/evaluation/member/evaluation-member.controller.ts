@@ -23,8 +23,7 @@ export class EvaluationMemberController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationMemberCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
-        await this.evaluationMemberService.evaluateSite(request.user.accountId, id, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.evaluationMemberService.evaluateSite(request.user.accountId, id, body));
     }
 
     @Get('count-completed')

@@ -102,8 +102,7 @@ export class TeamMemberController {
 
     @Post()
     async create(@Request() req: BaseRequest, @Body() request: TeamMemberUpsertRequest): Promise<BaseResponse<void>> {
-        await this.teamMemberService.create(req.user.accountId, request);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.teamMemberService.create(req.user.accountId, request));
     }
 
     @Get()

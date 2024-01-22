@@ -38,8 +38,7 @@ export class MemberAdminController {
         if (Array.isArray(query.memberId)) {
             memberIds = query.memberId.map((item) => parseInt(item));
         } else if (typeof query.memberId === 'string') memberIds = [parseInt(query.memberId)];
-        await this.memberAdminService.download(memberIds, response);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.memberAdminService.download(memberIds, response));
     }
 
     @Get('/:id')
@@ -52,7 +51,6 @@ export class MemberAdminController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: ChangeMemberRequest,
     ): Promise<BaseResponse<void>> {
-        await this.memberAdminService.updateMember(id, body);
-        return BaseResponse.ok();
+        return BaseResponse.of(await this.memberAdminService.updateMember(id, body));
     }
 }

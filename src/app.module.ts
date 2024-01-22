@@ -31,6 +31,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
 
 @Module({
     imports: [
@@ -64,6 +65,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterestModule,
         PreferenceModule,
         AnnouncementModule,
+        SalaryReportModule,
         InquiryModule,
         TermModule,
     ],
