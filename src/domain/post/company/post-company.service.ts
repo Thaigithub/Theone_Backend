@@ -513,7 +513,7 @@ export class PostCompanyService {
                 },
             });
 
-            return availablePullUp
+            return availablePullUp._sum.remainingTimes
                 ? {
                       pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE,
                       remainingTimes: availablePullUp._sum.remainingTimes,
@@ -567,6 +567,8 @@ export class PostCompanyService {
                 }
             }
         } else throw new BadRequestException("You don't have free pull up or any PULL_UP produdct");
+
+        if (post.isPulledUp) throw new BadRequestException('Post is already pulled up');
         await this.prismaService.post.update({
             data: {
                 isPulledUp: body.pullUpStatus,
@@ -582,7 +584,7 @@ export class PostCompanyService {
     }
 
     async updateType(postId: number, accountId: number, body: PostCompanyUpdateTypeRequest): Promise<void> {
-        await this.checkPostExist(postId, accountId);
+        const post = await this.checkPostExist(postId, accountId);
         const availablePremium = await this.productCompanyService.checkPremiumAvailability(accountId);
 
         if (availablePremium.isAvailable) {
@@ -611,6 +613,7 @@ export class PostCompanyService {
             });
         } else throw new BadRequestException("You don't have any PREMIUM_POST produdct");
 
+        if (post.type === PostType.PREMIUM) throw new BadRequestException('Post is already PREMIUM type');
         await this.prismaService.post.update({
             data: {
                 type: body.postType,
