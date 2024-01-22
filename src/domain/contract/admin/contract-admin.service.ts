@@ -9,6 +9,7 @@ import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.en
 import { ContractAdminStatus } from './enum/contract-admin-status.enum';
 import { ContractAdminGetListSettlementRequest } from './request/contract-admin-get-list-settlement.request';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
+import { ContractAdminUpdateSettlementStatusRequest } from './request/contract-admin-update-settlement-status.request';
 import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
 import { ContractAdminGetDetailSettlementResponse } from './response/contract-admin-get-detail-settlement.response';
 import { ContractAdminGetListSettlementResponse } from './response/contract-admin-get-list-settlement.response';
@@ -318,5 +319,26 @@ export class ContractAdminService {
                   }
                 : null,
         };
+    }
+
+    async updateSettlementStatus(id: number, body: ContractAdminUpdateSettlementStatusRequest): Promise<void> {
+        const contract = await this.prismaService.contract.findUnique({
+            where: {
+                id,
+                application: {
+                    category: ApplicationCategory.HEADHUNTING,
+                },
+            },
+        });
+        if (!contract) throw new NotFoundException('Settlement not found');
+        await this.prismaService.contract.update({
+            where: {
+                id,
+            },
+            data: {
+                settlementStatus: body.status,
+                settlementCompleteDate: new Date(),
+            },
+        });
     }
 }

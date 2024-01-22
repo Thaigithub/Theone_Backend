@@ -13,5 +13,6 @@ export class GetOfferResponse {
     requestDate: string;
     occupationName: string;
     applicationStatus: PostApplicationStatus;
+    isHeadhunting: boolean;
 }
 export class ApplicationMemberGetListOfferResponse extends PaginationResponse<GetOfferResponse> {}

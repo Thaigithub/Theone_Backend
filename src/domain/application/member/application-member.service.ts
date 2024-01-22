@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InterviewStatus, PostApplicationStatus, Prisma } from '@prisma/client';
+import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -417,6 +417,7 @@ export class ApplicationMemberService {
             },
             select: {
                 id: true,
+                category: true,
                 team: {
                     select: {
                         name: true,
@@ -599,6 +600,7 @@ export class ApplicationMemberService {
         const offer = (await this.prismaService.application.findMany(query)).map((item) => {
             return {
                 isLeader: item.team ? item.team.leader.accountId === accountId : null,
+                isHeadhunting: item.category === ApplicationCategory.HEADHUNTING,
                 postId: item.post.id,
                 endDate: item.post.endDate,
                 type: item.team ? OfferType.TEAM : OfferType.INDIVIDUAL,
