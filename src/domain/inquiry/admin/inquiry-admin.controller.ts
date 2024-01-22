@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -19,9 +19,12 @@ export class InquiryAdminController {
         return BaseResponse.of(await this.inquiryAdminService.getList(query));
     }
 
-    @Delete('/:id')
-    async delete(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.inquiryAdminService.delete(id));
+    @Delete()
+    async delete(
+        @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
+        ids: number[],
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.inquiryAdminService.delete(ids));
     }
 
     @Get('/:id')

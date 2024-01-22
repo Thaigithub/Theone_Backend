@@ -85,19 +85,12 @@ export class InquiryAdminService {
         return new PaginationResponse(inquiries, new PageInfo(total));
     }
 
-    async delete(id: number): Promise<void> {
-        const inquiry = await this.prismaService.inquiry.count({
+    async delete(ids: number[]): Promise<void> {
+        await this.prismaService.inquiry.updateMany({
             where: {
-                isActive: true,
-                id,
-            },
-        });
-
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
-
-        await this.prismaService.inquiry.update({
-            where: {
-                id,
+                id: {
+                    in: ids,
+                },
             },
             data: {
                 isActive: false,
