@@ -416,7 +416,7 @@ export class TeamMemberService {
                     invitationStatus: InvitationStatus.REQUESTED,
                     member: {
                         connect: {
-                            accountId,
+                            id: body.id,
                         },
                     },
                     team: {
