@@ -13,6 +13,9 @@ export class SiteCompanyGetDetailResponse {
     contractStatus: Site['contractStatus'];
     startDate: Site['startDate'];
     endDate: Site['endDate'];
+    longitude: Site['longitude'];
+    latitude: Site['latitude'];
+    originalBuilding: Site['originalBuilding'];
     city: City['id'];
     cityKorean: City['koreanName'];
     district: District['id'];
