@@ -105,6 +105,9 @@ export class TeamMemberService {
                     },
                 },
                 members: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
                         member: {
                             select: {
@@ -346,25 +349,29 @@ export class TeamMemberService {
             },
         });
         if (!member) throw new NotFoundException('Member not found');
-        const memberOnTeam = await this.prismaService.team.findMany({
+        const memberOnTeam = await this.prismaService.team.findUnique({
             where: {
+                id: teamId,
+                isActive: true,
                 OR: [
                     {
                         members: {
                             some: {
                                 memberId: body.id,
+                                isActive: true,
                             },
                         },
                     },
                     {
                         leader: {
                             id: body.id,
+                            isActive: true,
                         },
                     },
                 ],
             },
         });
-        if (memberOnTeam.length !== 0) throw new BadRequestException('Member has been on team');
+        if (memberOnTeam) throw new BadRequestException('Member has been on team');
         const teamMemberInvitation = await this.prismaService.teamMemberInvitation.findFirst({
             where: {
                 memberId: body.id,
