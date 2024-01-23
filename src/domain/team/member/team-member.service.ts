@@ -480,7 +480,7 @@ export class TeamMemberService {
                     isActive: true,
                 },
                 data: {
-                    isActive: true,
+                    isActive: false,
                     updatedAt: new Date(),
                 },
             });
