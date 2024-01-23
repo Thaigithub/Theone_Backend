@@ -2,6 +2,7 @@ import { InvitationStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 class GetListInvitationResponse {
+    id: number;
     teamId: number;
     memberId: number;
     teamName: string;
