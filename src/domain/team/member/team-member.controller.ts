@@ -34,7 +34,7 @@ import { TeamMemberService } from './team-member.service';
 export class TeamMemberController {
     constructor(private teamMemberService: TeamMemberService) {}
 
-    @Patch('/invitaion/:id/status')
+    @Patch('/invitation/:id/status')
     async updateInvitationStatus(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
