@@ -512,6 +512,7 @@ export class TeamMemberService {
                 isActive: true,
             },
             select: {
+                id: true,
                 teamId: true,
                 memberId: true,
                 team: {
@@ -538,6 +539,7 @@ export class TeamMemberService {
         };
         const invitations = (await this.prismaService.teamMemberInvitation.findMany(search)).map((invitation) => {
             return {
+                id: invitation.id,
                 teamId: invitation.teamId,
                 memberId: invitation.memberId,
                 teamName: invitation.team.name,
