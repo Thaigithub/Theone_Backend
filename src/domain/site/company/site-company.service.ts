@@ -114,8 +114,8 @@ export class SiteCompanyService {
             contractStatus: site.contractStatus,
             startDate: site.startDate,
             endDate: site.endDate,
-            city: site.district.city.englishName,
-            district: site.district.englishName,
+            city: site.district.city.id,
+            district: site.district.id,
             cityKorean: site.district.city.koreanName,
             districtKorean: site.district.koreanName,
         };

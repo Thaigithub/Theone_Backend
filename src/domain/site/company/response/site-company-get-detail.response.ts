@@ -13,8 +13,8 @@ export class SiteCompanyGetDetailResponse {
     contractStatus: Site['contractStatus'];
     startDate: Site['startDate'];
     endDate: Site['endDate'];
-    city: City['englishName'];
+    city: City['id'];
     cityKorean: City['koreanName'];
-    district: District['englishName'];
+    district: District['id'];
     districtKorean: District['koreanName'];
 }
