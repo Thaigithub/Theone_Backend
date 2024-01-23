@@ -171,23 +171,20 @@ export class HeadhuntingCompanyService {
             } else {
                 const district = item.team.district;
                 delete item.team.district;
-                const { specialLicenses, ...restLeader } = item.team.leader;
                 const { leader, ...restTeam } = item.team;
+                const { specialLicenses, ...restLeader } = leader;
                 return {
                     member: null,
                     team: {
                         ...restTeam,
                         leader: {
-                            ...leader,
-                            specialLicenses: {
-                                ...restLeader,
-                                specialLicenses: specialLicenses.map((item) => {
-                                    return {
-                                        name: item.code.codeName,
-                                        licenseNumber: item.licenseNumber,
-                                    };
-                                }),
-                            },
+                            ...restLeader,
+                            specialLicenses: specialLicenses.map((item) => {
+                                return {
+                                    name: item.code.codeName,
+                                    licenseNumber: item.licenseNumber,
+                                };
+                            }),
                         },
                         city: {
                             englishName: district?.city.englishName || null,
