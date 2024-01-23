@@ -254,6 +254,14 @@ export class PostMemberService {
             },
         });
 
+        await this.prismaService.post.update({
+            where: {
+                id,
+            },
+            data: {
+                view: post.view + 1,
+            },
+        });
         return {
             postInformation: {
                 name: post.name,
