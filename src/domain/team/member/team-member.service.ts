@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvitationStatus, Prisma, TeamStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -579,7 +579,7 @@ export class TeamMemberService {
             },
         });
         if (!teamInvitation) throw new NotFoundException(`The invitation is not exist`);
-        if (teamInvitation.invitationStatus === InvitationStatus.REQUESTED)
+        if (teamInvitation.invitationStatus !== InvitationStatus.REQUESTED)
             throw new ConflictException(`The invitation had been accept or reject`);
         if (body.status === InvitationStatus.DECLIENED) {
             await this.prismaService.teamMemberInvitation.update({
@@ -605,19 +605,7 @@ export class TeamMemberService {
                         isActive: true,
                     },
                 });
-                if (memberOnTeam && memberOnTeam.isActive) {
-                    await prisma.teamMemberInvitation.update({
-                        where: {
-                            id: inviteId,
-                            isActive: true,
-                        },
-                        data: {
-                            invitationStatus: InvitationStatus.ACCEPTED,
-                            updatedAt: new Date(),
-                        },
-                    });
-                    throw new HttpException(`The invitation had been accept`, HttpStatus.ACCEPTED);
-                } else if (memberOnTeam && !memberOnTeam.isActive) {
+                if (memberOnTeam && !memberOnTeam.isActive) {
                     await prisma.membersOnTeams.updateMany({
                         where: {
                             member: {
@@ -639,7 +627,7 @@ export class TeamMemberService {
                             totalMembers: teamInvitation.team.totalMembers + 1,
                         },
                     });
-                } else {
+                } else if (!memberOnTeam) {
                     await prisma.membersOnTeams.create({
                         data: {
                             member: {
