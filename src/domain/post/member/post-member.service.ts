@@ -128,9 +128,14 @@ export class PostMemberService {
                     },
                 },
                 where: await this.parseConditionFromQuery(query, siteId),
-                orderBy: {
-                    createdAt: 'desc',
-                },
+                orderBy: [
+                    {
+                        isPulledUp: 'desc',
+                    },
+                    {
+                        createdAt: 'desc',
+                    },
+                ],
                 ...QueryPagingHelper.queryPaging(query),
             })
         ).map((item) => {
@@ -479,6 +484,14 @@ export class PostMemberService {
                     },
                 },
             },
+            orderBy: [
+                {
+                    isPulledUp: Prisma.SortOrder.desc,
+                },
+                {
+                    createdAt: Prisma.SortOrder.desc,
+                },
+            ],
         };
         const posts = (await this.prismaService.post.findMany(search)).map((item) => {
             return {

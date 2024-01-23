@@ -1,5 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CodeType, PaymentStatus, Post, PostCategory, PostType, Prisma, ProductType, RequestStatus } from '@prisma/client';
+import {
+    CodeType,
+    PaymentStatus,
+    Post,
+    PostCategory,
+    PostStatus,
+    PostType,
+    Prisma,
+    ProductType,
+    RequestStatus,
+} from '@prisma/client';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -43,6 +53,12 @@ export class PostCompanyService {
         return post;
     }
 
+    private getStatus(startDate: Date, endDate: Date): PostStatus {
+        if (new Date() >= startDate && new Date() <= endDate) return PostStatus.RECRUITING;
+        else if (new Date() <= startDate) return PostStatus.PREPARE;
+        else if (new Date() >= endDate) return PostStatus.DEADLINE;
+    }
+
     async getList(accountId: number, query: PostCompanyGetListRequest): Promise<PostCompanyGetListResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
@@ -69,10 +85,11 @@ export class PostCompanyService {
                 type: true,
                 status: true,
                 applicants: true,
+                isPulledUp: true,
             },
             where: queryFilter,
             orderBy: {
-                createdAt: 'desc',
+                updatedAt: 'desc',
             },
             // Pagination
             // If both pageNumber and pageSize is provided then handle the pagination
@@ -130,7 +147,7 @@ export class PostCompanyService {
         await this.prismaService.post.create({
             data: {
                 category: request.category,
-                status: request.status,
+                status: this.getStatus(new Date(request.startDate), new Date(request.endDate)),
                 name: request.name,
                 startDate: new Date(request.startDate),
                 endDate: new Date(request.endDate),
@@ -227,7 +244,7 @@ export class PostCompanyService {
             },
             data: {
                 category: request.category,
-                status: request.status,
+                status: this.getStatus(new Date(request.startDate), new Date(request.endDate)),
                 name: request.name,
                 startDate: new Date(request.startDate),
                 endDate: new Date(request.endDate),
@@ -523,8 +540,8 @@ export class PostCompanyService {
 
     async updatePullUpStatus(postId: number, accountId: number, body: PostCompanyUpdatePullUpStatusRequest): Promise<void> {
         const post = await this.checkPostExist(postId, accountId);
+        if (post.isPulledUp) throw new BadRequestException('Post is already pulled up');
         const availablePullUp = await this.checkPullUpAvailability(postId, accountId);
-
         if (availablePullUp.pullUpAvailableStatus !== PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE) {
             if (post.freePullUp) {
                 await this.prismaService.post.update({
@@ -567,7 +584,6 @@ export class PostCompanyService {
             }
         } else throw new BadRequestException("You don't have free pull up or any PULL_UP produdct");
 
-        if (post.isPulledUp) throw new BadRequestException('Post is already pulled up');
         await this.prismaService.post.update({
             data: {
                 isPulledUp: body.pullUpStatus,

@@ -153,9 +153,12 @@ export class CareerMemberService {
             },
         });
         if (!occupation) throw new NotFoundException('Occupation not found');
+        const { startDate, endDate, ...restBody } = body;
         await this.prismaService.career.update({
             data: {
-                ...body,
+                ...restBody,
+                startDate: new Date(startDate),
+                endDate: new Date(endDate),
                 experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
                 experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
                 occupationId: occupation.id,
