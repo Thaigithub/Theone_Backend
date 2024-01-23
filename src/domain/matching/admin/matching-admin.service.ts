@@ -43,6 +43,7 @@ export class MatchingAdminService {
                 company: {
                     select: {
                         name: true,
+                        id: true,
                     },
                 },
                 site: {
@@ -74,6 +75,7 @@ export class MatchingAdminService {
         const listResponse = list.map((item) => {
             const res: MatchingAdminGetItemResponse = {
                 companyName: item.company.name,
+                companyId: item.company.id,
                 siteName: item.site?.name || null,
                 postName: item.name,
                 startDate: item.startDate,

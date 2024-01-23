@@ -264,6 +264,7 @@ export class PostMemberService {
         });
         return {
             postInformation: {
+                status: post.status,
                 name: post.name,
                 startDate: post.startDate.toISOString().split('T')[0],
                 endDate: post.endDate.toISOString().split('T')[0],

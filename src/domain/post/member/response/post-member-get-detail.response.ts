@@ -2,6 +2,7 @@ import { Code, Company, File, Post, Site } from '@prisma/client';
 
 export class PostMemberGetDetailResponse {
     postInformation: {
+        status: Post['status'];
         name: Post['name'];
         startDate: string;
         endDate: string;
