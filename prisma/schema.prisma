@@ -320,6 +320,7 @@ model File {
   disability                   Disability?
   questionInquiry              Inquiry?                      @relation("question_file")
   answerInquiry                Inquiry?                      @relation("answer_file")
+  faqFile                      FaqFile?
 
   @@map("files")
 }
@@ -1150,6 +1151,31 @@ model Memo {
   note      String?
 }
 
+model Faq {
+  id           Int          @id @default(autoincrement())
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  inquirerType InquirerType @map("inquirer_type")
+  category     FaqCategory
+  question     String
+  answer       String
+  writer       String
+  faqFiles     FaqFile[]
+
+  @@map("faqs")
+}
+
+model FaqFile {
+  id     Int  @id @default(autoincrement())
+  faqId  Int  @map("faq_id")
+  fileId Int  @unique
+  faq    Faq  @relation(fields: [faqId], references: [id])
+  file   File @relation(fields: [fileId], references: [id])
+
+  @@map("faq_files")
+}
+
 enum CurrencyExchangeStatus {
   REQUESTED
   COMPLETE
@@ -1493,4 +1519,13 @@ enum InquiryType {
 enum AnswerStatus {
   WAITING
   COMPLETE
+}
+
+// TBD
+// The client has not decided yet
+enum FaqCategory {
+  CATEGORY1
+  CATEGORY2
+  CATEGORY3
+  CATEGORY4
 }

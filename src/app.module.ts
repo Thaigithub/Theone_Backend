@@ -6,6 +6,7 @@ import { CodeModule } from 'domain/code/code.module';
 import { ContractModule } from 'domain/contract/contract.module';
 import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchange.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
+import { FaqModule } from 'domain/faq/faq.module';
 import { FileModule } from 'domain/file/file.module';
 import { FilterModule } from 'domain/filter/filter.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
@@ -20,6 +21,7 @@ import { PostModule } from 'domain/post/post.module';
 import { PreferenceModule } from 'domain/preference/preference.module';
 import { ProductModule } from 'domain/product/product.module';
 import { RegionModule } from 'domain/region/region.module';
+import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
 import { TermModule } from 'domain/term/term.module';
@@ -31,7 +33,6 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
-import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
 
 @Module({
     imports: [
@@ -68,6 +69,7 @@ import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
         SalaryReportModule,
         InquiryModule,
         TermModule,
+        FaqModule,
     ],
 })
 export class AppModule {}
