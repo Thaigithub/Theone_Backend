@@ -83,7 +83,7 @@ export class PostMemberController {
     }
 
     // Get detail
-    @Get(':id')
+    @Get('/:id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
         @Req() request: BaseRequest,
@@ -92,12 +92,12 @@ export class PostMemberController {
     }
 
     // Apply
-    @Post(':id/apply/member')
+    @Post('/:id/apply/member')
     async addApplyPostMember(@Req() request: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.postMemberService.addApplyPostMember(request.user.accountId, id));
     }
 
-    @Post(':id/apply/team/:teamId')
+    @Post('/:id/apply/team/:teamId')
     async addApplyPost(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,

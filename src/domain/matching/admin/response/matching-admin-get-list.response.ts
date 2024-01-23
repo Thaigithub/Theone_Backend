@@ -1,6 +1,7 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class MatchingAdminGetItemResponse {
+    companyId: number;
     companyName: string;
     siteName: string;
     postName: string;
