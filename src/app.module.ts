@@ -35,6 +35,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { ReportModule } from 'domain/report/report.module';
 
 @Module({
     imports: [
@@ -72,6 +73,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InquiryModule,
         TermModule,
         FaqModule,
+        ReportModule,
         MemoModule,
         LaborConsultationModule,
     ],

@@ -20,6 +20,7 @@ export class MemoMemberService {
         const queryInput: Prisma.MemoWhereInput = {
             member: {
                 accountId,
+                isActive: true,
             },
             NOT: {
                 OR: [
@@ -38,6 +39,12 @@ export class MemoMemberService {
         };
         const memos = await this.prismaService.memo.findMany({
             where: queryInput,
+            select: {
+                note: true,
+                startDate: true,
+                endDate: true,
+                id: true,
+            },
         });
         return new PaginationResponse(memos, new PageInfo(memos.length));
     }
@@ -49,6 +56,7 @@ export class MemoMemberService {
                     accountId,
                 },
                 id,
+                isActive: true,
             },
         });
         if (!memo) throw new NotFoundException('Memo not found');
@@ -83,6 +91,7 @@ export class MemoMemberService {
                     accountId,
                 },
                 id,
+                isActive: true,
             },
         });
         if (!memo) throw new NotFoundException('Memo not found');
@@ -94,6 +103,27 @@ export class MemoMemberService {
                 startDate: new Date(body.startDate),
                 endDate: new Date(body.endDate),
                 note: body.note,
+            },
+        });
+    }
+
+    async delete(accountId: number, id: number): Promise<void> {
+        const memo = await this.prismaService.memo.findUnique({
+            where: {
+                member: {
+                    accountId,
+                },
+                id,
+                isActive: true,
+            },
+        });
+        if (!memo) throw new NotFoundException('Memo not found');
+        await this.prismaService.memo.update({
+            where: {
+                id,
+            },
+            data: {
+                isActive: false,
             },
         });
     }

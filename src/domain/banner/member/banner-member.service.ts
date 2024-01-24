@@ -155,6 +155,7 @@ export class BannerMemberService {
                     postName: item.post.name,
                     isInterested: accountId ? (item.post.interested.length !== 0 ? true : false) : null,
                     urlFile: await this.storageService.getSignedUrl(item.banner.file.key),
+                    urlLogo: await this.storageService.getSignedUrl(item.post.company.logo.file.key),
                 };
             }),
         );

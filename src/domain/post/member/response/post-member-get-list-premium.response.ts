@@ -10,5 +10,6 @@ class GetListPremium {
     endDate: Date;
     siteAddress: string;
     isInterested: boolean | null;
+    urlLogo: string;
 }
 export class PostMemberGetListPremiumResponse extends PaginationResponse<GetListPremium> {}

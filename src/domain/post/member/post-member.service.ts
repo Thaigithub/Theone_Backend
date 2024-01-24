@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ExperienceType, PostType, Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { StorageService } from 'services/storage/storage.service';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -15,8 +16,9 @@ import { PostMemberUpdateInterestResponse } from './response/post-member-update-
 @Injectable()
 export class PostMemberService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly regionService: RegionService,
+        private prismaService: PrismaService,
+        private regionService: RegionService,
+        private storageService: StorageService,
     ) {}
 
     protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
@@ -493,23 +495,26 @@ export class PostMemberService {
                 },
             ],
         };
-        const posts = (await this.prismaService.post.findMany(search)).map((item) => {
-            return {
-                companyLogo: {
-                    fileName: item.company.logo.file.fileName,
-                    type: item.company.logo.file.type,
-                    key: item.company.logo.file.key,
-                    size: Number(item.company.logo.file.size),
-                },
-                postName: item.name,
-                endDate: item.endDate,
-                id: item.id,
-                siteName: item.site?.name || null,
-                siteAddress: item.site?.address || null,
-                isInterested: accountId ? (item.interested.length === 0 ? false : true) : null,
-                occupationName: item.occupation?.codeName || null,
-            };
-        });
+        const posts = await Promise.all(
+            (await this.prismaService.post.findMany(search)).map(async (item) => {
+                return {
+                    companyLogo: {
+                        fileName: item.company.logo.file.fileName,
+                        type: item.company.logo.file.type,
+                        key: item.company.logo.file.key,
+                        size: Number(item.company.logo.file.size),
+                    },
+                    postName: item.name,
+                    endDate: item.endDate,
+                    id: item.id,
+                    siteName: item.site?.name || null,
+                    siteAddress: item.site?.address || null,
+                    isInterested: accountId ? (item.interested.length === 0 ? false : true) : null,
+                    occupationName: item.occupation?.codeName || null,
+                    urlLogo: await this.storageService.getSignedUrl(item.company.logo.file.key),
+                };
+            }),
+        );
         const total = await this.prismaService.post.count({ where: search.where });
         return new PaginationResponse(posts, new PageInfo(total));
     }
