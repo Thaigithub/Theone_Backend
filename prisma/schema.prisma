@@ -114,6 +114,7 @@ model Member {
   preference                   Preference?
   inquiries                    Inquiry[]
   memos                        Memo[]
+  laborConsultations           LaborConsultation[]
 
   @@map("members")
 }
@@ -146,6 +147,7 @@ model Company {
   productPaymentHistory  ProductPaymentHistory[]
   sites                  Site[]
   inquiries              Inquiry[]
+  laborConsultations     LaborConsultation[]
 
   @@map("companies")
 }
@@ -298,29 +300,31 @@ model BasicHealthSafetyCertificate {
 }
 
 model File {
-  id                           Int                           @id @default(autoincrement())
-  type                         FileType
-  key                          String?
-  fileName                     String?                       @map("file_name")
-  size                         BigInt
-  isDeactivated                Boolean                       @default(false) @map("is_deactivated")
-  createdAt                    DateTime                      @default(now()) @map("created_at")
-  updatedAt                    DateTime                      @updatedAt @map("updated_at")
-  attachment                   Attachment?
-  banner                       Banner?
-  contactCard                  ContactCard?
-  contract                     Contract?
-  foreignWorker                ForeignWorker?
-  basicHealthSafetyCertificate BasicHealthSafetyCertificate?
-  logo                         Logo?
-  specialLicense               SpecialLicense?
-  taxBill                      TaxBill?
-  cardReceipt                  CardReceipt?
-  announcementFile             AnnouncementFile?
-  disability                   Disability?
-  questionInquiry              Inquiry?                      @relation("question_file")
-  answerInquiry                Inquiry?                      @relation("answer_file")
-  faqFile                      FaqFile?
+  id                             Int                           @id @default(autoincrement())
+  type                           FileType
+  key                            String?
+  fileName                       String?                       @map("file_name")
+  size                           BigInt
+  isDeactivated                  Boolean                       @default(false) @map("is_deactivated")
+  createdAt                      DateTime                      @default(now()) @map("created_at")
+  updatedAt                      DateTime                      @updatedAt @map("updated_at")
+  attachment                     Attachment?
+  banner                         Banner?
+  contactCard                    ContactCard?
+  contract                       Contract?
+  foreignWorker                  ForeignWorker?
+  basicHealthSafetyCertificate   BasicHealthSafetyCertificate?
+  logo                           Logo?
+  specialLicense                 SpecialLicense?
+  taxBill                        TaxBill?
+  cardReceipt                    CardReceipt?
+  announcementFile               AnnouncementFile?
+  disability                     Disability?
+  questionInquiry                Inquiry?                      @relation("question_file")
+  answerInquiry                  Inquiry?                      @relation("answer_file")
+  faqFile                        FaqFile?
+  questionLaborConsultationFiles LaborConsultationFile[]       @relation("question_file")
+  answerLaborConsultationFiles   LaborConsultationFile[]       @relation("answer_file")
 
   @@map("files")
 }
@@ -1131,6 +1135,41 @@ model Inquiry {
   @@map("inquiries")
 }
 
+model LaborConsultation {
+  id                    Int                     @id @default(autoincrement())
+  isActive              Boolean                 @default(true) @map("is_active")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  answeredAt            DateTime?               @map("answered_at")
+  memberId              Int?                    @map("member_id")
+  companyId             Int?                    @map("company_id")
+  questionTitle         String                  @map("question_title")
+  questionContent       String                  @map("question_content")
+  answerTitle           String?                 @map("answer_title")
+  answerContent         String?                 @map("answer_content")
+  laborConsultationType LaborConsultationType   @map("labor_consultation_type")
+  inquirerType          InquirerType            @map("inquirer_type")
+  status                AnswerStatus            @default(WAITING)
+  member                Member?                 @relation(fields: [memberId], references: [id])
+  company               Company?                @relation(fields: [companyId], references: [id])
+  questionFiles         LaborConsultationFile[] @relation("question_labor_consultation")
+  answerFiles           LaborConsultationFile[] @relation("answer_labor_consultation")
+
+  @@map("labor_consultations")
+}
+
+model LaborConsultationFile {
+  id                          Int                @id @default(autoincrement())
+  questionFileId              Int?               @map("question_file_id")
+  answerFileId                Int?               @map("answer_file_id")
+  questionLaborConsultationId Int?               @map("question_labor_consultation_id")
+  answerLaborConsultationId   Int?               @map("answer_labor_consultation_id")
+  questionLaborConsultation   LaborConsultation? @relation("question_labor_consultation", fields: [questionLaborConsultationId], references: [id])
+  answerLaborConsultation     LaborConsultation? @relation("answer_labor_consultation", fields: [answerLaborConsultationId], references: [id])
+  questionFile                File?              @relation("question_file", fields: [questionFileId], references: [id])
+  answerFile                  File?              @relation("answer_file", fields: [answerFileId], references: [id])
+}
+
 model Term {
   id        Int      @id @default(autoincrement())
   isActive  Boolean  @default(true) @map("is_active")
@@ -1515,6 +1554,15 @@ enum InquiryType {
   CONTRACT
   LABOR
   WAGE
+  OTHERS
+}
+
+enum LaborConsultationType {
+  CONTRACT
+  LABOR
+  WAGE
+  FOUR_MAJOR_INSURANCES
+  SEVERANCE_PAY
   OTHERS
 }
 

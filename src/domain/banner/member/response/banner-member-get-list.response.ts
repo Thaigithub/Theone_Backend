@@ -6,6 +6,7 @@ export class BannerMemberGetListResponse {
         title: string;
         urlLink: string;
         logoFile: FileResponse;
+        urlFile: string;
     }[];
     post: {
         file: FileResponse;
@@ -16,5 +17,6 @@ export class BannerMemberGetListResponse {
         endDate: Date;
         siteAddress: string;
         isInterested: boolean;
+        urlFile: string;
     }[];
 }

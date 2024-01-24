@@ -13,6 +13,7 @@ import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InquiryModule } from 'domain/inquiry/inquiry.module';
 import { InterestModule } from 'domain/interest/interest.module';
 import { InterviewModule } from 'domain/interview/interview.module';
+import { LaborConsultationModule } from 'domain/labor-consultation/labor-consultation.module';
 import { LaborModule } from 'domain/labor/labor.module';
 import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
@@ -72,6 +73,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         TermModule,
         FaqModule,
         MemoModule,
+        LaborConsultationModule,
     ],
 })
 export class AppModule {}
