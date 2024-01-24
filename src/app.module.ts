@@ -35,6 +35,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { CrobJobModule } from 'services/crobjob/cronjob.module';
 import { ReportModule } from 'domain/report/report.module';
 
 @Module({
@@ -75,6 +76,7 @@ import { ReportModule } from 'domain/report/report.module';
         FaqModule,
         ReportModule,
         MemoModule,
+        CrobJobModule,
         LaborConsultationModule,
     ],
 })
