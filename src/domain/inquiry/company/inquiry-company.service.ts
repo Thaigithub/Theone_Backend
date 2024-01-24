@@ -23,7 +23,11 @@ export class InquiryCompanyService {
 
         const search = {
             include: {
-                questionFile: true,
+                questionFiles: {
+                    include: {
+                        questionFile: true,
+                    },
+                },
             },
             where: queryFilter,
             orderBy: {
@@ -38,13 +42,13 @@ export class InquiryCompanyService {
                 title: item.questionTitle,
                 status: item.status,
                 createdAt: item.createdAt,
-                ...(item.questionFile && {
-                    file: {
-                        fileName: item.questionFile.fileName,
-                        type: item.questionFile.type,
-                        key: item.questionFile.key,
-                        size: Number(item.questionFile.size),
-                    },
+                files: item.questionFiles.map((fileItem) => {
+                    return {
+                        fileName: fileItem.questionFile.fileName,
+                        type: fileItem.questionFile.type,
+                        key: fileItem.questionFile.key,
+                        size: Number(fileItem.questionFile.size),
+                    };
                 }),
             };
         });
@@ -54,23 +58,42 @@ export class InquiryCompanyService {
     }
 
     async create(accountId: number, body: InquiryCompanyCreateRequest): Promise<void> {
-        await this.prismaService.inquiry.create({
-            data: {
-                company: {
-                    connect: {
-                        accountId,
+        await this.prismaService.$transaction(async (tx) => {
+            const files = await Promise.all(
+                body.files.map(async (item) => {
+                    return (
+                        await tx.file.create({
+                            data: item,
+                            select: {
+                                id: true,
+                            },
+                        })
+                    ).id;
+                }),
+            );
+
+            await tx.inquiry.create({
+                data: {
+                    company: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                    questionTitle: body.title,
+                    questionContent: body.content,
+                    inquiryType: body.type,
+                    inquirerType: InquirerType.COMPANY,
+                    questionFiles: {
+                        createMany: {
+                            data: files.map((item) => {
+                                return {
+                                    questionFileId: item,
+                                };
+                            }),
+                        },
                     },
                 },
-                questionTitle: body.title,
-                questionContent: body.content,
-                inquiryType: body.type,
-                inquirerType: InquirerType.COMPANY,
-                questionFile: body.file
-                    ? {
-                          create: body.file,
-                      }
-                    : undefined,
-            },
+            });
         });
     }
 
@@ -84,14 +107,14 @@ export class InquiryCompanyService {
                 },
             },
             include: {
-                questionFile: {
-                    where: {
-                        isDeactivated: false,
+                questionFiles: {
+                    include: {
+                        questionFile: true,
                     },
                 },
-                answerFile: {
-                    where: {
-                        isDeactivated: false,
+                answerFiles: {
+                    include: {
+                        answerFile: true,
                     },
                 },
             },
@@ -106,25 +129,25 @@ export class InquiryCompanyService {
             status: inquiry.status,
             questionTitle: inquiry.questionTitle,
             questionContent: inquiry.questionContent,
-            questionFile: inquiry.questionFile
-                ? {
-                      fileName: inquiry.questionFile.fileName,
-                      type: inquiry.questionFile.type,
-                      key: inquiry.questionFile.key,
-                      size: Number(inquiry.questionFile.size),
-                  }
-                : null,
+            questionFiles: inquiry.questionFiles.map((item) => {
+                return {
+                    fileName: item.questionFile.fileName,
+                    type: item.questionFile.type,
+                    key: item.questionFile.key,
+                    size: Number(item.questionFile.size),
+                };
+            }),
             asnweredAt: inquiry.answeredAt,
             answerTitle: inquiry.answerTitle,
             answerContent: inquiry.answerContent,
-            answerFile: inquiry.answerFile
-                ? {
-                      fileName: inquiry.answerFile.fileName,
-                      type: inquiry.answerFile.type,
-                      key: inquiry.answerFile.key,
-                      size: Number(inquiry.answerFile.size),
-                  }
-                : null,
+            answerFiles: inquiry.answerFiles.map((item) => {
+                return {
+                    fileName: item.answerFile.fileName,
+                    type: item.answerFile.type,
+                    key: item.answerFile.key,
+                    size: Number(item.answerFile.size),
+                };
+            }),
         };
     }
 }

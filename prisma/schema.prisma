@@ -321,8 +321,8 @@ model File {
   cardReceipt                    CardReceipt?
   announcementFile               AnnouncementFile?
   disability                     Disability?
-  questionInquiry                Inquiry?                      @relation("question_file")
-  answerInquiry                  Inquiry?                      @relation("answer_file")
+  questionInquiryFiles           InquiryFile[]                 @relation("question_file")
+  answerInquiryFiles             InquiryFile[]                 @relation("answer_file")
   faqFile                        FaqFile?
   questionReport                 Report?                       @relation("question_file")
   answerReport                   Report?                       @relation("answer_file")
@@ -1114,28 +1114,38 @@ model SalaryReport {
 }
 
 model Inquiry {
-  id              Int          @id @default(autoincrement())
-  isActive        Boolean      @default(true) @map("is_active")
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @updatedAt @map("updated_at")
-  answeredAt      DateTime?    @map("answered_at")
-  memberId        Int?         @map("member_id")
-  companyId       Int?         @map("company_id")
-  questionTitle   String       @map("question_title")
-  questionContent String       @map("question_content")
-  questionFileId  Int?         @unique @map("question_file_id")
-  answerTitle     String?      @map("answer_title")
-  answerContent   String?      @map("answer_content")
-  answerFileId    Int?         @unique @map("answer_file_id")
-  inquiryType     InquiryType  @map("inquiry_type")
-  inquirerType    InquirerType @map("inquirer_type")
-  status          AnswerStatus @default(WAITING)
-  member          Member?      @relation(fields: [memberId], references: [id])
-  company         Company?     @relation(fields: [companyId], references: [id])
-  questionFile    File?        @relation("question_file", fields: [questionFileId], references: [id])
-  answerFile      File?        @relation("answer_file", fields: [answerFileId], references: [id])
+  id              Int           @id @default(autoincrement())
+  isActive        Boolean       @default(true) @map("is_active")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  answeredAt      DateTime?     @map("answered_at")
+  memberId        Int?          @map("member_id")
+  companyId       Int?          @map("company_id")
+  questionTitle   String        @map("question_title")
+  questionContent String        @map("question_content")
+  answerTitle     String?       @map("answer_title")
+  answerContent   String?       @map("answer_content")
+  inquiryType     InquiryType   @map("inquiry_type")
+  inquirerType    InquirerType  @map("inquirer_type")
+  status          AnswerStatus  @default(WAITING)
+  member          Member?       @relation(fields: [memberId], references: [id])
+  company         Company?      @relation(fields: [companyId], references: [id])
+  questionFiles   InquiryFile[] @relation("question_inquiry")
+  answerFiles     InquiryFile[] @relation("answer_inquiry")
 
   @@map("inquiries")
+}
+
+model InquiryFile {
+  id                Int      @id @default(autoincrement())
+  questionFileId    Int?     @map("question_file_id")
+  answerFileId      Int?     @map("answer_file_id")
+  questionInquiryId Int?     @map("question_inquiry_id")
+  answerInquiryId   Int?     @map("answer_inquiry_id")
+  questionInquiry   Inquiry? @relation("question_inquiry", fields: [questionInquiryId], references: [id])
+  answerInquiry     Inquiry? @relation("answer_inquiry", fields: [answerInquiryId], references: [id])
+  questionFile      File?    @relation("question_file", fields: [questionFileId], references: [id])
+  answerFile        File?    @relation("answer_file", fields: [answerFileId], references: [id])
 }
 
 model Report {

@@ -1,6 +1,6 @@
 import { InquiryType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class InquiryCompanyCreateRequest {
@@ -21,7 +21,6 @@ export class InquiryCompanyCreateRequest {
     type: InquiryType;
 
     @Expose()
-    @IsNotEmptyObject()
-    @IsOptional()
-    file: FileRequest;
+    @IsArray()
+    files: FileRequest[];
 }
