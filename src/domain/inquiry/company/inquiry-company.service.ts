@@ -3,7 +3,6 @@ import { InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { InquiryCompanyGetListSearchCategory } from './enum/inquiry-company-get-list-search-category.enum';
 import { InquiryCompanyCreateRequest } from './request/inquiry-company-create.request';
 import { InquiryCompanyGetListRequest } from './request/inquiry-company-get-list.request';
 import { InquiryCompanyGetDetailResponse } from './response/inquiry-company-get-detail.response';
@@ -19,19 +18,13 @@ export class InquiryCompanyService {
             company: {
                 accountId,
             },
-            ...(query.searchCategory === InquiryCompanyGetListSearchCategory.TITLE && {
-                questionTitle: { contains: query.keyword, mode: 'insensitive' },
-            }),
+            ...(query.keyword && { questionTitle: { contains: query.keyword, mode: 'insensitive' } }),
         };
 
         const search = {
-            select: {
-                id: true,
-                questionTitle: true,
-                status: true,
-                createdAt: true,
+            include: {
+                questionFile: true,
             },
-
             where: queryFilter,
             orderBy: {
                 createdAt: Prisma.SortOrder.desc,
@@ -40,10 +33,19 @@ export class InquiryCompanyService {
         };
 
         const inquiries = (await this.prismaService.inquiry.findMany(search)).map((item) => {
-            const { questionTitle, ...rest } = item;
             return {
-                ...rest,
-                title: questionTitle,
+                id: item.id,
+                title: item.questionTitle,
+                status: item.status,
+                createdAt: item.createdAt,
+                ...(item.questionFile && {
+                    file: {
+                        fileName: item.questionFile.fileName,
+                        type: item.questionFile.type,
+                        key: item.questionFile.key,
+                        size: Number(item.questionFile.size),
+                    },
+                }),
             };
         });
         const total = await this.prismaService.inquiry.count({ where: search.where });
