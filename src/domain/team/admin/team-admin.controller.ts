@@ -23,17 +23,17 @@ export class TeamAdminController {
         return BaseResponse.of(await this.teamAdminService.downloadDetail(teamId, response, memberIds));
     }
 
-    @Get('/:id')
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.teamAdminService.getDetail(id));
-    }
-
     @Get('/download')
     async download(
         @Query('teamIds', ParseArrayPipe) query: string[] | string,
         @Res() response: Response,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.teamAdminService.download(query, response));
+    }
+
+    @Get('/:id')
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamAdminGetDetailResponse>> {
+        return BaseResponse.of(await this.teamAdminService.getDetail(id));
     }
 
     @Get()

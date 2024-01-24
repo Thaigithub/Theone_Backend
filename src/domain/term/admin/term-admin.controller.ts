@@ -36,7 +36,7 @@ export class TermAdminController {
         return BaseResponse.of(await this.termAdminService.getDetail(id));
     }
 
-    @Put('/:id/')
+    @Put('/:id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() body: TermAdminUpdateRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.termAdminService.update(id, body));
     }
