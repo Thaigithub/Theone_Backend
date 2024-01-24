@@ -1,10 +1,8 @@
+import { AnswerStatus, InquirerType, InquiryType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { InquiryAdminGetListInquirerType } from '../enum/inquiry-admin-get-list-inquirer-type.enum';
-import { InquiryAdminGetListInquiryType } from '../enum/inquiry-admin-get-list-inquiry-type.enum';
 import { InquiryAdminGetListSearchCategory } from '../enum/inquiry-admin-get-list-search-category.enum';
-import { InquiryAdminGetListStatus } from '../enum/inquiry-admin-get-list-status.enum';
 
 export class InquiryAdminGetListRequest extends PaginationRequest {
     @Expose()
@@ -24,19 +22,19 @@ export class InquiryAdminGetListRequest extends PaginationRequest {
     endDate: string;
 
     @Expose()
-    @IsEnum(InquiryAdminGetListInquirerType)
+    @IsEnum(InquirerType)
     @IsOptional()
-    inquirerType: InquiryAdminGetListInquirerType;
+    inquirerType: InquirerType;
 
     @Expose()
-    @IsEnum(InquiryAdminGetListStatus)
+    @IsEnum(AnswerStatus)
     @IsOptional()
-    status: InquiryAdminGetListStatus;
+    status: AnswerStatus;
 
     @Expose()
-    @IsEnum(InquiryAdminGetListInquiryType)
+    @IsEnum(InquiryType)
     @IsOptional()
-    inquiryType: InquiryAdminGetListInquiryType;
+    inquiryType: InquiryType;
 
     @Expose()
     @IsEnum(InquiryAdminGetListSearchCategory)

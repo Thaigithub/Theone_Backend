@@ -95,6 +95,7 @@ export class InquiryMemberService {
             id: inquiry.id,
             createdAt: inquiry.createdAt,
             inquiryType: inquiry.inquiryType,
+            status: inquiry.status,
             questionTitle: inquiry.questionTitle,
             questionContent: inquiry.questionContent,
             questionFile: inquiry.questionFile

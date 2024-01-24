@@ -11,6 +11,8 @@ export class InquiryAdminGetDetailResponse {
     id: Inquiry['id'];
     createdAt: Inquiry['createdAt'];
     inquirer: Inquirer;
+    inquiryType: Inquiry['inquiryType'];
+
     status: Inquiry['status'];
     questionTitle: Inquiry['questionTitle'];
     questionContent: Inquiry['questionContent'];
