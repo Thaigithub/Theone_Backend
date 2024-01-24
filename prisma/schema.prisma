@@ -1149,6 +1149,8 @@ model Memo {
   startDate DateTime @map("start_date") @db.Date
   endDate   DateTime @map("end_date") @db.Date
   note      String?
+
+  @@map("memos")
 }
 
 model Faq {
