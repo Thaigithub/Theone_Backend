@@ -18,5 +18,6 @@ export class BannerMemberGetListResponse {
         siteAddress: string;
         isInterested: boolean;
         urlFile: string;
+        urlLogo: string;
     }[];
 }
