@@ -18,9 +18,9 @@ export class MemoMemberService {
         endDate.setMonth(endDate.getMonth() + 1);
         endDate.setDate(endDate.getDate() + 7);
         const queryInput: Prisma.MemoWhereInput = {
+            isActive: true,
             member: {
                 accountId,
-                isActive: true,
             },
             NOT: {
                 OR: [
