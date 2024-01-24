@@ -108,7 +108,7 @@ export class AccountMemberService {
                         name: request.name,
                         level: MemberLevel.THIRD,
                         signupMethod: SignupMethodType.GENERAL,
-                        memberPreference: {
+                        preference: {
                             create: {},
                         },
                     },
@@ -169,7 +169,7 @@ export class AccountMemberService {
                         name: payload.name,
                         level: MemberLevel.THIRD,
                         signupMethod: request.signupMethod,
-                        memberPreference: {
+                        preference: {
                             create: {},
                         },
                     },

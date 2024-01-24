@@ -111,7 +111,7 @@ model Member {
   specialLicenses              SpecialLicense[]
   teamMemberInvitation         TeamMemberInvitation[]
   leader                       Team[]
-  memberPreference             MemberPreference?
+  preference                   Preference?
   inquiries                    Inquiry[]
   memos                        Memo[]
 
@@ -1077,7 +1077,7 @@ model MembersOnCodes {
   @@map("members_on_codes")
 }
 
-model MemberPreference {
+model Preference {
   id                                     Int      @id @default(autoincrement())
   memberId                               Int      @unique @map("member_id")
   isActive                               Boolean  @default(true) @map("is_active")
@@ -1092,7 +1092,7 @@ model MemberPreference {
   isMemberLocationSearchedBySitesAllowed Boolean  @default(false) @map("is_member_location_searched_by_sites_allowed")
   member                                 Member   @relation(fields: [memberId], references: [id])
 
-  @@map("member_preferences")
+  @@map("preferences")
 }
 
 model SalaryReport {

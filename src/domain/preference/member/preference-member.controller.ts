@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -19,7 +19,7 @@ export class PreferenceMemberController {
         return BaseResponse.of(await this.preferenceMemberService.getDetail(request.user.accountId));
     }
 
-    @Put()
+    @Patch()
     async update(@Req() request: BaseRequest, @Body() body: PreferenceMemberUpdateRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.preferenceMemberService.update(request.user.accountId, body));
     }
