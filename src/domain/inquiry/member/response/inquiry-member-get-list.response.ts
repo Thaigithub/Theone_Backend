@@ -7,7 +7,7 @@ class InquiryResponse {
     title: Inquiry['questionTitle'];
     status: Inquiry['status'];
     createdAt: Inquiry['createdAt'];
-    file: FileResponse;
+    files: FileResponse[];
 }
 
 export class InquiryMemberGetListResponse extends PaginationResponse<InquiryResponse> {}

@@ -105,14 +105,14 @@ export class InquiryAdminService {
                 isActive: true,
             },
             include: {
-                questionFile: {
-                    where: {
-                        isDeactivated: false,
+                questionFiles: {
+                    include: {
+                        questionFile: true,
                     },
                 },
-                answerFile: {
-                    where: {
-                        isDeactivated: false,
+                answerFiles: {
+                    include: {
+                        answerFile: true,
                     },
                 },
                 member: {
@@ -151,25 +151,25 @@ export class InquiryAdminService {
                       },
             questionTitle: inquiry.questionTitle,
             questionContent: inquiry.questionContent,
-            questionFile: inquiry.questionFile
-                ? {
-                      fileName: inquiry.questionFile.fileName,
-                      type: inquiry.questionFile.type,
-                      key: inquiry.questionFile.key,
-                      size: Number(inquiry.questionFile.size),
-                  }
-                : null,
+            questionFiles: inquiry.questionFiles.map((item) => {
+                return {
+                    fileName: item.questionFile.fileName,
+                    type: item.questionFile.type,
+                    key: item.questionFile.key,
+                    size: Number(item.questionFile.size),
+                };
+            }),
             asnweredAt: inquiry.answeredAt,
             answerTitle: inquiry.answerTitle,
             answerContent: inquiry.answerContent,
-            answerFile: inquiry.answerFile
-                ? {
-                      fileName: inquiry.answerFile.fileName,
-                      type: inquiry.answerFile.type,
-                      key: inquiry.answerFile.key,
-                      size: Number(inquiry.answerFile.size),
-                  }
-                : null,
+            answerFiles: inquiry.answerFiles.map((item) => {
+                return {
+                    fileName: item.answerFile.fileName,
+                    type: item.answerFile.type,
+                    key: item.answerFile.key,
+                    size: Number(item.answerFile.size),
+                };
+            }),
         };
     }
 
@@ -184,15 +184,37 @@ export class InquiryAdminService {
         if (!inquiry) throw new NotFoundException('Inquiry does not exist');
 
         await this.prismaService.$transaction(async (tx) => {
-            if (inquiry.answerFileId)
-                await tx.file.update({
-                    where: {
-                        id: inquiry.answerFileId,
+            await tx.file.updateMany({
+                where: {
+                    answerLaborConsultationFiles: {
+                        some: {
+                            answerLaborConsultationId: id,
+                        },
                     },
-                    data: {
-                        isDeactivated: true,
-                    },
-                });
+                },
+                data: {
+                    isDeactivated: true,
+                },
+            });
+
+            await tx.inquiryFile.deleteMany({
+                where: {
+                    answerInquiryId: inquiry.id,
+                },
+            });
+
+            const files = await Promise.all(
+                body.files.map(async (item) => {
+                    return (
+                        await tx.file.create({
+                            data: item,
+                            select: {
+                                id: true,
+                            },
+                        })
+                    ).id;
+                }),
+            );
 
             await tx.inquiry.update({
                 where: {
@@ -201,8 +223,14 @@ export class InquiryAdminService {
                 data: {
                     answerTitle: body.title,
                     answerContent: body.content,
-                    answerFile: {
-                        create: body.file,
+                    answerFiles: {
+                        createMany: {
+                            data: files.map((item) => {
+                                return {
+                                    answerFileId: item,
+                                };
+                            }),
+                        },
                     },
                     answeredAt: new Date().toISOString(),
                     status: AnswerStatus.COMPLETE,

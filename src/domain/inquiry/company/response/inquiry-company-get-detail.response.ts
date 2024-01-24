@@ -8,9 +8,9 @@ export class InquiryCompanyGetDetailResponse {
     status: Inquiry['status'];
     questionTitle: Inquiry['questionTitle'];
     questionContent: Inquiry['questionContent'];
-    questionFile: FileResponse;
+    questionFiles: FileResponse[];
     asnweredAt: Inquiry['answeredAt'];
     answerTitle: Inquiry['answerTitle'];
     answerContent: Inquiry['answerContent'];
-    answerFile: FileResponse;
+    answerFiles: FileResponse[];
 }
