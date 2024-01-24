@@ -12,8 +12,8 @@ export class MemoMemberService {
     constructor(private prismaService: PrismaService) {}
 
     async getList(accountId: number, query: MemoMemberGetListRequest): Promise<MemoMemberGetListResponse> {
-        const startDate = new Date(parseInt(query.month.split('-')[0]), parseInt(query.month.split('-')[1]), 1);
-        const endDate = new Date(parseInt(query.month.split('-')[0]), parseInt(query.month.split('-')[1]), 1);
+        const startDate = new Date(query.month.concat('-01'));
+        const endDate = new Date(startDate);
         endDate.setMonth(endDate.getMonth() + 1);
         const queryInput: Prisma.MemoWhereInput = {
             member: {

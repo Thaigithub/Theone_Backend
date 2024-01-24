@@ -159,7 +159,7 @@ export class AccountMemberService {
         if (request.signupMethod === SignupMethodType.GENERAL) throw new BadRequestException('Wrong signupMethod');
         await this.prismaService.account.create({
             data: {
-                username: await hash(payload.email, 10),
+                username: payload.email,
                 password: await hash(payload.email, 10),
                 type: AccountType.MEMBER,
                 status: AccountStatus.APPROVED,
