@@ -14,13 +14,9 @@ export class InquiryMemberService {
 
     async getList(accountId: number, query: InquiryMemberGetListRequest): Promise<InquiryMemberGetListResponse> {
         const search = {
-            select: {
-                id: true,
-                questionTitle: true,
-                status: true,
-                createdAt: true,
+            include: {
+                questionFile: true,
             },
-
             where: {
                 isActive: true,
                 member: {
@@ -34,10 +30,19 @@ export class InquiryMemberService {
         };
 
         const inquiries = (await this.prismaService.inquiry.findMany(search)).map((item) => {
-            const { questionTitle, ...rest } = item;
             return {
-                ...rest,
-                title: questionTitle,
+                id: item.id,
+                title: item.questionTitle,
+                status: item.status,
+                createdAt: item.createdAt,
+                ...(item.questionFile && {
+                    file: {
+                        fileName: item.questionFile.fileName,
+                        type: item.questionFile.type,
+                        key: item.questionFile.key,
+                        size: Number(item.questionFile.size),
+                    },
+                }),
             };
         });
         const total = await this.prismaService.inquiry.count({ where: search.where });
