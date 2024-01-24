@@ -1,12 +1,12 @@
-import { MemberPreference } from '@prisma/client';
+import { Preference } from '@prisma/client';
 
 export class PreferenceMemberGetDetailResponse {
-    id: MemberPreference['id'];
-    isPushNotificationActive: MemberPreference['isPushNotificationActive'];
-    isNotificationSoundActive: MemberPreference['isNotificationSoundActive'];
-    isNoticeNotificationActive: MemberPreference['isNoticeNotificationActive'];
-    isServiceNotificationActive: MemberPreference['isServiceNotificationActive'];
-    isTeamNotificationActive: MemberPreference['isTeamNotificationActive'];
-    isSearchByMemberLocationAllowed: MemberPreference['isSearchByMemberLocationAllowed'];
-    isMemberLocationSearchedBySitesAllowed: MemberPreference['isMemberLocationSearchedBySitesAllowed'];
+    id: Preference['id'];
+    isPushNotificationActive: Preference['isPushNotificationActive'];
+    isNotificationSoundActive: Preference['isNotificationSoundActive'];
+    isNoticeNotificationActive: Preference['isNoticeNotificationActive'];
+    isServiceNotificationActive: Preference['isServiceNotificationActive'];
+    isTeamNotificationActive: Preference['isTeamNotificationActive'];
+    isSearchByMemberLocationAllowed: Preference['isSearchByMemberLocationAllowed'];
+    isMemberLocationSearchedBySitesAllowed: Preference['isMemberLocationSearchedBySitesAllowed'];
 }

@@ -8,7 +8,7 @@ export class PreferenceMemberService {
     constructor(private readonly prismaService: PrismaService) {}
 
     async getDetail(accountId: number): Promise<PreferenceMemberGetDetailResponse> {
-        const preference = await this.prismaService.memberPreference.findFirst({
+        const preference = await this.prismaService.preference.findFirst({
             select: {
                 id: true,
                 isPushNotificationActive: true,
@@ -42,7 +42,7 @@ export class PreferenceMemberService {
     }
 
     async update(accountId: number, body: PreferenceMemberUpdateRequest): Promise<void> {
-        await this.prismaService.memberPreference.updateMany({
+        await this.prismaService.preference.updateMany({
             where: {
                 member: {
                     accountId,
