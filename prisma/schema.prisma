@@ -496,21 +496,20 @@ model Site {
   createdAt                 DateTime                    @default(now()) @map("created_at")
   updatedAt                 DateTime                    @updatedAt @map("updated_at")
   status                    SiteStatus                  @default(REVIEWING)
-  type                      SiteType                    @default(REGISTERED)
-  name                      String?
-  address                   String?
-  longitude                 Float?
-  latitude                  Float?
-  contact                   String?
-  personInCharge            String?                     @map("person_in_charge")
-  personInChargeContact     String?                     @map("person_in_charge_contact")
-  originalBuilding          String?                     @map("original_building")
-  email                     String?
-  taxInvoiceEmail           String?                     @map("tax_invoice_email")
-  siteManagementNumber      String?                     @map("site_management_number")
+  name                      String
+  address                   String
+  longitude                 Float
+  latitude                  Float
+  contact                   String
+  personInCharge            String                      @map("person_in_charge")
+  personInChargeContact     String                      @map("person_in_charge_contact")
+  originalBuilding          String                      @map("original_building")
+  email                     String
+  taxInvoiceEmail           String                      @map("tax_invoice_email")
+  siteManagementNumber      String                      @map("site_management_number")
   contractStatus            ContractStatus?             @map("contract_status")
-  startDate                 DateTime?                   @map("start_date") @db.Date
-  endDate                   DateTime?                   @map("end_date") @db.Date
+  startDate                 DateTime                    @map("start_date") @db.Date
+  endDate                   DateTime                    @map("end_date") @db.Date
   companyId                 Int                         @map("company_id")
   numberOfContract          Int                         @default(0)
   districtId                Int                         @map("district_id")
@@ -564,6 +563,9 @@ model Post {
   endWorkTime               DateTime?                   @map("end_work_time") @db.Time(6)
   postEditor                String?                     @map("post_editor")
   freePullUp                Boolean                     @default(true) @map("free_pull_up")
+  pullUpExpirationTime      DateTime?                   @map("last_pulled_up")
+  nextFreePulledUpTime      DateTime?                   @map("last_free_pulled_up")
+  premiumExpirationTime     DateTime?                   @map("premium_expiration_time")
   view                      Int                         @default(0)
   companyId                 Int                         @map("company_id")
   occupationId              Int?                        @map("occupation_id")
@@ -784,7 +786,7 @@ model Contract {
   application              Application                @relation(fields: [applicationId], references: [id])
   file                     File                       @relation(fields: [fileId], references: [id])
   labor                    Labor?
-  SiteEvaluationByContract SiteEvaluationByContract[]
+  siteEvaluationByContract SiteEvaluationByContract[]
   settlementCompleteDate   DateTime?                  @map("settlement_complete_date")
   settlementRequestDate    DateTime?                  @map("settlement_request_date")
   settlementStatus         SettlementStatus           @default(NONE) @map("settlement_status")
@@ -1496,11 +1498,6 @@ enum InterviewStatus {
   INTERVIEWING
   PASS
   FAIL
-}
-
-enum SiteType {
-  REGISTERED
-  UNREGISTERED
 }
 
 enum InvitationStatus {

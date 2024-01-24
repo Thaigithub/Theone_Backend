@@ -542,11 +542,13 @@ export class PostCompanyService {
         const post = await this.checkPostExist(postId, accountId);
         if (post.isPulledUp) throw new BadRequestException('Post is already pulled up');
         const availablePullUp = await this.checkPullUpAvailability(postId, accountId);
+        const now = new Date();
         if (availablePullUp.pullUpAvailableStatus !== PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE) {
             if (post.freePullUp) {
                 await this.prismaService.post.update({
                     data: {
                         freePullUp: false,
+                        nextFreePulledUpTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7),
                     },
                     where: {
                         isActive: true,
@@ -587,6 +589,7 @@ export class PostCompanyService {
         await this.prismaService.post.update({
             data: {
                 isPulledUp: body.pullUpStatus,
+                pullUpExpirationTime: new Date(now.getTime() + 1000 * 60 * 60 * 24),
             },
             where: {
                 isActive: true,
@@ -629,9 +632,12 @@ export class PostCompanyService {
         } else throw new BadRequestException("You don't have any PREMIUM_POST produdct");
 
         if (post.type === PostType.PREMIUM) throw new BadRequestException('Post is already PREMIUM type');
+
+        const now = new Date();
         await this.prismaService.post.update({
             data: {
                 type: body.postType,
+                premiumExpirationTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7 * 2),
             },
             where: {
                 isActive: true,
