@@ -16,6 +16,7 @@ import { InterviewModule } from 'domain/interview/interview.module';
 import { LaborModule } from 'domain/labor/labor.module';
 import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
+import { MemoModule } from 'domain/memo/memo.module';
 import { PointModule } from 'domain/point/point.module';
 import { PostModule } from 'domain/post/post.module';
 import { PreferenceModule } from 'domain/preference/preference.module';
@@ -70,6 +71,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InquiryModule,
         TermModule,
         FaqModule,
+        MemoModule,
     ],
 })
 export class AppModule {}

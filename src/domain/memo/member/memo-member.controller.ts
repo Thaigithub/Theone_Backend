@@ -24,7 +24,7 @@ export class MemoMemberController {
         return BaseResponse.of(await this.memoMemberService.getList(req.user.accountId, query));
     }
 
-    @Get('/id')
+    @Get('/:id')
     async getDetail(
         @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
