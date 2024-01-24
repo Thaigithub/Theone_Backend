@@ -5,6 +5,7 @@ export class InquiryMemberGetDetailResponse {
     id: Inquiry['id'];
     createdAt: Inquiry['createdAt'];
     inquiryType: Inquiry['inquiryType'];
+    status: Inquiry['status'];
     questionTitle: Inquiry['questionTitle'];
     questionContent: Inquiry['questionContent'];
     questionFile: FileResponse;

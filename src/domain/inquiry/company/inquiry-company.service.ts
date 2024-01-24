@@ -3,6 +3,7 @@ import { InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
+import { InquiryCompanyGetListSearchCategory } from './enum/inquiry-company-get-list-search-category.enum';
 import { InquiryCompanyCreateRequest } from './request/inquiry-company-create.request';
 import { InquiryCompanyGetListRequest } from './request/inquiry-company-get-list.request';
 import { InquiryCompanyGetDetailResponse } from './response/inquiry-company-get-detail.response';
@@ -13,6 +14,16 @@ export class InquiryCompanyService {
     constructor(private readonly prismaService: PrismaService) {}
 
     async getList(accountId: number, query: InquiryCompanyGetListRequest): Promise<InquiryCompanyGetListResponse> {
+        const queryFilter: Prisma.InquiryWhereInput = {
+            isActive: true,
+            company: {
+                accountId,
+            },
+            ...(query.searchCategory === InquiryCompanyGetListSearchCategory.TITLE && {
+                questionTitle: { contains: query.keyword, mode: 'insensitive' },
+            }),
+        };
+
         const search = {
             select: {
                 id: true,
@@ -21,12 +32,7 @@ export class InquiryCompanyService {
                 createdAt: true,
             },
 
-            where: {
-                isActive: true,
-                company: {
-                    accountId,
-                },
-            },
+            where: queryFilter,
             orderBy: {
                 createdAt: Prisma.SortOrder.desc,
             },
@@ -95,6 +101,7 @@ export class InquiryCompanyService {
             id: inquiry.id,
             createdAt: inquiry.createdAt,
             inquiryType: inquiry.inquiryType,
+            status: inquiry.status,
             questionTitle: inquiry.questionTitle,
             questionContent: inquiry.questionContent,
             questionFile: inquiry.questionFile

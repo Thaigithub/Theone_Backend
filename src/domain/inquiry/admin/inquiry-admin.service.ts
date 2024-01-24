@@ -136,6 +136,7 @@ export class InquiryAdminService {
             id: inquiry.id,
             createdAt: inquiry.createdAt,
             status: inquiry.status,
+            inquiryType: inquiry.inquiryType,
             inquirer:
                 inquiry.inquirerType === InquirerType.MEMBER
                     ? {
