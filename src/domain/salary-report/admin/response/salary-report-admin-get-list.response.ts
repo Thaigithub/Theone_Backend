@@ -1,7 +1,8 @@
-import { Company, Site } from '@prisma/client';
+import { Company, SalaryReport, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 class SalaryReportResponse {
+    id: SalaryReport['id'];
     companyName: Company['name'];
     siteName: Site['name'];
     contact: Site['contact'];

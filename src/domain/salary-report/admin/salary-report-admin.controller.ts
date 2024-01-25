@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, ParseArrayPipe, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -16,5 +16,12 @@ export class SalaryReportAdminController {
     @Get()
     async getList(@Query() query: SalaryReportAdminGetListRequest): Promise<BaseResponse<SalaryReportAdminGetListResponse>> {
         return BaseResponse.of(await this.salaryReportAdminService.getList(query));
+    }
+
+    @Delete()
+    async delete(
+        @Query('salaryReportIdList', new ParseArrayPipe({ items: Number, separator: ',' })) salaryReportIdList: number[],
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.salaryReportAdminService.delete(salaryReportIdList));
     }
 }
