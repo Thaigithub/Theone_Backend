@@ -3,18 +3,18 @@ import { AnswerStatus, InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { InquiryAdminGetListSearchCategory } from './enum/inquiry-admin-get-list-search-category.enum';
-import { InquiryAdminGetListRequest } from './request/inquiry-admin-get-list.request';
-import { InquiryAdminAnswerRequest } from './request/inqury-admin-answer.request';
-import { InquiryAdminGetDetailResponse } from './response/inquiry-admin-get-detail.reponse';
-import { InquiryAdminGetListResponse } from './response/inquiry-admin-get-list.response';
+import { LaborConsultationAdminGetListSearchCategory } from './enum/labor-consultation-admin-get-list-search-category.enum';
+import { LaborConsultationAdminAnswerRequest } from './request/labor-consultation-admin-answer.request';
+import { LaborConsultationAdminGetListRequest } from './request/labor-consultation-admin-get-list.request';
+import { LaborConsultationAdminGetDetailResponse } from './response/labor-consultation-admin-get-detail.response';
+import { LaborConsultationAdminGetListResponse } from './response/labor-consultation-admin-get-list.response';
 
 @Injectable()
-export class InquiryAdminService {
+export class LaborConsultationAdminService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async getList(query: InquiryAdminGetListRequest): Promise<InquiryAdminGetListResponse> {
-        const queryFilter: Prisma.InquiryWhereInput = {
+    async getList(query: LaborConsultationAdminGetListRequest): Promise<LaborConsultationAdminGetListResponse> {
+        const queryFilter: Prisma.LaborConsultationWhereInput = {
             isActive: true,
             ...(query.startDate &&
                 query.endDate && {
@@ -22,13 +22,13 @@ export class InquiryAdminService {
                 }),
             ...(query.status && { status: query.status }),
             ...(query.inquirerType && { inquirerType: query.inquirerType }),
-            ...(query.inquiryType && { inquiryType: query.inquiryType }),
-            ...(query.searchCategory === InquiryAdminGetListSearchCategory.MEMBER_NAME && {
+            ...(query.laborConsultationType && { laborConsultationType: query.laborConsultationType }),
+            ...(query.searchCategory === LaborConsultationAdminGetListSearchCategory.MEMBER_NAME && {
                 member: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
             }),
-            ...(query.searchCategory === InquiryAdminGetListSearchCategory.COMPANY_NAME && {
+            ...(query.searchCategory === LaborConsultationAdminGetListSearchCategory.COMPANY_NAME && {
                 company: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
@@ -39,7 +39,7 @@ export class InquiryAdminService {
             select: {
                 id: true,
                 inquirerType: true,
-                inquiryType: true,
+                laborConsultationType: true,
                 questionTitle: true,
                 status: true,
                 createdAt: true,
@@ -61,7 +61,7 @@ export class InquiryAdminService {
             ...QueryPagingHelper.queryPaging(query),
         };
 
-        const inquiries = (await this.prismaService.inquiry.findMany(search)).map((item) => {
+        const laborConsultations = (await this.prismaService.laborConsultation.findMany(search)).map((item) => {
             return {
                 id: item.id,
                 inquirer:
@@ -74,19 +74,19 @@ export class InquiryAdminService {
                               type: item.inquirerType,
                               name: item.company.name,
                           },
-                inquiryType: item.inquiryType,
+                laborConsultationType: item.laborConsultationType,
                 title: item.questionTitle,
                 status: item.status,
                 createdAt: item.createdAt,
             };
         });
-        const total = await this.prismaService.inquiry.count({ where: search.where });
+        const total = await this.prismaService.laborConsultation.count({ where: search.where });
 
-        return new PaginationResponse(inquiries, new PageInfo(total));
+        return new PaginationResponse(laborConsultations, new PageInfo(total));
     }
 
     async delete(ids: number[]): Promise<void> {
-        await this.prismaService.inquiry.updateMany({
+        await this.prismaService.laborConsultation.updateMany({
             where: {
                 id: {
                     in: ids,
@@ -98,8 +98,8 @@ export class InquiryAdminService {
         });
     }
 
-    async getDetail(id: number): Promise<InquiryAdminGetDetailResponse> {
-        const inquiry = await this.prismaService.inquiry.findUnique({
+    async getDetail(id: number): Promise<LaborConsultationAdminGetDetailResponse> {
+        const laborConsultation = await this.prismaService.laborConsultation.findUnique({
             where: {
                 id,
                 isActive: true,
@@ -130,28 +130,28 @@ export class InquiryAdminService {
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
 
         return {
-            id: inquiry.id,
-            createdAt: inquiry.createdAt,
-            status: inquiry.status,
-            inquiryType: inquiry.inquiryType,
+            id: laborConsultation.id,
+            createdAt: laborConsultation.createdAt,
+            status: laborConsultation.status,
+            laborConsultationType: laborConsultation.laborConsultationType,
             inquirer:
-                inquiry.inquirerType === InquirerType.MEMBER
+                laborConsultation.inquirerType === InquirerType.MEMBER
                     ? {
-                          type: inquiry.inquirerType,
-                          name: inquiry.member.name,
-                          contact: inquiry.member.contact,
+                          type: laborConsultation.inquirerType,
+                          name: laborConsultation.member.name,
+                          contact: laborConsultation.member.contact,
                       }
                     : {
-                          type: inquiry.inquirerType,
-                          name: inquiry.company.name,
-                          contact: inquiry.company.contactPhone,
+                          type: laborConsultation.inquirerType,
+                          name: laborConsultation.company.name,
+                          contact: laborConsultation.company.contactPhone,
                       },
-            questionTitle: inquiry.questionTitle,
-            questionContent: inquiry.questionContent,
-            questionFiles: inquiry.questionFiles.map((item) => {
+            questionTitle: laborConsultation.questionTitle,
+            questionContent: laborConsultation.questionContent,
+            questionFiles: laborConsultation.questionFiles.map((item) => {
                 return {
                     fileName: item.questionFile.fileName,
                     type: item.questionFile.type,
@@ -159,10 +159,10 @@ export class InquiryAdminService {
                     size: Number(item.questionFile.size),
                 };
             }),
-            asnweredAt: inquiry.answeredAt,
-            answerTitle: inquiry.answerTitle,
-            answerContent: inquiry.answerContent,
-            answerFiles: inquiry.answerFiles.map((item) => {
+            asnweredAt: laborConsultation.answeredAt,
+            answerTitle: laborConsultation.answerTitle,
+            answerContent: laborConsultation.answerContent,
+            answerFiles: laborConsultation.answerFiles.map((item) => {
                 return {
                     fileName: item.answerFile.fileName,
                     type: item.answerFile.type,
@@ -173,22 +173,22 @@ export class InquiryAdminService {
         };
     }
 
-    async updateAnswer(id: number, body: InquiryAdminAnswerRequest): Promise<void> {
-        const inquiry = await this.prismaService.inquiry.findUnique({
+    async updateAnswer(id: number, body: LaborConsultationAdminAnswerRequest): Promise<void> {
+        const laborConsultation = await this.prismaService.laborConsultation.findUnique({
             where: {
                 isActive: true,
                 id,
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
 
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({
                 where: {
-                    answerInquiryFiles: {
+                    answerLaborConsultationFiles: {
                         some: {
-                            answerInquiryId: id,
+                            answerLaborConsultationId: id,
                         },
                     },
                 },
@@ -197,9 +197,9 @@ export class InquiryAdminService {
                 },
             });
 
-            await tx.inquiryFile.deleteMany({
+            await tx.laborConsultationFile.deleteMany({
                 where: {
-                    answerInquiryId: inquiry.id,
+                    answerLaborConsultationId: laborConsultation.id,
                 },
             });
 
@@ -216,7 +216,7 @@ export class InquiryAdminService {
                 }),
             );
 
-            await tx.inquiry.update({
+            await tx.laborConsultation.update({
                 where: {
                     id,
                 },

@@ -126,6 +126,7 @@ export class LaborConsultationCompanyService {
             id: laborConsultation.id,
             createdAt: laborConsultation.createdAt,
             laborConsultationType: laborConsultation.laborConsultationType,
+            status: laborConsultation.status,
             questionTitle: laborConsultation.questionTitle,
             questionContent: laborConsultation.questionContent,
             questionFiles: laborConsultation.questionFiles.map((item) => {

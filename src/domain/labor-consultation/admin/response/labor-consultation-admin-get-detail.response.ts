@@ -1,11 +1,18 @@
-import { LaborConsultation } from '@prisma/client';
+import { InquirerType, LaborConsultation } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
-export class LaborConsultationCompanyGetDetailResponse {
+class Inquirer {
+    type: InquirerType;
+    name: string;
+    contact: string;
+}
+
+export class LaborConsultationAdminGetDetailResponse {
     id: LaborConsultation['id'];
     createdAt: LaborConsultation['createdAt'];
-    laborConsultationType: LaborConsultation['laborConsultationType'];
+    inquirer: Inquirer;
     status: LaborConsultation['status'];
+    laborConsultationType: LaborConsultation['laborConsultationType'];
     questionTitle: LaborConsultation['questionTitle'];
     questionContent: LaborConsultation['questionContent'];
     questionFiles: FileResponse[];

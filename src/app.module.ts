@@ -23,10 +23,12 @@ import { PostModule } from 'domain/post/post.module';
 import { PreferenceModule } from 'domain/preference/preference.module';
 import { ProductModule } from 'domain/product/product.module';
 import { RegionModule } from 'domain/region/region.module';
+import { ReportModule } from 'domain/report/report.module';
 import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
 import { SiteModule } from 'domain/site/site.module';
 import { SpecialLicenseModule } from 'domain/special-license/special-license.module';
 import { TermModule } from 'domain/term/term.module';
+import { CrobJobModule } from 'services/crobjob/cronjob.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -35,8 +37,6 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
-import { CrobJobModule } from 'services/crobjob/cronjob.module';
-import { ReportModule } from 'domain/report/report.module';
 
 @Module({
     imports: [
