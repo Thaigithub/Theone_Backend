@@ -932,6 +932,7 @@ model AnnouncementFile {
   fileId        Int          @unique
   announcement  Announcement @relation(fields: [anouncementId], references: [id])
   file          File         @relation(fields: [fileId], references: [id])
+  isActive      Boolean      @default(true) @map("is_active")
 
   @@map("announcement_files")
 }

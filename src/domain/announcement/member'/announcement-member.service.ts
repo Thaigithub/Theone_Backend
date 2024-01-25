@@ -27,25 +27,30 @@ export class AnnouncementMemberService {
                 ],
             }),
         };
-
-        const search = {
-            include: {
-                announcementFiles: {
-                    include: {
-                        file: true,
+        const announcements = (
+            await this.prismaService.announcement.findMany({
+                include: {
+                    announcementFiles: {
+                        where: {
+                            isActive: true,
+                        },
+                        include: {
+                            file: true,
+                        },
+                    },
+                    account: {
+                        include: {
+                            admin: true,
+                        },
                     },
                 },
-                account: {
-                    include: {
-                        admin: true,
-                    },
+                where: queryFilter,
+                ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    createdAt: 'desc',
                 },
-            },
-            where: queryFilter,
-            ...QueryPagingHelper.queryPaging(query),
-        };
-
-        const announcements = (await this.prismaService.announcement.findMany(search)).map((item) => {
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 createdAt: item.createdAt,
@@ -63,7 +68,7 @@ export class AnnouncementMemberService {
             };
         });
 
-        const total = await this.prismaService.announcement.count({ where: search.where });
+        const total = await this.prismaService.announcement.count({ where: queryFilter });
 
         return new PaginationResponse(announcements, new PageInfo(total));
     }
@@ -76,6 +81,9 @@ export class AnnouncementMemberService {
             },
             include: {
                 announcementFiles: {
+                    where: {
+                        isActive: true,
+                    },
                     include: {
                         file: true,
                     },

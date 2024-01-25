@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { FileResponse } from 'utils/generics/file.response';
@@ -6,6 +6,7 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AnnouncementAdminCreateRequest } from './request/announcement-admin-create.request';
 import { AnnouncementAdminGetListRequest } from './request/announcement-admin-get-list.request';
+import { AnnouncementAdminUpdateRequest } from './request/announcement-admin-update.request';
 import { AnnouncementAdminGetDetailResponse } from './response/announcement-admin-get-detail.response';
 import { AnnouncementAdminGetListResponse } from './response/announcement-admin-get-list.response';
 
@@ -40,6 +41,9 @@ export class AnnouncementAdminService {
                     },
                 },
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    createdAt: 'desc',
+                },
             })
         ).map((item) => {
             return {
@@ -71,7 +75,11 @@ export class AnnouncementAdminService {
                 title: true,
                 content: true,
                 announcementFiles: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
+                        id: true,
                         file: {
                             select: {
                                 fileName: true,
@@ -100,13 +108,16 @@ export class AnnouncementAdminService {
             title: record.title,
             content: record.content,
             name: record.account.admin.name,
-            files: record.announcementFiles.map((item) => {
+            announcementFiles: record.announcementFiles.map((item) => {
                 return {
-                    fileName: item.file.fileName,
-                    type: item.file.type,
-                    key: item.file.key,
-                    size: Number(item.file.size),
-                } as FileResponse;
+                    id: item.id,
+                    file: {
+                        fileName: item.file.fileName,
+                        type: item.file.type,
+                        key: item.file.key,
+                        size: Number(item.file.size),
+                    } as FileResponse,
+                };
             }),
         };
     }
@@ -153,6 +164,116 @@ export class AnnouncementAdminService {
                     },
                 });
             }
+        });
+    }
+
+    async update(accountId: number, id: number, body: AnnouncementAdminUpdateRequest): Promise<void> {
+        const record = await this.prismaService.announcement.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            select: {
+                announcementFiles: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        if (!record) {
+            throw new NotFoundException('The announcement is not found');
+        }
+
+        const ids =
+            body.removeFileIds && body.removeFileIds.length > 0
+                ? record.announcementFiles.filter((file) => body.removeFileIds.includes(file.id)).map((item) => item.id)
+                : null;
+        const maximumFiles = record.announcementFiles.length + body.files.length - (ids ? ids.length : 0);
+        if (maximumFiles > 3) {
+            throw new ConflictException('Maximum number of files is 3');
+        }
+        await this.prismaService.$transaction(async (prisma) => {
+            await prisma.announcement.update({
+                where: {
+                    id: id,
+                    isActive: true,
+                },
+                data: {
+                    title: body.title,
+                    content: body.content,
+                    accountId: accountId,
+                    ...(ids &&
+                        ids.length > 0 && {
+                            announcementFiles: {
+                                updateMany: {
+                                    where: {
+                                        id: { in: ids },
+                                    },
+                                    data: {
+                                        isActive: false,
+                                    },
+                                },
+                            },
+                        }),
+                },
+            });
+            for (const file of body.files) {
+                await prisma.announcementFile.create({
+                    data: {
+                        announcement: {
+                            connect: {
+                                id,
+                            },
+                        },
+                        file: {
+                            create: {
+                                fileName: file.fileName,
+                                size: file.size,
+                                key: file.key,
+                                type: file.type,
+                            },
+                        },
+                    },
+                });
+            }
+        });
+    }
+
+    async delete(accountId: number, id: number): Promise<void> {
+        const announcement = await this.prismaService.announcement.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+        });
+        if (!announcement) {
+            throw new NotFoundException('The announcement has been deleted');
+        }
+        await this.prismaService.$transaction(async (prisma) => {
+            await prisma.announcement.update({
+                where: {
+                    id: id,
+                    isActive: true,
+                },
+                data: {
+                    isActive: false,
+                    accountId: accountId,
+                    announcementFiles: {
+                        updateMany: {
+                            where: {
+                                isActive: true,
+                            },
+                            data: {
+                                isActive: false,
+                            },
+                        },
+                    },
+                },
+            });
         });
     }
 }
