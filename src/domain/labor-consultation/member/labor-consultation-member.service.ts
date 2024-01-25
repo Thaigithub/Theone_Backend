@@ -1,0 +1,153 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InquirerType, Prisma } from '@prisma/client';
+import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { LaborConsultationMemberCreateRequest } from './request/labor-consultation-member-create.request';
+import { LaborConsultationMemberGetListRequest } from './request/labor-consultation-member-get-list.request';
+import { LaborConsultationMemberGetDetailResponse } from './response/labor-consultation-member-get-detail.response';
+import { LaborConsultationMemberGetListResponse } from './response/labor-consultation-member-get-list.response';
+
+@Injectable()
+export class LaborConsultationMemberService {
+    constructor(private readonly prismaService: PrismaService) {}
+
+    async getList(
+        accountId: number,
+        query: LaborConsultationMemberGetListRequest,
+    ): Promise<LaborConsultationMemberGetListResponse> {
+        const search = {
+            include: {
+                questionFiles: {
+                    include: {
+                        questionFile: true,
+                    },
+                },
+            },
+            where: {
+                isActive: true,
+                member: {
+                    accountId,
+                },
+            },
+            orderBy: {
+                createdAt: Prisma.SortOrder.desc,
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        };
+
+        const laborConsultations = (await this.prismaService.laborConsultation.findMany(search)).map((item) => {
+            return {
+                id: item.id,
+                status: item.status,
+                createdAt: item.createdAt,
+                title: item.questionTitle,
+                files: item.questionFiles.map((item) => {
+                    return {
+                        fileName: item.questionFile.fileName,
+                        type: item.questionFile.type,
+                        key: item.questionFile.key,
+                        size: Number(item.questionFile.size),
+                    };
+                }),
+            };
+        });
+        const total = await this.prismaService.laborConsultation.count({ where: search.where });
+
+        return new PaginationResponse(laborConsultations, new PageInfo(total));
+    }
+
+    async create(accountId: number, body: LaborConsultationMemberCreateRequest): Promise<void> {
+        await this.prismaService.$transaction(async (tx) => {
+            const files = await Promise.all(
+                body.files.map(async (item) => {
+                    return (
+                        await tx.file.create({
+                            data: item,
+                            select: {
+                                id: true,
+                            },
+                        })
+                    ).id;
+                }),
+            );
+
+            await tx.laborConsultation.create({
+                data: {
+                    member: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                    inquirerType: InquirerType.MEMBER,
+                    questionTitle: body.title,
+                    questionContent: body.content,
+                    laborConsultationType: body.type,
+                    questionFiles: {
+                        createMany: {
+                            data: files.map((item) => {
+                                return {
+                                    questionFileId: item,
+                                };
+                            }),
+                        },
+                    },
+                },
+            });
+        });
+    }
+
+    async getDetail(accountId: number, id: number): Promise<LaborConsultationMemberGetDetailResponse> {
+        const laborConsultation = await this.prismaService.laborConsultation.findUnique({
+            where: {
+                id,
+                isActive: true,
+                member: {
+                    accountId,
+                },
+            },
+            include: {
+                questionFiles: {
+                    include: {
+                        questionFile: true,
+                    },
+                },
+                answerFiles: {
+                    include: {
+                        answerFile: true,
+                    },
+                },
+            },
+        });
+
+        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
+
+        return {
+            id: laborConsultation.id,
+            createdAt: laborConsultation.createdAt,
+            laborConsultationType: laborConsultation.laborConsultationType,
+            status: laborConsultation.status,
+            questionTitle: laborConsultation.questionTitle,
+            questionContent: laborConsultation.questionContent,
+            questionFiles: laborConsultation.questionFiles.map((item) => {
+                return {
+                    fileName: item.questionFile.fileName,
+                    type: item.questionFile.type,
+                    key: item.questionFile.key,
+                    size: Number(item.questionFile.size),
+                };
+            }),
+            asnweredAt: laborConsultation.answeredAt,
+            answerTitle: laborConsultation.answerTitle,
+            answerContent: laborConsultation.answerContent,
+            answerFiles: laborConsultation.answerFiles.map((item) => {
+                return {
+                    fileName: item.answerFile.fileName,
+                    type: item.answerFile.type,
+                    key: item.answerFile.key,
+                    size: Number(item.answerFile.size),
+                };
+            }),
+        };
+    }
+}
