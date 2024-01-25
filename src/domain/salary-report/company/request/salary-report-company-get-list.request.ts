@@ -9,5 +9,13 @@ export class SalaryReportCompanyGetListRequest extends PaginationRequest {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'Date must be in the format yyyy-mm-dd.',
     })
-    requestDate: string;
+    startDate: string;
+
+    @Expose()
+    @IsOptional()
+    @IsDateString()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'Date must be in the format yyyy-mm-dd.',
+    })
+    endDate: string;
 }

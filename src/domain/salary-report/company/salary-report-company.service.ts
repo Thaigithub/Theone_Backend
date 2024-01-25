@@ -56,7 +56,10 @@ export class SalaryReportCompanyService {
                     accountId,
                 },
             },
-            createdAt: query.requestDate && new Date(query.requestDate),
+            createdAt: {
+                gte: query.startDate && new Date(query.startDate),
+                lte: query.endDate && new Date(query.endDate),
+            },
         };
 
         const list = (
