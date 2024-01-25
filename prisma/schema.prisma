@@ -1363,6 +1363,9 @@ enum FileType {
   CSV
   EXCEL
   WORD
+  JPG
+  BMP
+  GIF
 }
 
 enum TeamStatus {
