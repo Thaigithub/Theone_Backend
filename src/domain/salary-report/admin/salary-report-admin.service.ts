@@ -14,7 +14,10 @@ export class SalaryReportAdminService {
     async getList(query: SalaryReportAdminGetListRequest): Promise<SalaryReportAdminGetListResponse> {
         const queryFilter: Prisma.SalaryReportWhereInput = {
             isActive: true,
-            createdAt: query.requestDate && new Date(query.requestDate),
+            createdAt: {
+                gte: query.startDate && new Date(query.startDate),
+                lte: query.endDate && new Date(query.endDate),
+            },
             ...(query.category === SalaryReportAdminSearchCategory.COMPANY_NAME && {
                 site: { company: { name: { contains: query.keyword, mode: 'insensitive' } } },
             }),

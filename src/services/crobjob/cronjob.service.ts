@@ -17,7 +17,7 @@ export class CronJobService {
             where: {
                 isActive: true,
                 freePullUp: false,
-                nextFreePulledUpTime: { gte: new Date() },
+                nextFreePulledUpTime: { lt: new Date() },
             },
         });
     }
@@ -32,7 +32,7 @@ export class CronJobService {
             where: {
                 isActive: true,
                 isPulledUp: true,
-                pullUpExpirationTime: { gte: new Date() },
+                pullUpExpirationTime: { lt: new Date() },
             },
         });
     }
@@ -46,7 +46,7 @@ export class CronJobService {
             where: {
                 isActive: true,
                 status: { not: PostStatus.DEADLINE },
-                endDate: { gte: new Date() },
+                endDate: { lt: new Date() },
             },
         });
     }
@@ -63,10 +63,10 @@ export class CronJobService {
                 type: PostType.PREMIUM,
                 OR: [
                     {
-                        premiumExpirationTime: { gte: new Date() },
+                        premiumExpirationTime: { lt: new Date() },
                     },
                     {
-                        endDate: { gte: new Date() },
+                        endDate: { lt: new Date() },
                     },
                 ],
             },
@@ -85,7 +85,7 @@ export class CronJobService {
                         where: {
                             contract: {
                                 is: {
-                                    endDate: { gte: new Date() },
+                                    endDate: { lt: new Date() },
                                 },
                             },
                         },
@@ -141,7 +141,7 @@ export class CronJobService {
             where: {
                 isActive: true,
                 status: BannerStatus.EXPOSE,
-                endDate: { gte: new Date() },
+                endDate: { lt: new Date() },
             },
         });
     }
