@@ -4,10 +4,12 @@ import { LaborConsultationAdminController } from './admin/labor-consultation-adm
 import { LaborConsultationAdminService } from './admin/labor-consultation-admin.service';
 import { LaborConsultationCompanyController } from './company/labor-consultation-company.controller';
 import { LaborConsultationCompanyService } from './company/labor-consultation-company.service';
+import { LaborConsultationMemberController } from './member/labor-consultation-member.controller';
+import { LaborConsultationMemberService } from './member/labor-consultation-member.service';
 
 @Module({
     imports: [PrismaModule],
-    controllers: [LaborConsultationCompanyController, LaborConsultationAdminController],
-    providers: [LaborConsultationCompanyService, LaborConsultationAdminService],
+    controllers: [LaborConsultationCompanyController, LaborConsultationAdminController, LaborConsultationMemberController],
+    providers: [LaborConsultationCompanyService, LaborConsultationAdminService, LaborConsultationMemberService],
 })
 export class LaborConsultationModule {}
