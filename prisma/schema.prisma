@@ -1155,6 +1155,8 @@ model InquiryFile {
   answerInquiry     Inquiry? @relation("answer_inquiry", fields: [answerInquiryId], references: [id])
   questionFile      File?    @relation("question_file", fields: [questionFileId], references: [id])
   answerFile        File?    @relation("answer_file", fields: [answerFileId], references: [id])
+
+  @@map("inquiry_files")
 }
 
 model Report {
@@ -1213,6 +1215,8 @@ model LaborConsultationFile {
   answerLaborConsultation     LaborConsultation? @relation("answer_labor_consultation", fields: [answerLaborConsultationId], references: [id])
   questionFile                File?              @relation("question_file", fields: [questionFileId], references: [id])
   answerFile                  File?              @relation("answer_file", fields: [answerFileId], references: [id])
+
+  @@map("labor_consultation_files")
 }
 
 model Term {
