@@ -85,7 +85,7 @@ export class CronJobService {
                         where: {
                             contract: {
                                 is: {
-                                    endDate: { lt: new Date() },
+                                    startDate: { lte: new Date() },
                                 },
                             },
                         },
@@ -111,10 +111,11 @@ export class CronJobService {
         await Promise.all(
             expiredContractList.map(async (member) => {
                 const totalMonths = member.contractList.reduce((totalMonths, contract) => {
-                    return (
-                        totalMonths +
-                        Math.floor((contract.endDate.getTime() - contract.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
-                    );
+                    return contract.endDate.getTime() < new Date().getTime()
+                        ? totalMonths +
+                              Math.floor((contract.endDate.getTime() - contract.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+                        : totalMonths +
+                              Math.floor((new Date().getTime() - contract.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
                 }, 0);
                 const totalExperienceYears = Math.floor(totalMonths / 12);
                 const totalExperienceMonths = totalMonths - totalExperienceYears * 12;
