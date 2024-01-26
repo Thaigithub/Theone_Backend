@@ -1,13 +1,21 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerCertificationType, CareerType, Member as MemberPrisma } from '@prisma/client';
+import { CareerCertificationType, CareerType, Member as MemberPrisma, Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PaginationRequest } from 'utils/generics/pagination.request';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { searchCategory } from './dto/member-admin-search-category.request.dto';
+import { MemberAdminSearchCategoryFilter } from './enum/member-admin-search-category.enum';
+import { MemberAdminSortCategoryFilter } from './enum/member-admin-sort-category.enum';
+import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
 import { MemberResponse } from './response/member-admin-get-list.response';
+import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
+import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
+import { MemberAdminGetPointListResponse } from './response/member-admin-get-point-list.response';
 
 @Injectable()
 export class MemberAdminService {
@@ -47,6 +55,29 @@ export class MemberAdminService {
         });
     }
 
+    async calculateExchange(memberId: number) {
+        const member = await this.prismaService.member.findFirst({
+            where: {
+                id: memberId,
+                isActive: true,
+            },
+            select: {
+                currencyExchange: {
+                    select: {
+                        amount: true,
+                    },
+                    where: {
+                        isActive: true,
+                    },
+                },
+            },
+        });
+        if (!member) {
+            throw new NotFoundException('The id is not exist');
+        }
+        return member.currencyExchange.reduce((sum, current) => sum + current.amount, 0);
+    }
+
     // Methods used by controller
     async getList(query: GetMembersListRequest): Promise<MemberResponse[]> {
         return await this.prismaService.member.findMany({
@@ -76,6 +107,62 @@ export class MemberAdminService {
             // Conditions based on request query
             where: this.parseConditionsFromQuery(query),
         });
+    }
+
+    async getPointList(query: MemberAdminGetPointListRequest): Promise<MemberAdminGetPointListResponse> {
+        const queryFilter: Prisma.MemberWhereInput = {
+            isActive: true,
+            ...(query.searchCategory == MemberAdminSearchCategoryFilter.NAME && {
+                name: { contains: query.keyword, mode: 'insensitive' },
+            }),
+            ...(query.searchCategory == MemberAdminSearchCategoryFilter.CONTACT && {
+                contact: { contains: query.keyword, mode: 'insensitive' },
+            }),
+            ...(!query.searchCategory &&
+                query.keyword && {
+                    OR: [
+                        { name: { contains: query.keyword, mode: 'insensitive' } },
+                        { contact: { contains: query.keyword, mode: 'insensitive' } },
+                    ],
+                }),
+        };
+        const members = await this.prismaService.member.findMany({
+            where: queryFilter,
+            select: {
+                id: true,
+                name: true,
+                contact: true,
+                totalPoint: true,
+                currencyExchange: {
+                    select: {
+                        amount: true,
+                    },
+                    where: {
+                        isActive: true,
+                    },
+                },
+            },
+            orderBy: {
+                ...(query.pointHeld && query.pointHeld == MemberAdminSortCategoryFilter.HIGH_TO_LOW && { totalPoint: 'desc' }),
+                ...(query.pointHeld && query.pointHeld == MemberAdminSortCategoryFilter.LOW_TO_HIGH && { totalPoint: 'asc' }),
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const results = members.map((item) => {
+            const totalExchange = item.currencyExchange.reduce((sum, current) => sum + current.amount, 0);
+            return {
+                memberId: item.id,
+                name: item.name,
+                contact: item.contact,
+                pointHeld: item.totalPoint,
+                totalExchanngePoint: totalExchange,
+            };
+        });
+
+        const memberCount = await this.prismaService.member.count({
+            where: queryFilter,
+        });
+        return new PaginationResponse(results, new PageInfo(memberCount));
     }
 
     async getDetail(id: number): Promise<MemberAdminGetDetailResponse> {
@@ -228,6 +315,66 @@ export class MemberAdminService {
                       })
                     : [],
         };
+    }
+
+    async getPointDetail(id: number): Promise<MemberAdminGetPointDetailResponse> {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            select: {
+                name: true,
+                contact: true,
+                totalPoint: true,
+            },
+        });
+        if (!member) {
+            throw new NotFoundException('The id is not exist');
+        }
+        const totalExchangePoint = await this.calculateExchange(id);
+        return {
+            name: member.name,
+            contact: member.contact,
+            totalPoint: member.totalPoint,
+            totalExchangePoint: totalExchangePoint,
+        } as MemberAdminGetPointDetailResponse;
+    }
+
+    async getPointDetailList(id: number, query: PaginationRequest): Promise<MemberAdminGetPointDetailListResponse> {
+        const points = await this.prismaService.point.findMany({
+            where: {
+                memberId: id,
+                isActive: true,
+            },
+            select: {
+                createdAt: true,
+                reasonEarn: true,
+                amount: true,
+                remainAmount: true,
+                status: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            ...QueryPagingHelper.queryPaging(query),
+        });
+        const count = await this.prismaService.point.count({
+            where: {
+                memberId: id,
+                isActive: true,
+            },
+        });
+        const results = points.map((item) => {
+            return {
+                createAt: item.createdAt,
+                reasonEarn: item.reasonEarn,
+                amount: item.amount,
+                remainAmount: item.remainAmount,
+                status: item.status,
+            };
+        });
+        return new PaginationResponse(results, new PageInfo(count));
     }
 
     async updateMember(id: number, body: ChangeMemberRequest): Promise<void> {

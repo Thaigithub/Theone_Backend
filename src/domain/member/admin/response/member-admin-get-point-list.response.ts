@@ -1,6 +1,6 @@
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class PointAdminResponse {
+export class MemberAdminGetPointResponse {
     memberId: number;
     name: string;
     contact: string;
@@ -8,4 +8,4 @@ export class PointAdminResponse {
     totalExchanngePoint: number;
 }
 
-export class PointAdminGetMemberListResponse extends PaginationResponse<PointAdminResponse> {}
+export class MemberAdminGetPointListResponse extends PaginationResponse<MemberAdminGetPointResponse> {}

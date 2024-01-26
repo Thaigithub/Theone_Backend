@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CurrencyExchangeStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -48,7 +48,7 @@ export class CurrencyExchangeAdminService {
                         },
                     },
                     amount: true,
-                    exchangeStatus: true,
+                    status: true,
                     updatedAt: true,
                 },
                 orderBy: {
@@ -63,7 +63,7 @@ export class CurrencyExchangeAdminService {
                 name: item.member.name,
                 contact: item.member.contact,
                 amount: item.amount,
-                exchangeStatus: item.exchangeStatus,
+                exchangeStatus: item.status,
                 updatedAt: item.updatedAt,
                 bankName: item.member.bankAccount ? item.member.bankAccount.bankName : null,
                 accountNumber: item.member.bankAccount ? item.member.bankAccount.accountNumber : null,
@@ -87,7 +87,7 @@ export class CurrencyExchangeAdminService {
             },
             select: {
                 memberId: true,
-                exchangeStatus: true,
+                status: true,
                 amount: true,
             },
         });
@@ -97,54 +97,20 @@ export class CurrencyExchangeAdminService {
         return currencyExchange;
     }
 
-    async approve(id: number): Promise<void> {
+    async updateStatus(id: number): Promise<void> {
         await this.prismaService.$transaction(async (prisma) => {
             const currencyExchange = await this.getCurrencyExchange(id);
-            if (currencyExchange.exchangeStatus == CurrencyExchangeStatus.COMPLETE) {
-                throw new HttpException('The currency exchange request had been approved', HttpStatus.ACCEPTED);
-            } else if (currencyExchange.exchangeStatus == CurrencyExchangeStatus.DENY) {
-                throw new BadRequestException('The currency exchange request had been deny');
-            }
-            await prisma.currencyExchange.update({
-                where: {
-                    id: id,
-                    isActive: true,
-                },
-                data: {
-                    exchangeStatus: CurrencyExchangeStatus.COMPLETE,
-                },
-            });
-        });
-    }
-
-    async deny(id: number): Promise<void> {
-        await this.prismaService.$transaction(async (prisma) => {
-            const currencyExchange = await this.getCurrencyExchange(id);
-            if (currencyExchange.exchangeStatus == CurrencyExchangeStatus.COMPLETE) {
-                throw new HttpException('The currency exchange request had been approved', HttpStatus.ACCEPTED);
-            } else if (currencyExchange.exchangeStatus == CurrencyExchangeStatus.DENY) {
-                throw new HttpException('The currency exchange request had been deny', HttpStatus.ACCEPTED);
-            }
-            await prisma.currencyExchange.update({
-                where: {
-                    id: id,
-                    isActive: true,
-                },
-                data: {
-                    exchangeStatus: CurrencyExchangeStatus.DENY,
-                },
-            });
-            await prisma.member.update({
-                where: {
-                    id: currencyExchange.memberId,
-                    isActive: true,
-                },
-                data: {
-                    totalPoint: {
-                        increment: currencyExchange.amount,
+            if (currencyExchange.status !== CurrencyExchangeStatus.COMPLETE) {
+                await prisma.currencyExchange.update({
+                    where: {
+                        id: id,
+                        isActive: true,
                     },
-                },
-            });
+                    data: {
+                        status: CurrencyExchangeStatus.COMPLETE,
+                    },
+                });
+            }
         });
     }
 }

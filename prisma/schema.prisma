@@ -328,6 +328,7 @@ model File {
   answerReport                   Report?                       @relation("answer_file")
   questionLaborConsultationFiles LaborConsultationFile[]       @relation("question_file")
   answerLaborConsultationFiles   LaborConsultationFile[]       @relation("answer_file")
+  point                          Point?
 
   @@map("files")
 }
@@ -938,27 +939,31 @@ model AnnouncementFile {
 }
 
 model Point {
-  id           Int      @id @default(autoincrement())
-  memberId     Int      @map("member_id")
-  isActive     Boolean  @default(true) @map("is_active")
-  reasonEarn   String?  @map("reason_earn")
-  createdAt    DateTime @default(now()) @map("created_at")
-  amount       Int      @default(0) @map("amount")
-  remainAmount Int      @default(0) @map("remain_amount")
-  member       Member   @relation(fields: [memberId], references: [id])
+  id           Int         @id @default(autoincrement())
+  memberId     Int         @map("member_id")
+  isActive     Boolean     @default(true) @map("is_active")
+  reasonEarn   String?     @map("reason_earn")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updateAt     DateTime    @updatedAt @map("update_at")
+  amount       Int?        @map("amount")
+  remainAmount Int?        @map("remain_amount")
+  status       PointStatus
+  fileId       Int         @unique @map("file_id")
+  file         File        @relation(fields: [fileId], references: [id])
+  member       Member      @relation(fields: [memberId], references: [id])
 
   @@map("points")
 }
 
 model CurrencyExchange {
-  id             Int                    @id @default(autoincrement())
-  memberId       Int?                   @map("member_id")
-  isActive       Boolean                @default(true) @map("is_active")
-  createdAt      DateTime               @default(now()) @map("created_at")
-  updatedAt      DateTime               @updatedAt @map("updated_at")
-  amount         Int                    @default(0) @map("amount")
-  exchangeStatus CurrencyExchangeStatus @map("exchange_status")
-  member         Member?                @relation(fields: [memberId], references: [id])
+  id        Int                    @id @default(autoincrement())
+  memberId  Int                    @map("member_id")
+  isActive  Boolean                @default(true) @map("is_active")
+  createdAt DateTime               @default(now()) @map("created_at")
+  updatedAt DateTime               @updatedAt @map("updated_at")
+  amount    Int                    @default(0) @map("amount")
+  status    CurrencyExchangeStatus
+  member    Member                 @relation(fields: [memberId], references: [id])
 
   @@map("currency_exchanges")
 }
@@ -1260,10 +1265,15 @@ model FaqFile {
   @@map("faq_files")
 }
 
-enum CurrencyExchangeStatus {
+enum PointStatus {
   REQUESTED
   COMPLETE
   DENY
+}
+
+enum CurrencyExchangeStatus {
+  REQUESTED
+  COMPLETE
 }
 
 enum BannerStatus {

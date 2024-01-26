@@ -4,8 +4,10 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
+import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberAdminService } from './member-admin.service';
+import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import {
     ChangeMemberRequest,
     DownloadMembersRequest,
@@ -14,6 +16,9 @@ import {
 } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
 import { MemberAdminGetListResponse } from './response/member-admin-get-list.response';
+import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
+import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
+import { MemberAdminGetPointListResponse } from './response/member-admin-get-point-list.response';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -39,6 +44,24 @@ export class MemberAdminController {
             memberIds = query.memberId.map((item) => parseInt(item));
         } else if (typeof query.memberId === 'string') memberIds = [parseInt(query.memberId)];
         return BaseResponse.of(await this.memberAdminService.download(memberIds, response));
+    }
+
+    @Get('/points')
+    async getPointList(@Query() query: MemberAdminGetPointListRequest): Promise<BaseResponse<MemberAdminGetPointListResponse>> {
+        return BaseResponse.of(await this.memberAdminService.getPointList(query));
+    }
+
+    @Get('/:id/points/general')
+    async getPointDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberAdminGetPointDetailResponse>> {
+        return BaseResponse.of(await this.memberAdminService.getPointDetail(id));
+    }
+
+    @Get('/:id/points')
+    async getPointDetailList(
+        @Param('id', ParseIntPipe) id: number,
+        @Query() query: PaginationRequest,
+    ): Promise<BaseResponse<MemberAdminGetPointDetailListResponse>> {
+        return BaseResponse.of(await this.memberAdminService.getPointDetailList(id, query));
     }
 
     @Get('/:id')

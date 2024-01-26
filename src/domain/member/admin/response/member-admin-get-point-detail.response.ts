@@ -1,4 +1,4 @@
-export class PointAdminGetDetailResponse {
+export class MemberAdminGetPointDetailResponse {
     name: string;
     contact: string;
     totalPoint: number;

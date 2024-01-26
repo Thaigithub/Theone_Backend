@@ -7,8 +7,10 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PointMemberService } from './point-member.service';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
+import { PointMemberCreateRequest } from './request/point-member-create-point.request';
+import { PointMemberGetListRequest } from './request/point-member-get-list.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
-import { PointMemberExchangeGetListResponse } from './response/point-member-get-exchange-list.response';
+import { PointMemberGetExchangeListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Controller('/member/points')
@@ -26,7 +28,7 @@ export class PointMemberController {
     async getExchangeList(
         @Req() req: BaseRequest,
         @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<PointMemberExchangeGetListResponse>> {
+    ): Promise<BaseResponse<PointMemberGetExchangeListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getExchangeList(req.user.accountId, query));
     }
 
@@ -38,8 +40,16 @@ export class PointMemberController {
         return BaseResponse.of(await this.pointMemberService.createCurrencyExchange(request.user.accountId, body));
     }
 
+    @Post()
+    async createPointHistory(@Req() req: BaseRequest, @Body() body: PointMemberCreateRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.pointMemberService.createPointHistory(req.user.accountId, body));
+    }
+
     @Get()
-    async getList(@Req() req: BaseRequest, @Query() query: PaginationRequest): Promise<BaseResponse<PointMemberGetListResponse>> {
+    async getList(
+        @Req() req: BaseRequest,
+        @Query() query: PointMemberGetListRequest,
+    ): Promise<BaseResponse<PointMemberGetListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getList(req.user.accountId, query));
     }
 }

@@ -42,7 +42,7 @@ export class AnnouncementAdminService {
                 },
                 ...QueryPagingHelper.queryPaging(query),
                 orderBy: {
-                    createdAt: 'desc',
+                    updatedAt: 'desc',
                 },
             })
         ).map((item) => {
