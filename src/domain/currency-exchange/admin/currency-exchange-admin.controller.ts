@@ -19,13 +19,8 @@ export class CurrencyExchangeAdminController {
         return BaseResponse.of(await this.currencyExchangeAdminService.getList(query));
     }
 
-    @Patch('/:id/approve')
-    async approve(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.currencyExchangeAdminService.approve(id));
-    }
-
-    @Patch('/:id/deny')
-    async deny(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.currencyExchangeAdminService.deny(id));
+    @Patch('/:id/status')
+    async updateStatus(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.currencyExchangeAdminService.updateStatus(id));
     }
 }

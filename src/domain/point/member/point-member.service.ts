@@ -1,13 +1,14 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CurrencyExchangeStatus } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { CurrencyExchangeStatus, PointStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { PointMemberStatus } from './enum/point-member-request-status.enum';
 import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member-create-currency-exchange.request';
+import { PointMemberCreateRequest } from './request/point-member-create-point.request';
+import { PointMemberGetListRequest } from './request/point-member-get-list.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
-import { PointMemberExchangeGetListResponse } from './response/point-member-get-exchange-list.response';
+import { PointMemberGetExchangeListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Injectable()
@@ -32,71 +33,36 @@ export class PointMemberService {
         };
     }
 
-    async checkApplyApplication(accountId: number) {
-        const member = await this.prismaService.member.findUnique({
-            where: {
+    async getList(accountId: number, query: PointMemberGetListRequest): Promise<PointMemberGetListResponse> {
+        const queryFilter: Prisma.PointWhereInput = {
+            member: {
                 accountId: accountId,
-                isActive: true,
             },
-            select: {
-                applyPosts: true,
-            },
-        });
-        if (!member) {
-            throw new NotFoundException('The member id is not found');
-        }
-        if (!member.applyPosts || member.applyPosts.length < 1) {
-            return false;
-        }
-        return true;
-    }
+            isActive: true,
+            ...(query.status && { status: query.status }),
+        };
 
-    async getList(accountId: number, query: PaginationRequest): Promise<PointMemberGetListResponse> {
-        if (!(await this.checkApplyApplication(accountId))) {
-            return {
-                status: PointMemberStatus.NOT_REQUESTED,
-                data: null,
-            };
-        }
         const points = await this.prismaService.point.findMany({
-            where: {
-                member: {
-                    accountId: accountId,
-                },
-                isActive: true,
-            },
+            where: queryFilter,
             select: {
                 createdAt: true,
                 reasonEarn: true,
                 amount: true,
+                status: true,
             },
             orderBy: {
                 createdAt: 'desc',
             },
             ...QueryPagingHelper.queryPaging(query),
         });
-        const pointCount = await this.prismaService.point.count({
-            where: {
-                member: {
-                    accountId: accountId,
-                },
-                isActive: true,
-            },
+        const count = await this.prismaService.point.count({
+            where: queryFilter,
         });
-        return {
-            status: PointMemberStatus.REQUESTED,
-            data: new PaginationResponse(points, new PageInfo(pointCount)),
-        };
+        return new PaginationResponse(points, new PageInfo(count));
     }
 
-    async getExchangeList(accountId: number, query: PaginationRequest): Promise<PointMemberExchangeGetListResponse> {
-        if (!(await this.checkApplyApplication(accountId))) {
-            return {
-                status: PointMemberStatus.NOT_REQUESTED,
-                data: null,
-            };
-        }
-        const points = await this.prismaService.currencyExchange.findMany({
+    async getExchangeList(accountId: number, query: PaginationRequest): Promise<PointMemberGetExchangeListResponse> {
+        const currentcyExchanges = await this.prismaService.currencyExchange.findMany({
             where: {
                 member: {
                     accountId: accountId,
@@ -106,16 +72,16 @@ export class PointMemberService {
             select: {
                 createdAt: true,
                 updatedAt: true,
-                exchangeStatus: true,
+                status: true,
                 amount: true,
             },
             orderBy: {
-                updatedAt: 'desc',
+                createdAt: 'desc',
             },
             ...QueryPagingHelper.queryPaging(query),
         });
 
-        const exchangeCount = await this.prismaService.currencyExchange.count({
+        const count = await this.prismaService.currencyExchange.count({
             where: {
                 member: {
                     accountId: accountId,
@@ -123,16 +89,38 @@ export class PointMemberService {
                 isActive: true,
             },
         });
-        return {
-            status: PointMemberStatus.NOT_REQUESTED,
-            data: new PaginationResponse(points, new PageInfo(exchangeCount)),
-        };
+        return new PaginationResponse(currentcyExchanges, new PageInfo(count));
+    }
+
+    async createPointHistory(accountId: number, body: PointMemberCreateRequest): Promise<void> {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                accountId: accountId,
+                isActive: true,
+            },
+            select: {
+                id: true,
+            },
+        });
+        await this.prismaService.point.create({
+            data: {
+                file: {
+                    create: {
+                        fileName: body.file.fileName,
+                        type: body.file.type,
+                        size: body.file.size,
+                        key: body.file.key,
+                    },
+                },
+                status: PointStatus.REQUESTED,
+                member: {
+                    connect: { id: member.id },
+                },
+            },
+        });
     }
 
     async createCurrencyExchange(accountId: number, body: PointMemberCreateCurrencyExchangeRequest) {
-        if (!(await this.checkApplyApplication(accountId))) {
-            throw new BadRequestException(`Member hasn't applied any post yet`);
-        }
         await this.prismaService.$transaction(async (prisma) => {
             const bankAccount = await prisma.bankAccount.findUnique({
                 where: {
@@ -183,7 +171,7 @@ export class PointMemberService {
                         },
                     },
                     amount: body.currencyExchangePoint,
-                    exchangeStatus: CurrencyExchangeStatus.REQUESTED,
+                    status: CurrencyExchangeStatus.REQUESTED,
                 },
             });
         });
