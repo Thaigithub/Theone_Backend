@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsNotEmptyObject, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsNotEmptyObject, IsOptional, IsString, MaxLength } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class AnnouncementAdminCreateRequest {
@@ -16,5 +16,7 @@ export class AnnouncementAdminCreateRequest {
     @Expose()
     @IsNotEmptyObject({}, { each: true })
     @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(3)
     files: FileRequest[];
 }

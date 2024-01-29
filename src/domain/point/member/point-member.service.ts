@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CurrencyExchangeStatus, PointStatus, Prisma } from '@prisma/client';
+import { PointStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -46,7 +46,7 @@ export class PointMemberService {
             where: queryFilter,
             select: {
                 createdAt: true,
-                reasonEarn: true,
+                reason: true,
                 amount: true,
                 status: true,
             },
@@ -112,7 +112,7 @@ export class PointMemberService {
                         key: body.file.key,
                     },
                 },
-                status: PointStatus.REQUESTED,
+                status: PointStatus.REQUESTING,
                 member: {
                     connect: { id: member.id },
                 },
@@ -158,7 +158,7 @@ export class PointMemberService {
                     isActive: true,
                 },
                 data: {
-                    totalPoint: member.totalPoint - body.currencyExchangePoint,
+                    totalPoint: { decrement: body.currencyExchangePoint },
                 },
             });
 
@@ -171,7 +171,7 @@ export class PointMemberService {
                         },
                     },
                     amount: body.currencyExchangePoint,
-                    status: CurrencyExchangeStatus.REQUESTED,
+                    status: PointStatus.REQUESTING,
                 },
             });
         });

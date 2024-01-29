@@ -13,7 +13,7 @@ export class MemberAdminGetPointListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(MemberAdminSearchCategoryFilter)
     @IsOptional()
-    searchCategory: MemberAdminSearchCategoryFilter;
+    category: MemberAdminSearchCategoryFilter;
 
     @Expose()
     @IsString()

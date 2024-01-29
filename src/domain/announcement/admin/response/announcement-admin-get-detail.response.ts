@@ -5,8 +5,5 @@ export class AnnouncementAdminGetDetailResponse {
     title: Announcement['title'];
     content: Announcement['content'];
     name: Admin['name'];
-    announcementFiles: {
-        id: number;
-        file: FileResponse;
-    }[];
+    files: FileResponse[];
 }

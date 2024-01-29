@@ -2,7 +2,7 @@ import { PointStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 class PointMemberResponse {
     createdAt: Date;
-    reasonEarn: string;
+    reason: string;
     amount: number;
     status: PointStatus;
 }
