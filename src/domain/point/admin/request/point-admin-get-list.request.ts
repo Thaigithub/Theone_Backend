@@ -1,12 +1,17 @@
 import { PointStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { CurrencyExchangeAdminSearchCategoryFilter } from '../dto/currency-exchange-admin-filter';
+import { PointAdminCategoryFilter } from '../enum/point-admin-category-filter';
 
-export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationRequest {
+export class PointAdminGetListRequest extends PaginationRequest {
     @Expose()
-    @IsDateString()
+    @IsOptional()
+    @IsEnum(PointStatus)
+    status: PointStatus;
+
+    @Expose()
+    @IsString()
     @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'Date must be in the format yyyy-mm-dd.',
@@ -14,7 +19,7 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
     startDate: string;
 
     @Expose()
-    @IsDateString()
+    @IsString()
     @IsOptional()
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'Date must be in the format yyyy-mm-dd.',
@@ -22,14 +27,9 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
     endDate: string;
 
     @Expose()
-    @IsEnum(PointStatus)
     @IsOptional()
-    status: PointStatus;
-
-    @Expose()
-    @IsOptional()
-    @IsEnum(CurrencyExchangeAdminSearchCategoryFilter)
-    category: CurrencyExchangeAdminSearchCategoryFilter;
+    @IsEnum(PointAdminCategoryFilter)
+    category: PointAdminCategoryFilter;
 
     @Expose()
     @IsString()

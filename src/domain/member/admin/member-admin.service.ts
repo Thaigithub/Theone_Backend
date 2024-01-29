@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerCertificationType, CareerType, Member as MemberPrisma, Prisma } from '@prisma/client';
+import { CareerCertificationType, CareerType, Member as MemberPrisma, PointStatus, Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { searchCategory } from './dto/member-admin-search-category.request.dto';
 import { MemberAdminSearchCategoryFilter } from './enum/member-admin-search-category.enum';
 import { MemberAdminSortCategoryFilter } from './enum/member-admin-sort-category.enum';
+import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
@@ -112,13 +112,13 @@ export class MemberAdminService {
     async getPointList(query: MemberAdminGetPointListRequest): Promise<MemberAdminGetPointListResponse> {
         const queryFilter: Prisma.MemberWhereInput = {
             isActive: true,
-            ...(query.searchCategory == MemberAdminSearchCategoryFilter.NAME && {
+            ...(query.category == MemberAdminSearchCategoryFilter.NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(query.searchCategory == MemberAdminSearchCategoryFilter.CONTACT && {
+            ...(query.category == MemberAdminSearchCategoryFilter.CONTACT && {
                 contact: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(!query.searchCategory &&
+            ...(!query.category &&
                 query.keyword && {
                     OR: [
                         { name: { contains: query.keyword, mode: 'insensitive' } },
@@ -341,15 +341,20 @@ export class MemberAdminService {
         } as MemberAdminGetPointDetailResponse;
     }
 
-    async getPointDetailList(id: number, query: PaginationRequest): Promise<MemberAdminGetPointDetailListResponse> {
+    async getPointDetailList(
+        id: number,
+        query: MemberAdminGetPoinDetailtListRequest,
+    ): Promise<MemberAdminGetPointDetailListResponse> {
+        const queryFilter: Prisma.PointWhereInput = {
+            memberId: id,
+            isActive: true,
+            ...(query.status && { status: query.status }),
+        };
         const points = await this.prismaService.point.findMany({
-            where: {
-                memberId: id,
-                isActive: true,
-            },
+            where: queryFilter,
             select: {
-                createdAt: true,
-                reasonEarn: true,
+                updateAt: true,
+                reason: true,
                 amount: true,
                 remainAmount: true,
                 status: true,
@@ -360,17 +365,15 @@ export class MemberAdminService {
             ...QueryPagingHelper.queryPaging(query),
         });
         const count = await this.prismaService.point.count({
-            where: {
-                memberId: id,
-                isActive: true,
-            },
+            where: queryFilter,
         });
         const results = points.map((item) => {
             return {
-                createAt: item.createdAt,
-                reasonEarn: item.reasonEarn,
-                amount: item.amount,
-                remainAmount: item.remainAmount,
+                completeDate: item.status !== PointStatus.APPROVED && item.status !== PointStatus.REJECTED ? null : item.updateAt,
+                reason: item.reason,
+                amount: item.status !== PointStatus.APPROVED ? null : item.amount,
+                remainAmount:
+                    item.status !== PointStatus.APPROVED && item.status !== PointStatus.REJECTED ? null : item.remainAmount,
                 status: item.status,
             };
         });

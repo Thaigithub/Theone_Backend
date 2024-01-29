@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CurrencyExchangeStatus, Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PointStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CurrencyExchangeAdminSearchCategoryFilter } from './dto/currency-exchange-admin-filter';
 import { CurrencyExchangeAdminGetExchangeListRequest } from './request/currency-exchange-admin-get-list.request';
+import { CurrencyExchangeAdminUpdateRequest } from './request/currency-exchange-admin-update.request';
 import { CurrencyExchangeAdminGetListResponse } from './response/currency-exchange-admin-get-list.response';
 
 @Injectable()
@@ -13,21 +14,22 @@ export class CurrencyExchangeAdminService {
     async getList(query: CurrencyExchangeAdminGetExchangeListRequest): Promise<CurrencyExchangeAdminGetListResponse> {
         const queryFilter: Prisma.CurrencyExchangeWhereInput = {
             isActive: true,
-            ...(query.refundStatus && { exchangeStatus: query.refundStatus }),
-            updatedAt: {
-                gte: query.startDate ? new Date(query.endDate).toISOString() : undefined,
-                lte: query.endDate ? new Date(query.endDate).toISOString() : undefined,
-            },
-            createdAt: {
-                gte: query.startDate ? new Date(query.endDate).toISOString() : undefined,
-                lte: query.endDate ? new Date(query.endDate).toISOString() : undefined,
-            },
-            ...(query.searchCategory == CurrencyExchangeAdminSearchCategoryFilter.NAME && {
-                name: { contains: query.searchTerm, mode: 'insensitive' },
+            ...(query.status && { status: query.status }),
+            ...((query.startDate || query.endDate) && {
+                status: PointStatus.APPROVED,
+                updatedAt: {
+                    gte: query.startDate ? new Date(query.startDate).toISOString() : undefined,
+                    lte: query.endDate ? new Date(query.endDate).toISOString() : undefined,
+                },
             }),
-            ...(query.searchCategory == CurrencyExchangeAdminSearchCategoryFilter.CONTACT && {
-                contact: { contains: query.searchTerm, mode: 'insensitive' },
-            }),
+            member: {
+                ...(query.category == CurrencyExchangeAdminSearchCategoryFilter.NAME && {
+                    name: { contains: query.keyword, mode: 'insensitive' },
+                }),
+                ...(query.category == CurrencyExchangeAdminSearchCategoryFilter.CONTACT && {
+                    contact: { contains: query.keyword, mode: 'insensitive' },
+                }),
+            },
         };
         const currencyExchanges = (
             await this.prismaService.currencyExchange.findMany({
@@ -59,12 +61,11 @@ export class CurrencyExchangeAdminService {
         ).map((item) => {
             return {
                 id: item.id,
-                memberId: item.member.id,
                 name: item.member.name,
                 contact: item.member.contact,
                 amount: item.amount,
-                exchangeStatus: item.status,
-                updatedAt: item.updatedAt,
+                status: item.status,
+                completeDate: item.status === PointStatus.APPROVED || item.status === PointStatus.REJECTED ? item.updatedAt : null,
                 bankName: item.member.bankAccount ? item.member.bankAccount.bankName : null,
                 accountNumber: item.member.bankAccount ? item.member.bankAccount.accountNumber : null,
             };
@@ -76,7 +77,7 @@ export class CurrencyExchangeAdminService {
         return new PaginationResponse(currencyExchanges, new PageInfo(currencyExchangeCount));
     }
 
-    async getCurrencyExchange(id: number) {
+    async update(id: number, body: CurrencyExchangeAdminUpdateRequest): Promise<void> {
         const currencyExchange = await this.prismaService.currencyExchange.findUnique({
             where: {
                 id: id,
@@ -86,31 +87,43 @@ export class CurrencyExchangeAdminService {
                 },
             },
             select: {
-                memberId: true,
                 status: true,
                 amount: true,
+                memberId: true,
             },
         });
         if (!currencyExchange) {
             throw new NotFoundException(`The currency exchange request with id = ${id} is not exist`);
         }
-        return currencyExchange;
-    }
-
-    async updateStatus(id: number): Promise<void> {
-        await this.prismaService.$transaction(async (prisma) => {
-            const currencyExchange = await this.getCurrencyExchange(id);
-            if (currencyExchange.status !== CurrencyExchangeStatus.COMPLETE) {
+        if (body.status === PointStatus.APPROVED && currencyExchange.status !== PointStatus.REQUESTING) {
+            throw new BadRequestException('Invalid state transition request');
+        } else if (body.status === PointStatus.REJECTED && (currencyExchange.status !== PointStatus.REQUESTING || !body.reason)) {
+            throw new BadRequestException('Invalid state transition request');
+        }
+        if (currencyExchange.status === PointStatus.REQUESTING) {
+            await this.prismaService.$transaction(async (prisma) => {
                 await prisma.currencyExchange.update({
                     where: {
                         id: id,
-                        isActive: true,
                     },
                     data: {
-                        status: CurrencyExchangeStatus.COMPLETE,
+                        status: body.status,
+                        ...(body.status === PointStatus.REJECTED && {
+                            reason: body.reason,
+                        }),
                     },
                 });
-            }
-        });
+                if (body.status === PointStatus.REJECTED) {
+                    await prisma.member.update({
+                        where: {
+                            id: currencyExchange.memberId,
+                        },
+                        data: {
+                            totalPoint: { increment: currencyExchange.amount },
+                        },
+                    });
+                }
+            });
+        }
     }
 }

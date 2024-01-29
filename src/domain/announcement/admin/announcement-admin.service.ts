@@ -1,12 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { FileResponse } from 'utils/generics/file.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AnnouncementAdminCreateRequest } from './request/announcement-admin-create.request';
 import { AnnouncementAdminGetListRequest } from './request/announcement-admin-get-list.request';
-import { AnnouncementAdminUpdateRequest } from './request/announcement-admin-update.request';
 import { AnnouncementAdminGetDetailResponse } from './response/announcement-admin-get-detail.response';
 import { AnnouncementAdminGetListResponse } from './response/announcement-admin-get-list.response';
 
@@ -27,7 +25,7 @@ export class AnnouncementAdminService {
                 where: queryFilter,
                 select: {
                     id: true,
-                    updatedAt: true,
+                    createdAt: true,
                     title: true,
                     content: true,
                     account: {
@@ -42,13 +40,13 @@ export class AnnouncementAdminService {
                 },
                 ...QueryPagingHelper.queryPaging(query),
                 orderBy: {
-                    updatedAt: 'desc',
+                    createdAt: 'desc',
                 },
             })
         ).map((item) => {
             return {
                 id: item.id,
-                updatedAt: item.updatedAt,
+                createdAt: item.createdAt,
                 title: item.title,
                 content: item.content,
                 name: item.account.admin.name,
@@ -108,15 +106,12 @@ export class AnnouncementAdminService {
             title: record.title,
             content: record.content,
             name: record.account.admin.name,
-            announcementFiles: record.announcementFiles.map((item) => {
+            files: record.announcementFiles.map((item) => {
                 return {
-                    id: item.id,
-                    file: {
-                        fileName: item.file.fileName,
-                        type: item.file.type,
-                        key: item.file.key,
-                        size: Number(item.file.size),
-                    } as FileResponse,
+                    fileName: item.file.fileName,
+                    type: item.file.type,
+                    key: item.file.key,
+                    size: Number(item.file.size),
                 };
             }),
         };
@@ -167,7 +162,7 @@ export class AnnouncementAdminService {
         });
     }
 
-    async update(accountId: number, id: number, body: AnnouncementAdminUpdateRequest): Promise<void> {
+    async update(accountId: number, id: number, body: AnnouncementAdminCreateRequest): Promise<void> {
         const record = await this.prismaService.announcement.findUnique({
             where: {
                 id: id,
@@ -187,16 +182,12 @@ export class AnnouncementAdminService {
         if (!record) {
             throw new NotFoundException('The announcement is not found');
         }
-
-        const ids =
-            body.removeFileIds && body.removeFileIds.length > 0
-                ? record.announcementFiles.filter((file) => body.removeFileIds.includes(file.id)).map((item) => item.id)
-                : null;
-        const maximumFiles = record.announcementFiles.length + body.files.length - (ids ? ids.length : 0);
-        if (maximumFiles > 3) {
-            throw new ConflictException('Maximum number of files is 3');
-        }
         await this.prismaService.$transaction(async (prisma) => {
+            await prisma.announcementFile.deleteMany({
+                where: {
+                    anouncementId: id,
+                },
+            });
             await prisma.announcement.update({
                 where: {
                     id: id,
@@ -206,19 +197,6 @@ export class AnnouncementAdminService {
                     title: body.title,
                     content: body.content,
                     accountId: accountId,
-                    ...(ids &&
-                        ids.length > 0 && {
-                            announcementFiles: {
-                                updateMany: {
-                                    where: {
-                                        id: { in: ids },
-                                    },
-                                    data: {
-                                        isActive: false,
-                                    },
-                                },
-                            },
-                        }),
                 },
             });
             for (const file of body.files) {
@@ -243,35 +221,21 @@ export class AnnouncementAdminService {
         });
     }
 
-    async delete(accountId: number, id: number): Promise<void> {
-        const announcement = await this.prismaService.announcement.findUnique({
-            where: {
-                id: id,
-                isActive: true,
-            },
-        });
-        if (!announcement) {
-            throw new NotFoundException('The announcement has been deleted');
-        }
+    async delete(accountId: number, ids: number[]): Promise<void> {
         await this.prismaService.$transaction(async (prisma) => {
-            await prisma.announcement.update({
+            await prisma.announcement.updateMany({
                 where: {
-                    id: id,
+                    id: { in: ids },
                     isActive: true,
                 },
                 data: {
                     isActive: false,
                     accountId: accountId,
-                    announcementFiles: {
-                        updateMany: {
-                            where: {
-                                isActive: true,
-                            },
-                            data: {
-                                isActive: false,
-                            },
-                        },
-                    },
+                },
+            });
+            await prisma.announcementFile.deleteMany({
+                where: {
+                    anouncementId: { in: ids },
                 },
             });
         });

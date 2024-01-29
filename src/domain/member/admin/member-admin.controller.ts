@@ -4,9 +4,9 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemberAdminService } from './member-admin.service';
+import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import {
     ChangeMemberRequest,
@@ -46,20 +46,20 @@ export class MemberAdminController {
         return BaseResponse.of(await this.memberAdminService.download(memberIds, response));
     }
 
-    @Get('/points')
+    @Get('/point')
     async getPointList(@Query() query: MemberAdminGetPointListRequest): Promise<BaseResponse<MemberAdminGetPointListResponse>> {
         return BaseResponse.of(await this.memberAdminService.getPointList(query));
     }
 
-    @Get('/:id/points/general')
+    @Get('/:id/point/general')
     async getPointDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberAdminGetPointDetailResponse>> {
         return BaseResponse.of(await this.memberAdminService.getPointDetail(id));
     }
 
-    @Get('/:id/points')
+    @Get('/:id/point')
     async getPointDetailList(
         @Param('id', ParseIntPipe) id: number,
-        @Query() query: PaginationRequest,
+        @Query() query: MemberAdminGetPoinDetailtListRequest,
     ): Promise<BaseResponse<MemberAdminGetPointDetailListResponse>> {
         return BaseResponse.of(await this.memberAdminService.getPointDetailList(id, query));
     }

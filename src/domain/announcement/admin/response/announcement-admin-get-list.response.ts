@@ -3,7 +3,7 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class AnnouncementAdminResponse {
     id: Announcement['id'];
-    updatedAt: Announcement['updatedAt'];
+    createdAt: Announcement['createdAt'];
     title: Announcement['title'];
     content: Announcement['content'];
     name: Admin['name'];
