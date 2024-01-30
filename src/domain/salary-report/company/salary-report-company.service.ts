@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { SalaryReportCompanyCreateRequest } from './request/salary-report-company-create.request';
 import { SalaryReportCompanyGetListResponse } from './response/salary-report-company-get-list.response';
@@ -24,19 +24,6 @@ export class SalaryReportCompanyService {
                     },
                 });
                 if (!siteExist) throw new NotFoundException(`Site with id: ${item} does not exist`);
-
-                const salaryReportExist = await this.prismaService.salaryReport.findUnique({
-                    where: {
-                        isActive: true,
-                        siteId: item,
-                        site: {
-                            company: {
-                                accountId,
-                            },
-                        },
-                    },
-                });
-                if (salaryReportExist) throw new BadRequestException(`Salary report for site_id: ${item} already existed`);
             }),
         );
         await this.prismaService.salaryReport.createMany({

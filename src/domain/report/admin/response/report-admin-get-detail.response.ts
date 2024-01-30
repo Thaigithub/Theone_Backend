@@ -8,7 +8,7 @@ export class ReportAdminGetDetailResponse {
     reportType: Report['reportType'];
     status: Report['status'];
     createAt: Report['createdAt'];
-    questionFile: FileResponse;
+    questionFiles: FileResponse[];
     memberName: Member['name'];
     memberContact: Member['contact'];
 }

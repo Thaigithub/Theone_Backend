@@ -16,8 +16,8 @@ export class ReportAdminService {
         const report = await this.prismaService.report.findUnique({
             include: {
                 member: true,
-                questionFile: true,
-                answerFile: true,
+                questionFiles: true,
+                answerFiles: true,
             },
             where: {
                 isActive: true,
@@ -39,8 +39,10 @@ export class ReportAdminService {
             data: {
                 answerTitle: body.title,
                 answerContent: body.content,
-                answerFile: {
-                    create: body.file,
+                answerFiles: {
+                    createMany: {
+                        data: body.files,
+                    },
                 },
                 status: AnswerStatus.COMPLETE,
             },
@@ -88,12 +90,15 @@ export class ReportAdminService {
             id: report.id,
             questionTitle: report.questionTitle,
             questionContent: report.questionContent,
-            questionFile: {
-                fileName: report.questionFile?.fileName || null,
-                type: report.questionFile?.type || null,
-                key: report.questionFile?.key || null,
-                size: report.questionFile ? Number(report.questionFile.size) : null,
-            },
+            questionFiles:
+                report.questionFiles?.map((item) => {
+                    return {
+                        fileName: item.fileName,
+                        type: item.type,
+                        key: item.key,
+                        size: Number(item.size),
+                    };
+                }) || [],
             reportType: report.reportType,
             createAt: report.createdAt,
             status: report.status,

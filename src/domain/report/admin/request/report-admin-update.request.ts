@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsOptional, IsString } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class ReportAdminUpdateRequest {
@@ -13,5 +13,7 @@ export class ReportAdminUpdateRequest {
 
     @Expose()
     @IsOptional()
-    file: FileRequest;
+    @IsArray()
+    @ArrayMaxSize(3)
+    files: FileRequest[];
 }

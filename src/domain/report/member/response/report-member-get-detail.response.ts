@@ -5,12 +5,12 @@ export class ReportMemberGetDetailResponse {
     id: Report['id'];
     questionTitle: Report['questionTitle'];
     questionContent: Report['questionContent'];
-    questionFile: FileResponse;
+    questionFiles: FileResponse[];
     reportType: Report['reportType'];
     createAt: Report['createdAt'];
     status: Report['status'];
     answerTitle: Report['answerTitle'];
     answerContent: Report['answerContent'];
-    answerFile: FileResponse;
+    answerFiles: FileResponse[];
     answeredAt: Report['answeredAt'];
 }
