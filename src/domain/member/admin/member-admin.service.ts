@@ -353,7 +353,7 @@ export class MemberAdminService {
         const points = await this.prismaService.point.findMany({
             where: queryFilter,
             select: {
-                updateAt: true,
+                updatedAt: true,
                 reason: true,
                 amount: true,
                 remainAmount: true,
@@ -369,7 +369,7 @@ export class MemberAdminService {
         });
         const results = points.map((item) => {
             return {
-                completeDate: item.status !== PointStatus.APPROVED && item.status !== PointStatus.REJECTED ? null : item.updateAt,
+                completeAt: item.status !== PointStatus.APPROVED && item.status !== PointStatus.REJECTED ? null : item.updatedAt,
                 reason: item.reason,
                 amount: item.status !== PointStatus.APPROVED ? null : item.amount,
                 remainAmount:

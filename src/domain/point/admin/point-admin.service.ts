@@ -58,12 +58,12 @@ export class PointAdminService {
                             contact: true,
                         },
                     },
-                    updateAt: true,
+                    updatedAt: true,
                     status: true,
                     file: true,
                 },
                 orderBy: {
-                    createdAt: 'desc',
+                    updatedAt: 'desc',
                 },
                 ...QueryPagingHelper.queryPaging(query),
             })
@@ -72,7 +72,7 @@ export class PointAdminService {
                 id: item.id,
                 name: item.member.name,
                 contact: item.member.contact,
-                completeDate: item.status === PointStatus.APPROVED ? item.updateAt : null,
+                completeAt: item.status === PointStatus.APPROVED ? item.updatedAt : null,
                 status: item.status,
                 file: {
                     fileName: item.file.fileName,
@@ -108,11 +108,11 @@ export class PointAdminService {
         if (!point) {
             throw new NotFoundException('The point request id is not found');
         }
-        if (body.status === PointStatus.APPROVED && !body.amount) {
+        if (body.status === PointStatus.APPROVED && (!body.amount || !body.reason)) {
             throw new BadRequestException('Appprove must include the amount point and reason to give');
         }
         if (body.status === PointStatus.REJECTED && !body.reason) {
-            throw new BadRequestException('Reject must include the reason the deny the request');
+            throw new BadRequestException('Reject must include the reason to deny the request');
         }
         if (point.status === PointStatus.REQUESTING) {
             await this.prismaService.$transaction(async (prisma) => {

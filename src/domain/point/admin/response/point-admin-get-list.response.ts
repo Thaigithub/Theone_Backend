@@ -6,7 +6,7 @@ class PointAdminGetResponse {
     id: Point['id'];
     name: Member['name'];
     contact: Member['contact'];
-    completeDate: Point['updateAt'];
+    completeAt: Point['updatedAt'];
     status: Point['status'];
     file: FileResponse;
 }

@@ -10,7 +10,6 @@ import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member
 import { PointMemberCreateRequest } from './request/point-member-create-point.request';
 import { PointMemberGetListRequest } from './request/point-member-get-list.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
-import { PointMemberGetExchangeListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Controller('/member/points')
@@ -28,7 +27,7 @@ export class PointMemberController {
     async getExchangeList(
         @Req() req: BaseRequest,
         @Query() query: PaginationRequest,
-    ): Promise<BaseResponse<PointMemberGetExchangeListResponse>> {
+    ): Promise<BaseResponse<PointMemberGetListResponse>> {
         return BaseResponse.of(await this.pointMemberService.getExchangeList(req.user.accountId, query));
     }
 

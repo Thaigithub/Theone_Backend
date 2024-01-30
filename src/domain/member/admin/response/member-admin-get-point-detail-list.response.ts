@@ -2,7 +2,7 @@ import { PointStatus } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 class MemberAdminGetPointDetailResponse {
-    completeDate: Date;
+    completeAt: Date;
     reason: string;
     amount: number;
     remainAmount: number;

@@ -943,7 +943,7 @@ model Point {
   memberId     Int         @map("member_id")
   isActive     Boolean     @default(true) @map("is_active")
   createdAt    DateTime    @default(now()) @map("created_at")
-  updateAt     DateTime    @updatedAt @map("update_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
   reason       String?
   amount       Int?        @map("amount")
   remainAmount Int?        @map("remain_amount")
