@@ -82,8 +82,8 @@ export class NotificationMemberService {
                 },
             },
         });
-        if (!Notification) {
-            throw new NotFoundException('The Notification id is not found');
+        if (!notification) {
+            throw new NotFoundException('The notification id is not found');
         }
         await this.prismaService.notification.update({
             where: {

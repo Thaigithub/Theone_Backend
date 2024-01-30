@@ -492,7 +492,6 @@ export class ApplicationCompanyService {
         const application = await this.prismaService.team.findUnique({
             where: {
                 id: team.teamId,
-                isActive: true,
             },
             select: {
                 name: true,
