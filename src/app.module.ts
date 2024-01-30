@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AnnouncementModule } from 'domain/announcement/announcement.module';
 import { ApplicationModule } from 'domain/application/application.module';
+import { BankModule } from 'domain/bank/bank.module';
 import { BannerModule } from 'domain/banner/banner.module';
 import { CodeModule } from 'domain/code/code.module';
 import { ContractModule } from 'domain/contract/contract.module';
@@ -8,7 +9,6 @@ import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchan
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FaqModule } from 'domain/faq/faq.module';
 import { FileModule } from 'domain/file/file.module';
-import { FilterModule } from 'domain/filter/filter.module';
 import { HeadhuntingModule } from 'domain/headhunting/headhunting.module';
 import { InquiryModule } from 'domain/inquiry/inquiry.module';
 import { InterestModule } from 'domain/interest/interest.module';
@@ -40,7 +40,6 @@ import { PrismaModule } from './services/prisma/prisma.module';
 
 @Module({
     imports: [
-        FilterModule,
         PrismaModule,
         AccountModule,
         AuthModule,
@@ -78,6 +77,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         MemoModule,
         CrobJobModule,
         LaborConsultationModule,
+        BankModule,
     ],
 })
 export class AppModule {}

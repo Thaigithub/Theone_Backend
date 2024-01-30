@@ -324,11 +324,13 @@ model File {
   questionInquiryFiles           InquiryFile[]                 @relation("question_file")
   answerInquiryFiles             InquiryFile[]                 @relation("answer_file")
   faqFile                        FaqFile?
-  questionReport                 Report?                       @relation("question_file")
-  answerReport                   Report?                       @relation("answer_file")
+  questionReport                 Report?                       @relation("question_files", fields: [questionReportId], references: [id])
+  answerReport                   Report?                       @relation("answer_files", fields: [answerReportId], references: [id])
   questionLaborConsultationFiles LaborConsultationFile[]       @relation("question_file")
   answerLaborConsultationFiles   LaborConsultationFile[]       @relation("answer_file")
   point                          Point?
+  questionReportId               Int?
+  answerReportId                 Int?
 
   @@map("files")
 }
@@ -523,7 +525,7 @@ model Site {
   company                   Company                     @relation(fields: [companyId], references: [id])
   district                  District                    @relation(fields: [districtId], references: [id])
   teamEvaluationByCompany   TeamEvaluationByCompany[]
-  salaryReport              SalaryReport?
+  salaryReport              SalaryReport[]
 
   @@map("sites")
 }
@@ -1117,7 +1119,7 @@ model SalaryReport {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
   isAdminDeleted Boolean  @default(false) @map("is_admin_deleted")
-  siteId         Int      @unique @map("site_id")
+  siteId         Int      @map("site_id")
   site           Site     @relation(fields: [siteId], references: [id])
 
   @@map("salary_reports")
@@ -1170,15 +1172,13 @@ model Report {
   memberId        Int          @map("member_id")
   questionTitle   String       @map("question_title")
   questionContent String       @map("question_content")
-  questionFileId  Int?         @unique @map("question_file_id")
   answerTitle     String       @default("") @map("answer_title")
   answerContent   String       @default("") @map("answer_content")
-  answerFileId    Int?         @unique @map("answer_file_id")
   reportType      ReportType   @map("report_type")
   status          AnswerStatus @default(WAITING)
   member          Member       @relation(fields: [memberId], references: [id])
-  questionFile    File?        @relation("question_file", fields: [questionFileId], references: [id])
-  answerFile      File?        @relation("answer_file", fields: [answerFileId], references: [id])
+  questionFiles   File[]       @relation("question_files")
+  answerFiles     File[]       @relation("answer_files")
 
   @@map("reports")
 }

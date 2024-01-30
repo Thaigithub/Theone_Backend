@@ -1,6 +1,6 @@
 import { ReportType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 import { FileRequest } from 'utils/generics/file.request';
 
 export class ReportMemberCreateRequest {
@@ -18,5 +18,7 @@ export class ReportMemberCreateRequest {
 
     @Expose()
     @IsOptional()
-    file: FileRequest;
+    @IsArray()
+    @ArrayMaxSize(3)
+    files: FileRequest[];
 }

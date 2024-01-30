@@ -23,8 +23,10 @@ export class ReportMemberService {
                 questionTitle: body.title,
                 questionContent: body.content,
                 reportType: body.type,
-                questionFile: {
-                    create: body.file,
+                questionFiles: {
+                    createMany: {
+                        data: body.files,
+                    },
                 },
             },
         });
@@ -59,8 +61,8 @@ export class ReportMemberService {
     async getDetail(accountId: number, reportId: number): Promise<ReportMemberGetDetailResponse> {
         const report = await this.prismaService.report.findUnique({
             include: {
-                questionFile: true,
-                answerFile: true,
+                questionFiles: true,
+                answerFiles: true,
             },
             where: {
                 isActive: true,
@@ -75,23 +77,29 @@ export class ReportMemberService {
             id: report.id,
             questionTitle: report.questionTitle,
             questionContent: report.questionContent,
-            questionFile: {
-                fileName: report.questionFile?.fileName || null,
-                type: report.questionFile?.type || null,
-                key: report.questionFile?.key || null,
-                size: report.questionFile ? Number(report.questionFile.size) : null,
-            },
+            questionFiles:
+                report.questionFiles?.map((item) => {
+                    return {
+                        fileName: item.fileName,
+                        type: item.type,
+                        key: item.key,
+                        size: Number(item.size),
+                    };
+                }) || [],
             reportType: report.reportType,
             createAt: report.createdAt,
             status: report.status,
             answerTitle: report.answerTitle,
             answerContent: report.answerContent,
-            answerFile: {
-                fileName: report.answerFile?.fileName || null,
-                type: report.answerFile?.type || null,
-                key: report.answerFile?.key || null,
-                size: report.answerFile ? Number(report.answerFile.size) : null,
-            },
+            answerFiles:
+                report.answerFiles?.map((item) => {
+                    return {
+                        fileName: item.fileName,
+                        type: item.type,
+                        key: item.key,
+                        size: Number(item.size),
+                    };
+                }) || [],
             answeredAt: report.answeredAt,
         };
     }
