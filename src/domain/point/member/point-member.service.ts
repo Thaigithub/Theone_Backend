@@ -8,7 +8,6 @@ import { PointMemberCreateCurrencyExchangeRequest } from './request/point-member
 import { PointMemberCreateRequest } from './request/point-member-create-point.request';
 import { PointMemberGetListRequest } from './request/point-member-get-list.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
-import { PointMemberGetExchangeListResponse } from './response/point-member-get-exchange-list.response';
 import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
 
 @Injectable()
@@ -42,18 +41,31 @@ export class PointMemberService {
             ...(query.status && { status: query.status }),
         };
 
-        const points = await this.prismaService.point.findMany({
-            where: queryFilter,
-            select: {
-                createdAt: true,
-                reason: true,
-                amount: true,
-                status: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            ...QueryPagingHelper.queryPaging(query),
+        const points = (
+            await this.prismaService.point.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    reason: true,
+                    amount: true,
+                    status: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                createdAt: item.createdAt,
+                completeAt: item.status == PointStatus.APPROVED ? item.updatedAt : null,
+                reason: item.status !== PointStatus.REQUESTING ? item.reason : null,
+                amount: item.amount,
+                status: item.status,
+            };
         });
         const count = await this.prismaService.point.count({
             where: queryFilter,
@@ -61,24 +73,37 @@ export class PointMemberService {
         return new PaginationResponse(points, new PageInfo(count));
     }
 
-    async getExchangeList(accountId: number, query: PaginationRequest): Promise<PointMemberGetExchangeListResponse> {
-        const currentcyExchanges = await this.prismaService.currencyExchange.findMany({
-            where: {
-                member: {
-                    accountId: accountId,
+    async getExchangeList(accountId: number, query: PaginationRequest): Promise<PointMemberGetListResponse> {
+        const currentcyExchanges = (
+            await this.prismaService.currencyExchange.findMany({
+                where: {
+                    member: {
+                        accountId: accountId,
+                    },
+                    isActive: true,
                 },
-                isActive: true,
-            },
-            select: {
-                createdAt: true,
-                updatedAt: true,
-                status: true,
-                amount: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            ...QueryPagingHelper.queryPaging(query),
+                select: {
+                    id: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    reason: true,
+                    status: true,
+                    amount: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                createdAt: item.createdAt,
+                completeAt: item.status == PointStatus.APPROVED ? item.updatedAt : null,
+                reason: item.status !== PointStatus.REQUESTING ? item.reason : null,
+                amount: item.amount,
+                status: item.status,
+            };
         });
 
         const count = await this.prismaService.currencyExchange.count({
