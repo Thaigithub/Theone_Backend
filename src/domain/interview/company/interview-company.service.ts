@@ -50,12 +50,12 @@ export class InterviewCompanyService {
                     },
                 },
             }),
-            ...(query.result && { interviewStatus: query.result }),
+            ...(query.result && { status: query.result }),
             ...(query.startDate && {
-                interviewRequestDate: { gte: new Date(query.startDate) },
+                requestDate: { gte: new Date(query.startDate) },
             }),
             ...(query.endDate && {
-                interviewRequestDate: { lte: new Date(query.endDate) },
+                requestDate: { lte: new Date(query.endDate) },
             }),
             ...(query.keyword && {
                 OR: [

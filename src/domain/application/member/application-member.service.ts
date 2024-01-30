@@ -524,21 +524,16 @@ export class ApplicationMemberService {
                 query.where = {
                     ...query.where,
                     ...{
-                        interview: {
-                            status: InterviewStatus.PASS,
-                        },
                         post: {
                             name: {
                                 contains: body.postName,
                                 mode: 'insensitive',
                             },
+                            endDate: {
+                                lte: new Date(),
+                            },
                         },
-                        NOT: {
-                            OR: [
-                                { status: PostApplicationStatus.APPROVE_BY_MEMBER },
-                                { status: PostApplicationStatus.REJECT_BY_MEMBER },
-                            ],
-                        },
+                        status: PostApplicationStatus.APPLY,
                     },
                 };
                 break;
@@ -600,6 +595,7 @@ export class ApplicationMemberService {
                 break;
             }
         }
+
         const offer = (await this.prismaService.application.findMany(query)).map((item) => {
             return {
                 isLeader: item.team ? item.team.leader.accountId === accountId : null,

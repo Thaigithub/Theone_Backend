@@ -956,15 +956,15 @@ model Point {
 }
 
 model CurrencyExchange {
-  id        Int                    @id @default(autoincrement())
-  memberId  Int                    @map("member_id")
-  isActive  Boolean                @default(true) @map("is_active")
-  createdAt DateTime               @default(now()) @map("created_at")
-  updatedAt DateTime               @updatedAt @map("updated_at")
+  id        Int         @id @default(autoincrement())
+  memberId  Int         @map("member_id")
+  isActive  Boolean     @default(true) @map("is_active")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
   reason    String?
-  amount    Int                    @default(0) @map("amount")
+  amount    Int         @default(0) @map("amount")
   status    PointStatus
-  member    Member                 @relation(fields: [memberId], references: [id])
+  member    Member      @relation(fields: [memberId], references: [id])
 
   @@map("currency_exchanges")
 }
@@ -1275,6 +1275,7 @@ enum PointStatus {
   APPROVED
   REJECTED
 }
+
 enum BannerStatus {
   HIDE
   EXPOSE
