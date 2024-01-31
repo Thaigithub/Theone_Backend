@@ -28,5 +28,6 @@ export class TeamAdminGetListRecommendationRequest extends PaginationRequest {
 
     @Expose()
     @IsString()
+    @IsOptional()
     keyword: string;
 }
