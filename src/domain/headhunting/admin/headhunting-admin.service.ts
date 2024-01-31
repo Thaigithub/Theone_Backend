@@ -30,7 +30,10 @@ export class HeadhuntingAdminService {
                 post: { site: { name: { contains: query.keyword, mode: 'insensitive' } } },
             }),
             paymentStatus: query.paymentStatus,
-            paymentDate: query.paymentDate && new Date(query.paymentDate),
+            paymentDate: {
+                gte: query.startPaymentDate && new Date(query.startPaymentDate),
+                lte: query.endPaymentDate && new Date(query.endPaymentDate),
+            },
         };
 
         const list = await this.prismaService.headhunting.findMany({

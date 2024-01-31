@@ -5,6 +5,7 @@ import { BankModule } from 'domain/bank/bank.module';
 import { BannerModule } from 'domain/banner/banner.module';
 import { CodeModule } from 'domain/code/code.module';
 import { ContractModule } from 'domain/contract/contract.module';
+import { CurrencyExchangeModule } from 'domain/currency-exchange/currency-exchange.module';
 import { EvaluationModule } from 'domain/evaluation/evaluation.module';
 import { FaqModule } from 'domain/faq/faq.module';
 import { FileModule } from 'domain/file/file.module';
@@ -15,8 +16,10 @@ import { InterviewModule } from 'domain/interview/interview.module';
 import { LaborConsultationModule } from 'domain/labor-consultation/labor-consultation.module';
 import { LaborModule } from 'domain/labor/labor.module';
 import { LicenseModule } from 'domain/license/license.module';
+import { MatchingModule } from 'domain/matching/matching.module';
 import { MemberModule } from 'domain/member/member.module';
 import { MemoModule } from 'domain/memo/memo.module';
+import { PointModule } from 'domain/point/point.module';
 import { PostModule } from 'domain/post/post.module';
 import { PreferenceModule } from 'domain/preference/preference.module';
 import { ProductModule } from 'domain/product/product.module';
@@ -57,12 +60,12 @@ import { PrismaModule } from './services/prisma/prisma.module';
         InterviewModule,
         HeadhuntingModule,
         ContractModule,
-        // MatchingModule,
+        MatchingModule,
         RegionModule,
         LaborModule,
-        // PointModule,
+        PointModule,
         ProductModule,
-        // CurrencyExchangeModule,
+        CurrencyExchangeModule,
         NotificationModule,
         InterestModule,
         PreferenceModule,
