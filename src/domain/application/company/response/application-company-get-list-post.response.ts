@@ -14,20 +14,24 @@ export class GetListPostResponse {
             licenseNumber: License['licenseNumber'];
         }[];
         desiredSalary: Member['desiredSalary'];
-        region: {
-            cityEnglishName: Region['cityEnglishName'];
-            cityKoreanName: Region['cityKoreanName'];
-            districtEnglishName: Region['districtEnglishName'];
-            districtKoreanName: Region['districtKoreanName'];
+        city: {
+            englishName: Region['cityEnglishName'];
+            koreanName: Region['cityKoreanName'];
+        };
+        district: {
+            englishName: Region['districtEnglishName'];
+            koreanName: Region['districtKoreanName'];
         };
     };
     team: {
         name: Team['name'];
-        region: {
-            cityEnglishName: Region['cityEnglishName'];
-            cityKoreanName: Region['cityKoreanName'];
-            districtEnglishName: Region['districtEnglishName'];
-            districtKoreanName: Region['districtKoreanName'];
+        city: {
+            englishName: Region['cityEnglishName'];
+            koreanName: Region['cityKoreanName'];
+        };
+        district: {
+            englishName: Region['districtEnglishName'];
+            koreanName: Region['districtKoreanName'];
         };
         leader: {
             contact: Member['contact'];

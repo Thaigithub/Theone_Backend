@@ -11,11 +11,13 @@ class GetListRecommendationMemberResponse {
         licenseNumber: string;
     }[];
     desiredSalary: Member['desiredSalary'];
-    region: {
-        cityEnglishName: Region['cityEnglishName'];
-        cityKoreanName: Region['cityKoreanName'];
-        districtEnglishName: Region['districtEnglishName'];
-        districtKoreanName: Region['districtKoreanName'];
+    city: {
+        englishName: Region['cityEnglishName'];
+        koreanName: Region['cityKoreanName'];
+    };
+    district: {
+        englishName: Region['districtEnglishName'];
+        koreanName: Region['districtKoreanName'];
     };
 }
 
@@ -28,11 +30,13 @@ export class GetListRecommendationLeaderResponse {
 
 class GetListRecommendationTeamResponse {
     name: string;
-    region: {
-        cityEnglishName: Region['cityEnglishName'];
-        cityKoreanName: Region['cityKoreanName'];
-        districtEnglishName: Region['districtEnglishName'];
-        districtKoreanName: Region['districtKoreanName'];
+    city: {
+        englishName: Region['cityEnglishName'];
+        koreanName: Region['cityKoreanName'];
+    };
+    district: {
+        englishName: Region['districtEnglishName'];
+        koreanName: Region['districtKoreanName'];
     };
     leader: GetListRecommendationLeaderResponse;
 }

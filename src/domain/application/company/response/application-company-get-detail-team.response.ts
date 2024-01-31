@@ -4,11 +4,13 @@ export class ApplicationCompanyGetDetailTeamResponse {
     name: string;
     totalMembers: number;
     contact: string;
-    region: {
-        cityEnglishName: Region['cityEnglishName'];
-        cityKoreanName: Region['cityKoreanName'];
-        districtEnglishName: Region['districtEnglishName'];
-        districtKoreanName: Region['districtKoreanName'];
+    city: {
+        englishName: Region['cityEnglishName'];
+        koreanName: Region['cityKoreanName'];
+    };
+    district: {
+        englishName: Region['districtEnglishName'];
+        koreanName: Region['districtKoreanName'];
     };
     code: string;
     leader: {

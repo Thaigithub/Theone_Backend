@@ -6,11 +6,11 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyUpdateStatus } from './enum/application-company-update-status.enum';
 import { ApplicationCompanyGetListPostRequest } from './request/application-company-get-list-post.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
+import { ApplicationCompanyGetDetailMemberResponse } from './response/application-company-get-detail-member.response';
+import { ApplicationCompanyGetDetailTeamResponse } from './response/application-company-get-detail-team.response';
 import { ApplicationCompanyGetListOfferPost } from './response/application-company-get-list-offer-post.response';
 import { ApplicationCompanyGetListPostResponse } from './response/application-company-get-list-post.response';
 import { ApplicationCompanyGetTotalResponse } from './response/application-company-get-total.response';
-import { ApplicationCompanyGetDetailMemberResponse } from './response/application-company-get-detail-member.response';
-import { ApplicationCompanyGetDetailTeamResponse } from './response/application-company-get-detail-team.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -102,11 +102,13 @@ export class ApplicationCompanyService {
                                   licenseNumber: item.licenseNumber,
                               };
                           }),
-                          region: {
-                              districtEnglishName: item.member.region?.districtEnglishName || null,
-                              districtKoreanName: item.member.region?.districtKoreanName || null,
-                              cityEnglishName: item.member.region?.cityEnglishName || null,
-                              cityKoreanName: item.member.region?.cityKoreanName || null,
+                          city: {
+                              englishName: item.member.region?.cityEnglishName || null,
+                              koreanName: item.member.region?.cityKoreanName || null,
+                          },
+                          district: {
+                              englishName: item.member.region?.districtEnglishName || null,
+                              koreanName: item.member.region?.districtKoreanName || null,
                           },
                       }
                     : null,
@@ -114,11 +116,13 @@ export class ApplicationCompanyService {
                     ? {
                           id: item.team.id,
                           name: item.team.name,
-                          region: {
-                              districtEnglishName: item.team.region?.districtEnglishName || null,
-                              districtKoreanName: item.team.region?.districtKoreanName || null,
-                              cityEnglishName: item.team.region?.cityEnglishName || null,
-                              cityKoreanName: item.team.region?.cityKoreanName || null,
+                          city: {
+                              englishName: item.team.region?.cityEnglishName || null,
+                              koreanName: item.team.region?.cityKoreanName || null,
+                          },
+                          district: {
+                              englishName: item.team.region?.districtEnglishName || null,
+                              koreanName: item.team.region?.districtKoreanName || null,
                           },
                           leader: {
                               contact: item.team.leader.contact,
@@ -312,11 +316,13 @@ export class ApplicationCompanyService {
             username: memberInfor.account.username,
             contact: memberInfor.contact,
             email: memberInfor.email,
-            region: {
-                districtEnglishName: memberInfor.region?.districtEnglishName || null,
-                districtKoreanName: memberInfor.region?.districtKoreanName || null,
-                cityEnglishName: memberInfor.region?.cityEnglishName || null,
-                cityKoreanName: memberInfor.region?.cityKoreanName || null,
+            city: {
+                englishName: memberInfor.region?.cityEnglishName || null,
+                koreanName: memberInfor.region?.cityKoreanName || null,
+            },
+            district: {
+                englishName: memberInfor.region?.districtEnglishName || null,
+                koreanName: memberInfor.region?.districtKoreanName || null,
             },
             desiredSalary: memberInfor.desiredSalary,
             totalExperienceMonths: memberInfor.totalExperienceMonths,
@@ -479,7 +485,7 @@ export class ApplicationCompanyService {
         let licenses = [];
         const memberDetails = [];
         members.forEach((element) => {
-           licenses = licenses.concat(
+            licenses = licenses.concat(
                 element.member.licenses.map((license) => {
                     return {
                         id: license.id,
@@ -527,11 +533,13 @@ export class ApplicationCompanyService {
                 occupations: leader.licenses.map((item) => item.code.name),
             },
             members: memberDetails,
-            region: {
-                districtEnglishName: application.region?.districtEnglishName || null,
-                districtKoreanName: application.region?.districtKoreanName || null,
-                cityEnglishName: application.region?.cityEnglishName || null,
-                cityKoreanName: application.region?.cityKoreanName || null,
+            city: {
+                englishName: application.region?.cityEnglishName || null,
+                koreanName: application.region?.cityKoreanName || null,
+            },
+            district: {
+                englishName: application.region?.districtEnglishName || null,
+                koreanName: application.region?.districtKoreanName || null,
             },
             code: application.teamCode,
             licenses: licenses,
