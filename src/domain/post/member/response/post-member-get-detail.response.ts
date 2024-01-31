@@ -12,7 +12,6 @@ export class PostMemberGetDetailResponse {
 
     eligibility: {
         experienceType: Post['experienceType'];
-        occupation: Code['name'];
         codeName: Code['name'];
         otherInformation: Post['otherInformation'];
         isEligibleToApply: boolean;
