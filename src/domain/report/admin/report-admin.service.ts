@@ -104,6 +104,18 @@ export class ReportAdminService {
             status: report.status,
             memberName: report.member.name,
             memberContact: report.member.contact,
+            answerTitle: report.answerTitle,
+            answerContent: report.answerContent,
+            answerFiles:
+                report.answerFiles?.map((item) => {
+                    return {
+                        fileName: item.fileName,
+                        type: item.type,
+                        key: item.key,
+                        size: Number(item.size),
+                    };
+                }) || [],
+            answeredAt: report.answeredAt,
         };
     }
 
