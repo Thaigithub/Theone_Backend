@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { HeadhuntingMatchingStatus, HeadhuntingRequestStatus, Prisma, RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { HeadhuntingAdminCountCategory } from './enum/headhunting-admin-get-count-category.enum';
 import { HeadhuntingAdminGetDetailRecommendationRank } from './enum/headhunting-admin-get-detail-recommendation-rank.enum';
 import { HeadhuntingAdminGetListCategory } from './enum/headhunting-admin-get-list-category.enum';
 import { HeadhuntingAdminGetListRequestCategory } from './enum/headhunting-admin-get-list-request-category.enum';
 import { HeadhuntingAdminCreateRecommendationRequest } from './request/headhunting-admin-create-recommendation.request';
+import { HeadhuntingAdminGetCountRequest } from './request/headhunting-admin-get-count.request';
 import { HeadhuntingAdminGetListRequestRequest } from './request/headhunting-admin-get-list-request.request';
 import { HeadhuntingAdminGetListRequest } from './request/headhunting-admin-get-list.request';
 import { HeadhuntingAdminUpdatePaymentRequest } from './request/headhunting-admin-update-payment.request';
@@ -19,6 +22,27 @@ import { HeadhuntingAdminGetListResponse } from './response/headhunting-admin-ge
 @Injectable()
 export class HeadhuntingAdminService {
     constructor(private prismaService: PrismaService) {}
+
+    async getCount(query: HeadhuntingAdminGetCountRequest): Promise<CountResponse> {
+        const queryFilter: Prisma.HeadhuntingRequestWhereInput = {
+            ...(query.category === HeadhuntingAdminCountCategory.UNANSWERED_CASE && {
+                OR: [{ status: HeadhuntingRequestStatus.APPLY }, { status: HeadhuntingRequestStatus.RE_APPLY }],
+            }),
+            ...(query.category === HeadhuntingAdminCountCategory.ACCEPTED_CASE && {
+                status: HeadhuntingRequestStatus.APPROVED,
+            }),
+            ...(query.category === HeadhuntingAdminCountCategory.REJECTED_CASE && {
+                status: HeadhuntingRequestStatus.REJECTED,
+            }),
+        };
+        const count = await this.prismaService.headhuntingRequest.count({
+            where: queryFilter,
+        });
+
+        return {
+            count: count,
+        };
+    }
 
     async getList(query: HeadhuntingAdminGetListRequest): Promise<HeadhuntingAdminGetListResponse> {
         const queryFilter: Prisma.HeadhuntingWhereInput = {

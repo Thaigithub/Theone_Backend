@@ -1,14 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
+import { SettlementAdminAmountRequest } from './request/settlement-admin-get-amount.request';
 import { SettlementAdminGetListRequest } from './request/settlement-admin-get-list.request';
 import { SettlementAdminGetDetail } from './response/settlement-admin-get-detail.response';
 import { SettlementAdminGetListResponse } from './response/settlement-admin-get-list.response';
 import { SettlementAdminService } from './settlement-admin.service';
-import { SettlementAdminAmountRequest } from './request/settlement-admin-get-amount.request';
 
 @Controller('/admin/settlements')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -27,15 +26,12 @@ export class SettlementAdminController {
     }
 
     @Get('/:id')
-    async getDetail(
-        @Req() req: BaseRequest,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<SettlementAdminGetDetail>> {
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SettlementAdminGetDetail>> {
         return BaseResponse.of(await this.settlementAdminService.getDetail(id));
     }
 
     @Get()
-    async getList(query: SettlementAdminGetListRequest): Promise<BaseResponse<SettlementAdminGetListResponse>> {
+    async getList(@Query() query: SettlementAdminGetListRequest): Promise<BaseResponse<SettlementAdminGetListResponse>> {
         return BaseResponse.of(await this.settlementAdminService.getList(query));
     }
 }

@@ -312,27 +312,38 @@ export class PostAdminService {
         request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime + 'Z' : undefined;
         request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime + 'Z' : undefined;
         await this.checkExistPost(id);
-        const data = {
-            type: request.type,
-            category: request.category,
-            status: request.status,
-            name: request.name,
-            startDate: request.startDate && new Date(request.startDate),
-            endDate: request.endDate && new Date(request.endDate),
-            experienceType: request.experienceType,
-            numberOfPeoples: request.numberOfPeople,
-            occupationId: request.occupationId || null,
-            otherInformation: request.otherInformation,
-            salaryType: request.salaryType,
-            salaryAmount: request.salaryAmount,
-            startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
-            endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
-            workday: request.workday,
-            startWorkTime: request.startWorkTime,
-            endWorkTime: request.endWorkTime,
-            postEditor: request.postEditor,
-        };
-        await this.recordPostHistory(id, PostHistoryType.EDITED, data, request.updateReason);
+        await this.prismaService.post.update({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            data: {
+                type: request.type,
+                category: request.category,
+                status: request.status,
+                name: request.name,
+                startDate: request.startDate && new Date(request.startDate),
+                endDate: request.endDate && new Date(request.endDate),
+                experienceType: request.experienceType,
+                numberOfPeoples: request.numberOfPeople,
+                ...(request.occupationId && { codeId:  request.occupationId}),
+                otherInformation: request.otherInformation,
+                salaryType: request.salaryType,
+                salaryAmount: request.salaryAmount,
+                startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
+                endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
+                workdays: request.workday,
+                startWorkTime: request.startWorkTime,
+                endWorkTime: request.endWorkTime,
+                postEditor: request.postEditor,
+                postHistories: {
+                create: {
+                        content: request.updateReason,
+                        historyType: PostHistoryType.EDITED,
+                    },
+                },
+            },
+        });
     }
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
