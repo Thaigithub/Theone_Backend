@@ -228,25 +228,32 @@ export class SiteCompanyService {
         accountId: number,
         request: SiteCompanyGetListContractRequest,
     ): Promise<SiteCompanyGetListContractResponse> {
-        const query = {
-            where: {
-                company: {
-                    accountId,
-                },
+        const queryFilter: Prisma.SiteWhereInput = {
+            company: {
+                accountId,
+            },
+            ...(request.keyword && {
                 name: {
                     contains: request.keyword,
+                    mode: 'insensitive',
                 },
-            },
-            select: {
-                id: true,
-                name: true,
-                startDate: true,
-                endDate: true,
-                numberOfContract: true,
-            },
-            ...QueryPagingHelper.queryPaging(request),
+            }),
+            ...(request.startDate && { startDate: { gte: new Date(request.startDate) } }),
+            ...(request.endDate && { endDate: { lte: new Date(request.endDate) } }),
         };
-        const sites = (await this.prismaService.site.findMany(query)).map((item) => {
+        const sites = (
+            await this.prismaService.site.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    name: true,
+                    startDate: true,
+                    endDate: true,
+                    numberOfContract: true,
+                },
+                ...QueryPagingHelper.queryPaging(request),
+            })
+        ).map((item) => {
             return {
                 siteId: item.id,
                 siteName: item.name,
@@ -255,7 +262,7 @@ export class SiteCompanyService {
                 numberOfContract: item.numberOfContract,
             };
         });
-        const total = await this.prismaService.site.count({ where: query.where });
+        const total = await this.prismaService.site.count({ where: queryFilter });
         return new PaginationResponse(sites, new PageInfo(total));
     }
 }

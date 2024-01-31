@@ -555,6 +555,9 @@ export class PostCompanyService {
             }),
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
+            NOT:{
+                headhunting: null,
+            },
         };
 
         const postLists = (
