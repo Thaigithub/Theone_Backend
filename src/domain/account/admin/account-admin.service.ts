@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { compare, hash } from 'bcrypt';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { AccountAdminUpdatePasswordRequest } from './request/account-admin-update-password.request';
 import { AccountAdminGetDetailResponse } from './response/account-admin-get-detail.response';
@@ -42,12 +42,6 @@ export class AccountAdminService {
         });
 
         if (!account) throw new NotFoundException('Admin not found');
-
-        const passwordMatch = await compare(body.currentPassword, account.password);
-
-        if (!passwordMatch) {
-            throw new UnauthorizedException('Password does not match');
-        }
 
         await this.prismaService.account.update({
             where: {
