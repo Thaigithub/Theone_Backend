@@ -6,10 +6,12 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { AccountMemberUpdateRequestDTO } from './dto/account-member-update-request.dto';
+import { AccountMemberUpdatePasswordRequestStatus } from './enum/account-member-update-password-request-status.enum';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
-import { AccountMemberUpdateRequest } from './request/account-member-update.request';
+import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
 import { AccountMemberUpsertBankAccountRequest } from './request/account-member-upsert-bankaccount.request';
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
@@ -19,10 +21,8 @@ import { AccountMemberCheckExistedResponse } from './response/account-member-che
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
-import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
-import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
-import { AccountMemberUpdatePasswordRequestStatus } from './enum/account-member-update-password-request-status.enum';
+import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -257,7 +257,7 @@ export class AccountMemberService {
         };
     }
 
-    async update(accountId: number, body: AccountMemberUpdateRequest): Promise<void> {
+    async update(accountId: number, body: AccountMemberUpdateRequestDTO): Promise<void> {
         const usernameExist = await this.prismaService.account.findUnique({
             where: {
                 username: body.username,
