@@ -183,6 +183,7 @@ export class HeadhuntingAdminService {
                 id: true,
                 post: {
                     select: {
+                        experienceType: true,
                         code: true,
                         name: true,
                         company: {
@@ -400,6 +401,7 @@ export class HeadhuntingAdminService {
             object: headhunting.requests[0].object,
             phone: headhunting.post.company.phone,
             occupation: headhunting.post.code.name,
+            careerType: headhunting.post.experienceType,
             paymentAmount: headhunting.recommendations.reduce((accum, current) => {
                 return accum + current.headhuntingRequest.usageHistory.productPaymentHistory.cost * 0.1;
             }, 0),
@@ -490,6 +492,7 @@ export class HeadhuntingAdminService {
                     select: {
                         post: {
                             select: {
+                                experienceType: true,
                                 code: true,
                                 name: true,
                                 company: {
@@ -512,6 +515,7 @@ export class HeadhuntingAdminService {
 
                 object: true,
                 detail: true,
+                status: true,
             },
         });
         if (!request) throw new NotFoundException('Headhunting request not found');
@@ -526,6 +530,8 @@ export class HeadhuntingAdminService {
             object: request.object,
             phone: request.headhunting.post.company.phone,
             occupation: request.headhunting.post.code.name,
+            careerType: request.headhunting.post.experienceType,
+            status: request.status,
         };
     }
 
