@@ -13,10 +13,9 @@ export class MatchingCompanyService {
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
     ): Promise<MatchingCompanyGetListRecommendation> {
-        const occupationIds = (query.occupation && query.occupation.split(',')) || null;
-        const regionIds = (query.region && query.region.split(',')) || null;
-
-        console.log('MATCHING QUERY', query, occupationIds, regionIds);
+        const occupationIds = (query.occupation && query.occupation.split(',')).map((item) => parseInt(item)) || undefined;
+        const regionIds =
+            (query.region && query.region.split(',')).map((item) => item.split('-')[1]).map((item) => parseInt(item)) || null;
         const dateQuery: Date = new Date();
         switch (query.date) {
             case MatchingCompanyGetListDate.ONE_DAY_AGO:
@@ -103,6 +102,20 @@ export class MatchingCompanyService {
 
         if (!existMatching.length && query.date === MatchingCompanyGetListDate.TODAY) {
             const members = await this.prismaService.member.findMany({
+                where: {
+                    regionId: {
+                        in: regionIds,
+                    },
+                    licenses: {
+                        some: {
+                            code: {
+                                id: {
+                                    in: occupationIds,
+                                },
+                            },
+                        },
+                    },
+                },
                 include: {
                     licenses: {
                         where: {
@@ -119,6 +132,16 @@ export class MatchingCompanyService {
             });
 
             const teams = await this.prismaService.team.findMany({
+                where: {
+                    regionId: {
+                        in: regionIds,
+                    },
+                    code: {
+                        id: {
+                            in: occupationIds,
+                        },
+                    },
+                },
                 include: {
                     leader: true,
                     members: {
