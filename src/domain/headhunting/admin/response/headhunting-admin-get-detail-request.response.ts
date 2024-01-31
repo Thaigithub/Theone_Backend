@@ -1,4 +1,13 @@
-import { Code, Company, HeadhuntingRequest, Post, RequestObject, Site } from '@prisma/client';
+import {
+    Code,
+    Company,
+    ExperienceType,
+    HeadhuntingRequest,
+    HeadhuntingRequestStatus,
+    Post,
+    RequestObject,
+    Site,
+} from '@prisma/client';
 
 export class HeadhuntingAdminGetDetailRequestResponse {
     id: HeadhuntingRequest['id'];
@@ -11,4 +20,6 @@ export class HeadhuntingAdminGetDetailRequestResponse {
     detail: string;
     email: Company['email'];
     occupation: Code['name'];
+    careerType: ExperienceType;
+    status: HeadhuntingRequestStatus;
 }

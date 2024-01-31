@@ -2,6 +2,7 @@ import {
     Account,
     Code,
     Company,
+    ExperienceType,
     Headhunting,
     HeadhuntingMatchingStatus,
     HeadhuntingPaymentStatus,
@@ -22,6 +23,7 @@ export class HeadhuntingAdminGetDetailResponse {
     occupation: Code['name'];
     object: RequestObject;
     postName: Post['name'];
+    careerType: ExperienceType;
     detail: string;
     paymentStatus: HeadhuntingPaymentStatus;
     paymentDate: Headhunting['paymentDate'];
