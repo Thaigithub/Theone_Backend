@@ -13,6 +13,8 @@ import { HeadhuntingAdminGetDetailRequestResponse } from './response/headhunting
 import { HeadhuntingAdminGetDetailResponse } from './response/headhunting-admin-get-detail.response';
 import { HeadhuntingAdminGetListRequestResponse } from './response/headhunting-admin-get-list-request.response';
 import { HeadhuntingAdminGetListResponse } from './response/headhunting-admin-get-list.response';
+import { HeadhuntingAdminGetCountRequest } from './request/headhunting-admin-get-count.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -23,6 +25,11 @@ export class HeadhuntingAdminController {
     @Get()
     async getList(@Query() query: HeadhuntingAdminGetListRequest): Promise<BaseResponse<HeadhuntingAdminGetListResponse>> {
         return BaseResponse.of(await this.headhuntingAdminService.getList(query));
+    }
+
+    @Get('/count')
+    async getCount(@Query() query: HeadhuntingAdminGetCountRequest): Promise<BaseResponse<CountResponse>> {
+        return BaseResponse.of(await this.headhuntingAdminService.getCount(query));
     }
 
     @Get('/request')

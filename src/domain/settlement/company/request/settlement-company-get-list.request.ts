@@ -13,7 +13,7 @@ export class SettlementCompanyGetListRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    searchTerm: string;
+    keyword: string;
 
     @Expose()
     @IsString()

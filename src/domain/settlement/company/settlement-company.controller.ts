@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Patch, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -31,7 +31,7 @@ export class SettlementCompanyController {
     @Get()
     async getList(
         @Req() req: BaseRequest,
-        query: SettlementCompanyGetListRequest,
+        @Query() query: SettlementCompanyGetListRequest,
     ): Promise<BaseResponse<SettlementCompanyGetListResponse>> {
         return BaseResponse.of(await this.settlementCompanyService.getList(req.user.accountId, query));
     }

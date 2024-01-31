@@ -31,8 +31,8 @@ export class SettlementCompanyService {
                                     {
                                         member: {
                                             isActive: true,
-                                            ...(query.searchTerm && {
-                                                name: { contains: query.searchTerm, mode: 'insensitive' },
+                                            ...(query.keyword && {
+                                                name: { contains: query.keyword, mode: 'insensitive' },
                                             }),
                                         },
                                     },
@@ -44,8 +44,8 @@ export class SettlementCompanyService {
                                     {
                                         team: {
                                             isActive: true,
-                                            ...(query.searchTerm && {
-                                                name: { contains: query.searchTerm, mode: 'insensitive' },
+                                            ...(query.keyword && {
+                                                name: { contains: query.keyword, mode: 'insensitive' },
                                             }),
                                         },
                                     },
@@ -103,12 +103,14 @@ export class SettlementCompanyService {
         ).map((item) => {
             return {
                 id: item.id,
-                name: RequestObject.INDIVIDUAL
-                    ? item.headHuntingRecommendation.application.member.name
-                    : item.headHuntingRecommendation.application.team.name,
-                contact: RequestObject.INDIVIDUAL
-                    ? item.headHuntingRecommendation.application.member.contact
-                    : item.headHuntingRecommendation.application.team.leader.contact,
+                name:
+                    query.type === RequestObject.INDIVIDUAL
+                        ? item.headHuntingRecommendation.application.member.name
+                        : item.headHuntingRecommendation.application.team.name,
+                contact:
+                    query.type === RequestObject.INDIVIDUAL
+                        ? item.headHuntingRecommendation.application.member.contact
+                        : item.headHuntingRecommendation.application.team.leader.contact,
                 settlementStatus: item.status,
                 completeDate: item.completeDate,
             };
