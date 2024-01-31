@@ -17,8 +17,8 @@ export class AccountCompanyService {
                 businessRegNumber: businessRegNumber,
             },
         });
-        if (count === 0) return { isExist: true };
-        return { isExist: false };
+        if (count === 0) return { isExist: false };
+        return { isExist: true };
     }
 
     async checkUsername(username: string): Promise<AccountCompanyCheckExistedResponse> {
@@ -27,8 +27,8 @@ export class AccountCompanyService {
                 username: username,
             },
         });
-        if (accountNum === 0) return { isExist: true };
-        return { isExist: false };
+        if (accountNum === 0) return { isExist: false };
+        return { isExist: true };
     }
 
     async signup(request: AccountCompanySignupRequest): Promise<void> {
@@ -85,10 +85,10 @@ export class AccountCompanyService {
                         },
                         contactCard: {
                             create: {
-                                fileName: request.logo.fileName,
-                                type: request.logo.type,
-                                size: request.logo.size,
-                                key: request.logo.key,
+                                fileName: request.contactCard.fileName,
+                                type: request.contactCard.type,
+                                size: request.contactCard.size,
+                                key: request.contactCard.key,
                             },
                         },
                     },
