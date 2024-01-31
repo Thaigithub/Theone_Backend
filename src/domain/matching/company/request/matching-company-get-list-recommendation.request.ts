@@ -1,7 +1,7 @@
 import { ExperienceType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { MatchingCompanyGetListDateEnum } from '../dto/matching-company-get-list-date.enum';
+import { MatchingCompanyGetListDate } from '../enum/matching-company-get-list-date.enum';
 
 export class MatchingCompanyGetListRecommendationRequest {
     @Expose()
@@ -10,9 +10,9 @@ export class MatchingCompanyGetListRecommendationRequest {
     career: ExperienceType;
 
     @Expose()
-    @IsEnum(MatchingCompanyGetListDateEnum)
+    @IsEnum(MatchingCompanyGetListDate)
     @IsOptional()
-    date: MatchingCompanyGetListDateEnum;
+    date: MatchingCompanyGetListDate;
 
     @Expose()
     @IsString()
@@ -22,15 +22,5 @@ export class MatchingCompanyGetListRecommendationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    specialOccupation: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
     region: string;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    keyword: string;
 }

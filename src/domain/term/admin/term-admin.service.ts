@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { TermAdminGetListSearchCategory } from './enum/term-admin-get-list-search-category.enum';
+import { TermAdminGetListCategory } from './enum/term-admin-get-list-category.enum';
 import { TermAdminCreateRequest } from './request/term-admin-create.request';
 import { TermAdminGetListRequest } from './request/term-admin-get-list.request';
 import { TermAdminUpdateRequest } from './request/term-admin-update.request';
@@ -12,15 +12,15 @@ import { TermAdminGetListResponse } from './response/term-admin-get-list.respons
 
 @Injectable()
 export class TermAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: TermAdminGetListRequest): Promise<TermAdminGetListResponse> {
         const queryFilter: Prisma.TermWhereInput = {
             isActive: true,
-            ...(query.searchCategory === TermAdminGetListSearchCategory.TITLE && {
+            ...(query.searchCategory === TermAdminGetListCategory.TITLE && {
                 title: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(query.searchCategory === TermAdminGetListSearchCategory.CONTENT && {
+            ...(query.searchCategory === TermAdminGetListCategory.CONTENT && {
                 content: { contains: query.keyword, mode: 'insensitive' },
             }),
         };

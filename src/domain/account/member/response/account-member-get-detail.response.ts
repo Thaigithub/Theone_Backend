@@ -2,12 +2,10 @@ import {
     Account,
     BankAccount,
     BasicHealthSafetyCertificate,
-    City,
-    Code,
-    District,
     ForeignWorker,
     Member,
     MemberLevel,
+    Region,
     SignupMethodType,
 } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
@@ -35,16 +33,11 @@ export class AccountMemberGetDetailResponse {
     contact: Member['contact'];
     email: Member['email'];
     desiredSalary: Member['desiredSalary'];
-    districtId: District['id'];
-    cityId: City['id'];
+    regionId: Region['id'];
     account: {
         username: Account['username'];
         status: Account['status'];
     };
-    desiredOccupations: {
-        codeName: Code['codeName'];
-        id: Code['id'];
-    }[];
     createdAt: Member['createdAt'];
     level: MemberLevel;
     signupMethod: SignupMethodType;

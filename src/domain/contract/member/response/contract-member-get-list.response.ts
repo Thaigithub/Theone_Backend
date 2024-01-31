@@ -1,6 +1,6 @@
 import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { ContractStatus } from '../enum/contract-member-status.enum';
+import { ContractMemberGetListStatus } from '../enum/contract-member-get-list-status.enum';
 export class GetListResponse {
     companyLogo: FileResponse;
     siteName: string;
@@ -13,9 +13,8 @@ export class GetListResponse {
     postName: string;
     postEndDate: Date;
     siteAddress: string;
-    codeNameGeneral: string;
-    codeNameSpecial: string;
+    occupation: string;
     isInterested: boolean;
-    status: ContractStatus;
+    status: ContractMemberGetListStatus;
 }
 export class ContractMemberGetListResponse extends PaginationResponse<GetListResponse> {}

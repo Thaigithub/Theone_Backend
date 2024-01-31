@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { SalaryReportCompanyCreateRequest } from './request/salary-report-company-create.request';
-import { SalaryReportCompanyGetListResponse } from './response/salary-report-company-get-list.response';
-import { SalaryReportCompanyGetListRequest } from './request/salary-report-company-get-list.request';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { SalaryReportCompanyCreateRequest } from './request/salary-report-company-create.request';
+import { SalaryReportCompanyGetListRequest } from './request/salary-report-company-get-list.request';
+import { SalaryReportCompanyGetListResponse } from './response/salary-report-company-get-list.response';
 
 @Injectable()
 export class SalaryReportCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async requestSalaryReport(accountId: number, body: SalaryReportCompanyCreateRequest): Promise<void> {
         await Promise.all(

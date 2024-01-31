@@ -9,9 +9,9 @@ import { MatchingAdminGetListResponse } from './response/matching-admin-get-list
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@Controller('admin/matching')
+@Controller('/admin/matchings')
 export class MatchingAdminController {
-    constructor(private readonly matchingAdminService: MatchingAdminService) {}
+    constructor(private matchingAdminService: MatchingAdminService) {}
 
     @Get()
     async getList(@Query() query: MatchingAdminGetListRequest): Promise<BaseResponse<MatchingAdminGetListResponse>> {

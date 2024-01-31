@@ -10,7 +10,7 @@ import { InquiryCompanyGetListResponse } from './response/inquiry-company-get-li
 
 @Injectable()
 export class InquiryCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(accountId: number, query: InquiryCompanyGetListRequest): Promise<InquiryCompanyGetListResponse> {
         const queryFilter: Prisma.InquiryWhereInput = {

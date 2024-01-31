@@ -4,7 +4,7 @@ import { Response } from 'express';
 
 @Catch(Error)
 export class ErrorMiddleware implements ExceptionFilter {
-    private readonly logger = new Logger(ErrorMiddleware.name);
+    private logger = new Logger(ErrorMiddleware.name);
 
     catch(exception: HttpException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();

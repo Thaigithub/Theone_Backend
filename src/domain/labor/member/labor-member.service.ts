@@ -4,7 +4,7 @@ import { LaborMemberGetTotalWorkDateResponse } from './response/labor-member-get
 
 @Injectable()
 export class LaborMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getTotalWorkDate(accountId: number): Promise<LaborMemberGetTotalWorkDateResponse> {
         const memberExist = await this.prismaService.member.count({

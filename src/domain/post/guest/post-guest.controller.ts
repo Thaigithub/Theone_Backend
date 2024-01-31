@@ -10,7 +10,7 @@ import { PostMemberGetListResponse } from '../member/response/post-member-get-li
 
 @Controller('/guest/posts')
 export class PostGuestController {
-    constructor(private readonly postMemberService: PostMemberService) {}
+    constructor(private postMemberService: PostMemberService) {}
 
     private async getListPost(
         query: PostMemberGetListRequest,

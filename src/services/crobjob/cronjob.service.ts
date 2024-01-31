@@ -2,10 +2,50 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { BannerStatus, PostStatus, PostType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { StorageService } from 'services/storage/storage.service';
 
 @Injectable()
 export class CronJobService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private storageService: StorageService,
+    ) {}
+
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    async deleteUnusedFile() {
+        await this.prismaService.file.deleteMany({
+            where: {
+                attachment: null,
+                banner: null,
+                contract: null,
+                foreignWorker: null,
+                basicHealthSafetyCertificate: null,
+                license: null,
+                taxBill: null,
+                cardReceipt: null,
+                announcementFile: null,
+                disability: null,
+                questionInquiryFile: null,
+                answerInquiryFile: null,
+                faqFile: null,
+                questionReport: null,
+                answerReport: null,
+                questionLaborConsultationFile: null,
+                answerLaborConsultationFile: null,
+                point: null,
+                logo: null,
+                contactCard: null,
+            },
+        });
+        const databaseKeys = (await this.prismaService.file.findMany()).map((item) => item.key);
+        await Promise.all(
+            (await this.storageService.getListKey())
+                .filter((item) => !databaseKeys.includes(item))
+                .map(async (item) => {
+                    await this.storageService.deleteFile(item);
+                }),
+        );
+    }
 
     @Cron(CronExpression.EVERY_HOUR)
     async resetFreePullUpPost() {
@@ -78,7 +118,7 @@ export class CronJobService {
         const expiredContractList = (
             await this.prismaService.member.findMany({
                 include: {
-                    applyPosts: {
+                    applications: {
                         include: {
                             contract: true,
                         },
@@ -96,11 +136,11 @@ export class CronJobService {
                 },
             })
         )
-            .filter((item) => item.applyPosts.length !== 0)
+            .filter((item) => item.applications.length !== 0)
             .map((member) => {
                 return {
                     id: member.id,
-                    contractList: member.applyPosts.map((application) => {
+                    contractList: member.applications.map((application) => {
                         return {
                             startDate: application.contract.startDate,
                             endDate: application.contract.endDate,

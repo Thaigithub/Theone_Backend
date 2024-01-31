@@ -8,7 +8,7 @@ export const MemberLevelPermissions = (memberLevels: MemberLevel[]) => SetMetada
 @Injectable()
 export class AuthMemberLevelGuard implements CanActivate {
     constructor(
-        private readonly prisma: PrismaService,
+        private prisma: PrismaService,
         private reflector: Reflector,
     ) {}
 

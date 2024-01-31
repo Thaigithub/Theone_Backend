@@ -1,19 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { EvaluationStatus } from './dto/evaluation-member-get-list.enum';
-import { EvaluationMemberCreateEvaluationRequest } from './request/evaluation-member-create-evaluation.request';
-import { EvaluationMemberGetListRequest } from './request/evaluation-member-get-list.request';
-import { SiteEvaluationByContractResponse } from './response/evaluation-member-get-list.response';
+import { EvaluationMemberStatus } from './dto/evaluation-member-get-list.enum';
+import { EvaluationMemberCreateSiteRequest } from './request/evaluation-member-create-site.request';
+import { EvaluationMemberGetListSiteRequest } from './request/evaluation-member-get-list-site.request';
+import { EvaluationMemberGetListSiteResponse } from './response/evaluation-member-get-list-site.response';
 
 @Injectable()
 export class EvaluationMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     private parseConditionFromQuery(
         accountId: number,
-        query: EvaluationMemberGetListRequest,
+        query: EvaluationMemberGetListSiteRequest,
     ): Prisma.SiteEvaluationByContractWhereInput {
         query.startWorkDate = query.startWorkDate ? new Date(query.startWorkDate).toISOString() : undefined;
         query.endWorkDate = query.endWorkDate ? new Date(query.endWorkDate).toISOString() : undefined;
@@ -41,12 +42,12 @@ export class EvaluationMemberService {
                                     score: query.score,
                                 }
                               : {},
-                          query.status === EvaluationStatus.INCOMPLETE
+                          query.status === EvaluationMemberStatus.INCOMPLETE
                               ? {
                                     score: null,
                                 }
                               : {},
-                          query.status === EvaluationStatus.COMPLETE
+                          query.status === EvaluationMemberStatus.COMPLETE
                               ? {
                                     score: query.score ? query.score : { not: null },
                                 }
@@ -56,7 +57,7 @@ export class EvaluationMemberService {
         };
     }
 
-    async evaluateSite(accountId: number, id: number, body: EvaluationMemberCreateEvaluationRequest): Promise<void> {
+    async updateSiteScore(accountId: number, id: number, body: EvaluationMemberCreateSiteRequest): Promise<void> {
         // Check whether evaluation ticket existed or evaluated
         const siteEvaluationByMember = await this.prismaService.siteEvaluationByContract.findUnique({
             where: {
@@ -100,14 +101,14 @@ export class EvaluationMemberService {
             },
         });
         const totalEvaluators = siteEvaluation.totalEvaluators + 1;
-        const totalScore = siteEvaluation.totalScore + body.score;
+        const totalScores = siteEvaluation.totalScores + body.score;
 
         // Update site evaluation table
         await this.prismaService.siteEvaluation.update({
             data: {
                 totalEvaluators,
-                totalScore,
-                averageScore: totalScore / totalEvaluators,
+                totalScores,
+                averageScore: totalScores / totalEvaluators,
             },
             where: {
                 isActive: true,
@@ -116,20 +117,21 @@ export class EvaluationMemberService {
         });
     }
 
-    async getListSites(accountId: number, query: EvaluationMemberGetListRequest): Promise<SiteEvaluationByContractResponse[]> {
-        const listSiteEvaluationByContract = await this.prismaService.siteEvaluationByContract.findMany({
-            include: {
-                contract: true,
-                siteEvaluation: {
-                    include: {
-                        site: {
-                            include: {
-                                company: {
-                                    include: {
-                                        logo: {
-                                            include: {
-                                                file: true,
-                                            },
+    async getListSite(
+        accountId: number,
+        query: EvaluationMemberGetListSiteRequest,
+    ): Promise<EvaluationMemberGetListSiteResponse> {
+        const listSiteEvaluationByContract = (
+            await this.prismaService.siteEvaluationByContract.findMany({
+                include: {
+                    contract: true,
+                    siteEvaluation: {
+                        include: {
+                            site: {
+                                include: {
+                                    company: {
+                                        include: {
+                                            logo: true,
                                         },
                                     },
                                 },
@@ -137,12 +139,10 @@ export class EvaluationMemberService {
                         },
                     },
                 },
-            },
-            where: this.parseConditionFromQuery(accountId, query),
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        return listSiteEvaluationByContract.map((item) => {
+                where: this.parseConditionFromQuery(accountId, query),
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 siteName: item.siteEvaluation.site.name,
@@ -150,22 +150,24 @@ export class EvaluationMemberService {
                 endWorkDate: item.contract.endDate,
                 score: item.score,
                 logo: {
-                    fileName: item.siteEvaluation.site.company.logo.file.fileName,
-                    type: item.siteEvaluation.site.company.logo.file.type,
-                    key: item.siteEvaluation.site.company.logo.file.key,
-                    size: Number(item.siteEvaluation.site.company.logo.file.size),
+                    fileName: item.siteEvaluation.site.company.logo.fileName,
+                    type: item.siteEvaluation.site.company.logo.type,
+                    key: item.siteEvaluation.site.company.logo.key,
+                    size: Number(item.siteEvaluation.site.company.logo.size),
                 },
             };
         });
+        const total = await this.getTotalSites(accountId, query);
+        return new PaginationResponse(listSiteEvaluationByContract, new PageInfo(total));
     }
 
-    async getTotalSites(accountId: number, query: EvaluationMemberGetListRequest): Promise<number> {
+    async getTotalSites(accountId: number, query: EvaluationMemberGetListSiteRequest): Promise<number> {
         return await this.prismaService.siteEvaluationByContract.count({
             where: this.parseConditionFromQuery(accountId, query),
         });
     }
 
-    async getTotalCompletedEvaluation(accountId: number): Promise<number> {
+    async getTotalCompleted(accountId: number): Promise<number> {
         return await this.prismaService.siteEvaluationByContract.count({
             where: {
                 isActive: true,

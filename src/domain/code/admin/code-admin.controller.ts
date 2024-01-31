@@ -11,9 +11,9 @@ import { CodeAdminGetListResponse } from './response/code-admin-get-list.respons
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@Controller('/admin/code')
+@Controller('/admin/codes')
 export class CodeAdminController {
-    constructor(private readonly codeAdminService: CodeAdminService) {}
+    constructor(private codeAdminService: CodeAdminService) {}
 
     @Get()
     async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeAdminGetListResponse>> {

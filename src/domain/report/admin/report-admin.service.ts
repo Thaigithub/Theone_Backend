@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
 import { AnswerStatus, Prisma } from '@prisma/client';
-import { QueryPagingHelper } from 'utils/pagination-query';
-import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
-import { ReportAdminGetListRequest } from './request/report-admin-get-list.request';
-import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { ReportAdminGetListRequest } from './request/report-admin-get-list.request';
+import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
 import { ReportAdminGetDetailResponse } from './response/report-admin-get-detail.response';
+import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
 
 @Injectable()
 export class ReportAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     private async checkReportExist(reportId: number) {
         const report = await this.prismaService.report.findUnique({

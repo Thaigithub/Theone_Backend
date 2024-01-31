@@ -9,7 +9,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 
 @Controller('/company/files')
 export class FileCompanyController {
-    constructor(private readonly storageService: StorageService) {}
+    constructor(private storageService: StorageService) {}
 
     @Get('/get-signed-url-to-upload')
     @Roles(AccountType.COMPANY)

@@ -3,15 +3,15 @@ import { AnswerStatus, InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { InquiryAdminGetListSearchCategory } from './enum/inquiry-admin-get-list-search-category.enum';
+import { InquiryAdminGetListCategory } from './enum/inquiry-admin-get-list-category.enum';
 import { InquiryAdminGetListRequest } from './request/inquiry-admin-get-list.request';
-import { InquiryAdminAnswerRequest } from './request/inqury-admin-answer.request';
+import { InquiryAdminAnswerRequest } from './request/inquiry-admin-update-answer.request';
 import { InquiryAdminGetDetailResponse } from './response/inquiry-admin-get-detail.reponse';
 import { InquiryAdminGetListResponse } from './response/inquiry-admin-get-list.response';
 
 @Injectable()
 export class InquiryAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: InquiryAdminGetListRequest): Promise<InquiryAdminGetListResponse> {
         const queryFilter: Prisma.InquiryWhereInput = {
@@ -23,12 +23,12 @@ export class InquiryAdminService {
             ...(query.status && { status: query.status }),
             ...(query.inquirerType && { inquirerType: query.inquirerType }),
             ...(query.inquiryType && { inquiryType: query.inquiryType }),
-            ...(query.searchCategory === InquiryAdminGetListSearchCategory.MEMBER_NAME && {
+            ...(query.searchCategory === InquiryAdminGetListCategory.MEMBER_NAME && {
                 member: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
             }),
-            ...(query.searchCategory === InquiryAdminGetListSearchCategory.COMPANY_NAME && {
+            ...(query.searchCategory === InquiryAdminGetListCategory.COMPANY_NAME && {
                 company: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
@@ -186,14 +186,12 @@ export class InquiryAdminService {
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({
                 where: {
-                    answerInquiryFiles: {
-                        some: {
-                            answerInquiryId: id,
-                        },
+                    answerInquiryFile: {
+                        answerInquiryId: id,
                     },
                 },
                 data: {
-                    isDeactivated: true,
+                    isActive: false,
                 },
             });
 

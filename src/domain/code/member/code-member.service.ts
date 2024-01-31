@@ -1,20 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { CodeMemberGetListResponse } from './response/code-member-get-list.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { CodeAdminGetListRequest } from '../admin/request/code-admin-get-list.request';
+import { CodeAdminGetListResponse } from '../admin/response/code-admin-get-list.response';
 
 @Injectable()
 export class CodeMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
-    async getList(): Promise<CodeMemberGetListResponse[]> {
-        return await this.prismaService.code.findMany({
+    async getList(query: CodeAdminGetListRequest): Promise<CodeAdminGetListResponse> {
+        const queryFilter = {
+            isActive: true,
+        };
+
+        const codeList = await this.prismaService.code.findMany({
             select: {
                 id: true,
-                codeName: true,
+                code: true,
+                name: true,
             },
-            where: {
-                isActive: true,
+            where: queryFilter,
+            orderBy: {
+                createdAt: 'desc',
             },
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
         });
+
+        const codeListCount = await this.prismaService.code.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        return new PaginationResponse(codeList, new PageInfo(codeListCount));
     }
 }

@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 import { MailContext } from './dto/mail.context';
 @Injectable()
 export class MailService {
-    constructor(private readonly mailerService: MailerService) {}
+    constructor(private mailerService: MailerService) {}
     private async setTransport() {
         const OAuth2 = google.auth.OAuth2;
         const oauth2Client = new OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');

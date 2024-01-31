@@ -7,7 +7,7 @@ import {
     Company,
     ForeignWorker,
     Member,
-    SpecialLicense,
+    License,
     Team,
 } from '@prisma/client';
 
@@ -31,7 +31,7 @@ export class MemberAdminGetDetailResponse {
     teams: {
         id: Team['id'];
         name: Team['name'];
-        occupation: Code['codeName'];
+        occupation: Code['name'];
     }[];
     registeredExperienceList: {
         companyName: Career['companyName'];
@@ -43,10 +43,10 @@ export class MemberAdminGetDetailResponse {
         startDate: string;
         endDate: string;
     }[];
-    specialLicenseList: {
-        codeName: Code['codeName'];
+    licenseList: {
+        codeName: Code['name'];
         acquisitionDate: string;
-        status: SpecialLicense['status'];
+        status: License['status'];
     }[];
     basicHealthSafetyCertificateList: {
         registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];

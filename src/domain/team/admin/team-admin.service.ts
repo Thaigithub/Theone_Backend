@@ -5,17 +5,21 @@ import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { TeamAdminGetListCategory } from './dto/team-admin-get-list-category.enum';
-import { TeamAdminGetListSort } from './dto/team-admin-get-list-sort.enum';
-import { TeamAdminGetListStatus } from './dto/team-admin-get-list-status.enum';
+import { TeamAdminGetListCategory } from './enum/team-admin-get-list-category.enum';
+import { TeamAdminGetListRecommendationCategory } from './enum/team-admin-get-list-recommendation-category.enum';
+import { TeamAdminGetListRecommendationSort } from './enum/team-admin-get-list-recommendation-sort.enum';
+import { TeamAdminGetListSort } from './enum/team-admin-get-list-sort.enum';
+import { TeamAdminGetListStatus } from './enum/team-admin-get-list-status.enum';
+import { TeamAdminGetListRecommendationRequest } from './request/team-admin-get-list-recommendation.request';
 import { TeamAdminGetListRequest } from './request/team-admin-get-list.request';
 import { TeamAdminGetDetailResponse } from './response/team-admin-get-detail.response';
+import { TeamAdminGetListRecommendationResponse } from './response/team-admin-get-list-recommendation.response';
 import { TeamAdminGetListResponse } from './response/team-admin-get-list.response';
 @Injectable()
 export class TeamAdminService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly excelService: ExcelService,
+        private prismaService: PrismaService,
+        private excelService: ExcelService,
     ) {}
 
     getStatus(item: any) {
@@ -168,6 +172,158 @@ export class TeamAdminService {
             where: queryFilter,
         });
         return new PaginationResponse(results, new PageInfo(teamListCount));
+    }
+
+    async getListRecommendation(query: TeamAdminGetListRecommendationRequest): Promise<TeamAdminGetListRecommendationResponse> {
+        const queryFilter: Prisma.TeamWhereInput = {
+            isActive: true,
+            ...(query.tier && { leader: { level: query.tier } }),
+            ...(query.category === TeamAdminGetListRecommendationCategory.TEAM_NAME && {
+                name: { contains: query.keyword, mode: 'insensitive' },
+            }),
+            ...(query.category === TeamAdminGetListRecommendationCategory.TEAM_LEADER_NAME && {
+                leader: { name: { contains: query.keyword, mode: 'insensitive' } },
+            }),
+            ...(query.category === TeamAdminGetListRecommendationCategory.CONTACT && {
+                leader: { contact: { contains: query.keyword, mode: 'insensitive' } },
+            }),
+            ...(query.category === TeamAdminGetListRecommendationCategory.ID && {
+                leader: { account: { username: { contains: query.keyword, mode: 'insensitive' } } },
+            }),
+            //TODO: Special, Qualification
+        };
+
+        const list = await this.prismaService.team.findMany({
+            include: {
+                leader: {
+                    select: {
+                        name: true,
+                        contact: true,
+                        licenses: {
+                            where: {
+                                isActive: true,
+                            },
+                            select: {
+                                code: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                            },
+                        },
+                        level: true,
+                        account: {
+                            select: {
+                                username: true,
+                            },
+                        },
+                    },
+                },
+                teamEvaluation: {
+                    select: {
+                        averageScore: true,
+                    },
+                },
+                code: {
+                    select: {
+                        name: true,
+                    },
+                },
+                headhuntingRecommendations: {
+                    include: {
+                        headhunting: {
+                            include: {
+                                post: true,
+                            },
+                        },
+                    },
+                },
+                members: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        member: {
+                            select: {
+                                licenses: {
+                                    select: {
+                                        code: {
+                                            select: {
+                                                name: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            where: queryFilter,
+            orderBy: {
+                ...(query.sortScore === TeamAdminGetListRecommendationSort.HIGHEST_SCORE && {
+                    leader: {
+                        memberEvaluation: { averageScore: { sort: 'desc', nulls: 'last' } },
+                    },
+                }),
+                ...(query.sortScore === TeamAdminGetListRecommendationSort.LOWEST_SCORE && {
+                    leader: {
+                        memberEvaluation: { averageScore: { sort: 'asc', nulls: 'last' } },
+                    },
+                }),
+            },
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
+        });
+
+        const listCount = await this.prismaService.team.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+            where: {
+                id: query.requestId,
+                isActive: true,
+            },
+            select: {
+                headhunting: {
+                    select: {
+                        postId: true,
+                    },
+                },
+            },
+        });
+
+        const responseList = list.map((item) => {
+            let licenses = item.leader.licenses.map((item) => {
+                return item.code.name;
+            });
+
+            item.members.forEach((member) => {
+                const licenseList: string[] = member.member.licenses.map((license) => license.code.name);
+                licenses = licenses.concat(licenseList);
+            });
+            return {
+                id: item.id,
+                name: item.name,
+                leaderName: item.leader.name,
+                username: item.leader.account.username,
+                contact: item.leader.contact,
+                desiredOccupations: item.code.name,
+                licenses: licenses,
+                averageScore: item.teamEvaluation ? item.teamEvaluation.averageScore : null,
+                isSuggest:
+                    headhuntingRequest && headhuntingRequest.headhunting.postId
+                        ? item.headhuntingRecommendations
+                              .map((recommend) => recommend.headhunting.postId)
+                              .includes(headhuntingRequest.headhunting.postId)
+                        : false,
+            };
+        });
+
+        return new PaginationResponse(responseList, new PageInfo(listCount));
     }
 
     async download(query: string | string[], response: Response): Promise<void> {

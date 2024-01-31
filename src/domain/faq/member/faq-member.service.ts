@@ -8,7 +8,7 @@ import { FaqMemberGetListResponse } from './response/faq-member-get-list.respons
 
 @Injectable()
 export class FaqMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: FaqMemberGetListRequest): Promise<FaqMemberGetListResponse> {
         const queryFilter: Prisma.FaqWhereInput = {

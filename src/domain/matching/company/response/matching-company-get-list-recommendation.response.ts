@@ -1,18 +1,36 @@
 import { RequestObject } from '@prisma/client';
-import { MatchingCompanyGetItemRecommendationMemberDetail } from './matching-company-get-item-recommendation-member-detail.response';
-import { MatchingCompanyGetItemRecommendationTeamDetail } from './matching-company-get-item-recommendation-team-detail.response';
 
-export class MatchingCompanyGetItemRecommendation {
+class MatchingCompanyGetItemRecommendation {
     id: number;
     object: RequestObject;
     name: string;
     contact: string;
     totalMonths: number;
     totalYears: number;
-    specialNote: string[];
     numberOfTeamMembers: number;
-    memberDetail: MatchingCompanyGetItemRecommendationMemberDetail;
-    teamDetail: MatchingCompanyGetItemRecommendationTeamDetail;
+    memberDetail: {
+        codeName: string[];
+        localInformation: string;
+        totalYears: number;
+        totalMonths: number;
+        entire: string;
+    };
+    teamDetail: {
+        codeName: string;
+        leaderName: string;
+        leaderContact: string;
+        leaderAddress: string;
+        totalYears: number;
+        totalMonths: number;
+        member: {
+            rank: string;
+            name: string;
+            contact: string;
+            totalYears: number;
+            totalMonths: number;
+            workingStatus: string;
+        };
+    };
 }
 export class MatchingCompanyGetListRecommendation {
     data: MatchingCompanyGetItemRecommendation[];

@@ -11,7 +11,7 @@ export class ProductCompanyUsageHistoryResponse {
     createdAt: UsageHistory['createdAt'];
     expirationDate: UsageHistory['expirationDate'];
     numberOfUses: number;
-    remainNumber: UsageHistory['remainNumber'];
+    remainNumber: UsageHistory['remainNumbers'];
 }
 
 export class ProductCompanyUsageHistoryGetListResponse extends PaginationResponse<ProductCompanyUsageHistoryResponse> {}

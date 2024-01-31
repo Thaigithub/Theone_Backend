@@ -10,8 +10,8 @@ import { GetListHistoryResponse, LaborAdminGetListHistoryResponse } from './resp
 @Injectable()
 export class LaborAdminService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly excelService: ExcelService,
+        private prismaService: PrismaService,
+        private excelService: ExcelService,
     ) {}
 
     async getListHistory(id: number, query: LaborAdminGetListHistoryRequest): Promise<LaborAdminGetListHistoryResponse> {

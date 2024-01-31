@@ -9,7 +9,7 @@ import { AnnouncementCompanyGetListResponse } from './response/announcement-comp
 
 @Injectable()
 export class AnnouncementCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: AnnouncementCompanyGetListRequest): Promise<AnnouncementCompanyGetListResponse> {
         const queryFilter: Prisma.AnnouncementWhereInput = {

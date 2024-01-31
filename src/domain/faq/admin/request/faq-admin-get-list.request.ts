@@ -2,13 +2,13 @@ import { InquirerType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { FaqAdminGetListSearchCategory } from '../enum/faq-admin-get-list-search-category.enum';
+import { FaqAdminGetListCategory } from '../enum/faq-admin-get-list-category.enum';
 
 export class FaqAdminGetListRequest extends PaginationRequest {
     @Expose()
-    @IsEnum(FaqAdminGetListSearchCategory)
+    @IsEnum(FaqAdminGetListCategory)
     @IsOptional()
-    searchCategory: FaqAdminGetListSearchCategory;
+    searchCategory: FaqAdminGetListCategory;
 
     @Expose()
     @IsString()

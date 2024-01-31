@@ -1,4 +1,4 @@
-import { City, District, File, Site } from '@prisma/client';
+import { File, Site, Region } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class GetListResponse {
@@ -9,10 +9,10 @@ export class GetListResponse {
     originalBuilding: Site['originalBuilding'];
     startDate: Site['startDate'];
     endDate: Site['endDate'];
-    cityKoreanName: City['koreanName'];
-    cityEnglishName: City['englishName'];
-    districtKoreanName: District['koreanName'];
-    districtEnglishName: District['englishName'];
+    cityKoreanName: Region['cityKoreanName'];
+    cityEnglishName: Region['cityEnglishName'];
+    districtKoreanName: Region['districtKoreanName'];
+    districtEnglishName: Region['districtEnglishName'];
     companyLogoKey: File['key'];
 }
 

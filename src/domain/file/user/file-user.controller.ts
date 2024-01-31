@@ -8,7 +8,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 @UseGuards(AuthJwtGuard)
 @Controller('/user/files')
 export class FileUserController {
-    constructor(private readonly storageService: StorageService) {}
+    constructor(private storageService: StorageService) {}
 
     @Get('/generate-permanently-client-public-url-to-upload')
     async generatePermanentlyClientPublicUrlToUpload(

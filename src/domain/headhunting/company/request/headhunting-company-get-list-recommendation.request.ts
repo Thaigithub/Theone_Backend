@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 import { IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class HeadhuntingGetListRecommendationRequest extends PaginationRequest {
+export class HeadhuntingCompanyGetListRecommendationRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()

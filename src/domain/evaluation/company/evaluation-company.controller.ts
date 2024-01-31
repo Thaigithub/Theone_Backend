@@ -4,61 +4,54 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { EvaluationStatus } from './enum/evaluation-company-get-list-request.enum';
+import { EvaluationCompanyGetListStatus } from './enum/evaluation-company-get-list-request.enum';
 import { EvaluationCompanyService } from './evaluation-company.service';
 import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-company-create-evaluation.request';
 import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
-import { EvaluationCompanyGetListMembersResponse } from './response/evaluation-company-get-list-members.response';
-import { EvaluationCompanyGetListTeamsResponse } from './response/evaluation-company-get-list-teams.response';
+import { EvaluationCompanyGetListMemberResponse } from './response/evaluation-company-get-list-members.response';
+import { EvaluationCompanyGetListTeamResponse } from './response/evaluation-company-get-list-teams.response';
 
 @Controller('/company/evaluations')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class EvaluationCompanyController {
-    constructor(private readonly evaluationCompanyService: EvaluationCompanyService) {}
+    constructor(private evaluationCompanyService: EvaluationCompanyService) {}
 
-    @Patch('/member/:id')
-    async evaluateMember(
+    @Patch('/member/:id/score')
+    async updateMemberScore(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.evaluationCompanyService.evaluateMember(request.user.accountId, id, body));
+        return BaseResponse.of(await this.evaluationCompanyService.updateMemberScore(request.user.accountId, id, body));
     }
 
-    @Patch('/team/:id')
-    async evaluateTeam(
+    @Patch('/team/:id/score')
+    async updateTeamScore(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: EvaluationCompanyCreateEvaluationRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.evaluationCompanyService.evaluateTeam(request.user.accountId, id, body));
+        return BaseResponse.of(await this.evaluationCompanyService.updateTeamScore(request.user.accountId, id, body));
     }
 
     @Get('/member')
-    async getMemberEvaluations(
+    async getListMember(
         @Req() request: BaseRequest,
         @Query() query: EvaluationCompanyGetListRequest,
-    ): Promise<BaseResponse<EvaluationCompanyGetListMembersResponse>> {
-        if (query.score && query.status === EvaluationStatus.INCOMPLETE)
+    ): Promise<BaseResponse<EvaluationCompanyGetListMemberResponse>> {
+        if (query.score && query.status === EvaluationCompanyGetListStatus.INCOMPLETE)
             throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
-        const list = await this.evaluationCompanyService.getListMembers(request.user.accountId, query);
-        const total = await this.evaluationCompanyService.getTotalMembers(request.user.accountId, query);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+        return BaseResponse.of(await this.evaluationCompanyService.getListMember(request.user.accountId, query));
     }
 
     @Get('/team')
-    async getTeamEvaluations(
+    async getListTeam(
         @Req() request: BaseRequest,
         @Query() query: EvaluationCompanyGetListRequest,
-    ): Promise<BaseResponse<EvaluationCompanyGetListTeamsResponse>> {
-        if (query.score && query.status === EvaluationStatus.INCOMPLETE)
+    ): Promise<BaseResponse<EvaluationCompanyGetListTeamResponse>> {
+        if (query.score && query.status === EvaluationCompanyGetListStatus.INCOMPLETE)
             throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
-        const list = await this.evaluationCompanyService.getListTeams(request.user.accountId, query);
-        const total = await this.evaluationCompanyService.getTotalTeams(request.user.accountId, query);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+        return BaseResponse.of(await this.evaluationCompanyService.getListTeam(request.user.accountId, query));
     }
 }

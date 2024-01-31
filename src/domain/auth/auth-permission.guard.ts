@@ -8,7 +8,7 @@ export const FunctionPermission = (permission: FunctionName) => SetMetadata(PERM
 @Injectable()
 export class AuthPermissionGuard implements CanActivate {
     constructor(
-        private readonly prisma: PrismaService,
+        private prisma: PrismaService,
         private reflector: Reflector,
     ) {}
 

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ContractStatus } from './enum/contract-member-status.enum';
+import { ContractMemberGetListStatus } from './enum/contract-member-get-list-status.enum';
 import { ContractMemberGetListForSalaryRequest } from './request/contract-member-get-list-for-salary.request';
 import { ContractMemberGetListRequest } from './request/contract-member-get-list.request';
 import { ContractMemberGetDetailForSalaryResponse } from './response/contract-member-get-detail-for-salary.response';
@@ -45,21 +45,16 @@ export class ContractMemberService {
                     select: {
                         post: {
                             select: {
-                                interested: {
+                                interests: {
                                     where: {
                                         member: {
                                             accountId,
                                         },
                                     },
                                 },
-                                occupation: {
+                                code: {
                                     select: {
-                                        codeName: true,
-                                    },
-                                },
-                                specialOccupation: {
-                                    select: {
-                                        codeName: true,
+                                        name: true,
                                     },
                                 },
                                 endDate: true,
@@ -67,11 +62,7 @@ export class ContractMemberService {
                                 id: true,
                                 company: {
                                     select: {
-                                        logo: {
-                                            select: {
-                                                file: true,
-                                            },
-                                        },
+                                        logo: true,
                                     },
                                 },
                                 site: {
@@ -91,7 +82,7 @@ export class ContractMemberService {
             },
         };
         if (query.status) {
-            if (query.status === ContractStatus.ON_DUTY) {
+            if (query.status === ContractMemberGetListStatus.ON_DUTY) {
                 search.where.endDate['gte'] = new Date();
             } else {
                 search.where.endDate['lt'] = new Date();
@@ -100,10 +91,10 @@ export class ContractMemberService {
         const contracts = (await this.prismaService.contract.findMany(search)).map((item) => {
             return {
                 companyLogo: {
-                    fileName: item.application.post.company.logo.file.fileName,
-                    type: item.application.post.company.logo.file.type,
-                    key: item.application.post.company.logo.file.key,
-                    size: Number(item.application.post.company.logo.file.size),
+                    fileName: item.application.post.company.logo.fileName,
+                    type: item.application.post.company.logo.type,
+                    key: item.application.post.company.logo.key,
+                    size: Number(item.application.post.company.logo.size),
                 },
                 siteName: item.application.post.site.name,
                 siteStartDate: item.application.post.site.startDate,
@@ -115,10 +106,9 @@ export class ContractMemberService {
                 postName: item.application.post.name,
                 postEndDate: item.application.post.endDate,
                 siteAddress: item.application.post.site.address,
-                codeNameGeneral: item.application.post.occupation?.codeName || null,
-                codeNameSpecial: item.application.post.specialOccupation?.codeName || null,
-                isInterested: item.application.post.interested.length === 0 ? false : true,
-                status: item.endDate < new Date() ? ContractStatus.END_OF_DUTY : ContractStatus.ON_DUTY,
+                occupation: item.application.post.code?.name || null,
+                isInterested: item.application.post.interests.length === 0 ? false : true,
+                status: item.endDate < new Date() ? ContractMemberGetListStatus.END_OF_DUTY : ContractMemberGetListStatus.ON_DUTY,
             };
         });
         const total = await this.prismaService.contract.count({ where: search.where });
@@ -175,11 +165,7 @@ export class ContractMemberService {
                                 },
                                 company: {
                                     select: {
-                                        logo: {
-                                            select: {
-                                                file: true,
-                                            },
-                                        },
+                                        logo: true,
                                         name: true,
                                     },
                                 },
@@ -191,10 +177,10 @@ export class ContractMemberService {
         });
         return {
             companyLogo: {
-                fileName: contract.application.post.company.logo.file.fileName,
-                key: contract.application.post.company.logo.file.key,
-                type: contract.application.post.company.logo.file.type,
-                size: Number(contract.application.post.company.logo.file.size),
+                fileName: contract.application.post.company.logo.fileName,
+                key: contract.application.post.company.logo.key,
+                type: contract.application.post.company.logo.type,
+                size: Number(contract.application.post.company.logo.size),
             },
             postName: contract.application.post.name,
             siteName: contract.application.post.site.name,
@@ -217,7 +203,7 @@ export class ContractMemberService {
         };
     }
 
-    async getListForSalary(
+    async getListSalary(
         accountId: number,
         query: ContractMemberGetListForSalaryRequest,
     ): Promise<ContractMemberGetListForSalaryResponse> {
@@ -270,11 +256,7 @@ export class ContractMemberService {
                             select: {
                                 company: {
                                     select: {
-                                        logo: {
-                                            select: {
-                                                file: true,
-                                            },
-                                        },
+                                        logo: true,
                                         name: true,
                                     },
                                 },
@@ -298,7 +280,7 @@ export class ContractMemberService {
                         },
                         workDates: {
                             select: {
-                                hours: true,
+                                hour: true,
                             },
                         },
                     },
@@ -307,7 +289,7 @@ export class ContractMemberService {
             },
         };
         if (query.status) {
-            if (query.status === ContractStatus.ON_DUTY) {
+            if (query.status === ContractMemberGetListStatus.ON_DUTY) {
                 search.where.OR.map((item) => {
                     item.endDate['gte'] = new Date();
                     return item;
@@ -324,10 +306,10 @@ export class ContractMemberService {
             return {
                 id: item.id,
                 companyLogo: {
-                    fileName: item.application.post.company.logo.file.fileName,
-                    type: item.application.post.company.logo.file.type,
-                    key: item.application.post.company.logo.file.key,
-                    size: Number(item.application.post.company.logo.file.size),
+                    fileName: item.application.post.company.logo.fileName,
+                    type: item.application.post.company.logo.type,
+                    key: item.application.post.company.logo.key,
+                    size: Number(item.application.post.company.logo.size),
                 },
                 companyName: item.application.post.company.name,
                 startDate: item.startDate,
@@ -341,10 +323,10 @@ export class ContractMemberService {
                         : 0,
                 totalDays: item.labor.workDates.length,
                 totalHours: item.labor.workDates.reduce((accum, current) => {
-                    return accum + current.hours;
+                    return accum + current.hour;
                 }, 0),
                 siteName: item.application.post.site.name,
-                status: item.endDate < new Date() ? ContractStatus.END_OF_DUTY : ContractStatus.ON_DUTY,
+                status: item.endDate < new Date() ? ContractMemberGetListStatus.END_OF_DUTY : ContractMemberGetListStatus.ON_DUTY,
             };
         });
         const total = await this.prismaService.contract.count({ where: search.where });
@@ -371,7 +353,7 @@ export class ContractMemberService {
         });
     }
 
-    async getDetailForSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {
+    async getDetailSalary(accountId: number, id: number): Promise<ContractMemberGetDetailForSalaryResponse> {
         const contract = await this.prismaService.contract.findUnique({
             where: {
                 id,
@@ -407,7 +389,7 @@ export class ContractMemberService {
                     select: {
                         workDates: {
                             select: {
-                                hours: true,
+                                hour: true,
                             },
                         },
                         salaryHistories: true,
@@ -420,11 +402,7 @@ export class ContractMemberService {
                                 company: {
                                     select: {
                                         name: true,
-                                        logo: {
-                                            select: {
-                                                file: true,
-                                            },
-                                        },
+                                        logo: true,
                                     },
                                 },
                                 site: {
@@ -453,17 +431,17 @@ export class ContractMemberService {
             companyName: contract.application.post.company.name,
             siteName: contract.application.post.site.name,
             companyLogo: {
-                fileName: contract.application.post.company.logo.file.fileName,
-                type: contract.application.post.company.logo.file.type,
-                key: contract.application.post.company.logo.file.key,
-                size: Number(contract.application.post.company.logo.file.size),
+                fileName: contract.application.post.company.logo.fileName,
+                type: contract.application.post.company.logo.type,
+                key: contract.application.post.company.logo.key,
+                size: Number(contract.application.post.company.logo.size),
             },
             name: contract.application.member ? contract.application.member.name : contract.application.team.name,
             paymentForm: contract.paymentForm,
             salaryType: contract.salaryType,
             totalDays: contract.labor.workDates.length,
             totalHours: contract.labor.workDates.reduce((accum, current) => {
-                return accum + current.hours;
+                return accum + current.hour;
             }, 0),
             startDate: contract.startDate,
             endDate: contract.endDate,

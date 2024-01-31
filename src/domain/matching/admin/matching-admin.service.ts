@@ -3,13 +3,13 @@ import { ApplicationCategory, InterviewStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { MatchingAdminGetListCategory } from './dto/matching-admin-get-list-category.enum';
+import { MatchingAdminGetListCategory } from './enum/matching-admin-get-list-category.enum';
 import { MatchingAdminGetListRequest } from './request/matching-admin-get-list.request';
 import { MatchingAdminGetItemResponse, MatchingAdminGetListResponse } from './response/matching-admin-get-list.response';
 
 @Injectable()
 export class MatchingAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: MatchingAdminGetListRequest): Promise<MatchingAdminGetListResponse> {
         const queryFilter: Prisma.PostWhereInput = {
@@ -51,7 +51,7 @@ export class MatchingAdminService {
                         name: true,
                     },
                 },
-                applicants: {
+                applications: {
                     select: {
                         category: true,
                         interview: {
@@ -82,10 +82,10 @@ export class MatchingAdminService {
                 endDate: item.endDate,
                 paymentDate: null, //TODO: Adjust this field
                 remainingNumber: null, // TODO: Adjust this field
-                numberOfInterviewRequests: item.applicants.filter(
+                numberOfInterviewRequests: item.applications.filter(
                     (applicant) => applicant.category === ApplicationCategory.MATCHING,
                 ).length,
-                numberOfInterviewRejections: item.applicants.filter(
+                numberOfInterviewRejections: item.applications.filter(
                     (applicant) =>
                         applicant.category === ApplicationCategory.MATCHING &&
                         applicant.interview?.status === InterviewStatus.FAIL,

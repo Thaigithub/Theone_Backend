@@ -154,7 +154,7 @@ export class ProductCompanyService {
                 id: true,
             },
             _min: {
-                remainNumber: true,
+                remainNumbers: true,
                 expirationDate: true,
             },
             orderBy: { createdAt: 'desc' },
@@ -380,7 +380,7 @@ export class ProductCompanyService {
             select: {
                 id: true,
                 expirationDate: true,
-                usageHistory: true,
+                usageHistories: true,
                 refund: true,
             },
         });
@@ -388,7 +388,7 @@ export class ProductCompanyService {
             throw new NotFoundException('The payment history id is not found');
         }
         if (!paymentHistory.refund) {
-            if (paymentHistory.usageHistory.length > 0) {
+            if (paymentHistory.usageHistories.length > 0) {
                 throw new BadRequestException('The product has been used');
             }
             const pastDate = paymentHistory.expirationDate;

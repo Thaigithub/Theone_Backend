@@ -77,26 +77,18 @@ export class AccountCompanyService {
                         contactName: request.contactName,
                         logo: {
                             create: {
-                                file: {
-                                    create: {
-                                        fileName: request.logo.fileName,
-                                        type: request.logo.type,
-                                        size: request.logo.size,
-                                        key: request.logo.key,
-                                    },
-                                },
+                                fileName: request.logo.fileName,
+                                type: request.logo.type,
+                                size: request.logo.size,
+                                key: request.logo.key,
                             },
                         },
                         contactCard: {
                             create: {
-                                file: {
-                                    create: {
-                                        fileName: request.logo.fileName,
-                                        type: request.logo.type,
-                                        size: request.logo.size,
-                                        key: request.logo.key,
-                                    },
-                                },
+                                fileName: request.logo.fileName,
+                                type: request.logo.type,
+                                size: request.logo.size,
+                                key: request.logo.key,
                             },
                         },
                     },
@@ -118,16 +110,8 @@ export class AccountCompanyService {
                         file: true,
                     },
                 },
-                logo: {
-                    select: {
-                        file: true,
-                    },
-                },
-                contactCard: {
-                    select: {
-                        file: true,
-                    },
-                },
+                logo: true,
+                contactCard: true,
             },
         });
         if (!company) throw new NotFoundException('Company not found');
@@ -155,18 +139,18 @@ export class AccountCompanyService {
             }),
             logo: company.logo
                 ? {
-                      type: company.logo.file.type,
-                      key: company.logo.file.key,
-                      fileName: company.logo.file.fileName,
-                      size: company.logo.file.size ? Number(company.logo.file.size) : null,
+                      type: company.logo.type,
+                      key: company.logo.key,
+                      fileName: company.logo.fileName,
+                      size: company.logo.size ? Number(company.logo.size) : null,
                   }
                 : null,
             contactCard: company.contactCard
                 ? {
-                      type: company.contactCard.file.type,
-                      key: company.contactCard.file.key,
-                      fileName: company.contactCard.file.fileName,
-                      size: company.contactCard.file.size ? Number(company.contactCard.file.size) : null,
+                      type: company.contactCard.type,
+                      key: company.contactCard.key,
+                      fileName: company.contactCard.fileName,
+                      size: company.contactCard.size ? Number(company.contactCard.size) : null,
                   }
                 : null,
         };
@@ -264,26 +248,18 @@ export class AccountCompanyService {
                         },
                         logo: {
                             update: {
-                                file: {
-                                    update: {
-                                        fileName: body.logo.fileName,
-                                        type: body.logo.type,
-                                        size: body.logo.size,
-                                        key: body.logo.key,
-                                    },
-                                },
+                                fileName: body.logo.fileName,
+                                type: body.logo.type,
+                                size: body.logo.size,
+                                key: body.logo.key,
                             },
                         },
                         contactCard: {
                             update: {
-                                file: {
-                                    update: {
-                                        fileName: body.logo.fileName,
-                                        type: body.logo.type,
-                                        size: body.logo.size,
-                                        key: body.logo.key,
-                                    },
-                                },
+                                fileName: body.logo.fileName,
+                                type: body.logo.type,
+                                size: body.logo.size,
+                                key: body.logo.key,
                             },
                         },
                     },

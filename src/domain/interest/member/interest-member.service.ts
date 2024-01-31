@@ -5,7 +5,7 @@ import { SiteMemberService } from 'domain/site/member/site-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { InterestMemberGetFilter } from './dto/interest-member-get-filter';
+import { InterestMemberGetListCategory } from './enum/interest-member-get-filter';
 import { InterestMemberDeleteRequest } from './request/interest-member-delete.request';
 import { InterestMemberGetListRequest } from './request/interest-member-get-list.request';
 import { InterestMemberGetListResponse } from './response/interest-member-get-list.response.ts';
@@ -24,7 +24,7 @@ export class InterestMemberService {
                 accountId: accountId,
                 isActive: true,
             },
-            ...(query.interestType === InterestMemberGetFilter.POST && {
+            ...(query.interestType === InterestMemberGetListCategory.POST && {
                 AND: [
                     { NOT: { postId: null } },
                     {
@@ -34,7 +34,7 @@ export class InterestMemberService {
                     },
                 ],
             }),
-            ...(query.interestType === InterestMemberGetFilter.SITE && {
+            ...(query.interestType === InterestMemberGetListCategory.SITE && {
                 AND: [
                     { NOT: { siteId: null } },
                     {
@@ -54,20 +54,16 @@ export class InterestMemberService {
                         select: {
                             id: true,
                             name: true,
-                            post: true,
+                            posts: true,
                             address: true,
                             company: {
                                 select: {
                                     logo: {
                                         select: {
-                                            file: {
-                                                select: {
-                                                    key: true,
-                                                    fileName: true,
-                                                    size: true,
-                                                    type: true,
-                                                },
-                                            },
+                                            key: true,
+                                            fileName: true,
+                                            size: true,
+                                            type: true,
                                         },
                                     },
                                 },
@@ -80,9 +76,9 @@ export class InterestMemberService {
                             name: true,
                             startDate: true,
                             endDate: true,
-                            occupation: {
+                            code: {
                                 select: {
-                                    codeName: true,
+                                    name: true,
                                 },
                             },
                             site: {
@@ -95,14 +91,10 @@ export class InterestMemberService {
                                 select: {
                                     logo: {
                                         select: {
-                                            file: {
-                                                select: {
-                                                    key: true,
-                                                    fileName: true,
-                                                    size: true,
-                                                    type: true,
-                                                },
-                                            },
+                                            key: true,
+                                            fileName: true,
+                                            size: true,
+                                            type: true,
                                         },
                                     },
                                 },
@@ -119,38 +111,38 @@ export class InterestMemberService {
             return {
                 id: item.id,
                 site:
-                    query.interestType === InterestMemberGetFilter.SITE
+                    query.interestType === InterestMemberGetListCategory.SITE
                         ? {
                               id: item.site.id,
                               name: item.site.name,
                               address: item.site.address,
-                              countPost: item.site.post.length,
+                              countPost: item.site.posts.length,
                               logo: item.site?.company?.logo
                                   ? {
-                                        fileName: item.site.company.logo.file.fileName,
-                                        key: item.site.company.logo.file.key,
-                                        size: Number(item.site.company.logo.file.size),
-                                        type: item.site.company.logo.file.type,
+                                        fileName: item.site.company.logo.fileName,
+                                        key: item.site.company.logo.key,
+                                        size: Number(item.site.company.logo.size),
+                                        type: item.site.company.logo.type,
                                     }
                                   : null,
                           }
                         : null,
                 post:
-                    query.interestType === InterestMemberGetFilter.POST
+                    query.interestType === InterestMemberGetListCategory.POST
                         ? {
                               id: item.post.id,
                               name: item.post.name,
                               startDate: item.post.startDate,
                               endDate: item.post.endDate,
-                              codeName: item.post?.occupation ? item.post.occupation.codeName : null,
+                              codeName: item.post?.code ? item.post.code.name : null,
                               siteName: item.post?.site ? item.post.site.name : null,
                               siteAddress: item.post?.site ? item.post.site.address : null,
                               logo: item.post?.company?.logo
                                   ? {
-                                        fileName: item.post.company.logo.file.fileName,
-                                        key: item.post.company.logo.file.key,
-                                        size: Number(item.post.company.logo.file.size),
-                                        type: item.post.company.logo.file.type,
+                                        fileName: item.post.company.logo.fileName,
+                                        key: item.post.company.logo.key,
+                                        size: Number(item.post.company.logo.size),
+                                        type: item.post.company.logo.type,
                                     }
                                   : null,
                           }
@@ -180,7 +172,7 @@ export class InterestMemberService {
         if (!interest) {
             throw new NotFoundException('The interest is not exist');
         }
-        if (body.interestType === InterestMemberGetFilter.POST) {
+        if (body.interestType === InterestMemberGetListCategory.POST) {
             if (interest.postId) {
                 await this.postMemberService.updateInterest(accountId, interest.postId);
             } else {

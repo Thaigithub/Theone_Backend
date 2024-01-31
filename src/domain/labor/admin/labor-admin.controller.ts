@@ -12,7 +12,7 @@ import { LaborAdminGetListHistoryResponse } from './response/labor-admin-get-lis
 @Roles(AccountType.ADMIN)
 @Controller('/admin/labors')
 export class LaborAdminController {
-    constructor(private readonly laborAdminService: LaborAdminService) {}
+    constructor(private laborAdminService: LaborAdminService) {}
 
     @Get('/site/:siteId/history')
     async getListHistory(

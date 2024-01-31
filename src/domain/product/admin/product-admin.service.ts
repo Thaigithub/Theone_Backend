@@ -1,32 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentStatus, Prisma, ProductType, UsageType } from '@prisma/client';
+import { Response } from 'express';
+import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GetListType } from './enum/product-admin-get-list.enum';
 import { ProductAdminRefundSearchCategory } from './enum/product-admin-refund-search-category.enum';
 import { ProductAdminGetListRefundRequest } from './request/product-admin-get-list-refund.request';
+import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdateRefundStatusRequest } from './request/product-admin-update-refund-status.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
+import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
+import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
 import { ProductAdminGetDetailRefundResponse } from './response/product-admin-get-detail-refund.response';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
-import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
-import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
-import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
-import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
 import { ProductAdminGetListSettlementResponse } from './response/product-admin-get-list-settlement.response';
-import { Response } from 'express';
-import { ExcelService } from 'services/excel/excel.service';
+import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetAmountRequest } from './request/product-admin-get-amount.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @Injectable()
 export class ProductAdminService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly excelService: ExcelService,
+        private prismaService: PrismaService,
+        private excelService: ExcelService,
     ) {}
 
     async getList(
@@ -203,6 +205,29 @@ export class ProductAdminService {
         } as ProductAdminGetCompanyDetailLimitedCountResponse | ProductAdminGetCompanyDetailFixedTermResponse;
     }
 
+    async getAmount(query: ProductAdminGetAmountRequest): Promise<CountResponse> {
+        const currentDate = new Date();
+        const count = (
+            await this.prismaService.productPaymentHistory.findMany({
+                where: {
+                    product: {
+                        productType: query.productType,
+                    },
+                    createdAt: { gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1, 0, 0, 0, 0) },
+                    status: PaymentStatus.COMPLETE,
+                },
+                select: {
+                    cost: true,
+                },
+            })
+        ).reduce((sum, currentObject) => {
+            return sum + currentObject.cost;
+        }, 0);
+        return {
+            count: count,
+        };
+    }
+
     async getListRefund(query: ProductAdminGetListRefundRequest): Promise<ProductAdminGetListRefundResponse> {
         const search = {
             ...QueryPagingHelper.queryPaging(query),
@@ -309,7 +334,7 @@ export class ProductAdminService {
             },
             data: {
                 status: body.status,
-                refundHistory: {
+                refundHistories: {
                     create: {
                         status: body.status,
                         reason: body.updateReason,

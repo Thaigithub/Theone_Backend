@@ -1,13 +1,13 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { TermAdminGetListSearchCategory } from '../enum/term-admin-get-list-search-category.enum';
+import { TermAdminGetListCategory } from '../enum/term-admin-get-list-category.enum';
 
 export class TermAdminGetListRequest extends PaginationRequest {
     @Expose()
-    @IsEnum(TermAdminGetListSearchCategory)
+    @IsEnum(TermAdminGetListCategory)
     @IsOptional()
-    searchCategory: TermAdminGetListSearchCategory;
+    searchCategory: TermAdminGetListCategory;
 
     @Expose()
     @IsString()

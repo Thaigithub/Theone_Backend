@@ -14,6 +14,8 @@ import { PostAdminUpdateRequest } from './request/post-admin-update.request';
 import { PostAdminGetDetailResponse } from './response/post-admin-get-detail.response';
 import { PostAdminGetListForApplicationResponse } from './response/post-admin-get-list-application.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { PostAdminGetCountRequest } from './request/post-admin-get-count.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @Controller('/admin/posts')
 @Roles(AccountType.ADMIN)
@@ -32,6 +34,11 @@ export class PostAdminController {
         @Query() query: PostAdminGetListForApplicationRequest,
     ): Promise<BaseResponse<PostAdminGetListForApplicationResponse>> {
         return BaseResponse.of(await this.postAdminService.getListForApplication(query));
+    }
+
+    @Get('/count')
+    async getCount(@Query() query: PostAdminGetCountRequest): Promise<BaseResponse<CountResponse>> {
+        return BaseResponse.of(await this.postAdminService.getCount(query));
     }
 
     @Patch('/pullup')

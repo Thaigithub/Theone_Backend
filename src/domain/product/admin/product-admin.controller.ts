@@ -2,31 +2,37 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, Query, Res, Use
 import { AccountType, UsageType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { GetListType } from './enum/product-admin-get-list.enum';
 import { ProductAdminService } from './product-admin.service';
+import { ProductAdminDownloadSettlementRequest } from './request/product-admin-download-settlement.request';
 import { ProductAdminGetListRefundRequest } from './request/product-admin-get-list-refund.request';
+import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
 import { ProductAdminUpdateFixedTermRequest } from './request/product-admin-update-fixed-term.request';
 import { ProductAdminUpdateLimitedCountRequest } from './request/product-admin-update-limited-count.request';
 import { ProductAdminUpdateRefundStatusRequest } from './request/product-admin-update-refund-status.request';
 import { ProductAdminUpdateUsageCycleRequest } from './request/product-admin-update-usage-cycle.request';
+import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
+import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
 import { ProductAdminGetDetailRefundResponse } from './response/product-admin-get-detail-refund.response';
 import { ProductAdminGetListFixedTermResponse } from './response/product-admin-get-list-fixed-term.response';
 import { ProductAdminGetListLimitedCountResponse } from './response/product-admin-get-list-limited-count.response';
 import { ProductAdminGetListRefundResponse } from './response/product-admin-get-list-refund.response';
-import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
-import { ProductAdminGetCompanyDetailLimitedCountResponse } from './response/product-admin-get-company-detail-limited-count.response';
-import { ProductAdminGetCompanyDetailFixedTermResponse } from './response/product-admin-get-company-detail-fixed-term.response';
-import { ProductAdminGetListSettlementRequest } from './request/product-admin-get-list-settlement.request';
 import { ProductAdminGetListSettlementResponse } from './response/product-admin-get-list-settlement.response';
-import { Response } from 'express';
-import { ProductAdminDownloadSettlementRequest } from './request/product-admin-download-settlement.request';
+import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
+import { ProductAdminGetAmountRequest } from './request/product-admin-get-amount.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Controller('admin/products')
 export class ProductAdminController {
-    constructor(private readonly productAdminService: ProductAdminService) {}
+    constructor(private productAdminService: ProductAdminService) {}
+    @Get('/amount/count')
+    async getAmount(@Query() query: ProductAdminGetAmountRequest): Promise<BaseResponse<CountResponse>> {
+        return BaseResponse.of(await this.productAdminService.getAmount(query));
+    }
 
     @Get('/limited-count')
     async getListLimitedCount(): Promise<BaseResponse<ProductAdminGetListLimitedCountResponse>> {

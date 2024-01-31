@@ -33,11 +33,6 @@ export class PostCompanyCreateRequest {
     @Expose()
     @IsNumber()
     @IsOptional()
-    specialOccupationId: number;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
     occupationId: number;
 
     @Expose()

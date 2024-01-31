@@ -25,7 +25,7 @@ import { BannerAdminGetListPostResponse } from './response/banner-admin-get-list
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class BannerAdminController {
-    constructor(private readonly bannerAdminService: BannerAdminService) {}
+    constructor(private bannerAdminService: BannerAdminService) {}
     @Post('/advertising')
     async createAdvertising(@Body() body: BannerAdminUpsertAdvertisingRequest): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.bannerAdminService.createAdvertising(body));

@@ -1,8 +1,8 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { MatchingAdminGetListCategory } from '../dto/matching-admin-get-list-category.enum';
-import { MatchingAdminGetListServiceType } from '../dto/matching-admin-get-list-service-type.enum';
+import { MatchingAdminGetListCategory } from '../enum/matching-admin-get-list-category.enum';
+import { MatchingAdminGetListServiceType } from '../enum/matching-admin-get-list-service-type.enum';
 
 export class MatchingAdminGetListRequest extends PaginationRequest {
     @Expose()

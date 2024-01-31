@@ -1,0 +1,7 @@
+export enum InterviewMemberGetListStatus {
+    INTERVIEW_PROPOSAL = 'INTERVIEW_PROPOSAL',
+    INTERVIEW_COMPLETED = 'INTERVIEW_COMPLETED',
+    PASS = 'PASS',
+    FAIL = 'FAIL',
+    DEADLINE = 'DEADLINE',
+}

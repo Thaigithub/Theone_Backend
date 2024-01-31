@@ -27,7 +27,7 @@ const extractJwtFromCookie: JwtFromRequestFunction = (request) => {
 
 @Injectable()
 export class AuthJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-    constructor(private readonly prismaService: PrismaService) {
+    constructor(private prismaService: PrismaService) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromCookie, ExtractJwt.fromAuthHeaderAsBearerToken()]),
             secretOrKey: JWT_SECRET_KEY,

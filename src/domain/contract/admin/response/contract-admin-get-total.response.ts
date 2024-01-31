@@ -1,3 +1,3 @@
 export class ContractAdminGetTotalResponse {
-    totalContracts: number;
+    total: number;
 }

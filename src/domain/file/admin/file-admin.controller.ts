@@ -11,7 +11,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class FileAdminController {
-    constructor(private readonly storageService: StorageService) {}
+    constructor(private storageService: StorageService) {}
 
     @Get('/get-signed-url-to-upload')
     async generateSignedUrlToUploadForAdmin(@Query() query: FileUploadRequest): Promise<BaseResponse<GetSignedUrlResponse>> {

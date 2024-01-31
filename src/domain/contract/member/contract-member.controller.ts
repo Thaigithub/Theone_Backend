@@ -18,20 +18,20 @@ import { ContractMemberGetListResponse } from './response/contract-member-get-li
 export class ContractMemberController {
     constructor(private contractMemberService: ContractMemberService) {}
 
-    @Get('/:id/salary-site')
-    async geDetailForSalary(
+    @Get('/:id/salary')
+    async geDetailSalary(
         @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<ContractMemberGetDetailForSalaryResponse>> {
-        return BaseResponse.of(await this.contractMemberService.getDetailForSalary(req.user.accountId, id));
+        return BaseResponse.of(await this.contractMemberService.getDetailSalary(req.user.accountId, id));
     }
 
-    @Get('/salary-site')
-    async getListForSalary(
+    @Get('/salary')
+    async getListSalary(
         @Query() query: ContractMemberGetListForSalaryRequest,
         @Req() req: BaseRequest,
     ): Promise<BaseResponse<ContractMemberGetListForSalaryResponse>> {
-        return BaseResponse.of(await this.contractMemberService.getListForSalary(req.user.accountId, query));
+        return BaseResponse.of(await this.contractMemberService.getListSalary(req.user.accountId, query));
     }
 
     @Get('/count')

@@ -1,29 +1,27 @@
 import { Expose } from 'class-transformer';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { HeadhuntingAdminGetListCategory } from '../dto/headhunting-admin-get-list-category.enum';
-import { HeadhuntingAdminGetListRequestStatusEnum } from '../dto/headhunting-admin-get-list-request-status.enum';
+import { HeadhuntingAdminGetListRequestCategory } from '../enum/headhunting-admin-get-list-request-category.enum';
+import { HeadhuntingAdminGetListRequestStatus } from '../enum/headhunting-admin-get-list-request-status.enum';
 
 export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
-    startRequestDate: string;
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'Date must be in the format yyyy-mm-dd.',
+    })
+    requestDate: string;
 
     @Expose()
-    @IsString()
+    @IsEnum(HeadhuntingAdminGetListRequestCategory)
     @IsOptional()
-    endRequestDate: string;
+    category: HeadhuntingAdminGetListRequestCategory;
 
     @Expose()
-    @IsEnum(HeadhuntingAdminGetListCategory)
+    @IsEnum(HeadhuntingAdminGetListRequestStatus)
     @IsOptional()
-    category: HeadhuntingAdminGetListCategory;
-
-    @Expose()
-    @IsEnum(HeadhuntingAdminGetListRequestStatusEnum)
-    @IsOptional()
-    status: HeadhuntingAdminGetListRequestStatusEnum;
+    status: HeadhuntingAdminGetListRequestStatus;
 
     @Expose()
     @IsString()

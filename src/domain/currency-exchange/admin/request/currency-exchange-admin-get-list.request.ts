@@ -2,7 +2,7 @@ import { PointStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { CurrencyExchangeAdminSearchCategoryFilter } from '../dto/currency-exchange-admin-filter';
+import { CurrencyExchangeAdminGetListCategory } from '../dto/currency-exchange-admin-get-list-category.enum';
 
 export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationRequest {
     @Expose()
@@ -28,8 +28,8 @@ export class CurrencyExchangeAdminGetExchangeListRequest extends PaginationReque
 
     @Expose()
     @IsOptional()
-    @IsEnum(CurrencyExchangeAdminSearchCategoryFilter)
-    category: CurrencyExchangeAdminSearchCategoryFilter;
+    @IsEnum(CurrencyExchangeAdminGetListCategory)
+    category: CurrencyExchangeAdminGetListCategory;
 
     @Expose()
     @IsString()

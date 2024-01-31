@@ -5,7 +5,7 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
 import { InquiryAdminService } from './inquiry-admin.service';
 import { InquiryAdminGetListRequest } from './request/inquiry-admin-get-list.request';
-import { InquiryAdminAnswerRequest } from './request/inqury-admin-answer.request';
+import { InquiryAdminAnswerRequest } from './request/inquiry-admin-update-answer.request';
 import { InquiryAdminGetDetailResponse } from './response/inquiry-admin-get-detail.reponse';
 import { InquiryAdminGetListResponse } from './response/inquiry-admin-get-list.response';
 @Controller('/admin/inquiries')

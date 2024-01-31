@@ -8,7 +8,6 @@ export class PostAdminGetDetailResponse {
     endDate: Date;
     experienceType: ExperienceType;
     numberOfPeople: number;
-    specialOccupation: PostAdminCodeDTO;
     occupation: PostAdminCodeDTO;
     salaryType: SalaryType;
     salaryAmount: number;

@@ -3,7 +3,7 @@ import { InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { FaqAdminGetListSearchCategory } from './enum/faq-admin-get-list-search-category.enum';
+import { FaqAdminGetListCategory } from './enum/faq-admin-get-list-category.enum';
 import { FaqAdminCreateRequest } from './request/faq-admin-create.request';
 import { FaqAdminGetListRequest } from './request/faq-admin-get-list.request';
 import { FaqAdminUpdateRequest } from './request/faq-admin-update.request';
@@ -11,15 +11,15 @@ import { FaqAdminGetDetailResponse } from './response/faq-admin-get-detail.respo
 import { FaqAdminGetListResponse } from './response/faq-admin-get-list.response';
 @Injectable()
 export class FaqAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: FaqAdminGetListRequest): Promise<FaqAdminGetListResponse> {
         const queryFilter: Prisma.FaqWhereInput = {
             isActive: true,
-            ...(query.searchCategory === FaqAdminGetListSearchCategory.QUESTION && {
+            ...(query.searchCategory === FaqAdminGetListCategory.QUESTION && {
                 question: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(query.searchCategory === FaqAdminGetListSearchCategory.ANSWER && {
+            ...(query.searchCategory === FaqAdminGetListCategory.ANSWER && {
                 answer: { contains: query.keyword, mode: 'insensitive' },
             }),
             ...(query.inquirerType && {
@@ -108,7 +108,7 @@ export class FaqAdminService {
                     },
                     where: {
                         file: {
-                            isDeactivated: false,
+                            isActive: true,
                         },
                     },
                 },
@@ -154,7 +154,7 @@ export class FaqAdminService {
                     },
                 },
                 data: {
-                    isDeactivated: true,
+                    isActive: true,
                 },
             });
 

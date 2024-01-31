@@ -12,7 +12,7 @@ import { PreferenceMemberGetDetailResponse } from './response/preference-member-
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
 export class PreferenceMemberController {
-    constructor(private readonly preferenceMemberService: PreferenceMemberService) {}
+    constructor(private preferenceMemberService: PreferenceMemberService) {}
 
     @Get()
     async getDetail(@Req() request: BaseRequest): Promise<BaseResponse<PreferenceMemberGetDetailResponse>> {

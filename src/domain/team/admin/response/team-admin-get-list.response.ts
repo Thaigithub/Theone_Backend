@@ -1,6 +1,6 @@
 import { Team } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { TeamAdminGetListStatus } from '../dto/team-admin-get-list-status.enum';
+import { TeamAdminGetListStatus } from '../enum/team-admin-get-list-status.enum';
 
 class GetListResponse {
     id: number;

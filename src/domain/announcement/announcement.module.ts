@@ -4,8 +4,8 @@ import { AnnouncementAdminController } from './admin/announcement-admin.controll
 import { AnnouncementAdminService } from './admin/announcement-admin.service';
 import { AnnouncementCompanyController } from './company/announcement-company.controller';
 import { AnnouncementCompanyService } from './company/announcement-company.service';
-import { AnnouncementMemberController } from "./member'/announcement-member.controller";
-import { AnnouncementMemberService } from "./member'/announcement-member.service";
+import { AnnouncementMemberController } from './member/announcement-member.controller';
+import { AnnouncementMemberService } from './member/announcement-member.service';
 
 @Module({
     imports: [PrismaModule],

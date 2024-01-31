@@ -1,48 +1,44 @@
-import { Member } from '@prisma/client';
+import { Member, Region } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO {
+class GetListRecommendationMemberResponse {
     name: Member['name'];
     contact: Member['contact'];
     totalExperienceMonths: Member['totalExperienceMonths'];
     totalExperienceYears: Member['totalExperienceYears'];
-    specialLicenses: {
+    licenses: {
         name: string;
         licenseNumber: string;
     }[];
     desiredSalary: Member['desiredSalary'];
-    city: {
-        englishName: string;
-        koreanName: string;
-    };
-    district: {
-        englishName: string;
-        koreanName: string;
+    region: {
+        cityEnglishName: Region['cityEnglishName'];
+        cityKoreanName: Region['cityKoreanName'];
+        districtEnglishName: Region['districtEnglishName'];
+        districtKoreanName: Region['districtKoreanName'];
     };
 }
 
-export class RecommendationCompanyGetItemHeadhuntingApprovedLeaderDTO {
+export class GetListRecommendationLeaderResponse {
     contact: string;
     totalExperienceMonths: Member['totalExperienceMonths'];
     totalExperienceYears: Member['totalExperienceYears'];
     desiredSalary: Member['desiredSalary'];
 }
 
-export class RecommendationCompanyGetItemHeadhuntingApprovedTeamDTO {
+class GetListRecommendationTeamResponse {
     name: string;
-    district: {
-        englishName: string;
-        koreanName: string;
+    region: {
+        cityEnglishName: Region['cityEnglishName'];
+        cityKoreanName: Region['cityKoreanName'];
+        districtEnglishName: Region['districtEnglishName'];
+        districtKoreanName: Region['districtKoreanName'];
     };
-    city: {
-        englishName: string;
-        koreanName: string;
-    };
-    leader: RecommendationCompanyGetItemHeadhuntingApprovedLeaderDTO;
+    leader: GetListRecommendationLeaderResponse;
 }
-export class RecommendationCompanyGetItemHeadhuntingApprovedResponse {
-    member: RecommendationCompanyGetItemHeadhuntingApprovedMemberDTO;
-    team: RecommendationCompanyGetItemHeadhuntingApprovedTeamDTO;
+class GetListRecommendationResponse {
+    member: GetListRecommendationMemberResponse;
+    team: GetListRecommendationTeamResponse;
 }
 
-export class RecommendationCompanyGetListHeadhuntingApprovedResponse extends PaginationResponse<RecommendationCompanyGetItemHeadhuntingApprovedResponse> {}
+export class HeadhuntingCompanyGetListRecommendationResponse extends PaginationResponse<GetListRecommendationResponse> {}

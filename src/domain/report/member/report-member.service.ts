@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { ReportMemberCreateRequest } from './request/report-member-create.request';
-import { ReportMemberGetListResponse } from './response/report-member-get-list.response';
-import { ReportMemberGetListRequest } from './request/report-member-get-list.request';
 import { Prisma } from '@prisma/client';
-import { QueryPagingHelper } from 'utils/pagination-query';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
+import { ReportMemberCreateRequest } from './request/report-member-create.request';
+import { ReportMemberGetListRequest } from './request/report-member-get-list.request';
 import { ReportMemberGetDetailResponse } from './response/report-member-get-detail.response';
+import { ReportMemberGetListResponse } from './response/report-member-get-list.response';
 
 @Injectable()
 export class ReportMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async create(accountId: number, body: ReportMemberCreateRequest): Promise<void> {
         await this.prismaService.report.create({

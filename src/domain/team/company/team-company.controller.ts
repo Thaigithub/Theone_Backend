@@ -12,7 +12,8 @@ import { TeamCompanyService } from './team-company.service';
 @Roles(AccountType.COMPANY)
 @Controller('/company/teams')
 export class TeamCompanyController {
-    constructor(private readonly teamCompanyService: TeamCompanyService) {}
+    constructor(private teamCompanyService: TeamCompanyService) {}
+
     @Get('/:id')
     async getTeamDetailManpower(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<TeamCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.teamCompanyService.getDetail(id));

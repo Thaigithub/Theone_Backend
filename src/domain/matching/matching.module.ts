@@ -5,12 +5,10 @@ import { MatchingAdminController } from './admin/matching-admin.controller';
 import { MatchingAdminService } from './admin/matching-admin.service';
 import { MatchingCompanyController } from './company/matching-company.controller';
 import { MatchingCompanyService } from './company/matching-company.service';
-import { MatchingMemberController } from './member/matching-member.controller';
-import { MatchingMemberService } from './member/matching-member.service';
 
 @Module({
     imports: [PrismaModule, PostModule],
-    controllers: [MatchingCompanyController, MatchingMemberController, MatchingAdminController],
-    providers: [MatchingCompanyService, MatchingMemberService, MatchingAdminService],
+    controllers: [MatchingCompanyController, MatchingAdminController],
+    providers: [MatchingCompanyService, MatchingAdminService],
 })
 export class MatchingModule {}

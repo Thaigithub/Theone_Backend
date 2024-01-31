@@ -1,31 +1,20 @@
 import { Expose } from 'class-transformer';
-import { ArrayUnique, IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AccountMemberUpdateRequest {
     @IsString()
-    @IsOptional()
     @Expose()
     username: string;
 
     @IsString()
-    @IsOptional()
     @Expose()
     name: string;
 
     @IsNumber()
-    @IsOptional()
     @Expose()
     desiredSalary: number;
 
-    @IsArray()
-    @ArrayUnique()
-    @IsNumber({}, { each: true })
-    @IsOptional()
-    @Expose()
-    desiredOccupations: number[];
-
     @IsNumber()
     @Expose()
-    @IsOptional()
-    districtId: number;
+    regionId: number;
 }

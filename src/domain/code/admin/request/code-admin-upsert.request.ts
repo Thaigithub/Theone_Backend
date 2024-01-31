@@ -1,12 +1,7 @@
-import { CodeType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class CodeAdminUpsertRequest {
-    @Expose()
-    @IsEnum(CodeType)
-    codeType: CodeType;
-
     @Expose()
     @IsString()
     @Length(1, 10, { message: 'Code should be maximum 10 characters' })

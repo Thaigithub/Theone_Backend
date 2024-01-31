@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
-import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
+import { ApplicationCompanyGetDetailMemberResponse } from 'domain/application/company/response/application-company-get-detail-member.response';
+import { ApplicationCompanyGetDetailTeamResponse } from 'domain/application/company/response/application-company-get-detail-team.response';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-detail-applicant.response';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { InterviewCompanyService } from './interview-company.service';
@@ -16,7 +16,7 @@ import { InterviewCompanyGetListResponse } from './response/interview-company-ge
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class InterviewCompanyController {
-    constructor(private readonly interviewCompanyService: InterviewCompanyService) {}
+    constructor(private interviewCompanyService: InterviewCompanyService) {}
 
     @Get()
     async getList(
@@ -30,7 +30,7 @@ export class InterviewCompanyController {
     async getDetailMember(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetDetailMemberResponse>> {
         return BaseResponse.of(await this.interviewCompanyService.getDetailMember(request.user.accountId, id));
     }
 
@@ -38,7 +38,7 @@ export class InterviewCompanyController {
     async getDetailTeam(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<TeamCompanyGetTeamDetailApplicants>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetDetailTeamResponse>> {
         return BaseResponse.of(await this.interviewCompanyService.getDetailTeam(request.user.accountId, id));
     }
 

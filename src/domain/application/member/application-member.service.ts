@@ -3,12 +3,13 @@ import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } f
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ChangeApplicationStatus } from './enum/application-member-change-status.enum';
 import { ApplicationMemberGetListOfferFilter } from './enum/application-member-get-list-offer-filter.enum';
 import { OfferType } from './enum/application-member-get-list-offer-type.enum';
 import { ApplicationMemberStatus } from './enum/application-member-status.enum';
+import { ApplicationMemberUpdateStatus } from './enum/application-member-update-status.enum';
 import { ApplicationMemberGetListOfferRequest } from './request/application-member-get-list-offer.request';
 import { ApplicationMemberGetListRequest } from './request/application-member-get-list.request';
+import { ApplicationMemberUpdateStatusRequest } from './request/application-member-update-status.request';
 import { ApplicationMemberGetDetailResponse } from './response/application-member-get-detail.response';
 import { ApplicationMemberGetListOfferResponse } from './response/application-member-get-list-offer.response';
 import { ApplicationMemberGetListResponse } from './response/application-member-get-list.response';
@@ -28,14 +29,14 @@ export class ApplicationMemberService {
                         teamId: true,
                     },
                 },
-                leader: {
+                leaders: {
                     select: {
                         id: true,
                     },
                 },
             },
         });
-        const teamIds = [...teams.leader.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
+        const teamIds = [...teams.leaders.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
         const status =
             query.status === ApplicationMemberStatus.FAIL
                 ? {
@@ -98,7 +99,7 @@ export class ApplicationMemberService {
                     assignedAt: true,
                     post: {
                         select: {
-                            interested: {
+                            interests: {
                                 where: {
                                     member: {
                                         accountId: id,
@@ -109,9 +110,9 @@ export class ApplicationMemberService {
                             name: true,
                             endDate: true,
                             status: true,
-                            occupation: {
+                            code: {
                                 select: {
-                                    codeName: true,
+                                    name: true,
                                     id: true,
                                 },
                             },
@@ -129,11 +130,7 @@ export class ApplicationMemberService {
                                 select: {
                                     id: true,
                                     name: true,
-                                    logo: {
-                                        select: {
-                                            file: true,
-                                        },
-                                    },
+                                    logo: true,
                                 },
                             },
                         },
@@ -148,22 +145,22 @@ export class ApplicationMemberService {
             return {
                 applicationId: item.id,
                 companyLogo: {
-                    fileName: item.post.company.logo.file.fileName,
-                    type: item.post.company.logo.file.type,
-                    key: item.post.company.logo.file.key,
-                    size: Number(item.post.company.logo.file.size),
+                    fileName: item.post.company.logo.fileName,
+                    type: item.post.company.logo.type,
+                    key: item.post.company.logo.key,
+                    size: Number(item.post.company.logo.size),
                 },
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
-                occupationId: item.post.occupation ? item.post.occupation.id : null,
-                occupationName: item.post.occupation ? item.post.occupation.codeName : null,
+                occupationId: item.post.code ? item.post.code.id : null,
+                occupationName: item.post.code ? item.post.code.name : null,
                 endDate: item.post.endDate,
                 status: item.status,
                 appliedDate: item.assignedAt,
                 siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site ? item.post.site.address : '',
-                isInterested: item.post.interested.length === 0 ? false : true,
+                isInterested: item.post.interests.length === 0 ? false : true,
             };
         });
         const total = await this.prismaService.application.count({ where: queryFilter });
@@ -237,16 +234,16 @@ export class ApplicationMemberService {
                 },
                 post: {
                     select: {
-                        interested: {
+                        interests: {
                             where: {
                                 member: {
                                     accountId,
                                 },
                             },
                         },
-                        occupation: {
+                        code: {
                             select: {
-                                codeName: true,
+                                name: true,
                             },
                         },
                         id: true,
@@ -269,18 +266,7 @@ export class ApplicationMemberService {
                             select: {
                                 id: true,
                                 name: true,
-                                logo: {
-                                    select: {
-                                        file: {
-                                            select: {
-                                                key: true,
-                                                fileName: true,
-                                                type: true,
-                                                size: true,
-                                            },
-                                        },
-                                    },
-                                },
+                                logo: true,
                             },
                         },
                     },
@@ -291,10 +277,10 @@ export class ApplicationMemberService {
         return {
             isLeader: application.team?.leader.accountId === accountId || null,
             companyLogo: {
-                fileName: application.post.company.logo.file.fileName,
-                type: application.post.company.logo.file.type,
-                key: application.post.company.logo.file.key,
-                size: Number(application.post.company.logo.file.size),
+                fileName: application.post.company.logo.fileName,
+                type: application.post.company.logo.type,
+                key: application.post.company.logo.key,
+                size: Number(application.post.company.logo.size),
             },
             companyName: application.post.company.name,
             companyId: application.post.company.id,
@@ -312,8 +298,8 @@ export class ApplicationMemberService {
             postStartDate: application.post.startDate,
             status: application.status,
             appliedDate: application.assignedAt,
-            occupationName: application.post.occupation ? application.post.occupation.codeName : null,
-            isInterested: application.post.interested.length !== 0 ? true : false,
+            occupationName: application.post.code ? application.post.code.name : null,
+            isInterested: application.post.interests.length !== 0 ? true : false,
             team: application.team
                 ? {
                       name: application.team.name,
@@ -331,7 +317,7 @@ export class ApplicationMemberService {
         };
     }
 
-    async updateStatus(id: number, accountId: number, status: ChangeApplicationStatus): Promise<void> {
+    async updateStatus(id: number, accountId: number, body: ApplicationMemberUpdateStatusRequest): Promise<void> {
         const application = await this.prismaService.application.findFirst({
             where: {
                 OR: [
@@ -370,7 +356,7 @@ export class ApplicationMemberService {
             },
             data: {
                 status:
-                    status === ChangeApplicationStatus.ACCEPT
+                    body.status === ApplicationMemberUpdateStatus.ACCEPT
                         ? PostApplicationStatus.APPROVE_BY_MEMBER
                         : PostApplicationStatus.REJECT_BY_MEMBER,
             },
@@ -391,14 +377,14 @@ export class ApplicationMemberService {
                         teamId: true,
                     },
                 },
-                leader: {
+                leaders: {
                     select: {
                         id: true,
                     },
                 },
             },
         });
-        const teamIds = [...teams.leader.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
+        const teamIds = [...teams.leaders.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
         const query = {
             where: {
                 OR: [
@@ -442,7 +428,7 @@ export class ApplicationMemberService {
                 post: {
                     select: {
                         id: true,
-                        interested: {
+                        interests: {
                             where: {
                                 member: {
                                     accountId,
@@ -451,9 +437,9 @@ export class ApplicationMemberService {
                         },
                         endDate: true,
                         name: true,
-                        occupation: {
+                        code: {
                             select: {
-                                codeName: true,
+                                name: true,
                             },
                         },
                         site: {
@@ -464,18 +450,7 @@ export class ApplicationMemberService {
                         },
                         company: {
                             select: {
-                                logo: {
-                                    select: {
-                                        file: {
-                                            select: {
-                                                fileName: true,
-                                                type: true,
-                                                size: true,
-                                                key: true,
-                                            },
-                                        },
-                                    },
-                                },
+                                logo: true,
                             },
                         },
                     },
@@ -608,16 +583,16 @@ export class ApplicationMemberService {
                 applicationStatus: item.status,
                 teamName: item.team ? item.team.name : '',
                 companyLogo: {
-                    key: item.post.company.logo.file.key,
-                    fileName: item.post.company.logo.file.fileName,
-                    type: item.post.company.logo.file.type,
-                    size: Number(item.post.company.logo.file.size),
+                    key: item.post.company.logo.key,
+                    fileName: item.post.company.logo.fileName,
+                    type: item.post.company.logo.type,
+                    size: Number(item.post.company.logo.size),
                 },
                 postName: item.post.name,
                 siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site ? item.post.site.address : '',
-                occupationName: item.post.occupation ? item.post.occupation.codeName : '',
-                isInterested: item.post.interested.length === 0 ? false : true,
+                occupationName: item.post.code ? item.post.code.name : '',
+                isInterested: item.post.interests.length === 0 ? false : true,
             };
         });
         const total = await this.prismaService.application.count({

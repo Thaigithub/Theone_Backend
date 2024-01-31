@@ -4,8 +4,10 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
+import { CountResponse } from 'utils/generics/count.response';
 import { MemberAdminService } from './member-admin.service';
+import { MemberAdminGetCountRequest } from './request/member-admin-count.request';
+import { MemberAdminGetListRecommendationRequest } from './request/member-admin-get-list-recommendation.request';
 import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import {
@@ -15,6 +17,7 @@ import {
     GetMembersListRequest,
 } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
+import { MemberAdminGetListRecommendationResponse } from './response/member-admin-get-list-recommendation.response';
 import { MemberAdminGetListResponse } from './response/member-admin-get-list.response';
 import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
 import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
@@ -24,14 +27,16 @@ import { MemberAdminGetPointListResponse } from './response/member-admin-get-poi
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Controller('/admin/members')
 export class MemberAdminController {
-    constructor(private readonly memberAdminService: MemberAdminService) {}
+    constructor(private memberAdminService: MemberAdminService) {}
 
     @Get()
     async getList(@Query() query: GetMembersListRequest): Promise<BaseResponse<MemberAdminGetListResponse>> {
-        const membersList = await this.memberAdminService.getList(query);
-        const membersTotal = await this.memberAdminService.getTotal(query);
-        const paginationResponse = new PaginationResponse(membersList, new PageInfo(membersTotal));
-        return BaseResponse.of(paginationResponse);
+        return BaseResponse.of(await this.memberAdminService.getList(query));
+    }
+
+    @Get('/count')
+    async getCount(@Query() query: MemberAdminGetCountRequest): Promise<BaseResponse<CountResponse>> {
+        return BaseResponse.of(await this.memberAdminService.getCount(query));
     }
 
     @Get('/download')
@@ -44,6 +49,13 @@ export class MemberAdminController {
             memberIds = query.memberId.map((item) => parseInt(item));
         } else if (typeof query.memberId === 'string') memberIds = [parseInt(query.memberId)];
         return BaseResponse.of(await this.memberAdminService.download(memberIds, response));
+    }
+
+    @Get('/headhunting')
+    async getListMemberRecommendation(
+        @Query() query: MemberAdminGetListRecommendationRequest,
+    ): Promise<BaseResponse<MemberAdminGetListRecommendationResponse>> {
+        return BaseResponse.of(await this.memberAdminService.getListRecommendation(query));
     }
 
     @Get('/point')

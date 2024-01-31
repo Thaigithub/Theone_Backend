@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, PostType, Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
@@ -25,7 +26,7 @@ export class PostMemberService {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupationList?.map((item) => parseInt(item));
         const constructionMachineryList = query.constructionMachineryList?.map((item) => parseInt(item));
-        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
+        const { ids } = await this.regionService.parseFromRegionList(query.regionList);
 
         return {
             isActive: true,
@@ -43,29 +44,20 @@ export class PostMemberService {
                     ],
                 },
                 {
-                    OR: [
-                        districtsList.length
-                            ? {
-                                  site: {
-                                      district: { id: { in: districtsList } },
-                                  },
-                              }
-                            : {},
-                        citiesList.length
-                            ? {
-                                  site: {
-                                      district: { cityId: { in: citiesList } },
-                                  },
-                              }
-                            : {},
-                    ],
+                    site: {
+                        region: {
+                            id: { in: ids },
+                        },
+                    },
                 },
             ],
             siteId,
             type: query.postType,
             experienceType: query.experienceTypeList && { in: experienceTypeList },
-            occupationId: query.occupationList && { in: occupationList },
-            specialOccupationId: query.constructionMachineryList && { in: constructionMachineryList },
+            OR: [
+                { codeId: query.occupationList && { in: occupationList } },
+                { codeId: query.constructionMachineryList && { in: constructionMachineryList } },
+            ],
             startDate: { lte: new Date() },
             endDate: { gte: new Date() },
         };
@@ -93,30 +85,28 @@ export class PostMemberService {
                     name: true,
                     startWorkDate: true,
                     endWorkDate: true,
-                    numberOfPeople: true,
+                    numberOfPeoples: true,
                     endDate: true,
-                    occupation: {
+                    code: {
                         select: {
-                            codeName: true,
+                            name: true,
                         },
                     },
                     site: {
                         select: {
                             name: true,
                             address: true,
-                            district: {
+                            region: {
                                 select: {
-                                    englishName: true,
-                                    city: {
-                                        select: {
-                                            englishName: true,
-                                        },
-                                    },
+                                    districtEnglishName: true,
+                                    districtKoreanName: true,
+                                    cityEnglishName: true,
+                                    cityKoreanName: true,
                                 },
                             },
                         },
                     },
-                    interested: {
+                    interests: {
                         where: {
                             member: {
                                 accountId: accountId,
@@ -145,25 +135,25 @@ export class PostMemberService {
             const startWorkDate = item.startWorkDate ? item.startWorkDate.toISOString().split('T')[0] : null;
             const endWorkDate = item.endWorkDate ? item.endWorkDate.toISOString().split('T')[0] : null;
             const endDate = item.endDate ? item.endDate.toISOString().split('T')[0] : null;
-            const occupation = item.occupation ? item.occupation.codeName : null;
+            const occupation = item.code ? item.code.name : null;
             delete item.site;
-            delete item.occupation;
+            delete item.code;
             delete item.startWorkDate;
             delete item.endWorkDate;
             delete item.endDate;
             return {
                 id: item.id,
                 name: item.name,
-                numberOfPeople: item.numberOfPeople,
+                numberOfPeople: item.numberOfPeoples,
                 occupation,
                 startWorkDate,
                 endWorkDate,
                 endDate,
                 siteName: site ? site.name : null,
                 siteAddress: site ? site.address : null,
-                siteAddressCity: site?.district ? site.district.city.englishName : null,
-                siteAddressDistrict: site?.district ? site.district.englishName : null,
-                isInterested: accountId && item.interested.length > 0 ? true : false,
+                siteAddressCity: site?.region ? site.region.cityEnglishName : null,
+                siteAddressDistrict: site?.region ? site.region.districtEnglishName : null,
+                isInterested: accountId && item.interests.length > 0 ? true : false,
             };
         });
         const count = await this.prismaService.post.count({
@@ -189,9 +179,9 @@ export class PostMemberService {
 
         let memberRegisteredCodeIdsList = null;
         if (accountId) {
-            const memberSpecialLicenseList = await this.prismaService.member.findUnique({
+            const memberLicenseList = await this.prismaService.member.findUnique({
                 select: {
-                    specialLicenses: {
+                    licenses: {
                         where: {
                             isActive: true,
                         },
@@ -210,7 +200,7 @@ export class PostMemberService {
             });
             memberRegisteredCodeIdsList = [
                 ...new Set([
-                    ...memberSpecialLicenseList.specialLicenses.map((item) => {
+                    ...memberLicenseList.licenses.map((item) => {
                         return item.code.id;
                     }),
                 ]),
@@ -222,20 +212,26 @@ export class PostMemberService {
                 company: {
                     include: {
                         logo: {
-                            include: {
-                                file: true,
+                            select: {
+                                key: true,
+                                type: true,
+                                size: true,
+                                fileName: true,
                             },
                         },
                     },
                 },
                 site: {
                     include: {
-                        district: {
-                            include: {
-                                city: true,
+                        region: {
+                            select: {
+                                districtEnglishName: true,
+                                districtKoreanName: true,
+                                cityEnglishName: true,
+                                cityKoreanName: true,
                             },
                         },
-                        interestMember: {
+                        interests: {
                             where: {
                                 member: {
                                     accountId,
@@ -244,9 +240,8 @@ export class PostMemberService {
                         },
                     },
                 },
-                occupation: true,
-                specialOccupation: true,
-                interested: {
+                code: true,
+                interests: {
                     where: {
                         member: {
                             accountId,
@@ -275,16 +270,16 @@ export class PostMemberService {
                 name: post.name,
                 startDate: post.startDate.toISOString().split('T')[0],
                 endDate: post.endDate.toISOString().split('T')[0],
-                numberOfPeople: post.numberOfPeople,
+                numberOfPeople: post.numberOfPeoples,
                 personInCharge: post.company.presentativeName,
             },
             eligibility: {
                 experienceType: post.experienceType,
-                occupation: post.occupation ? post.occupation.codeName : null,
-                specialNote: post.specialOccupation ? post.specialOccupation.codeName : null,
+                occupation: post.code ? post.code.name : null,
+                codeName: post.code ? post.code.name : null,
                 otherInformation: post.otherInformation,
                 isEligibleToApply: memberRegisteredCodeIdsList
-                    ? !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.specialOccupation?.id)
+                    ? !memberRegisteredCodeIdsList.length || memberRegisteredCodeIdsList.includes(post.code?.id)
                         ? true
                         : false
                     : false,
@@ -292,7 +287,7 @@ export class PostMemberService {
             detail: post.postEditor,
             siteInformation: {
                 id: post.siteId,
-                companyLogoKey: post.company.logo?.file ? post.company.logo.file.key : null,
+                companyLogoKey: post.company.logo ? post.company.logo.key : null,
                 siteName: post.site ? post.site.name : null,
                 siteAddress: post.site ? post.site.address : null,
                 startDate: post.site?.startDate ? post.site.startDate.toISOString().split('T')[0] : null,
@@ -301,9 +296,9 @@ export class PostMemberService {
                 longitude: post.site ? post.site.longitude : null,
                 latitude: post.site ? post.site.latitude : null,
                 originalContractor: post.site ? post.site.contractStatus : null,
-                isInterest: post.site && accountId && post.site?.interestMember.length !== 0 ? true : false,
+                isInterest: post.site && accountId && post.site?.interests.length !== 0 ? true : false,
             },
-            isInterest: accountId && post.interested.length !== 0 ? true : false,
+            isInterest: accountId && post.interests.length !== 0 ? true : false,
         };
     }
 
@@ -451,71 +446,76 @@ export class PostMemberService {
         accountId: number | undefined,
         query: PostMemberGetListPremiumRequest,
     ): Promise<PostMemberGetListPremiumResponse> {
-        const search = {
-            ...QueryPagingHelper.queryPaging(query),
-            where: {
-                type: PostType.PREMIUM,
-                isHidden: false,
-                isActive: true,
-            },
-            select: {
-                company: {
+        const queryFilter: Prisma.PostWhereInput = {
+            type: PostType.PREMIUM,
+            isHidden: false,
+            isActive: true,
+        };
+        const posts = await Promise.all(
+            (
+                await this.prismaService.post.findMany({
+                    where: queryFilter,
                     select: {
-                        logo: {
+                        company: {
                             select: {
-                                file: true,
+                                logo: {
+                                    select: {
+                                        fileName: true,
+                                        key: true,
+                                        size: true,
+                                        type: true,
+                                    },
+                                },
+                            },
+                        },
+                        name: true,
+                        endDate: true,
+                        id: true,
+                        site: {
+                            select: {
+                                name: true,
+                                address: true,
+                            },
+                        },
+                        code: true,
+                        interests: {
+                            where: {
+                                member: {
+                                    accountId,
+                                },
                             },
                         },
                     },
-                },
-                name: true,
-                endDate: true,
-                id: true,
-                site: {
-                    select: {
-                        name: true,
-                        address: true,
-                    },
-                },
-                occupation: true,
-                interested: {
-                    where: {
-                        member: {
-                            accountId,
+                    orderBy: [
+                        {
+                            isPulledUp: Prisma.SortOrder.desc,
                         },
-                    },
-                },
-            },
-            orderBy: [
-                {
-                    isPulledUp: Prisma.SortOrder.desc,
-                },
-                {
-                    createdAt: Prisma.SortOrder.desc,
-                },
-            ],
-        };
-        const posts = await Promise.all(
-            (await this.prismaService.post.findMany(search)).map(async (item) => {
+                        {
+                            createdAt: Prisma.SortOrder.desc,
+                        },
+                    ],
+                    ...QueryPagingHelper.queryPaging(query),
+                })
+            ).map(async (item) => {
                 return {
                     companyLogo: {
-                        fileName: item.company.logo.file.fileName,
-                        type: item.company.logo.file.type,
-                        key: item.company.logo.file.key,
-                        size: Number(item.company.logo.file.size),
+                        fileName: item.company.logo.fileName,
+                        type: item.company.logo.type,
+                        key: item.company.logo.key,
+                        size: Number(item.company.logo.size),
                     },
                     postName: item.name,
                     endDate: item.endDate,
                     id: item.id,
                     siteName: item.site?.name || null,
                     siteAddress: item.site?.address || null,
-                    isInterested: accountId ? (item.interested.length === 0 ? false : true) : null,
-                    occupationName: item.occupation?.codeName || null,
-                    urlLogo: await this.storageService.getSignedUrl(item.company.logo.file.key),
+                    isInterested: accountId ? (item.interests.length === 0 ? false : true) : null,
+                    occupationName: item.code?.name || null,
+                    urlLogo: await this.storageService.getSignedUrl(item.company.logo.key),
                 };
             }),
         );
-        const total = await this.prismaService.post.count({ where: search.where });
+        const total = await this.prismaService.post.count({ where: queryFilter });
         return new PaginationResponse(posts, new PageInfo(total));
     }
 }

@@ -13,12 +13,14 @@ import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.res
 import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
 import { SiteAdminService } from './site-admin.service';
+import { SiteAdminGetCountRequest } from './request/site-admin-get-count.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @Controller('/admin/sites')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class SiteAdminController {
-    constructor(private readonly siteAdminService: SiteAdminService) {}
+    constructor(private siteAdminService: SiteAdminService) {}
 
     @Get('/:id/labor')
     async getDetailLabor(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailLaborResponse>> {
@@ -33,6 +35,11 @@ export class SiteAdminController {
     @Get('/:id/contract')
     async getDetailContract(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<SiteAdminGetDetailContractResponse>> {
         return BaseResponse.of(await this.siteAdminService.getDetailContract(id));
+    }
+
+    @Get('/count')
+    async getCount(@Query() query: SiteAdminGetCountRequest): Promise<BaseResponse<CountResponse>> {
+        return BaseResponse.of(await this.siteAdminService.getCount(query));
     }
 
     @Get('/download')

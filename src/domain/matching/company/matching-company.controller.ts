@@ -10,9 +10,9 @@ import { MatchingCompanyGetListRecommendation } from './response/matching-compan
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
-@Controller('/company/matching')
+@Controller('/company/matchings')
 export class MatchingCompanyController {
-    constructor(private readonly matchingCompanyService: MatchingCompanyService) {}
+    constructor(private matchingCompanyService: MatchingCompanyService) {}
 
     @Get()
     async getList(

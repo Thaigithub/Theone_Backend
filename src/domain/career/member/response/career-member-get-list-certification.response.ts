@@ -5,7 +5,7 @@ export class CareerResponse {
     startDate: Career['startDate'];
     endDate: Career['endDate'];
     createdAt: Career['createdAt'];
-    occupationName: Code['codeName'];
+    occupationName: Code['name'];
     // careerCertificationType: Career['certificationType'];
 }
 

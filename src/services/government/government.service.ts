@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GovernmentService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async saveCertificationExperienceHealthInsurance(accountId: number): Promise<void> {
         await this.prismaService.$transaction(async (prisma) => {
@@ -22,7 +22,7 @@ export class GovernmentService {
                     accountId,
                 },
                 data: {
-                    career: {
+                    careers: {
                         createMany: {
                             data: [
                                 {
@@ -33,7 +33,7 @@ export class GovernmentService {
                                     type: CareerType.CERTIFICATION,
                                     certificationType: CareerCertificationType.HEALTH_INSURANCE,
                                     isExperienced: true,
-                                    occupationId: 1,
+                                    codeId: 1,
                                 },
                                 {
                                     companyName: 'health insurance - company name 2',
@@ -43,7 +43,7 @@ export class GovernmentService {
                                     type: CareerType.CERTIFICATION,
                                     certificationType: CareerCertificationType.HEALTH_INSURANCE,
                                     isExperienced: true,
-                                    occupationId: 1,
+                                    codeId: 1,
                                 },
                             ],
                         },
@@ -69,7 +69,7 @@ export class GovernmentService {
                     accountId,
                 },
                 data: {
-                    career: {
+                    careers: {
                         createMany: {
                             data: [
                                 {
@@ -80,7 +80,7 @@ export class GovernmentService {
                                     type: CareerType.CERTIFICATION,
                                     certificationType: CareerCertificationType.EMPLOYMENT_INSURANCE,
                                     isExperienced: true,
-                                    occupationId: 1,
+                                    codeId: 1,
                                 },
                                 {
                                     companyName: 'health insurance - company name 2',
@@ -90,7 +90,7 @@ export class GovernmentService {
                                     type: CareerType.CERTIFICATION,
                                     certificationType: CareerCertificationType.EMPLOYMENT_INSURANCE,
                                     isExperienced: true,
-                                    occupationId: 1,
+                                    codeId: 1,
                                 },
                             ],
                         },
@@ -144,7 +144,7 @@ export class GovernmentService {
                             select: {
                                 company: true,
                                 site: true,
-                                occupationId: true,
+                                codeId: true,
                             },
                         },
                     },
@@ -156,7 +156,7 @@ export class GovernmentService {
                 accountId,
             },
             data: {
-                career: {
+                careers: {
                     createMany: {
                         data: contracts.map((value) => {
                             return {
@@ -167,7 +167,7 @@ export class GovernmentService {
                                 type: CareerType.CERTIFICATION,
                                 certificationType: CareerCertificationType.THE_ONE_SITE,
                                 isExperienced: true,
-                                occupationId: value.application.post.occupationId,
+                                codeId: value.application.post.codeId,
                             };
                         }),
                     },

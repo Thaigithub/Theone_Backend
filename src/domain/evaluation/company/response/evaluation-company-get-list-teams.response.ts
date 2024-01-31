@@ -1,7 +1,7 @@
 import { Member, Site, Team, TeamEvaluationByCompany } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class TeamEvaluationByCompanyResponse {
+class GetListTeamResponse {
     id: TeamEvaluationByCompany['id'];
     teamName: Team['name'];
     leaderName: Member['name'];
@@ -10,4 +10,4 @@ export class TeamEvaluationByCompanyResponse {
     score: TeamEvaluationByCompany['score'];
 }
 
-export class EvaluationCompanyGetListTeamsResponse extends PaginationResponse<TeamEvaluationByCompanyResponse> {}
+export class EvaluationCompanyGetListTeamResponse extends PaginationResponse<GetListTeamResponse> {}

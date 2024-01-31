@@ -5,13 +5,13 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { ApplicationCompanyService } from './application-company.service';
-import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
+import { ApplicationCompanyGetListPostRequest } from './request/application-company-get-list-post.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
-import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
-import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
-import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
-import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
-import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
+import { ApplicationCompanyGetDetailMemberResponse } from './response/application-company-get-detail-member.response';
+import { ApplicationCompanyGetDetailTeamResponse } from './response/application-company-get-detail-team.response';
+import { ApplicationCompanyGetListOfferPost } from './response/application-company-get-list-offer-post.response';
+import { ApplicationCompanyGetListPostResponse } from './response/application-company-get-list-post.response';
+import { ApplicationCompanyGetTotalResponse } from './response/application-company-get-total.response';
 
 @Controller('/company/applications')
 @Roles(AccountType.COMPANY)
@@ -23,12 +23,12 @@ export class ApplicationCompanyController {
     async getListOfferPost(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() req: BaseRequest,
-    ): Promise<BaseResponse<ApplicationCompanyGetListOfferForPost>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetListOfferPost>> {
         return BaseResponse.of(await this.applicationCompanyService.getListOfferPost(req.user.accountId, postId));
     }
 
     @Get('/count')
-    async count(@Req() req: BaseRequest): Promise<BaseResponse<ApplicationCompanyCountApplicationsResponse>> {
+    async count(@Req() req: BaseRequest): Promise<BaseResponse<ApplicationCompanyGetTotalResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.count(req.user.accountId));
     }
 
@@ -36,8 +36,8 @@ export class ApplicationCompanyController {
     async getListPost(
         @Param('postId', ParseIntPipe) postId: number,
         @Req() request: BaseRequest,
-        @Query() query: ApplicationCompanyGetListApplicantsRequest,
-    ): Promise<BaseResponse<ApplicationCompanyGetListApplicantsResponse>> {
+        @Query() query: ApplicationCompanyGetListPostRequest,
+    ): Promise<BaseResponse<ApplicationCompanyGetListPostResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.getListPost(request.user.accountId, query, postId));
     }
 
@@ -45,7 +45,7 @@ export class ApplicationCompanyController {
     async getDetailMember(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<ApplicationCompanyGetMemberDetail>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetDetailMemberResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.getDetailMember(request.user.accountId, id));
     }
 
@@ -53,7 +53,7 @@ export class ApplicationCompanyController {
     async getDetailTeam(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<ApplicationCompanyGetTeamDetail>> {
+    ): Promise<BaseResponse<ApplicationCompanyGetDetailTeamResponse>> {
         return BaseResponse.of(await this.applicationCompanyService.getDetailTeam(request.user.accountId, id));
     }
 

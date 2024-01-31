@@ -9,7 +9,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 
 @Controller('/member/files')
 export class FileMemberController {
-    constructor(private readonly storageService: StorageService) {}
+    constructor(private storageService: StorageService) {}
 
     @Roles(AccountType.COMPANY)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)

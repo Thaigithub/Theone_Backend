@@ -11,7 +11,6 @@ export class PostCompanyDetailResponse {
     endDate: Date;
     experienceType: ExperienceType;
     numberOfPeople: number;
-    specialOccupation: PostCompanyCodeDTO;
     occupation: PostCompanyCodeDTO;
     otherInformation: string;
     salaryType: SalaryType;

@@ -8,8 +8,8 @@ class ApplicationMemberGetResponse {
     postName: Post['name'];
     postStatus: Post['status'];
     siteAddress: Site['address'];
-    occupationId: Post['occupationId'];
-    occupationName: Code['codeName'];
+    occupationId: Post['codeId'];
+    occupationName: Code['name'];
     siteName: Site['name'];
     endDate: Post['endDate'];
     status: Application['status'];

@@ -1,4 +1,4 @@
-export enum EvaluationStatus {
+export enum EvaluationCompanyGetListStatus {
     INCOMPLETE = 'INCOMPLETE',
     COMPLETE = 'COMPLETE',
 }
