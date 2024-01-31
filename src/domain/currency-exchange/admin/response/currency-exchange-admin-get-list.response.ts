@@ -7,7 +7,7 @@ export class CurrencyExchangeAdminListResponse {
     contact: Member['contact'];
     amount: CurrencyExchange['amount'];
     status: CurrencyExchange['status'];
-    completeDate: CurrencyExchange['updatedAt'];
+    completeAt: CurrencyExchange['updatedAt'];
     bankName: Bank['name'];
     accountNumber: BankAccount['accountNumber'];
 }

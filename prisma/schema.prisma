@@ -906,6 +906,7 @@ model Notification {
   accountId Int                @map("account_id")
   status    NotificationStatus @default(NOT_READ) @map("status")
   account   Account            @relation(fields: [accountId], references: [id])
+  typeId    Int?
 
   @@map("notifications")
 }
@@ -1266,16 +1267,25 @@ enum BannerStatus {
 }
 
 enum NotificationType {
-  ON_SITE_APPROVAL
-  ON_SITE_STOP
-  FIELD_REFUSAL
-  ANNOUNCEMENT_SUPPORT
-  HEADHUNTING_APPROVED
-  HEADHUNTING_PETITION
-  NOTICE_REJECTION
-  ACCEPT_INTERVIEW
-  REJECTION_INTERVIEW
-  CHANGE_PAYMENT_PRODUCT
+  ACCOUNT
+  TEAM
+  SITE
+  POST
+  APPLICATION
+  INTERVIEW
+  CONTRACT
+  SalaryHistory
+  POINT
+  HEADHUNTING
+  MATCHING
+  PRODUCT_PAYMENT
+  LABOR_CONSULTATION
+  INQUIRY
+  OTHERS
+}
+
+enum ObjectStatus {
+  APPROVED
 }
 
 enum RequestBannerStatus {

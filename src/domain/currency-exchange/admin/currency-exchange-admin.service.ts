@@ -65,7 +65,7 @@ export class CurrencyExchangeAdminService {
                 contact: item.member.contact,
                 amount: item.amount,
                 status: item.status,
-                completeDate: item.status === PointStatus.APPROVED ? item.updatedAt : null,
+                completeAt: item.status === PointStatus.APPROVED ? item.updatedAt : null,
                 bankName: item.member.bankAccount ? item.member.bankAccount.bankName : null,
                 accountNumber: item.member.bankAccount ? item.member.bankAccount.accountNumber : null,
             };

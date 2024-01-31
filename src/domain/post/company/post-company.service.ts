@@ -2,13 +2,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     HeadhuntingRequestStatus,
+    NotificationType,
     PaymentStatus,
     Post,
     PostCategory,
     PostStatus,
     PostType,
     Prisma,
-    ProductType,
+    ProductType
 } from '@prisma/client';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -140,14 +141,18 @@ export class PostCompanyService {
             include: {
                 company: {
                     include: {
-                        sites: true,
+                        sites: {
+                            where: {
+                                isActive: true,
+                            },
+                        },
                     },
                 },
             },
         });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
-            throw new BadRequestException('Site does not found');
+            throw new BadRequestException('Site is not found');
         }
         await this.checkCodeType(request.occupationId);
 
@@ -184,6 +189,44 @@ export class PostCompanyService {
                           }
                         : null,
             },
+        });
+        await this.prismaService.$transaction(async (prisma) => {
+            const memberAccountIds = (
+                await prisma.site.findUnique({
+                    where: {
+                        id: request.siteId,
+                    },
+                    select: {
+                        interestMember: {
+                            where: {
+                                NOT: { member: null },
+                                member: {
+                                    isActive: true,
+                                },
+                            },
+                            select: {
+                                member: {
+                                    select: {
+                                        accountId: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })
+            ).interestMember.map((item) => {
+                return item.member.accountId;
+            });
+            for (const id of memberAccountIds) {
+                await prisma.notification.createMany({
+                    data: {
+                        title: '관심 업체(현장) 공고 등록',
+                        content: '관심 업체(현장)가 공고를 등록했습니다.',
+                        type: NotificationType.POST,
+                        accountId: id,
+                    },
+                });
+            }
         });
     }
 
