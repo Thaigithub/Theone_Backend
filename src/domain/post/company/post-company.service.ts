@@ -197,7 +197,7 @@ export class PostCompanyService {
                         id: request.siteId,
                     },
                     select: {
-                        interestMember: {
+                        interests: {
                             where: {
                                 NOT: { member: null },
                                 member: {
@@ -214,7 +214,7 @@ export class PostCompanyService {
                         },
                     },
                 })
-            ).interestMember.map((item) => {
+            ).interests.map((item) => {
                 return item.member.accountId;
             });
             for (const id of memberAccountIds) {
