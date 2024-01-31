@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { AccountStatus, AccountType, NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -10,6 +10,61 @@ import { NotificationMemberGetListResponse } from './response/notification-membe
 @Injectable()
 export class NotificationMemberService {
     constructor(private prismaService: PrismaService) {}
+    async create(
+        accountId: number,
+        title: string,
+        content: string | undefined,
+        type: NotificationType,
+        typeId: number | undefined,
+    ) {
+        const account = await this.prismaService.account.findUnique({
+            where: {
+                id: accountId,
+                status: AccountStatus.APPROVED,
+            },
+            select: {
+                type: true,
+                member: true,
+            },
+        });
+        if (!account) {
+            return;
+        }
+        if (account.type === AccountType.MEMBER && account.member) {
+            const preference = await this.prismaService.preference.findUnique({
+                where: {
+                    memberId: account.member.id,
+                },
+            });
+            if (!preference.isNoticeNotificationActive) {
+                return;
+            }
+            if (
+                !preference.isServiceNotificationActive &&
+                Array<NotificationType>(
+                    NotificationType.POST,
+                    NotificationType.APPLICATION,
+                    NotificationType.INTERVIEW,
+                    NotificationType.CONTRACT,
+                ).includes(type)
+            ) {
+                return;
+            }
+            if (!preference.isTeamNotificationActive && NotificationType.TEAM) {
+                return;
+            }
+            await this.prismaService.notification.create({
+                data: {
+                    title,
+                    ...(content && { content }),
+                    type,
+                    accountId,
+                    ...(typeId && { typeId }),
+                },
+            });
+        }
+    }
+
     async getList(accountId: number, query: NotificationMemberGetListRequest): Promise<NotificationMemberGetListResponse> {
         const queryFilter: Prisma.NotificationWhereInput = {
             account: {

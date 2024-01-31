@@ -147,14 +147,12 @@ export class PointMemberService {
 
     async createCurrencyExchange(accountId: number, body: PointMemberCreateCurrencyExchangeRequest) {
         await this.prismaService.$transaction(async (prisma) => {
-            const bankAccount = await prisma.bankAccount.findUnique({
+            const bankAccount = await prisma.bankAccount.findFirst({
                 where: {
                     member: {
                         accountId: accountId,
                         isActive: true,
                     },
-                    id: body.bankId,
-                    accountNumber: body.bankAccountNumber,
                     isActive: true,
                 },
             });
@@ -172,7 +170,7 @@ export class PointMemberService {
                     totalPoint: true,
                 },
             });
-            if (member.totalPoint < body.currencyExchangePoint) {
+            if (member.totalPoint < body.amount) {
                 throw new ForbiddenException(`The points are not enough to exchange`);
             }
 
@@ -183,7 +181,7 @@ export class PointMemberService {
                     isActive: true,
                 },
                 data: {
-                    totalPoint: { decrement: body.currencyExchangePoint },
+                    totalPoint: { decrement: body.amount },
                 },
             });
 
@@ -195,7 +193,7 @@ export class PointMemberService {
                             accountId: accountId,
                         },
                     },
-                    amount: body.currencyExchangePoint,
+                    amount: body.amount,
                     status: PointStatus.REQUESTING,
                 },
             });

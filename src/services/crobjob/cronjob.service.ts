@@ -75,6 +75,19 @@ export class CronJobService {
                 pullUpExpirationTime: { lt: new Date() },
             },
         });
+        // const currentDate = new Date(); // Lấy ngày hiện tại
+        // const previousDate = new Date(currentDate); // Tạo một đối tượng date mới với ngày hiện tại
+
+        // previousDate.setTime(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        // const deadlineInterestPost = await this.prismaService.interest.findMany({
+        //     where: {
+        //         NOT: { post: null},
+        //         post: {
+        //             updatedAt: { lte: }
+        //             endDate: {}
+        //         }
+        //     }
+        // });
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
