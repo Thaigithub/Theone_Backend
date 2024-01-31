@@ -14,7 +14,7 @@ export class CodeCompanyController {
     constructor(private codeCompanyService: CodeCompanyService) {}
 
     @Get()
-    async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeMemberGetListResponse>> {
+    async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeMemberGetListResponse[]>> {
         return BaseResponse.of(await this.codeCompanyService.getList(query));
     }
 }

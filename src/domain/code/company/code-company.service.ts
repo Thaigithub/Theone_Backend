@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CodeAdminGetListRequest } from '../admin/request/code-admin-get-list.request';
 import { CodeMemberGetListResponse } from '../member/response/code-member-get-list.response';
@@ -9,7 +8,7 @@ import { CodeMemberGetListResponse } from '../member/response/code-member-get-li
 export class CodeCompanyService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: CodeAdminGetListRequest): Promise<CodeMemberGetListResponse> {
+    async getList(query: CodeAdminGetListRequest): Promise<CodeMemberGetListResponse[]> {
         const queryFilter = {
             isActive: true,
         };
@@ -35,11 +34,6 @@ export class CodeCompanyService {
             };
         });
 
-        const codeListCount = await this.prismaService.code.count({
-            // Conditions based on request query
-            where: queryFilter,
-        });
-
-        return new PaginationResponse(codeList, new PageInfo(codeListCount));
+        return codeList;
     }
 }
