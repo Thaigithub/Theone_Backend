@@ -1,12 +1,15 @@
 import { Region } from '@prisma/client';
-import { PaginationResponse } from 'utils/generics/pagination.response';
 
-export class RegionGetResponse {
+export class RegionGetListResponse {
     id: Region['id'];
-    districtKoreanName: Region['districtKoreanName'];
-    districtEnglishName: Region['districtEnglishName'];
-    cityKoreanName: Region['cityKoreanName'];
-    cityEnglishName: Region['cityEnglishName'];
+    city: {
+        englishName: Region['cityEnglishName'];
+        koreanName: Region['cityKoreanName'];
+        district: {
+            id: Region['id'];
+            englishName: Region['districtEnglishName'];
+            koreanName: Region['districtKoreanName'];
+            cityId: Region['id'];
+        }[];
+    };
 }
-
-export class RegionGetListResponse extends PaginationResponse<RegionGetResponse> {}
