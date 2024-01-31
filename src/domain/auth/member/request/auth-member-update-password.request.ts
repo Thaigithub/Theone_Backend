@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsNumber, IsString, Matches } from 'class-validator';
 
-export class AuthMemberChangePasswordRequest {
+export class AuthMemberUpdatePasswordRequest {
     @Expose()
     @IsString()
     @Matches(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*()\-_=+{}\[\];:'",.<>/?]{6,20}$/, {

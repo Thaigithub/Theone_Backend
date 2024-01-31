@@ -8,11 +8,11 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
-import { AuthCompanyChangePasswordRequest } from './request/auth-company-change-password.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
 import { AuthCompanyOtpVerifyRequest } from './request/auth-company-otp-verify.request';
+import { AuthCompanyUpdatePasswordRequest } from './request/auth-company-update-password.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
@@ -57,7 +57,7 @@ export class CompanyAuthService {
         return { token, uid, type };
     }
 
-    async changePassword(body: AuthCompanyChangePasswordRequest, ip: string): Promise<void> {
+    async updatePassword(body: AuthCompanyUpdatePasswordRequest, ip: string): Promise<void> {
         const searchOtp = await this.otpService.getOtp(body.otpId, ip);
         if (!searchOtp) throw new NotFoundException('Otp not found');
         if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {

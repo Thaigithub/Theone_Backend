@@ -297,7 +297,7 @@ export class AccountMemberService {
         });
     }
 
-    async changePassword(
+    async updatePassword(
         ip: string,
         accountId: number,
         body: AccountMemberUpdatePasswordRequest,
