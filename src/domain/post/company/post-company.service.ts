@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-    CodeType,
+    HeadhuntingRequestStatus,
     PaymentStatus,
     Post,
     PostCategory,
@@ -8,25 +9,23 @@ import {
     PostType,
     Prisma,
     ProductType,
-    RequestStatus,
 } from '@prisma/client';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostCompanyCheckPullUpStatus } from './enum/post-company-check-pull-up-status.enum';
-import { PostCompanyHeadhuntingRequestFilter } from './enum/post-company-headhunting-request-filter.enum';
-import { PostCompanyCreateHeadhuntingRequestRequest } from './request/post-company-create-headhunting-request.request';
+import { PostCompanyGetListHeadhuntingCategory } from './enum/post-company-get-list-headhunting-category.enum';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
 import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-get-list-applicant-site.request';
+import { PostCompanyGetListHeadhuntingRequest } from './request/post-company-get-list-headhunting.request';
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
-import { PostCompanyHeadhuntingRequestRequest } from './request/post-company-headhunting-request.request';
 import { PostCompanyUpdatePullUpStatusRequest } from './request/post-company-update-pull-up-status.request';
 import { PostCompanyUpdateTypeRequest } from './request/post-company-update-type.request';
 import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
 import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
-import { PostCompanyGetListApplicantsResponse } from './response/post-company-get-list-applicants.response';
+import { PostCompanyGetListApplicationResponse } from './response/post-company-get-list-application.response';
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
@@ -34,8 +33,8 @@ import { PostCompanyGetListResponse } from './response/post-company-get-list.res
 @Injectable()
 export class PostCompanyService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly productCompanyService: ProductCompanyService,
+        private prismaService: PrismaService,
+        private productCompanyService: ProductCompanyService,
     ) {}
 
     private async checkPostExist(postId: number, accountId: number): Promise<Post> {
@@ -70,30 +69,45 @@ export class PostCompanyService {
             },
         };
 
-        const postList = await this.prismaService.post.findMany({
-            select: {
-                id: true,
-                name: true,
-                site: {
-                    select: {
-                        name: true,
+        const postList = (
+            await this.prismaService.post.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    site: {
+                        select: {
+                            name: true,
+                        },
                     },
+                    startDate: true,
+                    endDate: true,
+                    view: true,
+                    type: true,
+                    status: true,
+                    applications: true,
+                    isPulledUp: true,
                 },
-                startDate: true,
-                endDate: true,
-                view: true,
-                type: true,
-                status: true,
-                applicants: true,
-                isPulledUp: true,
-            },
-            where: queryFilter,
-            orderBy: {
-                updatedAt: 'desc',
-            },
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            ...QueryPagingHelper.queryPaging(query),
+                where: queryFilter,
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+                site: {
+                    name: item.site.name,
+                },
+                startDate: item.startDate,
+                endDate: item.endDate,
+                view: item.view,
+                type: item.type,
+                status: item.status,
+                applicants: item.applications,
+                isPulledUp: item.isPulledUp,
+            };
         });
 
         const postListCount = await this.prismaService.post.count({
@@ -135,9 +149,7 @@ export class PostCompanyService {
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException('Site does not found');
         }
-
-        await this.checkCodeType(request.specialOccupationId, CodeType.SPECIAL);
-        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
+        await this.checkCodeType(request.occupationId);
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -152,20 +164,25 @@ export class PostCompanyService {
                 startDate: new Date(request.startDate),
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
-                numberOfPeople: request.numberOfPeople,
-                ...(request.specialOccupationId && { specialOccupationId: request.specialOccupationId }),
-                ...(request.occupationId && { occupationId: request.occupationId }),
+                numberOfPeoples: request.numberOfPeople,
+                ...(request.occupationId && { codeId: request.occupationId }),
                 otherInformation: request.otherInformation || '',
                 salaryType: request.salaryType,
                 salaryAmount: request.salaryAmount,
                 startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
                 endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
-                workday: request.workday,
+                workdays: request.workday,
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor || '',
                 siteId: request.siteId || null,
                 companyId: account.company.id,
+                headhunting:
+                    request.category === PostCategory.HEADHUNTING
+                        ? {
+                              create: {},
+                          }
+                        : null,
             },
         });
     }
@@ -173,7 +190,7 @@ export class PostCompanyService {
     async getDetail(accountId: number, id: number): Promise<PostCompanyDetailResponse> {
         await this.checkPostExist(id, accountId);
 
-        return await this.prismaService.post.findUnique({
+        const record = await this.prismaService.post.findUnique({
             where: {
                 id,
                 isActive: true,
@@ -182,18 +199,10 @@ export class PostCompanyService {
                 },
             },
             include: {
-                specialOccupation: {
+                code: {
                     select: {
                         code: true,
-                        codeName: true,
-                        codeType: true,
-                    },
-                },
-                occupation: {
-                    select: {
-                        code: true,
-                        codeName: true,
-                        codeType: true,
+                        name: true,
                     },
                 },
                 site: {
@@ -207,6 +216,37 @@ export class PostCompanyService {
                 },
             },
         });
+
+        const post = {
+            type: record.type,
+            category: record.category,
+            status: record.status,
+            name: record.name,
+            startDate: record.startDate,
+            endDate: record.endDate,
+            experienceType: record.experienceType,
+            numberOfPeople: record.numberOfPeoples,
+            occupation: record.code
+                ? {
+                      codeName: record.code.name,
+                      code: record.code.code,
+                  }
+                : null,
+            otherInformation: record.otherInformation,
+            salaryType: record.salaryType,
+            salaryAmount: record.salaryAmount,
+            startWorkDate: record.startWorkDate,
+            endWorkDate: record.endWorkDate,
+            workday: record.workdays,
+            startWorkTime: record.startWorkTime,
+            endWorkTime: record.endWorkTime,
+            site: {
+                name: record.site.name,
+            },
+            postEditor: record.postEditor,
+        };
+
+        return post;
     }
 
     async update(accountId: number, id: number, request: PostCompanyCreateRequest) {
@@ -225,17 +265,84 @@ export class PostCompanyService {
         });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
-            throw new BadRequestException('Site does not found');
+            throw new BadRequestException('Site not found');
         }
-
-        await this.checkCodeType(request.specialOccupationId, CodeType.SPECIAL);
-        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
-
+        await this.checkCodeType(request.occupationId);
+        const post = await this.prismaService.post.findUnique({
+            where: {
+                id,
+                company: {
+                    accountId,
+                },
+            },
+            select: {
+                category: true,
+                headhunting: {
+                    select: {
+                        requests: {
+                            where: {
+                                status: HeadhuntingRequestStatus.APPROVED,
+                            },
+                        },
+                    },
+                },
+                company: {
+                    select: {
+                        matchingRequests: {
+                            where: {
+                                recommendations: {
+                                    some: {
+                                        OR: [
+                                            {
+                                                team: {
+                                                    applications: {
+                                                        some: {
+                                                            postId: id,
+                                                            NOT: {
+                                                                contract: null,
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                            {
+                                                member: {
+                                                    applications: {
+                                                        some: {
+                                                            postId: id,
+                                                            NOT: {
+                                                                contract: null,
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
         request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
         request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
-
+        if (!post) throw new NotFoundException('Post not found');
+        if (post.category === PostCategory.HEADHUNTING) {
+            if (request.category !== PostCategory.HEADHUNTING) {
+                if (post.headhunting.requests.length !== 0)
+                    throw new BadRequestException('Headhunting recommendation has been added');
+            }
+        }
+        if (post.category === PostCategory.MATCHING) {
+            if (request.category !== PostCategory.MATCHING) {
+                if (post.company.matchingRequests.length !== 0)
+                    throw new BadRequestException('Matching recommendation has been added');
+            }
+        }
         await this.prismaService.post.update({
             where: {
                 isActive: true,
@@ -249,19 +356,32 @@ export class PostCompanyService {
                 startDate: new Date(request.startDate),
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
-                numberOfPeople: request.numberOfPeople,
-                specialOccupationId: request.specialOccupationId || null,
-                occupationId: request.occupationId || null,
+                numberOfPeoples: request.numberOfPeople,
+                codeId: request.occupationId || null,
                 otherInformation: request.otherInformation,
                 salaryType: request.salaryType,
                 salaryAmount: request.salaryAmount,
                 startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
                 endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
-                workday: request.workday,
+                workdays: request.workday,
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor,
                 siteId: request.siteId,
+                headhunting:
+                    request.category === PostCategory.MATCHING
+                        ? post.headhunting
+                            ? { update: { isActive: false } }
+                            : null
+                        : request.category === PostCategory.HEADHUNTING
+                          ? post.headhunting
+                              ? { update: { isActive: true } }
+                              : {
+                                    create: {},
+                                }
+                          : post.headhunting
+                            ? { update: { isActive: false } }
+                            : null,
             },
         });
     }
@@ -286,24 +406,23 @@ export class PostCompanyService {
         });
     }
 
-    async checkCodeType(id: number, codeType: CodeType) {
+    async checkCodeType(id: number) {
         if (id) {
             const code = await this.prismaService.code.findUnique({
                 where: {
                     isActive: true,
                     id,
-                    codeType: codeType,
                 },
             });
 
-            if (!code) throw new BadRequestException(`Code ID of type ${codeType} does not exist`);
+            if (!code) throw new BadRequestException(`Code ID does not exist`);
         }
     }
 
-    async getListApplicant(
+    async getListApplication(
         accountId: number,
         query: PostCompanyGetListApplicantSiteRequest,
-    ): Promise<PostCompanyGetListApplicantsResponse> {
+    ): Promise<PostCompanyGetListApplicationResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
             company: {
@@ -334,7 +453,7 @@ export class PostCompanyService {
                 view: true,
                 type: true,
                 status: true,
-                applicants: {
+                applications: {
                     select: {
                         team: true,
                         member: true,
@@ -356,20 +475,28 @@ export class PostCompanyService {
         });
 
         const postListsResponse = postLists.map((post) => {
-            const { applicants, ...rest } = post;
+            const { applications, ...rest } = post;
             return {
                 ...rest,
-                teamCount: applicants.filter((item) => item.team != null).length,
-                memberCount: applicants.filter((item) => item.member != null).length,
+                teamCount: applications.filter((item) => item.team != null).length,
+                memberCount: applications.filter((item) => item.member != null).length,
             };
         });
-
+        // name: string;
+        // type: PostType;
+        // status: PostStatus;
+        // startDate: Post['startDate'];
+        // endDate: Post['endDate'];
+        // site: PostCompanyGetItemListSiteResponse;
+        // view: number;
+        // teamCount: number;
+        // memberCount: number;
         return new PaginationResponse(postListsResponse, new PageInfo(postListCount));
     }
 
-    async getListHeadhuntingRequest(
+    async getListHeadhunting(
         accountId: number,
-        query: PostCompanyHeadhuntingRequestRequest,
+        query: PostCompanyGetListHeadhuntingRequest,
     ): Promise<PostCompanyGetListHeadhuntingRequestResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
@@ -377,42 +504,66 @@ export class PostCompanyService {
                 accountId,
             },
             category: PostCategory.HEADHUNTING,
-            ...(query.category === PostCompanyHeadhuntingRequestFilter.SITE_NAME && {
+            ...(query.category === PostCompanyGetListHeadhuntingCategory.SITE_NAME && {
                 siteName: { contains: query.keyword, mode: 'insensitive' },
             }),
-            ...(query.category === PostCompanyHeadhuntingRequestFilter.POST_NAME && {
+            ...(query.category === PostCompanyGetListHeadhuntingCategory.POST_NAME && {
                 name: { contains: query.keyword, mode: 'insensitive' },
             }),
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
         };
 
-        const postLists = await this.prismaService.post.findMany({
-            select: {
-                id: true,
-                name: true,
+        const postLists = (
+            await this.prismaService.post.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    site: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    startDate: true,
+                    endDate: true,
+                    status: true,
+                    headhunting: {
+                        select: {
+                            id: true,
+                            requests: {
+                                select: {
+                                    date: true,
+                                    status: true,
+                                },
+                                orderBy: {
+                                    createdAt: 'desc',
+                                },
+                                take: 1,
+                            },
+                        },
+                    },
+                },
+                where: queryFilter,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                // Pagination
+                // If both pageNumber and pageSize is provided then handle the pagination
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            return {
+                name: item.name,
+                status: item.status,
+                startDate: item.startDate,
+                endDate: item.endDate,
                 site: {
-                    select: {
-                        name: true,
-                    },
+                    name: item.site.name,
                 },
-                startDate: true,
-                endDate: true,
-                status: true,
-                headhuntingRequest: {
-                    select: {
-                        date: true,
-                        status: true,
-                    },
-                },
-            },
-            where: queryFilter,
-            orderBy: {
-                createdAt: 'desc',
-            },
-            // Pagination
-            // If both pageNumber and pageSize is provided then handle the pagination
-            ...QueryPagingHelper.queryPaging(query),
+                headhuntingRequest:
+                    item.headhunting && item.headhunting.requests.length > 0 ? item.headhunting.requests[0] : null,
+                headhuntingId: item.headhunting.id,
+            };
         });
 
         const postListCount = await this.prismaService.post.count({
@@ -421,57 +572,6 @@ export class PostCompanyService {
         });
 
         return new PaginationResponse(postLists, new PageInfo(postListCount));
-    }
-
-    async createHeadhuntingRequest(accountId: number, body: PostCompanyCreateHeadhuntingRequestRequest, id: number) {
-        const post = await this.prismaService.post.findUnique({
-            where: {
-                id,
-                company: {
-                    accountId,
-                },
-                category: PostCategory.HEADHUNTING,
-            },
-        });
-
-        if (!post) {
-            throw new BadRequestException('No Headhunting Post found');
-        }
-
-        const existRequest = await this.prismaService.headhuntingRequest.findUnique({
-            where: {
-                postId: id,
-                isActive: true,
-            },
-        });
-
-        if (!existRequest) {
-            await this.prismaService.headhuntingRequest.create({
-                data: {
-                    detail: body.detail,
-                    object: body.object,
-                    status: RequestStatus.APPLY,
-                    postId: id,
-                },
-            });
-        } else {
-            if (existRequest.status === RequestStatus.APPLY) {
-                throw new BadRequestException('Headhunting request is already applied');
-            }
-
-            await this.prismaService.headhuntingRequest.update({
-                where: {
-                    postId: id,
-                    object: body.object,
-                    isActive: true,
-                },
-                data: {
-                    detail: body.detail,
-                    object: body.object,
-                    status: RequestStatus.RE_APPLY,
-                },
-            });
-        }
     }
 
     async getListSite(accountId: number, siteId: number): Promise<PostCompanyGetListBySite> {

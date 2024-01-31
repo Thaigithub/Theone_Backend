@@ -9,7 +9,7 @@ import { TeamCompanyGetListResponse } from './response/team-company-get-list.res
 
 @Injectable()
 export class TeamCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     private parseConditionFromQuery(query: TeamCompanyGetListRequest): Prisma.TeamWhereInput {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
@@ -23,27 +23,23 @@ export class TeamCompanyService {
                     OR: query.keyword && [
                         {
                             code: {
-                                codeName: { contains: query.keyword, mode: 'insensitive' },
+                                name: { contains: query.keyword, mode: 'insensitive' },
                             },
                         },
                         {
-                            district: {
+                            region: {
                                 OR: [
                                     {
-                                        englishName: { contains: query.keyword, mode: 'insensitive' },
+                                        districtEnglishName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        koreanName: { contains: query.keyword, mode: 'insensitive' },
+                                        districtKoreanName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        city: {
-                                            englishName: { contains: query.keyword, mode: 'insensitive' },
-                                        },
+                                        cityEnglishName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        city: {
-                                            koreanName: { contains: query.keyword, mode: 'insensitive' },
-                                        },
+                                        cityKoreanName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                 ],
                             },
@@ -67,7 +63,7 @@ export class TeamCompanyService {
                     code: query.occupation && { id: { in: occupationList } },
                 },
                 {
-                    district: query.regionList && { id: { in: districtList } },
+                    region: query.regionList && { id: { in: districtList } },
                 },
                 {
                     totalMembers: query.numberOfMembers && { lte: query.numberOfMembers },
@@ -76,12 +72,12 @@ export class TeamCompanyService {
         };
     }
 
-    private async getListSpecialLicensesOfTeam(teamId: number): Promise<{ licenseNumber: string; codeName: string }[]> {
+    private async getListLicensesOfTeam(teamId: number): Promise<{ licenseNumber: string; codeName: string }[]> {
         const team = await this.prismaService.team.findUnique({
             include: {
                 leader: {
                     include: {
-                        specialLicenses: {
+                        licenses: {
                             include: {
                                 code: true,
                             },
@@ -96,7 +92,7 @@ export class TeamCompanyService {
                     include: {
                         member: {
                             include: {
-                                specialLicenses: {
+                                licenses: {
                                     include: {
                                         code: true,
                                     },
@@ -116,22 +112,22 @@ export class TeamCompanyService {
             },
         });
 
-        const leaderSpecialLicenses = team.leader.specialLicenses
-            ? team.leader.specialLicenses.map((item) => {
+        const leaderLicenses = team.leader.licenses
+            ? team.leader.licenses.map((item) => {
                   return {
                       licenseNumber: item.licenseNumber,
-                      codeName: item.code.codeName,
+                      codeName: item.code.name,
                   };
               })
             : [];
-        let membersSpecialLicences = team.members
+        let membersLicences = team.members
             .map((item) => {
-                if (item.member.specialLicenses) {
+                if (item.member.licenses) {
                     return {
-                        licenseNumber: item.member.specialLicenses.map((item) => {
+                        licenseNumber: item.member.licenses.map((item) => {
                             return {
                                 licenseNumber: item.licenseNumber,
-                                codeName: item.code.codeName,
+                                codeName: item.code.name,
                             };
                         }),
                     };
@@ -141,8 +137,8 @@ export class TeamCompanyService {
                 return item.licenseNumber;
             })
             .flat(1);
-        membersSpecialLicences = membersSpecialLicences.concat(leaderSpecialLicenses);
-        return membersSpecialLicences;
+        membersLicences = membersLicences.concat(leaderLicenses);
+        return membersLicences;
     }
 
     async getList(query: TeamCompanyGetListRequest): Promise<TeamCompanyGetListResponse> {
@@ -150,9 +146,10 @@ export class TeamCompanyService {
             await this.prismaService.team.findMany({
                 include: {
                     leader: true,
-                    district: {
-                        include: {
-                            city: true,
+                    region: {
+                        select: {
+                            districtKoreanName: true,
+                            cityKoreanName: true,
                         },
                     },
                 },
@@ -164,8 +161,8 @@ export class TeamCompanyService {
                 id: item.id,
                 name: item.name,
                 totalMembers: item.totalMembers,
-                cityKoreanName: item.district.city.koreanName,
-                districtKoreanName: item.district.koreanName,
+                cityKoreanName: item.region.cityKoreanName,
+                districtKoreanName: item.region.districtKoreanName,
                 leaderContact: item.leader.contact,
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
@@ -191,35 +188,38 @@ export class TeamCompanyService {
             include: {
                 leader: {
                     include: {
-                        desiredOccupations: {
+                        licenses: {
                             include: {
                                 code: true,
                             },
                         },
-                        district: {
-                            include: {
-                                city: true,
+                        region: {
+                            select: {
+                                cityKoreanName: true,
+                                districtKoreanName: true,
                             },
                         },
                     },
                 },
-                district: {
-                    include: {
-                        city: true,
+                region: {
+                    select: {
+                        cityKoreanName: true,
+                        districtKoreanName: true,
                     },
                 },
                 members: {
                     include: {
                         member: {
                             include: {
-                                desiredOccupations: {
+                                licenses: {
                                     include: {
                                         code: true,
                                     },
                                 },
-                                district: {
-                                    include: {
-                                        city: true,
+                                region: {
+                                    select: {
+                                        cityKoreanName: true,
+                                        districtKoreanName: true,
                                     },
                                 },
                             },
@@ -253,8 +253,8 @@ export class TeamCompanyService {
         return {
             name: team.name,
             totalMembers: team.totalMembers,
-            cityKoreanName: team.district.city.koreanName,
-            districtKoreanName: team.district.koreanName,
+            cityKoreanName: team.region.cityKoreanName,
+            districtKoreanName: team.region.districtKoreanName,
             leaderContact: team.leader.contact,
             leaderTotalExperienceYears: team.leader.totalExperienceYears,
             leaderTotalExperienceMonths: team.leader.totalExperienceMonths,
@@ -266,14 +266,14 @@ export class TeamCompanyService {
                     contact: item.contact,
                     totalExperienceYears: item.totalExperienceYears,
                     totalExperienceMonths: item.totalExperienceMonths,
-                    desiredOccupations: item.desiredOccupations
-                        ? item.desiredOccupations.map((item) => {
-                              return item.code.codeName;
+                    desiredOccupations: item.licenses
+                        ? item.licenses.map((item) => {
+                              return item.code.name;
                           })
                         : [],
                 };
             }),
-            specialLicenses: await this.getListSpecialLicensesOfTeam(team.id),
+            licenses: await this.getListLicensesOfTeam(team.id),
         };
     }
 }

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -12,48 +13,52 @@ import { SiteCompanyGetListResponse } from './response/site-company-get-list.res
 
 @Injectable()
 export class SiteCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: SiteCompanyGetListRequest, accountId: number): Promise<SiteCompanyGetListResponse> {
-        const search = {
-            include: {
-                district: {
-                    include: {
-                        city: true,
+        const queryFilter: Prisma.SiteWhereInput = {
+            isActive: true,
+            company: {
+                accountId,
+            },
+            ...(query.progressStatus === SiteCompanyGetListStatus.WAITING && {
+                startDate: { gt: new Date() },
+            }),
+            ...(query.progressStatus === SiteCompanyGetListStatus.IN_PROGRESS && {
+                startDate: { lte: new Date() },
+                endDate: { gte: new Date() },
+            }),
+            ...(query.progressStatus === SiteCompanyGetListStatus.END && {
+                endDate: { lt: new Date() },
+            }),
+        };
+        const sites = (
+            await this.prismaService.site.findMany({
+                where: queryFilter,
+                include: {
+                    region: {
+                        select: {
+                            cityKoreanName: true,
+                            cityEnglishName: true,
+                            districtKoreanName: true,
+                            districtEnglishName: true,
+                        },
                     },
-                },
-                company: {
-                    include: {
-                        logo: {
-                            include: {
-                                file: true,
+                    company: {
+                        include: {
+                            logo: {
+                                select: {
+                                    fileName: true,
+                                    key: true,
+                                    size: true,
+                                    type: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            where: {
-                isActive: true,
-                company: {
-                    accountId,
-                },
-            },
-            ...QueryPagingHelper.queryPaging(query),
-        };
-        switch (query.progressStatus) {
-            case SiteCompanyGetListStatus.WAITING:
-                search.where['startDate'] = { gt: new Date() };
-                break;
-            case SiteCompanyGetListStatus.IN_PROGRESS:
-                search.where['startDate'] = { lte: new Date() };
-                search.where['endDate'] = { gte: new Date() };
-                break;
-            case SiteCompanyGetListStatus.END:
-                search.where['endDate'] = { lt: new Date() };
-                break;
-        }
-
-        const sites = (await this.prismaService.site.findMany(search)).map((item) => {
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 name: item.name,
@@ -62,15 +67,15 @@ export class SiteCompanyService {
                 originalBuilding: item.originalBuilding,
                 startDate: item.startDate,
                 endDate: item.endDate,
-                cityKoreanName: item.district?.city.koreanName ? item.district.city.koreanName : null,
-                cityEnglishName: item.district?.city.englishName ? item.district.city.englishName : null,
-                districtKoreanName: item.district?.koreanName ? item.district.koreanName : null,
-                districtEnglishName: item.district?.englishName ? item.district.englishName : null,
-                companyLogoKey: item.company.logo ? item.company.logo.file.key : null,
+                cityKoreanName: item.region?.cityKoreanName || null,
+                cityEnglishName: item.region?.cityEnglishName || null,
+                districtKoreanName: item.region?.districtKoreanName || null,
+                districtEnglishName: item.region?.districtEnglishName || null,
+                companyLogoKey: item.company.logo ? item.company.logo.key : null,
             };
         });
-        const total = await this.prismaService.site.count({ where: search.where });
-        return new PaginationResponse(sites, new PageInfo(total));
+        const count = await this.prismaService.site.count({ where: queryFilter });
+        return new PaginationResponse(sites, new PageInfo(count));
     }
 
     async getDetail(id: number, accountId: number): Promise<SiteCompanyGetDetailResponse> {
@@ -87,9 +92,11 @@ export class SiteCompanyService {
 
         const site = await this.prismaService.site.findUnique({
             include: {
-                district: {
-                    include: {
-                        city: true,
+                region: {
+                    select: {
+                        id: true,
+                        cityKoreanName: true,
+                        districtKoreanName: true,
                     },
                 },
             },
@@ -117,10 +124,10 @@ export class SiteCompanyService {
             longitude: site.longitude,
             latitude: site.latitude,
             originalBuilding: site.originalBuilding,
-            city: site.district.city.id,
-            district: site.district.id,
-            cityKorean: site.district.city.koreanName,
-            districtKorean: site.district.koreanName,
+            city: site.region.id,
+            district: site.region.id,
+            cityKorean: site.region.cityKoreanName,
+            districtKorean: site.region.districtKoreanName,
         };
     }
 
@@ -139,8 +146,26 @@ export class SiteCompanyService {
         body.endDate = new Date(body.endDate).toISOString();
         await this.prismaService.site.create({
             data: {
-                ...body,
-                companyId,
+                name: body.name,
+                address: body.address,
+                region: {
+                    connect: { id: body.districtId },
+                },
+                originalBuilding: body.originalBuilding,
+                contact: body.contact,
+                personInCharge: body.personInCharge,
+                personInChargeContact: body.personInChargeContact,
+                email: body.email,
+                taxInvoiceEmail: body.taxInvoiceEmail,
+                siteManagementNumber: body.siteManagementNumber,
+                contractStatus: body.contractStatus,
+                longitude: body.longitude,
+                latitude: body.latitude,
+                startDate: body.startDate,
+                endDate: body.endDate,
+                company: {
+                    connect: { id: companyId },
+                },
             },
         });
     }

@@ -7,20 +7,18 @@ import { CodeAdminGetListResponse } from '../admin/response/code-admin-get-list.
 
 @Injectable()
 export class CodeCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: CodeAdminGetListRequest): Promise<CodeAdminGetListResponse> {
         const queryFilter = {
             isActive: true,
-            ...(query.codeType && { codeType: query.codeType }),
         };
 
         const codeList = await this.prismaService.code.findMany({
             select: {
                 id: true,
                 code: true,
-                codeName: true,
-                codeType: true,
+                name: true,
             },
             where: queryFilter,
             orderBy: {

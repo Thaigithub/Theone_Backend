@@ -54,7 +54,7 @@ export class ValidationPipe implements PipeTransform<any> {
 
 @Injectable()
 export class ParseArrayPipe implements PipeTransform<any> {
-    constructor(private readonly type?: any) {}
+    constructor(private type?: any) {}
 
     async transform(value: any, metadata: any) {
         if (!Array.isArray(value)) {

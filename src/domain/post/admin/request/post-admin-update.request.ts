@@ -65,11 +65,6 @@ export class PostAdminUpdateRequest {
     @Expose()
     @IsNumber()
     @IsOptional()
-    specialNoteId: number;
-
-    @Expose()
-    @IsNumber()
-    @IsOptional()
     occupationId: number;
 
     @Expose()

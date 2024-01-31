@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
@@ -12,14 +13,14 @@ import { MemberCompanyGetListResponse } from './response/member-company-get-list
 @Injectable()
 export class MemberCompanyService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly regionService: RegionService,
+        private prismaService: PrismaService,
+        private regionService: RegionService,
     ) {}
 
     private async parseConditionFromQuery(query: MemberCompanyGetListRequest): Promise<Prisma.MemberWhereInput> {
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupation?.map((item) => parseInt(item));
-        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
+        const { ids } = await this.regionService.parseFromRegionList(query.regionList);
 
         return {
             isActive: true,
@@ -27,32 +28,28 @@ export class MemberCompanyService {
                 {
                     OR: query.keyword && [
                         {
-                            desiredOccupations: {
+                            licenses: {
                                 some: {
                                     code: {
-                                        codeName: { contains: query.keyword, mode: 'insensitive' },
+                                        name: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                 },
                             },
                         },
                         {
-                            district: {
+                            region: {
                                 OR: [
                                     {
-                                        englishName: { contains: query.keyword, mode: 'insensitive' },
+                                        districtEnglishName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        koreanName: { contains: query.keyword, mode: 'insensitive' },
+                                        districtKoreanName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        city: {
-                                            englishName: { contains: query.keyword, mode: 'insensitive' },
-                                        },
+                                        cityEnglishName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                     {
-                                        city: {
-                                            koreanName: { contains: query.keyword, mode: 'insensitive' },
-                                        },
+                                        cityKoreanName: { contains: query.keyword, mode: 'insensitive' },
                                     },
                                 ],
                             },
@@ -79,29 +76,24 @@ export class MemberCompanyService {
                     ],
                 },
                 {
-                    desiredOccupations: query.occupation && {
-                        some: {
-                            code: { id: { in: occupationList } },
-                        },
-                    },
+                    ...(occupationList &&
+                        occupationList.length > 0 && {
+                            licenses: {
+                                some: {
+                                    code: {
+                                        id: { in: occupationList },
+                                    },
+                                },
+                            },
+                        }),
                 },
                 {
-                    OR: [
-                        districtsList.length
-                            ? {
-                                  district: {
-                                      id: { in: districtsList },
-                                  },
-                              }
-                            : {},
-                        citiesList.length
-                            ? {
-                                  district: {
-                                      cityId: { in: citiesList },
-                                  },
-                              }
-                            : {},
-                    ],
+                    ...(ids &&
+                        ids.length > 0 && {
+                            region: {
+                                id: { in: ids },
+                            },
+                        }),
                 },
             ],
         };
@@ -111,14 +103,15 @@ export class MemberCompanyService {
         const members = (
             await this.prismaService.member.findMany({
                 include: {
-                    specialLicenses: {
+                    licenses: {
                         where: {
                             isActive: true,
                         },
                     },
-                    district: {
-                        include: {
-                            city: true,
+                    region: {
+                        select: {
+                            districtKoreanName: true,
+                            cityKoreanName: true,
                         },
                     },
                 },
@@ -131,11 +124,11 @@ export class MemberCompanyService {
                 name: item.name,
                 contact: item.contact,
                 desiredSalary: item.desiredSalary,
-                cityKoreanName: item.district ? item.district.city.koreanName : null,
-                districtKoreanName: item.district ? item.district.city.koreanName : null,
+                cityKoreanName: item.region ? item.region.cityKoreanName : null,
+                districtKoreanName: item.region ? item.region.districtKoreanName : null,
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
-                specialLicenses: item.specialLicenses,
+                licenses: item.licenses,
             };
         });
         const total = await this.prismaService.member.count({
@@ -156,22 +149,20 @@ export class MemberCompanyService {
         const member = await this.prismaService.member.findUnique({
             include: {
                 account: true,
-                district: {
-                    include: {
-                        city: true,
+                region: {
+                    select: {
+                        districtEnglishName: true,
+                        districtKoreanName: true,
+                        cityEnglishName: true,
+                        cityKoreanName: true,
                     },
                 },
-                desiredOccupations: {
+                careers: {
                     include: {
                         code: true,
                     },
                 },
-                career: {
-                    include: {
-                        occupation: true,
-                    },
-                },
-                specialLicenses: {
+                licenses: {
                     where: {
                         isActive: true,
                     },
@@ -197,36 +188,31 @@ export class MemberCompanyService {
             contact: member.contact,
             email: member.email,
             district: {
-                englishName: member.district ? member.district.englishName : null,
-                koreanName: member.district ? member.district.koreanName : null,
+                englishName: member.region ? member.region.districtEnglishName : null,
+                koreanName: member.region ? member.region.districtKoreanName : null,
             },
             city: {
-                englishName: member.district ? member.district.city.englishName : null,
-                koreanName: member.district ? member.district.city.koreanName : null,
+                englishName: member.region ? member.region.cityEnglishName : null,
+                koreanName: member.region ? member.region.cityKoreanName : null,
             },
             desiredSalary: member.desiredSalary,
             totalExperienceYears: member.totalExperienceYears,
             totalExperienceMonths: member.totalExperienceMonths,
-            desiredOccupations: member.desiredOccupations
-                ? member.desiredOccupations.map((item) => {
-                      return { codeName: item.code.codeName };
-                  })
-                : [],
-            careers: member.career
-                ? member.career.map((item) => {
+            careers: member.careers
+                ? member.careers.map((item) => {
                       return {
                           startDate: item.startDate,
                           endDate: item.endDate,
                           companyName: item.companyName,
                           siteName: item.siteName,
-                          occupation: item.occupation.codeName,
+                          occupation: item.code.name,
                       };
                   })
                 : [],
-            specialLicenses: member.specialLicenses
-                ? member.specialLicenses.map((item) => {
+            licenses: member.licenses
+                ? member.licenses.map((item) => {
                       return {
-                          codeName: item.code.codeName,
+                          codeName: item.code.name,
                           licenseNumber: item.licenseNumber,
                       };
                   })
@@ -251,7 +237,7 @@ export class MemberCompanyService {
     async countWorkers(accountId: number): Promise<MemberCompanyCountWorkersResponse> {
         const workers = await this.prismaService.member.count({
             where: {
-                applyPosts: {
+                applications: {
                     some: {
                         post: {
                             company: {

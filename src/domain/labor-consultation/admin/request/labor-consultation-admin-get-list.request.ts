@@ -2,7 +2,7 @@ import { AnswerStatus, InquirerType, LaborConsultationType } from '@prisma/clien
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { LaborConsultationAdminGetListSearchCategory } from '../enum/labor-consultation-admin-get-list-search-category.enum';
+import { LaborConsultationAdminGetListCategory } from '../enum/labor-consultation-admin-get-list-category.enum';
 
 export class LaborConsultationAdminGetListRequest extends PaginationRequest {
     @Expose()
@@ -37,9 +37,9 @@ export class LaborConsultationAdminGetListRequest extends PaginationRequest {
     laborConsultationType: LaborConsultationType;
 
     @Expose()
-    @IsEnum(LaborConsultationAdminGetListSearchCategory)
+    @IsEnum(LaborConsultationAdminGetListCategory)
     @IsOptional()
-    searchCategory: LaborConsultationAdminGetListSearchCategory;
+    searchCategory: LaborConsultationAdminGetListCategory;
 
     @Expose()
     @IsString()

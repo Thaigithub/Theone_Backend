@@ -1,6 +1,6 @@
 import { Application, Company, Post, Site } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
-import { Member, Team } from '../dto/application-member-teamtype.response.dto';
+import { Member, Team } from '../dto/application-member-team-type-response.dto';
 
 export class ApplicationMemberGetDetailResponse {
     isLeader: boolean;

@@ -1,9 +1,9 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { TeamAdminGetListCategory } from '../dto/team-admin-get-list-category.enum';
-import { TeamAdminGetListSort } from '../dto/team-admin-get-list-sort.enum';
-import { TeamAdminGetListStatus } from '../dto/team-admin-get-list-status.enum';
+import { TeamAdminGetListCategory } from '../enum/team-admin-get-list-category.enum';
+import { TeamAdminGetListSort } from '../enum/team-admin-get-list-sort.enum';
+import { TeamAdminGetListStatus } from '../enum/team-admin-get-list-status.enum';
 
 export class TeamAdminGetListRequest extends PaginationRequest {
     @IsOptional()

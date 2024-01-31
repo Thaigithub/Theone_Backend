@@ -5,21 +5,21 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
-import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
+import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
 import { AccountMemberUpdateRequest } from './request/account-member-update.request';
 import { AccountMemberUpsertBankAccountRequest } from './request/account-member-upsert-bankaccount.request';
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
-import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
+import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
 
 @Controller('/member/accounts')
@@ -63,8 +63,8 @@ export class AccountMemberController {
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     async changePassword(
         @Req() request,
-        @Body() body: AccountMemberChangePasswordRequest,
-    ): Promise<BaseResponse<AccountMemberChangePasswordResponse>> {
+        @Body() body: AccountMemberUpdatePasswordRequest,
+    ): Promise<BaseResponse<AccountMemberUpdatePasswordResponse>> {
         return BaseResponse.of(await this.accountMemberService.changePassword(request.ip, request.user.accountId, body));
     }
 

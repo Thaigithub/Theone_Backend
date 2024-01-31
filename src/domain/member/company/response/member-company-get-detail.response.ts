@@ -1,4 +1,4 @@
-import { Account, BasicHealthSafetyCertificate, Career, City, Code, District, Member, SpecialLicense } from '@prisma/client';
+import { Account, BasicHealthSafetyCertificate, Career, Code, Member, License } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
 export class MemberCompanyGetDetailResponse {
@@ -7,27 +7,26 @@ export class MemberCompanyGetDetailResponse {
     contact: Member['contact'];
     email: Member['email'];
     district: {
-        koreanName: District['koreanName'];
-        englishName: District['englishName'];
+        koreanName: string;
+        englishName: string;
     };
     city: {
-        koreanName: City['koreanName'];
-        englishName: City['englishName'];
+        koreanName: string;
+        englishName: string;
     };
     desiredSalary: Member['desiredSalary'];
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
-    desiredOccupations: { codeName: Code['codeName'] }[];
     careers: {
         startDate: Career['startDate'];
         endDate: Career['endDate'];
         companyName: Career['companyName'];
         siteName: Career['siteName'];
-        occupation: Code['codeName'];
+        occupation: Code['name'];
     }[];
-    specialLicenses: {
-        codeName: Code['codeName'];
-        licenseNumber: SpecialLicense['licenseNumber'];
+    licenses: {
+        codeName: Code['name'];
+        licenseNumber: License['licenseNumber'];
     }[];
     basicHealthSafetyCertificate: {
         registrationNumber: BasicHealthSafetyCertificate['registrationNumber'];

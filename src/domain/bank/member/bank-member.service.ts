@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { BankMemberGetListResponse } from './response/bank-member-get-list.response';
 
 @Injectable()
 export class BankMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
-    async getList(): Promise<BankMemberGetListResponse[]> {
-        return await this.prismaService.bank.findMany({
+    async getList(): Promise<BankMemberGetListResponse> {
+        const banks = await this.prismaService.bank.findMany({
             select: {
                 name: true,
             },
@@ -15,5 +16,6 @@ export class BankMemberService {
                 isActive: true,
             },
         });
+        return new PaginationResponse(banks, new PageInfo(banks.length));
     }
 }

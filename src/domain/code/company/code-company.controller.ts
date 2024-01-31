@@ -9,13 +9,12 @@ import { CodeCompanyService } from './code-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
-@Controller('company/code')
+@Controller('/company/codes')
 export class CodeCompanyController {
-    constructor(private readonly codeCompanyService: CodeCompanyService) {}
+    constructor(private codeCompanyService: CodeCompanyService) {}
 
     @Get()
     async getList(@Query() query: CodeAdminGetListRequest): Promise<BaseResponse<CodeAdminGetListResponse>> {
-        const code = await this.codeCompanyService.getList(query);
-        return BaseResponse.of(code);
+        return BaseResponse.of(await this.codeCompanyService.getList(query));
     }
 }

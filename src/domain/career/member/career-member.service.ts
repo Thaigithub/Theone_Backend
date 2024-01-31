@@ -1,6 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CareerCertificationRequestStatus, CareerCertificationType, CareerType, CodeType, Prisma } from '@prisma/client';
+import { CareerCertificationRequestStatus, CareerCertificationType, CareerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { BaseResponse } from 'utils/generics/base.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
@@ -10,13 +11,12 @@ import { CareerMemberUpsertGeneralRequest } from './request/career-member-upsert
 import { CareerMemberGetDetailGeneralResponse } from './response/career-member-get-detail-general.response';
 import { CareerResponse } from './response/career-member-get-list-certification.response';
 import { CareerMemberGetListGeneralResponse } from './response/career-member-get-list-general.response';
-import { BaseResponse } from 'utils/generics/base.response';
 
 @Injectable()
 export class CareerMemberService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly governmentService: GovernmentService,
+        private prismaService: PrismaService,
+        private governmentService: GovernmentService,
     ) {}
 
     async getListGeneral(
@@ -32,7 +32,7 @@ export class CareerMemberService {
                 siteName: true,
                 startDate: true,
                 endDate: true,
-                occupation: true,
+                code: true,
             },
             where: {
                 isActive: true,
@@ -48,10 +48,10 @@ export class CareerMemberService {
             ...QueryPagingHelper.queryPaging(query),
         };
         const careers = (await this.prismaService.career.findMany(search)).map((item) => {
-            const { occupation, ...rest } = item;
+            const { code, ...rest } = item;
             return {
                 ...rest,
-                occupationName: occupation.codeName,
+                occupationName: code.name,
             };
         });
         const total = await this.prismaService.career.count({ where: search.where });
@@ -67,7 +67,7 @@ export class CareerMemberService {
                 siteName: true,
                 startDate: true,
                 endDate: true,
-                occupation: true,
+                code: true,
                 isExperienced: true,
             },
             where: {
@@ -81,11 +81,11 @@ export class CareerMemberService {
             },
         });
         if (!response) throw new NotFoundException('Career does not exist');
-        const { occupation, ...rest } = response;
+        const { code, ...rest } = response;
         return {
             ...rest,
-            occupationId: occupation.id,
-            occupationName: occupation.codeName,
+            occupationId: code.id,
+            occupationName: code.name,
         };
     }
 
@@ -93,7 +93,6 @@ export class CareerMemberService {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
-                codeType: CodeType.GENERAL,
                 isActive: true,
             },
         });
@@ -117,13 +116,13 @@ export class CareerMemberService {
                 accountId,
             },
             data: {
-                career: {
+                careers: {
                     create: {
                         ...body,
                         experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
                         experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
                         type: CareerType.GENERAL,
-                        occupationId: occupation.id,
+                        codeId: occupation.id,
                         certificationType: CareerCertificationType.NONE,
                     },
                 },
@@ -148,7 +147,6 @@ export class CareerMemberService {
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
-                codeType: CodeType.GENERAL,
                 isActive: true,
             },
         });
@@ -161,7 +159,7 @@ export class CareerMemberService {
                 endDate: new Date(endDate),
                 experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
                 experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
-                occupationId: occupation.id,
+                codeId: occupation.id,
             },
             where: {
                 id,
@@ -248,7 +246,7 @@ export class CareerMemberService {
                     startDate: true,
                     endDate: true,
                     createdAt: true,
-                    occupation: true,
+                    code: true,
                 },
             })
         ).reduce((result: { [key: string]: CareerResponse[] }, currentItem) => {
@@ -260,7 +258,7 @@ export class CareerMemberService {
                 startDate: currentItem.startDate,
                 endDate: currentItem.endDate,
                 createdAt: currentItem.createdAt,
-                occupationName: currentItem.occupation.codeName,
+                occupationName: currentItem.code.name,
             });
             return result;
         }, {});

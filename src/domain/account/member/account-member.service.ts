@@ -6,8 +6,6 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { AccountMemberChangePasswordRequestStatus } from './enum/account-member-change-password-request-status.enum';
-import { AccountMemberChangePasswordRequest } from './request/account-member-change-password.request';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
@@ -17,12 +15,14 @@ import { AccountMemberUpsertDisabilityRequest } from './request/account-member-u
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
-import { AccountMemberChangePasswordResponse } from './response/account-member-change-password.response';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
 import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
+import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
+import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
+import { AccountMemberUpdatePasswordRequestStatus } from './enum/account-member-update-password-request-status.enum';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -197,16 +197,7 @@ export class AccountMemberService {
                 accountId,
             },
             include: {
-                district: {
-                    include: {
-                        city: true,
-                    },
-                },
-                desiredOccupations: {
-                    include: {
-                        code: true,
-                    },
-                },
+                region: true,
                 account: true,
                 bankAccount: true,
                 foreignWorker: {
@@ -226,27 +217,15 @@ export class AccountMemberService {
                 },
                 teams: {
                     include: {
-                        team: {
-                            include: {
-                                code: true,
-                            },
-                        },
+                        team: true,
                     },
                 },
             },
         });
-        const { desiredOccupations, foreignWorker, disability, basicHealthSafetyCertificate, district, ...rest } = member;
+        const { foreignWorker, disability, basicHealthSafetyCertificate, region, ...rest } = member;
         return {
             ...rest,
-            cityId: district ? district.city.id : null,
-            desiredOccupations: desiredOccupations
-                ? desiredOccupations.map((item) => {
-                      return {
-                          id: item.codeId,
-                          codeName: item.code.codeName,
-                      };
-                  })
-                : [],
+            regionId: region ? region.id : null,
             foreignWorker: {
                 englishName: foreignWorker ? foreignWorker.englishName : null,
                 registrationNumber: foreignWorker ? foreignWorker.registrationNumber : null,
@@ -279,94 +258,38 @@ export class AccountMemberService {
     }
 
     async update(accountId: number, body: AccountMemberUpdateRequest): Promise<void> {
-        if (body.desiredOccupations) {
-            await Promise.all(
-                body.desiredOccupations.map(async (item) => {
-                    const codeExist = await this.prismaService.code.findUnique({
-                        where: {
-                            isActive: true,
-                            id: item,
-                        },
-                    });
-                    if (!codeExist) throw new BadRequestException(`Occupation code number: ${item} does not exist`);
-                }),
-            );
-
-            const memberId = await this.findIdByAccountId(accountId);
-
-            const currentDesiredOccupations = (
-                await this.prismaService.membersOnCodes.findMany({
-                    where: {
-                        isActive: true,
-                        memberId,
-                    },
-                })
-            ).map((item) => {
-                return item.codeId;
-            });
-
-            await Promise.all(
-                body.desiredOccupations.map(async (item) => {
-                    if (!currentDesiredOccupations.includes(item)) {
-                        await this.prismaService.membersOnCodes.create({
-                            data: {
-                                memberId,
-                                codeId: item,
-                            },
-                        });
-                    }
-                }),
-            );
-
-            await Promise.all(
-                currentDesiredOccupations.map(async (item) => {
-                    if (!body.desiredOccupations.includes(item)) {
-                        await this.prismaService.membersOnCodes.delete({
-                            where: {
-                                memberId_codeId: {
-                                    memberId,
-                                    codeId: item,
-                                },
-                            },
-                        });
-                    }
-                }),
-            );
-        }
-
-        if (body.username) {
-            const usernameExist = await this.prismaService.account.findUnique({
-                where: {
-                    username: body.username,
-                },
-            });
-            if (usernameExist) throw new ConflictException('Username already existed');
-            await this.prismaService.account.update({
-                data: {
-                    username: body.username,
-                },
-                where: {
+        const usernameExist = await this.prismaService.account.findUnique({
+            where: {
+                username: body.username,
+                NOT: {
                     id: accountId,
                 },
-            });
-        }
+            },
+        });
+        if (usernameExist) throw new ConflictException('Username already existed');
+        await this.prismaService.account.update({
+            data: {
+                username: body.username,
+            },
+            where: {
+                id: accountId,
+            },
+        });
 
-        if (body.districtId) {
-            const isEntireCityId = await this.prismaService.district.findUnique({
-                where: {
-                    isActive: true,
-                    id: body.districtId,
-                    englishName: 'All',
-                },
-            });
-            if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
-        }
+        const isEntireCityId = await this.prismaService.region.findUnique({
+            where: {
+                isActive: true,
+                id: body.regionId,
+                cityEnglishName: 'All',
+            },
+        });
+        if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
 
         await this.prismaService.member.update({
             data: {
                 name: body.name,
                 desiredSalary: body.desiredSalary,
-                districtId: body.districtId,
+                regionId: body.regionId,
             },
             where: {
                 accountId,
@@ -377,8 +300,8 @@ export class AccountMemberService {
     async changePassword(
         ip: string,
         accountId: number,
-        body: AccountMemberChangePasswordRequest,
-    ): Promise<AccountMemberChangePasswordResponse> {
+        body: AccountMemberUpdatePasswordRequest,
+    ): Promise<AccountMemberUpdatePasswordResponse> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 isActive: true,
@@ -388,7 +311,7 @@ export class AccountMemberService {
         if (!account) throw new NotFoundException('Account does not exist');
 
         const passwordMatch = await compare(body.currentPassword, account.password);
-        if (!passwordMatch) return { status: AccountMemberChangePasswordRequestStatus.PASSWORD_NOT_MATCH };
+        if (!passwordMatch) return { status: AccountMemberUpdatePasswordRequestStatus.PASSWORD_NOT_MATCH };
 
         const otpVerificationStatus = await this.otpService.checkValidOtp({ otpId: body.otpId, code: body.code }, ip);
         if (otpVerificationStatus.status === OtpStatus.VERIFIED) {
@@ -405,13 +328,13 @@ export class AccountMemberService {
         }
         switch (otpVerificationStatus.status) {
             case OtpStatus.VERIFIED:
-                return { status: AccountMemberChangePasswordRequestStatus.SUCCESS };
+                return { status: AccountMemberUpdatePasswordRequestStatus.SUCCESS };
             case OtpStatus.NOT_FOUND:
-                return { status: AccountMemberChangePasswordRequestStatus.OTP_NOT_FOUND };
+                return { status: AccountMemberUpdatePasswordRequestStatus.OTP_NOT_FOUND };
             case OtpStatus.OUT_OF_TIME:
-                return { status: AccountMemberChangePasswordRequestStatus.OTP_OUT_OF_TIME };
+                return { status: AccountMemberUpdatePasswordRequestStatus.OTP_OUT_OF_TIME };
             case OtpStatus.WRONG_CODE:
-                return { status: AccountMemberChangePasswordRequestStatus.OTP_WRONG_CODE };
+                return { status: AccountMemberUpdatePasswordRequestStatus.OTP_WRONG_CODE };
         }
     }
 
@@ -639,7 +562,7 @@ export class AccountMemberService {
                 },
             });
 
-            await tx.teamMemberInvitation.updateMany({
+            await tx.teamInvitation.updateMany({
                 data: {
                     isActive: false,
                 },

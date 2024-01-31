@@ -2,7 +2,7 @@ import { AnswerStatus, InquirerType, InquiryType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { InquiryAdminGetListSearchCategory } from '../enum/inquiry-admin-get-list-search-category.enum';
+import { InquiryAdminGetListCategory } from '../enum/inquiry-admin-get-list-category.enum';
 
 export class InquiryAdminGetListRequest extends PaginationRequest {
     @Expose()
@@ -37,9 +37,9 @@ export class InquiryAdminGetListRequest extends PaginationRequest {
     inquiryType: InquiryType;
 
     @Expose()
-    @IsEnum(InquiryAdminGetListSearchCategory)
+    @IsEnum(InquiryAdminGetListCategory)
     @IsOptional()
-    searchCategory: InquiryAdminGetListSearchCategory;
+    searchCategory: InquiryAdminGetListCategory;
 
     @Expose()
     @IsString()

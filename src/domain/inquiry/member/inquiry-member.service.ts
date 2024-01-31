@@ -10,7 +10,7 @@ import { InquiryMemberGetListResponse } from './response/inquiry-member-get-list
 
 @Injectable()
 export class InquiryMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(accountId: number, query: InquiryMemberGetListRequest): Promise<InquiryMemberGetListResponse> {
         const search = {

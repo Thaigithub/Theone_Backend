@@ -1,48 +1,45 @@
 import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { EvaluationType } from './dto/evaluation-admin.dto';
-import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
-import {
-    SiteEvaluationAdminGetListRequest,
-    SiteEvaluationSearchCategory,
-} from './request/site-evaluation-admin-get-list.request';
-import {
-    TeamEvaluationAdminGetListRequest,
-    TeamEvaluationSearchCategory,
-} from './request/team-evaluation-admin-get-list.request';
-import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
-import { MemberEvaluationResponse } from './response/member-evaluation-admin-get-list.response';
-import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
-import { SiteEvaluationResponse } from './response/site-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
-import { TeamEvaluationResponse } from './response/team-evaluation-admin-get-list.response';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { EvaluationAdmingetListSiteCategory } from './enum/evaluation-admin-get-list-site-category.enum';
+import { EvaluationAdminGetListTeamCategory } from './enum/evaluation-admin-get-list-team-category.enum';
+import { EvaluationAdminType } from './enum/evaluation-admin-type.enum';
+import { EvaluationAdminGetListMemberRequest } from './request/evaluation-admin-get-list-member.request';
+import { EvaluationAdminGetListSiteRequest } from './request/evaluation-admin-get-list-site.request';
+import { EvaluationAdminGetListTeamRequest } from './request/evaluation-admin-get-list-team.request';
+import { EvaluationAdminGetDetailMemberResponse } from './response/evaluation-admin-get-detail-member.response';
+import { EvaluationAdminGetDetailSiteResponse } from './response/evaluation-admin-get-detail-site.response';
+import { EvaluationAdminGetDetailTeamResponse } from './response/evaluation-admin-get-detail-team.response';
+import { EvaluationAdminGetListMemberResponse } from './response/evaluation-admin-get-list-member.response';
+import { EvaluationAdminGetListSiteResponse } from './response/evaluation-admin-get-list-site.response';
+import { EvaluationAdminGetListTeamResponse } from './response/evaluation-admin-get-list-team.response';
 
 @Injectable()
 export class EvaluationAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     private parseConditionsFromQuery(
-        evaluationType: EvaluationType,
-        query: SiteEvaluationAdminGetListRequest | TeamEvaluationAdminGetListRequest | MemberEvaluationAdminGetListRequest,
+        evaluationType: EvaluationAdminType,
+        query: EvaluationAdminGetListSiteRequest | EvaluationAdminGetListTeamRequest | EvaluationAdminGetListMemberRequest,
     ) {
         let whereConditions = {};
         switch (evaluationType) {
-            case EvaluationType.SITE:
-                const siteQuery = query as SiteEvaluationAdminGetListRequest;
+            case EvaluationAdminType.SITE:
+                const siteQuery = query as EvaluationAdminGetListSiteRequest;
                 whereConditions = {
                     isActive: true,
                     site: {
                         name:
-                            siteQuery.searchCategory === SiteEvaluationSearchCategory.SITE_NAME
+                            siteQuery.searchCategory === EvaluationAdmingetListSiteCategory.SITE_NAME
                                 ? {
                                       contains: siteQuery.keyword,
                                   }
                                 : undefined,
                         company: {
                             name:
-                                siteQuery.searchCategory === SiteEvaluationSearchCategory.COMPANY_NAME
+                                siteQuery.searchCategory === EvaluationAdmingetListSiteCategory.COMPANY_NAME
                                     ? {
                                           contains: siteQuery.keyword,
                                       }
@@ -51,20 +48,20 @@ export class EvaluationAdminService {
                     },
                 };
                 break;
-            case EvaluationType.TEAM:
-                const teamQuery = query as TeamEvaluationAdminGetListRequest;
+            case EvaluationAdminType.TEAM:
+                const teamQuery = query as EvaluationAdminGetListTeamRequest;
                 whereConditions = {
                     isActive: true,
                     team: {
                         name:
-                            teamQuery.searchCategory === TeamEvaluationSearchCategory.TEAM_NAME
+                            teamQuery.searchCategory === EvaluationAdminGetListTeamCategory.TEAM_NAME
                                 ? {
                                       contains: teamQuery.keyword,
                                   }
                                 : undefined,
                         leader: {
                             name:
-                                teamQuery.searchCategory === TeamEvaluationSearchCategory.LEADER_NAME
+                                teamQuery.searchCategory === EvaluationAdminGetListTeamCategory.LEADER_NAME
                                     ? {
                                           contains: teamQuery.keyword,
                                       }
@@ -73,8 +70,8 @@ export class EvaluationAdminService {
                     },
                 };
                 break;
-            case EvaluationType.MEMBER:
-                const memberQuery = query as MemberEvaluationAdminGetListRequest;
+            case EvaluationAdminType.MEMBER:
+                const memberQuery = query as EvaluationAdminGetListMemberRequest;
                 whereConditions = {
                     isActive: true,
                     member: {
@@ -103,22 +100,22 @@ export class EvaluationAdminService {
     }
 
     async getTotal(
-        evaluationType: EvaluationType,
-        query: SiteEvaluationAdminGetListRequest | TeamEvaluationAdminGetListRequest | MemberEvaluationAdminGetListRequest,
+        evaluationType: EvaluationAdminType,
+        query: EvaluationAdminGetListSiteRequest | EvaluationAdminGetListTeamRequest | EvaluationAdminGetListMemberRequest,
     ) {
         let count: number;
         switch (evaluationType) {
-            case EvaluationType.SITE:
+            case EvaluationAdminType.SITE:
                 count = await this.prismaService.siteEvaluation.count({
                     where: this.parseConditionsFromQuery(evaluationType, query),
                 });
                 break;
-            case EvaluationType.TEAM:
+            case EvaluationAdminType.TEAM:
                 count = await this.prismaService.teamEvaluation.count({
                     where: this.parseConditionsFromQuery(evaluationType, query),
                 });
                 break;
-            case EvaluationType.MEMBER:
+            case EvaluationAdminType.MEMBER:
                 count = await this.prismaService.memberEvaluation.count({
                     where: this.parseConditionsFromQuery(evaluationType, query),
                 });
@@ -127,29 +124,30 @@ export class EvaluationAdminService {
         return count;
     }
 
-    async getListSiteEvaluation(@Query() query: SiteEvaluationAdminGetListRequest): Promise<SiteEvaluationResponse[]> {
+    async getListSite(query: EvaluationAdminGetListSiteRequest): Promise<EvaluationAdminGetListSiteResponse> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
-        const siteEvaluations = await this.prismaService.siteEvaluation.findMany({
-            select: {
-                id: true,
-                totalEvaluators: true,
-                averageScore: true,
-                site: {
-                    select: {
-                        name: true,
-                        company: {
-                            select: {
-                                name: true,
+        const siteEvaluations = (
+            await this.prismaService.siteEvaluation.findMany({
+                select: {
+                    id: true,
+                    totalEvaluators: true,
+                    averageScore: true,
+                    site: {
+                        select: {
+                            name: true,
+                            company: {
+                                select: {
+                                    name: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            where: this.parseConditionsFromQuery(EvaluationType.SITE, query),
-            orderBy,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        return siteEvaluations.map((item) => {
+                where: this.parseConditionsFromQuery(EvaluationAdminType.SITE, query),
+                orderBy,
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 companyName: item.site.company.name,
@@ -158,9 +156,12 @@ export class EvaluationAdminService {
                 averageScore: item.averageScore,
             };
         });
+
+        const total = await this.getTotal(EvaluationAdminType.SITE, query);
+        return new PaginationResponse(siteEvaluations, new PageInfo(total));
     }
 
-    async getSiteEvaluationDetail(id: number): Promise<SiteEvaluationAdminGetDetailResponse> {
+    async getDetailSite(id: number): Promise<EvaluationAdminGetDetailSiteResponse> {
         const evaluationExist = await this.prismaService.siteEvaluation.count({
             where: {
                 isActive: true,
@@ -186,7 +187,7 @@ export class EvaluationAdminService {
                         },
                     },
                 },
-                siteEvaluationByContract: {
+                siteEvaluationsByContracts: {
                     select: {
                         score: true,
                         contract: {
@@ -216,7 +217,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = siteEvaluation.siteEvaluationByContract.map((item) => {
+        const listOfEvaluators = siteEvaluation.siteEvaluationsByContracts.map((item) => {
             return {
                 name: item.contract.application.member.name,
                 username: item.contract.application.member.account.username,
@@ -236,30 +237,31 @@ export class EvaluationAdminService {
         };
     }
 
-    async getListTeamEvaluation(@Query() query: TeamEvaluationAdminGetListRequest): Promise<TeamEvaluationResponse[]> {
+    async getListTeam(@Query() query: EvaluationAdminGetListTeamRequest): Promise<EvaluationAdminGetListTeamResponse> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
-        const teamEvaluations = await this.prismaService.teamEvaluation.findMany({
-            select: {
-                id: true,
-                totalEvaluators: true,
-                averageScore: true,
-                team: {
-                    select: {
-                        name: true,
-                        totalMembers: true,
-                        leader: {
-                            select: {
-                                name: true,
+        const teamEvaluations = (
+            await this.prismaService.teamEvaluation.findMany({
+                select: {
+                    id: true,
+                    totalEvaluators: true,
+                    averageScore: true,
+                    team: {
+                        select: {
+                            name: true,
+                            totalMembers: true,
+                            leader: {
+                                select: {
+                                    name: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            where: this.parseConditionsFromQuery(EvaluationType.TEAM, query),
-            orderBy,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        return teamEvaluations.map((item) => {
+                where: this.parseConditionsFromQuery(EvaluationAdminType.TEAM, query),
+                orderBy,
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 teamName: item.team.name,
@@ -269,9 +271,12 @@ export class EvaluationAdminService {
                 averageScore: item.averageScore,
             };
         });
+
+        const total = await this.getTotal(EvaluationAdminType.TEAM, query);
+        return new PaginationResponse(teamEvaluations, new PageInfo(total));
     }
 
-    async getTeamEvaluationDetail(id: number): Promise<TeamEvaluationAdminGetDetailResponse> {
+    async getDetailTeam(id: number): Promise<EvaluationAdminGetDetailTeamResponse> {
         const evaluationExist = await this.prismaService.teamEvaluation.count({
             where: {
                 isActive: true,
@@ -295,7 +300,7 @@ export class EvaluationAdminService {
                         },
                     },
                 },
-                teamEvaluationByCompany: {
+                teamEvaluationsByCompanies: {
                     select: {
                         score: true,
                         site: {
@@ -318,7 +323,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = teamEvaluation.teamEvaluationByCompany.map((item) => {
+        const listOfEvaluators = teamEvaluation.teamEvaluationsByCompanies.map((item) => {
             return {
                 companyName: item.site.company.name,
                 siteName: item.site.name,
@@ -337,25 +342,26 @@ export class EvaluationAdminService {
         };
     }
 
-    async getListMemberEvaluation(@Query() query: MemberEvaluationAdminGetListRequest): Promise<MemberEvaluationResponse[]> {
+    async getListMember(@Query() query: EvaluationAdminGetListMemberRequest): Promise<EvaluationAdminGetListMemberResponse> {
         const orderBy = this.handleOrderBy(query.isHighestRating);
-        const memberEvaluations = this.prismaService.memberEvaluation.findMany({
-            select: {
-                id: true,
-                totalEvaluators: true,
-                averageScore: true,
-                member: {
-                    select: {
-                        name: true,
-                        contact: true,
+        const memberEvaluations = (
+            await this.prismaService.memberEvaluation.findMany({
+                select: {
+                    id: true,
+                    totalEvaluators: true,
+                    averageScore: true,
+                    member: {
+                        select: {
+                            name: true,
+                            contact: true,
+                        },
                     },
                 },
-            },
-            where: this.parseConditionsFromQuery(EvaluationType.MEMBER, query),
-            orderBy,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-        return (await memberEvaluations).map((item) => {
+                where: this.parseConditionsFromQuery(EvaluationAdminType.MEMBER, query),
+                orderBy,
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 name: item.member.name,
@@ -364,9 +370,12 @@ export class EvaluationAdminService {
                 averageScore: item.averageScore,
             };
         });
+
+        const total = await this.getTotal(EvaluationAdminType.MEMBER, query);
+        return new PaginationResponse(memberEvaluations, new PageInfo(total));
     }
 
-    async getMemberEvaluationDetail(id: number): Promise<MemberEvaluationAdminGetDetailResponse> {
+    async getDetailMember(id: number): Promise<EvaluationAdminGetDetailMemberResponse> {
         const evaluationExist = await this.prismaService.memberEvaluation.count({
             where: {
                 isActive: true,
@@ -385,7 +394,7 @@ export class EvaluationAdminService {
                         contact: true,
                     },
                 },
-                memberEvaluationByCompany: {
+                memberEvaluationsByCompanies: {
                     select: {
                         score: true,
                         site: {
@@ -408,7 +417,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        const listOfEvaluators = memberEvaluation.memberEvaluationByCompany.map((item) => {
+        const listOfEvaluators = memberEvaluation.memberEvaluationsByCompanies.map((item) => {
             return {
                 companyName: item.site.company.name,
                 siteName: item.site.name,

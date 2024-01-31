@@ -1,42 +1,41 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { HeadhuntingRequestStatus, PaymentStatus, PostCategory, Prisma, ProductType, RefundStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { HeadhuntingGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
-import { RecommendationCompanyGetListHeadhuntingApprovedResponse } from './response/headhunting-company-get-list-recommendation.response';
+import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
+import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
+import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
+import { HeadhuntingCompanyCreateRequestRequest } from './request/headhunting-company-create-request.request';
 
 @Injectable()
 export class HeadhuntingCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getListRecommendation(
         accountId: number,
-        postId: number,
-        query: HeadhuntingGetListRecommendationRequest,
-    ): Promise<RecommendationCompanyGetListHeadhuntingApprovedResponse> {
-        const account = await this.prismaService.account.findUniqueOrThrow({
+        id: number,
+        query: HeadhuntingCompanyGetListRecommendationRequest,
+    ): Promise<HeadhuntingCompanyGetListRecommendationResponse> {
+        const headhunting = await this.prismaService.headhunting.findUnique({
             where: {
-                id: accountId,
+                id,
                 isActive: true,
-            },
-            include: {
-                company: true,
+                post: {
+                    company: {
+                        accountId,
+                    },
+                },
             },
         });
 
-        const post = await this.prismaService.post.findUnique({
-            where: {
-                id: postId,
-                isActive: true,
-                companyId: account.company.id,
-            },
-        });
-
-        if (!post) throw new BadRequestException('No post found');
+        if (!headhunting) throw new NotFoundException('Headhunting not found');
 
         const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {
-            postId,
+            headhunting: {
+                id,
+                isActive: true,
+            },
             OR: query.name && [
                 {
                     member: {
@@ -66,7 +65,7 @@ export class HeadhuntingCompanyService {
                         contact: true,
                         totalExperienceMonths: true,
                         totalExperienceYears: true,
-                        specialLicenses: {
+                        licenses: {
                             where: {
                                 isActive: true,
                             },
@@ -74,22 +73,18 @@ export class HeadhuntingCompanyService {
                                 licenseNumber: true,
                                 code: {
                                     select: {
-                                        codeName: true,
+                                        name: true,
                                     },
                                 },
                             },
                         },
                         desiredSalary: true,
-                        district: {
+                        region: {
                             select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
+                                districtEnglishName: true,
+                                districtKoreanName: true,
+                                cityEnglishName: true,
+                                cityKoreanName: true,
                             },
                         },
                     },
@@ -103,14 +98,14 @@ export class HeadhuntingCompanyService {
                                 contact: true,
                                 totalExperienceMonths: true,
                                 totalExperienceYears: true,
-                                specialLicenses: {
+                                licenses: {
                                     where: {
                                         isActive: true,
                                     },
                                     select: {
                                         code: {
                                             select: {
-                                                codeName: true,
+                                                name: true,
                                             },
                                         },
                                         licenseNumber: true,
@@ -119,16 +114,12 @@ export class HeadhuntingCompanyService {
                                 desiredSalary: true,
                             },
                         },
-                        district: {
+                        region: {
                             select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
+                                districtEnglishName: true,
+                                districtKoreanName: true,
+                                cityEnglishName: true,
+                                cityKoreanName: true,
                             },
                         },
                     },
@@ -144,55 +135,51 @@ export class HeadhuntingCompanyService {
 
         const newList = list.map((item) => {
             if (item.member) {
-                const district = item.member.district;
-                delete item.member.district;
-                const { specialLicenses, ...rest } = item.member;
+                const region = item.member.region;
+                delete item.member.region;
+                const { licenses, ...rest } = item.member;
                 return {
                     ...item,
                     team: null,
                     member: {
                         ...rest,
-                        specialLicenses: specialLicenses.map((item) => {
+                        licenses: licenses.map((item) => {
                             return {
-                                name: item.code.codeName,
+                                name: item.code.name,
                                 licenseNumber: item.licenseNumber,
                             };
                         }),
-                        city: {
-                            englishName: district?.city.englishName || null,
-                            koreanName: district?.city.koreanName || null,
-                        },
-                        district: {
-                            englishName: district?.englishName || null,
-                            koreanName: district?.koreanName || null,
+                        region: {
+                            cityEnglishName: region?.cityEnglishName || null,
+                            cityKoreanName: region?.cityKoreanName || null,
+                            districtEnglishName: region?.districtEnglishName || null,
+                            districtKoreanName: region?.districtKoreanName || null,
                         },
                     },
                 };
             } else {
-                const district = item.team.district;
-                delete item.team.district;
+                const region = item.team.region;
+                delete item.team.region;
                 const { leader, ...restTeam } = item.team;
-                const { specialLicenses, ...restLeader } = leader;
+                const { licenses, ...restLeader } = leader;
                 return {
                     member: null,
                     team: {
                         ...restTeam,
                         leader: {
                             ...restLeader,
-                            specialLicenses: specialLicenses.map((item) => {
+                            licenses: licenses.map((item) => {
                                 return {
-                                    name: item.code.codeName,
+                                    name: item.code.name,
                                     licenseNumber: item.licenseNumber,
                                 };
                             }),
                         },
-                        city: {
-                            englishName: district?.city.englishName || null,
-                            koreanName: district?.city.koreanName || null,
-                        },
-                        district: {
-                            englishName: district?.englishName || null,
-                            koreanName: district?.koreanName || null,
+                        region: {
+                            cityEnglishName: region?.cityEnglishName || null,
+                            cityKoreanName: region?.cityKoreanName || null,
+                            districtEnglishName: region?.districtEnglishName || null,
+                            districtKoreanName: region?.districtKoreanName || null,
                         },
                     },
                 };
@@ -206,40 +193,30 @@ export class HeadhuntingCompanyService {
         return new PaginationResponse(newList, new PageInfo(listCount));
     }
 
-    async getDetailRequest(accountId: number, postId: number) {
-        const account = await this.prismaService.account.findUniqueOrThrow({
+    async getDetailRequest(accountId: number, id: number): Promise<HeadhuntingCompanyGetDetailRequestResponse> {
+        return await this.prismaService.headhunting.findUnique({
             where: {
-                id: accountId,
+                id,
                 isActive: true,
-            },
-            include: {
-                company: true,
-            },
-        });
-
-        return await this.prismaService.headhuntingRequest.findUnique({
-            where: {
-                postId,
-                isActive: true,
-                post: {
-                    companyId: account.company.id,
-                },
             },
             select: {
-                object: true,
-                detail: true,
+                requests: {
+                    select: {
+                        object: true,
+                        detail: true,
+                    },
+                    take: 1,
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
                 post: {
                     select: {
                         name: true,
                         experienceType: true,
-                        occupation: {
+                        code: {
                             select: {
-                                codeName: true,
-                            },
-                        },
-                        specialOccupation: {
-                            select: {
-                                codeName: true,
+                                name: true,
                             },
                         },
                         site: {
@@ -251,5 +228,136 @@ export class HeadhuntingCompanyService {
                 },
             },
         });
+    }
+
+    async createRequest(accountId: number, body: HeadhuntingCompanyCreateRequestRequest, id: number): Promise<void> {
+        const headhunting = await this.prismaService.headhunting.findUnique({
+            where: {
+                id,
+                post: {
+                    company: {
+                        accountId,
+                    },
+                    category: PostCategory.HEADHUNTING,
+                },
+            },
+        });
+
+        if (!headhunting) {
+            throw new BadRequestException('Headhunting not found');
+        }
+
+        const existRequest = await this.prismaService.headhuntingRequest.findFirst({
+            where: {
+                headhunting: {
+                    postId: id,
+                    isActive: true,
+                },
+                isActive: true,
+                status: {
+                    in: [HeadhuntingRequestStatus.APPLY, HeadhuntingRequestStatus.RE_APPLY],
+                },
+            },
+            select: {
+                id: true,
+                status: true,
+            },
+        });
+        const currentProduct = await this.prismaService.productPaymentHistory.findFirst({
+            where: {
+                product: {
+                    productType: ProductType.HEADHUNTING_SERVICE,
+                },
+                remainingTimes: { gt: 0 },
+                status: PaymentStatus.COMPLETE,
+                OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
+                expirationDate: { gt: new Date() },
+            },
+            select: {
+                id: true,
+                remainingTimes: true,
+                expirationDate: true,
+            },
+            orderBy: [
+                {
+                    expirationDate: 'asc',
+                },
+                {
+                    remainingTimes: 'asc',
+                },
+            ],
+        });
+        if (!currentProduct) {
+            throw new BadRequestException(`The product hasn't been bought yet`);
+        }
+
+        if (!existRequest) {
+            await this.prismaService.$transaction(async (prisma) => {
+                await prisma.headhuntingRequest.create({
+                    data: {
+                        detail: body.detail,
+                        object: body.object,
+                        status: HeadhuntingRequestStatus.APPLY,
+                        headhunting: {
+                            connect: {
+                                postId: id,
+                            },
+                        },
+                        usageHistory: {
+                            create: {
+                                productPaymentHistoryId: currentProduct.id,
+                                expirationDate: currentProduct.expirationDate,
+                                remainNumbers: currentProduct.remainingTimes - 1,
+                            },
+                        },
+                    },
+                });
+                await prisma.productPaymentHistory.update({
+                    where: {
+                        id: currentProduct.id,
+                    },
+                    data: {
+                        remainingTimes: currentProduct.remainingTimes - 1,
+                    },
+                });
+            });
+        } else {
+            if (
+                existRequest.status === HeadhuntingRequestStatus.APPLY ||
+                existRequest.status === HeadhuntingRequestStatus.RE_APPLY
+            ) {
+                throw new BadRequestException('Headhunting request is already applied');
+            } else {
+                await this.prismaService.$transaction(async (prisma) => {
+                    await prisma.headhuntingRequest.create({
+                        data: {
+                            detail: body.detail,
+                            object: body.object,
+                            status: HeadhuntingRequestStatus.RE_APPLY,
+                            headhunting: {
+                                connect: {
+                                    postId: id,
+                                },
+                            },
+                            usageHistory: {
+                                create: {
+                                    productPaymentHistoryId: currentProduct.id,
+                                    expirationDate: currentProduct.expirationDate,
+                                    remainNumbers: currentProduct.remainingTimes - 1,
+                                },
+                            },
+                        },
+                    });
+                    await prisma.productPaymentHistory.update({
+                        where: {
+                            id: currentProduct.id,
+                        },
+                        data: {
+                            remainingTimes: currentProduct.remainingTimes - 1,
+                        },
+                    });
+                });
+            }
+        }
     }
 }

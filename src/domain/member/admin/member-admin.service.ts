@@ -3,25 +3,31 @@ import { CareerCertificationType, CareerType, Member as MemberPrisma, PointStatu
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { searchCategory } from './dto/member-admin-search-category.request.dto';
+import { MemberAdminGetListCategory } from './enum/member-admin-get-list-recommendation-approval-category.enum';
+import { MemberAdminGetListRecommendationSort } from './enum/member-admin-get-list-recommendation-sort.enum';
 import { MemberAdminSearchCategoryFilter } from './enum/member-admin-search-category.enum';
 import { MemberAdminSortCategoryFilter } from './enum/member-admin-sort-category.enum';
-import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
+import { MemberAdminGetCountRequest } from './request/member-admin-count.request';
+import { MemberAdminGetListRecommendationRequest } from './request/member-admin-get-list-recommendation.request';
 import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
-import { MemberResponse } from './response/member-admin-get-list.response';
+import { MemberAdminGetListRecommendationResponse } from './response/member-admin-get-list-recommendation.response';
+import { MemberAdminGetListResponse } from './response/member-admin-get-list.response';
 import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
 import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
 import { MemberAdminGetPointListResponse } from './response/member-admin-get-point-list.response';
+import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 
 @Injectable()
 export class MemberAdminService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly excelService: ExcelService,
+        private prismaService: PrismaService,
+        private excelService: ExcelService,
     ) {}
 
     private parseConditionsFromQuery(query: GetMembersListRequest) {
@@ -62,7 +68,7 @@ export class MemberAdminService {
                 isActive: true,
             },
             select: {
-                currencyExchange: {
+                currencyExchanges: {
                     select: {
                         amount: true,
                     },
@@ -75,12 +81,12 @@ export class MemberAdminService {
         if (!member) {
             throw new NotFoundException('The id is not exist');
         }
-        return member.currencyExchange.reduce((sum, current) => sum + current.amount, 0);
+        return member.currencyExchanges.reduce((sum, current) => sum + current.amount, 0);
     }
 
     // Methods used by controller
-    async getList(query: GetMembersListRequest): Promise<MemberResponse[]> {
-        return await this.prismaService.member.findMany({
+    async getList(query: GetMembersListRequest): Promise<MemberAdminGetListResponse> {
+        const members = await this.prismaService.member.findMany({
             // Retrieve specific fields
             select: {
                 id: true,
@@ -100,13 +106,29 @@ export class MemberAdminService {
 
             ...QueryPagingHelper.queryPaging(query),
         });
+
+        const count = await this.prismaService.member.count({ where: this.parseConditionsFromQuery(query) });
+        return new PaginationResponse(members, new PageInfo(count));
     }
 
-    async getTotal(query: GetMembersListRequest): Promise<number> {
-        return await this.prismaService.member.count({
-            // Conditions based on request query
-            where: this.parseConditionsFromQuery(query),
+    async getCount(query: MemberAdminGetCountRequest): Promise<CountResponse> {
+        const queryFilter: Prisma.MemberWhereInput = {
+            ...(query.accountStatus && {
+                account: {
+                    status: query.accountStatus,
+                },
+            }),
+            ...(query.level && {
+                level: query.level,
+            }),
+            isActive: true,
+        };
+        const count = await this.prismaService.member.count({
+            where: queryFilter,
         });
+        return {
+            count: count,
+        };
     }
 
     async getPointList(query: MemberAdminGetPointListRequest): Promise<MemberAdminGetPointListResponse> {
@@ -133,7 +155,7 @@ export class MemberAdminService {
                 name: true,
                 contact: true,
                 totalPoint: true,
-                currencyExchange: {
+                currencyExchanges: {
                     select: {
                         amount: true,
                     },
@@ -149,7 +171,7 @@ export class MemberAdminService {
             ...QueryPagingHelper.queryPaging(query),
         });
         const results = members.map((item) => {
-            const totalExchange = item.currencyExchange.reduce((sum, current) => sum + current.amount, 0);
+            const totalExchange = item.currencyExchanges.reduce((sum, current) => sum + current.amount, 0);
             return {
                 memberId: item.id,
                 name: item.name,
@@ -193,8 +215,8 @@ export class MemberAdminService {
                         },
                     },
                 },
-                career: true,
-                applyPosts: {
+                careers: true,
+                applications: {
                     include: {
                         contract: true,
                         post: {
@@ -208,7 +230,7 @@ export class MemberAdminService {
                         },
                     },
                 },
-                specialLicenses: {
+                licenses: {
                     where: {
                         isActive: true,
                     },
@@ -220,10 +242,10 @@ export class MemberAdminService {
             },
         });
 
-        const healthInsuranceList = member.career.filter(
+        const healthInsuranceList = member.careers.filter(
             (item) => item.certificationType === CareerCertificationType.HEALTH_INSURANCE,
         );
-        const employmentInsuranceList = member.career.filter(
+        const employmentInsuranceList = member.careers.filter(
             (item) => item.certificationType === CareerCertificationType.EMPLOYMENT_INSURANCE,
         );
 
@@ -249,43 +271,40 @@ export class MemberAdminService {
                       return {
                           id: item.teamId,
                           name: item.team.name,
-                          occupation: item.team.code.codeName,
+                          occupation: item.team.code.name,
                       };
                   })
                 : [],
-            registeredExperienceList: member.career
-                ? member.career.map((item) => {
-                      if (item.type === CareerType.GENERAL) {
-                          return {
-                              companyName: item.companyName,
-                              startDate: item.startDate.toISOString().split('T')[0],
-                              endDate: item.endDate.toISOString().split('T')[0],
-                          };
-                      }
-                  })
-                : [],
-            contractHistoryList: member.applyPosts
-                ? member.applyPosts
-                      .filter((item) => {
-                          return item.contract;
-                      })
-                      .map((item) => {
-                          return {
-                              companyName: item.post.site.company.name,
-                              startDate: item.contract.startDate.toISOString().split('T')[0],
-                              endDate: item.contract.endDate.toISOString().split('T')[0],
-                          };
-                      })
-                : [],
-            specialLicenseList: member.specialLicenses
-                ? member.specialLicenses.map((item) => {
-                      return {
-                          codeName: item.code.codeName,
-                          acquisitionDate: item.acquisitionDate.toISOString().split('T')[0],
-                          status: item.status,
-                      };
-                  })
-                : [],
+            registeredExperienceList:
+                member.careers.map((item) => {
+                    if (item.type === CareerType.GENERAL) {
+                        return {
+                            companyName: item.companyName,
+                            startDate: item.startDate.toISOString().split('T')[0],
+                            endDate: item.endDate.toISOString().split('T')[0],
+                        };
+                    }
+                }) || [],
+            contractHistoryList:
+                member.applications
+                    .filter((item) => {
+                        return item.contract;
+                    })
+                    .map((item) => {
+                        return {
+                            companyName: item.post.site.company.name,
+                            startDate: item.contract.startDate.toISOString().split('T')[0],
+                            endDate: item.contract.endDate.toISOString().split('T')[0],
+                        };
+                    }) || [],
+            licenseList:
+                member.licenses.map((item) => {
+                    return {
+                        codeName: item.code.name,
+                        acquisitionDate: item.acquisitionDate.toISOString().split('T')[0],
+                        status: item.status,
+                    };
+                }) || [],
             basicHealthSafetyCertificateList: {
                 registrationNumber: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.registrationNumber
@@ -378,6 +397,140 @@ export class MemberAdminService {
             };
         });
         return new PaginationResponse(results, new PageInfo(count));
+    }
+
+    async getListRecommendation(
+        query: MemberAdminGetListRecommendationRequest,
+    ): Promise<MemberAdminGetListRecommendationResponse> {
+        const queryFilter: Prisma.MemberWhereInput = {
+            isActive: true,
+            ...(query.tier && { level: query.tier }),
+            ...(query.category === MemberAdminGetListCategory.WORK_NAME && {
+                name: { contains: query.keyword, mode: 'insensitive' },
+            }),
+            ...(query.category === MemberAdminGetListCategory.ID && {
+                account: { username: { contains: query.keyword, mode: 'insensitive' } },
+            }),
+            ...(query.category === MemberAdminGetListCategory.CONTACT && {
+                contact: { contains: query.keyword, mode: 'insensitive' },
+            }),
+            //TODO: Special
+        };
+
+        const list = await this.prismaService.member.findMany({
+            select: {
+                id: true,
+                name: true,
+                contact: true,
+                careers: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        code: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+                licenses: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        code: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+                account: {
+                    select: {
+                        username: true,
+                    },
+                },
+                memberEvaluation: {
+                    select: {
+                        averageScore: true,
+                    },
+                },
+                headhuntingRecommendations: {
+                    include: {
+                        headhuntingRequest: {
+                            select: {
+                                headhunting: {
+                                    select: {
+                                        postId: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            where: queryFilter,
+            orderBy: {
+                ...(query.sortScore === MemberAdminGetListRecommendationSort.HIGHEST_SCORE && {
+                    memberEvaluation: { averageScore: { sort: 'desc', nulls: 'last' } },
+                }),
+                ...(query.sortScore === MemberAdminGetListRecommendationSort.LOWEST_SCORE && {
+                    memberEvaluation: { averageScore: { sort: 'asc', nulls: 'last' } },
+                }),
+            },
+            // Pagination
+            // If both pageNumber and pageSize is provided then handle the pagination
+            ...QueryPagingHelper.queryPaging(query),
+        });
+
+        const listCount = await this.prismaService.member.count({
+            // Conditions based on request query
+            where: queryFilter,
+        });
+
+        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+            where: {
+                id: query.requestId,
+                isActive: true,
+            },
+            select: {
+                headhunting: {
+                    select: {
+                        postId: true,
+                    },
+                },
+            },
+        });
+
+        const responseList = list.map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+                username: item.account.username,
+                contact: item.contact,
+                desiredOccupations:
+                    item.careers && item.careers.length > 0
+                        ? item.careers.map((item) => {
+                              return item.code.name;
+                          })
+                        : [],
+                licenses: item.licenses
+                    ? item.licenses.map((subItem) => {
+                          return subItem.code.name;
+                      })
+                    : [],
+                averageScore: item.memberEvaluation ? item.memberEvaluation.averageScore : null,
+                isSuggest:
+                    headhuntingRequest && headhuntingRequest.headhunting.postId
+                        ? item.headhuntingRecommendations
+                              .map((recommend) => recommend.headhuntingRequest.headhunting.postId)
+                              .includes(headhuntingRequest.headhunting.postId)
+                        : false,
+            };
+        });
+
+        return new PaginationResponse(responseList, new PageInfo(listCount));
     }
 
     async updateMember(id: number, body: ChangeMemberRequest): Promise<void> {

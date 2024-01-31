@@ -14,7 +14,7 @@ import { CareerMemberGetListGeneralResponse } from './response/career-member-get
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
 export class CareerMemberController {
-    constructor(private readonly careerMemberService: CareerMemberService) {}
+    constructor(private careerMemberService: CareerMemberService) {}
 
     @Get('/general')
     async getListGeneral(

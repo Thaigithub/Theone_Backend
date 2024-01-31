@@ -3,73 +3,58 @@ import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseResponse } from 'utils/generics/base.response';
-import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { EvaluationType } from './dto/evaluation-admin.dto';
 import { EvaluationAdminService } from './evaluation-admin.service';
-import { MemberEvaluationAdminGetListRequest } from './request/member-evaluation-admin-get-list.request';
-import { SiteEvaluationAdminGetListRequest } from './request/site-evaluation-admin-get-list.request';
-import { TeamEvaluationAdminGetListRequest } from './request/team-evaluation-admin-get-list.request';
-import { MemberEvaluationAdminGetDetailResponse } from './response/member-evaluation-admin-get-detail.response';
-import { MemberEvaluationAdminGetListResponse } from './response/member-evaluation-admin-get-list.response';
-import { SiteEvaluationAdminGetDetailResponse } from './response/site-evaluation-admin-get-detail.response';
-import { SiteEvaluationAdminGetListResponse } from './response/site-evaluation-admin-get-list.response';
-import { TeamEvaluationAdminGetDetailResponse } from './response/team-evaluation-admin-get-detail.response';
-import { TeamEvaluationAdminGetListResponse } from './response/team-evaluation-admin-get-list.response';
+import { EvaluationAdminGetListMemberRequest } from './request/evaluation-admin-get-list-member.request';
+import { EvaluationAdminGetListSiteRequest } from './request/evaluation-admin-get-list-site.request';
+import { EvaluationAdminGetListTeamRequest } from './request/evaluation-admin-get-list-team.request';
+import { EvaluationAdminGetDetailMemberResponse } from './response/evaluation-admin-get-detail-member.response';
+import { EvaluationAdminGetDetailSiteResponse } from './response/evaluation-admin-get-detail-site.response';
+import { EvaluationAdminGetDetailTeamResponse } from './response/evaluation-admin-get-detail-team.response';
+import { EvaluationAdminGetListMemberResponse } from './response/evaluation-admin-get-list-member.response';
+import { EvaluationAdminGetListSiteResponse } from './response/evaluation-admin-get-list-site.response';
+import { EvaluationAdminGetListTeamResponse } from './response/evaluation-admin-get-list-team.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
-@Controller('admin/evaluation')
+@Controller('/admin/evaluations')
 export class EvaluationAdminController {
-    constructor(private readonly evaluationAdminService: EvaluationAdminService) {}
+    constructor(private evaluationAdminService: EvaluationAdminService) {}
 
-    @Get('sites')
-    async getListSiteEvaluation(
-        @Query() query: SiteEvaluationAdminGetListRequest,
-    ): Promise<BaseResponse<SiteEvaluationAdminGetListResponse>> {
-        const list = await this.evaluationAdminService.getListSiteEvaluation(query);
-        const total = await this.evaluationAdminService.getTotal(EvaluationType.SITE, query);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
+    @Get('/site')
+    async getListSite(
+        @Query() query: EvaluationAdminGetListSiteRequest,
+    ): Promise<BaseResponse<EvaluationAdminGetListSiteResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getListSite(query));
     }
 
-    @Get('sites/:id')
-    async getSiteEvaluationDetail(
+    @Get('/site/:id')
+    async getDetailSite(@Param('id', ParseIntPipe) param: number): Promise<BaseResponse<EvaluationAdminGetDetailSiteResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getDetailSite(param));
+    }
+
+    @Get('/team')
+    async getListTeam(
+        @Query() query: EvaluationAdminGetListTeamRequest,
+    ): Promise<BaseResponse<EvaluationAdminGetListTeamResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getListTeam(query));
+    }
+
+    @Get('/team/:id')
+    async getDetailTeam(@Param('id', ParseIntPipe) param: number): Promise<BaseResponse<EvaluationAdminGetDetailTeamResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getDetailTeam(param));
+    }
+
+    @Get('/member')
+    async getListMember(
+        @Query() query: EvaluationAdminGetListMemberRequest,
+    ): Promise<BaseResponse<EvaluationAdminGetListMemberResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getListMember(query));
+    }
+
+    @Get('/member/:id')
+    async getDetailMember(
         @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<SiteEvaluationAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.evaluationAdminService.getSiteEvaluationDetail(param));
-    }
-
-    @Get('teams')
-    async getListTeamEvaluation(
-        @Query() query: TeamEvaluationAdminGetListRequest,
-    ): Promise<BaseResponse<TeamEvaluationAdminGetListResponse>> {
-        const list = await this.evaluationAdminService.getListTeamEvaluation(query);
-        const total = await this.evaluationAdminService.getTotal(EvaluationType.TEAM, query);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
-    }
-
-    @Get('teams/:id')
-    async getTeamEvaluationDetail(
-        @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<TeamEvaluationAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.evaluationAdminService.getTeamEvaluationDetail(param));
-    }
-
-    @Get('members')
-    async getListMemberEvaluation(
-        @Query() query: MemberEvaluationAdminGetListRequest,
-    ): Promise<BaseResponse<MemberEvaluationAdminGetListResponse>> {
-        const list = await this.evaluationAdminService.getListMemberEvaluation(query);
-        const total = await this.evaluationAdminService.getTotal(EvaluationType.MEMBER, query);
-        const paginationResponse = new PaginationResponse(list, new PageInfo(total));
-        return BaseResponse.of(paginationResponse);
-    }
-
-    @Get('members/:id')
-    async getMemberEvaluationDetail(
-        @Param('id', ParseIntPipe) param: number,
-    ): Promise<BaseResponse<MemberEvaluationAdminGetDetailResponse>> {
-        return BaseResponse.of(await this.evaluationAdminService.getMemberEvaluationDetail(param));
+    ): Promise<BaseResponse<EvaluationAdminGetDetailMemberResponse>> {
+        return BaseResponse.of(await this.evaluationAdminService.getDetailMember(param));
     }
 }

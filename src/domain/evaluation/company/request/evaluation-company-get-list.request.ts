@@ -1,7 +1,7 @@
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { EvaluationStatus } from '../enum/evaluation-company-get-list-request.enum';
+import { EvaluationCompanyGetListStatus } from '../enum/evaluation-company-get-list-request.enum';
 
 export class EvaluationCompanyGetListRequest extends PaginationRequest {
     @Expose()
@@ -10,9 +10,9 @@ export class EvaluationCompanyGetListRequest extends PaginationRequest {
     keyword: string;
 
     @Expose()
-    @IsEnum(EvaluationStatus)
+    @IsEnum(EvaluationCompanyGetListStatus)
     @IsOptional()
-    status: EvaluationStatus;
+    status: EvaluationCompanyGetListStatus;
 
     @Expose()
     @IsNumber()

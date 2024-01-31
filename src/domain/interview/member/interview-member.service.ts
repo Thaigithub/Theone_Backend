@@ -3,8 +3,9 @@ import { PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { InterviewMemberGetListRequest, InterviewStatus } from './request/interview-member-get-list.request';
+import { InterviewMemberGetListRequest } from './request/interview-member-get-list.request';
 import { InterviewMemberGetListResponse } from './response/interview-member-get-list.response';
+import { InterviewMemberGetListStatus } from './enum/interview-member-get-list-status.enum';
 
 @Injectable()
 export class InterviewMemberService {
@@ -59,7 +60,7 @@ export class InterviewMemberService {
                 assignedAt: true,
                 post: {
                     select: {
-                        interested: {
+                        interests: {
                             where: {
                                 member: {
                                     accountId,
@@ -70,13 +71,7 @@ export class InterviewMemberService {
                         name: true,
                         endDate: true,
                         status: true,
-                        occupation: {
-                            select: {
-                                codeName: true,
-                                id: true,
-                            },
-                        },
-
+                        code: true,
                         site: {
                             select: {
                                 name: true,
@@ -90,11 +85,7 @@ export class InterviewMemberService {
                             select: {
                                 id: true,
                                 name: true,
-                                logo: {
-                                    select: {
-                                        file: true,
-                                    },
-                                },
+                                logo: true,
                             },
                         },
                     },
@@ -102,7 +93,7 @@ export class InterviewMemberService {
             },
         };
         switch (query.status) {
-            case InterviewStatus.INTERVIEW_COMPLETED: {
+            case InterviewMemberGetListStatus.INTERVIEW_COMPLETED: {
                 search.where.OR = search.where.OR.map((item) => {
                     return {
                         ...item,
@@ -113,7 +104,7 @@ export class InterviewMemberService {
                 });
                 break;
             }
-            case InterviewStatus.PASS: {
+            case InterviewMemberGetListStatus.PASS: {
                 search.where.OR = search.where.OR.map((item) => {
                     return {
                         ...item,
@@ -122,7 +113,7 @@ export class InterviewMemberService {
                 });
                 break;
             }
-            case InterviewStatus.FAIL: {
+            case InterviewMemberGetListStatus.FAIL: {
                 search.where.OR = search.where.OR.map((item) => {
                     return {
                         ...item,
@@ -131,7 +122,7 @@ export class InterviewMemberService {
                 });
                 break;
             }
-            case InterviewStatus.DEADLINE: {
+            case InterviewMemberGetListStatus.DEADLINE: {
                 search.where.OR = search.where.OR.map((item) => {
                     return {
                         ...item,
@@ -144,7 +135,7 @@ export class InterviewMemberService {
                 });
                 break;
             }
-            case InterviewStatus.INTERVIEW_PROPOSAL: {
+            case InterviewMemberGetListStatus.INTERVIEW_PROPOSAL: {
                 search.where.OR = search.where.OR.map((item) => {
                     return {
                         ...item,
@@ -173,22 +164,22 @@ export class InterviewMemberService {
             return {
                 applicationId: item.id,
                 companyLogo: {
-                    fileName: item.post.company.logo.file.fileName,
-                    type: item.post.company.logo.file.type,
-                    key: item.post.company.logo.file.key,
-                    size: Number(item.post.company.logo.file.size),
+                    fileName: item.post.company.logo.fileName,
+                    type: item.post.company.logo.type,
+                    key: item.post.company.logo.key,
+                    size: Number(item.post.company.logo.size),
                 },
                 postId: item.post.id,
                 postName: item.post.name,
                 postStatus: item.post.status,
-                occupationId: item.post.occupation ? item.post.occupation.id : null,
-                occupationName: item.post.occupation ? item.post.occupation.codeName : null,
+                occupationId: item.post.code ? item.post.code.id : null,
+                occupationName: item.post.code ? item.post.code.name : null,
                 endDate: item.post.endDate,
                 status: item.status,
                 appliedDate: item.assignedAt,
                 siteName: item.post.site ? item.post.site.name : '',
                 siteAddress: item.post.site ? item.post.site.address : '',
-                isInterested: item.post.interested.length === 0 ? false : true,
+                isInterested: item.post.interests.length === 0 ? false : true,
             };
         });
         const total = await this.prismaService.application.count({ where: search.where });

@@ -9,20 +9,18 @@ import { CodeAdminGetListResponse } from './response/code-admin-get-list.respons
 
 @Injectable()
 export class CodeAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: CodeAdminGetListRequest): Promise<CodeAdminGetListResponse> {
         const queryFilter = {
             isActive: true,
-            ...(query.codeType && { codeType: query.codeType }),
         };
 
         const codeList = await this.prismaService.code.findMany({
             select: {
                 id: true,
                 code: true,
-                codeName: true,
-                codeType: true,
+                name: true,
             },
             where: queryFilter,
             orderBy: {
@@ -43,8 +41,7 @@ export class CodeAdminService {
         await this.prismaService.code.create({
             data: {
                 code: request.code,
-                codeName: request.codeName,
-                codeType: request.codeType,
+                name: request.codeName,
             },
         });
     }
@@ -57,8 +54,7 @@ export class CodeAdminService {
             },
             data: {
                 code: payload.code,
-                codeName: payload.codeName,
-                codeType: payload.codeType,
+                name: payload.codeName,
             },
         });
     }

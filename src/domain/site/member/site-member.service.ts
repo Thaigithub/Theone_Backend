@@ -12,8 +12,8 @@ import { SiteMemberUpdateInterestResponse } from './response/site-member-update-
 @Injectable()
 export class SiteMemberService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly regionService: RegionService,
+        private prismaService: PrismaService,
+        private regionService: RegionService,
     ) {}
     async checkExist(id: number) {
         const siteRecord = await this.prismaService.site.findUnique({
@@ -77,22 +77,12 @@ export class SiteMemberService {
     }
 
     async getList(accountId: number | undefined, query: SiteMemberGetListRequest): Promise<SiteMemberGetListResponse> {
-        const { districtsList, citiesList } = await this.regionService.parseFromRegionList(query.regionList);
+        const { ids } = await this.regionService.parseFromRegionList(query.regionList);
+
         const queryFilter: Prisma.SiteWhereInput = {
             ...(query.keyword && { name: { contains: query.keyword, mode: 'insensitive' } }),
             ...(query.regionList && {
-                OR: [
-                    districtsList.length
-                        ? {
-                              district: { id: { in: districtsList } },
-                          }
-                        : {},
-                    citiesList.length
-                        ? {
-                              district: { cityId: { in: citiesList } },
-                          }
-                        : {},
-                ],
+                regionId: { in: ids },
             }),
             isActive: true,
         };
@@ -107,32 +97,24 @@ export class SiteMemberService {
                         select: {
                             logo: {
                                 select: {
-                                    file: {
-                                        select: {
-                                            fileName: true,
-                                            key: true,
-                                            size: true,
-                                            type: true,
-                                        },
-                                    },
+                                    fileName: true,
+                                    key: true,
+                                    size: true,
+                                    type: true,
                                 },
                             },
                         },
                     },
-                    district: {
+                    region: {
                         select: {
-                            koreanName: true,
-                            englishName: true,
-                            city: {
-                                select: {
-                                    koreanName: true,
-                                    englishName: true,
-                                },
-                            },
+                            cityKoreanName: true,
+                            cityEnglishName: true,
+                            districtEnglishName: true,
+                            districtKoreanName: true,
                         },
                     },
                     status: true,
-                    post: {
+                    posts: {
                         where: {
                             isActive: true,
                             isHidden: false,
@@ -141,11 +123,15 @@ export class SiteMemberService {
                             id: true,
                             name: true,
                             isPulledUp: true,
-                            occupation: true,
+                            code: {
+                                select: {
+                                    name: true,
+                                },
+                            },
                             endDate: true,
                         },
                     },
-                    interestMember: {
+                    interests: {
                         where: {
                             member: {
                                 accountId: accountId,
@@ -168,44 +154,44 @@ export class SiteMemberService {
                 id: item.id,
                 name: item.name,
                 dictrict: {
-                    englishName: item.district.englishName,
-                    koreanName: item.district.koreanName,
+                    englishName: item.region.districtEnglishName,
+                    koreanName: item.region.districtKoreanName,
                 },
                 city: {
-                    englishName: item.district.city.englishName,
-                    koreanName: item.district.city.koreanName,
+                    englishName: item.region.cityEnglishName,
+                    koreanName: item.region.cityKoreanName,
                 },
                 file: item.company.logo
                     ? {
-                          fileName: item.company.logo.file.fileName,
-                          size: Number(item.company.logo.file.size),
-                          type: item.company.logo.file.type,
-                          key: item.company.logo.file.key,
+                          fileName: item.company.logo.fileName,
+                          size: Number(item.company.logo.size),
+                          type: item.company.logo.type,
+                          key: item.company.logo.key,
                       }
                     : null,
                 posts: query.numberOfPost
-                    ? item.post
+                    ? item.posts
                           .map((post) => {
                               return {
                                   id: post.id,
                                   name: post.name,
                                   isPulledUp: post.isPulledUp,
                                   endDate: post.endDate,
-                                  occupationName: post.occupation?.codeName || null,
+                                  occupationName: post.code?.name || null,
                               };
                           })
                           .slice(0, query.numberOfPost)
-                    : item.post.map((post) => {
+                    : item.posts.map((post) => {
                           return {
                               id: post.id,
                               name: post.name,
                               isPulledUp: post.isPulledUp,
                               endDate: post.endDate,
-                              occupationName: post.occupation?.codeName || null,
+                              occupationName: post.code?.name || null,
                           };
                       }),
-                countPost: item.post.length,
-                isInterested: accountId && item.interestMember.length > 0 ? true : false,
+                countPost: item.posts.length,
+                isInterested: accountId && item.interests.length > 0 ? true : false,
                 status: item.status,
                 longitude: item.longitude,
                 latitude: item.latitude,
@@ -242,14 +228,10 @@ export class SiteMemberService {
                         address: true,
                         logo: {
                             select: {
-                                file: {
-                                    select: {
-                                        fileName: true,
-                                        key: true,
-                                        type: true,
-                                        size: true,
-                                    },
-                                },
+                                fileName: true,
+                                key: true,
+                                type: true,
+                                size: true,
                             },
                         },
                         contactName: true,
@@ -258,7 +240,7 @@ export class SiteMemberService {
                         contactPhone: true,
                     },
                 },
-                interestMember: {
+                interests: {
                     where: {
                         member: {
                             accountId: accountId,
@@ -281,7 +263,7 @@ export class SiteMemberService {
                 id: siteRecord.id,
                 name: siteRecord.name,
                 address: siteRecord.address,
-                isInterested: siteRecord.interestMember.length > 0 && accountId ? true : false,
+                isInterested: siteRecord.interests.length > 0 && accountId ? true : false,
                 startDate: siteRecord.startDate,
                 endDate: siteRecord.endDate,
                 personInCharge: siteRecord.personInCharge,
@@ -294,10 +276,10 @@ export class SiteMemberService {
                 address: siteRecord.company.address,
                 logoFile: siteRecord.company.logo
                     ? {
-                          fileName: siteRecord.company.logo.file.fileName,
-                          key: siteRecord.company.logo.file.key,
-                          type: siteRecord.company.logo.file.type,
-                          size: Number(siteRecord.company.logo.file.size),
+                          fileName: siteRecord.company.logo.fileName,
+                          key: siteRecord.company.logo.key,
+                          type: siteRecord.company.logo.type,
+                          size: Number(siteRecord.company.logo.size),
                       }
                     : null,
 

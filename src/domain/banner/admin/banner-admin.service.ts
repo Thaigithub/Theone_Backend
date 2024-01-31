@@ -24,7 +24,7 @@ import { BannerAdminGetListPostResponse } from './response/banner-admin-get-list
 
 @Injectable()
 export class BannerAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async createAdvertising(request: BannerAdminUpsertAdvertisingRequest): Promise<void> {
         const count = await this.prismaService.advertisingBanner.count({

@@ -22,8 +22,8 @@ import { ProductCompanyUsageHistoryGetListResponse } from './response/product-co
 @Controller('company/products')
 export class ProductCompanyController {
     constructor(
-        private readonly productCompanyService: ProductCompanyService,
-        private readonly productAdminService: ProductAdminService,
+        private productCompanyService: ProductCompanyService,
+        private productAdminService: ProductAdminService,
     ) {}
 
     @Get('/payment')

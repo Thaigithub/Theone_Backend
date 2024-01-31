@@ -1,21 +1,21 @@
-import { City, Code, District, Post, Site } from '@prisma/client';
+import { Region, Code, Post, Site } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ConstructionMachinaryResponse {
     id: Code['id'];
-    codeName: Code['codeName'];
+    codeName: Code['name'];
 }
 
 export class PostResponse {
     id: Post['id'];
     name: Post['name'];
-    occupation: Code['codeName'];
+    occupation: Code['name'];
     siteAddress: Site['address'];
-    siteAddressCity: City['englishName'];
-    siteAddressDistrict: District['englishName'];
+    siteAddressCity: Region['cityEnglishName'];
+    siteAddressDistrict: Region['districtEnglishName'];
     startWorkDate: string;
     endWorkDate: string;
-    numberOfPeople: Post['numberOfPeople'];
+    numberOfPeople: Post['numberOfPeoples'];
     endDate: string;
 }
 

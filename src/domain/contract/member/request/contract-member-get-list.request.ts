@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { ContractStatus } from '../enum/contract-member-status.enum';
+import { ContractMemberGetListStatus } from '../enum/contract-member-get-list-status.enum';
 
 export class ContractMemberGetListRequest extends PaginationRequest {
     @Expose()
@@ -21,7 +21,7 @@ export class ContractMemberGetListRequest extends PaginationRequest {
     endDate: Date;
 
     @Expose()
-    @IsEnum(ContractStatus)
+    @IsEnum(ContractMemberGetListStatus)
     @IsOptional()
-    status: ContractStatus;
+    status: ContractMemberGetListStatus;
 }

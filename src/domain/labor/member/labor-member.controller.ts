@@ -11,7 +11,7 @@ import { LaborMemberGetTotalWorkDateResponse } from './response/labor-member-get
 @Roles(AccountType.MEMBER)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class LaborMemberController {
-    constructor(private readonly laborMemberService: LaborMemberService) {}
+    constructor(private laborMemberService: LaborMemberService) {}
 
     @Get('/workdate/count')
     async getTotalWorkDate(@Req() request: BaseRequest): Promise<BaseResponse<LaborMemberGetTotalWorkDateResponse>> {

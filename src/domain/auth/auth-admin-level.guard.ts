@@ -8,7 +8,7 @@ export const AdminLevelPermissions = (adminLevel: AdminLevel) => SetMetadata(ADM
 @Injectable()
 export class AuthAdminLevelGuard implements CanActivate {
     constructor(
-        private readonly prisma: PrismaService,
+        private prisma: PrismaService,
         private reflector: Reflector,
     ) {}
 

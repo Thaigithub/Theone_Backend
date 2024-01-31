@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject } from '@prisma/client';
 import { ApplicationCompanyService } from 'domain/application/company/application-company.service';
-import { ApplicationCompanyGetMemberDetail } from 'domain/application/company/response/application-company-get-member-detail.response';
-import { TeamCompanyGetTeamDetailApplicants } from 'domain/team/company/response/team-company-get-detail-applicant.response';
+import { ApplicationCompanyGetDetailMemberResponse } from 'domain/application/company/response/application-company-get-detail-member.response';
+import { ApplicationCompanyGetDetailTeamResponse } from 'domain/application/company/response/application-company-get-detail-team.response';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -78,14 +78,14 @@ export class InterviewCompanyService {
                             select: {
                                 name: true,
                                 contact: true,
-                                specialLicenses: {
+                                licenses: {
                                     where: {
                                         isActive: true,
                                     },
                                     select: {
                                         code: {
                                             select: {
-                                                codeName: true,
+                                                name: true,
                                             },
                                         },
                                     },
@@ -98,14 +98,14 @@ export class InterviewCompanyService {
                                 leader: {
                                     select: {
                                         contact: true,
-                                        specialLicenses: {
+                                        licenses: {
                                             where: {
                                                 isActive: true,
                                             },
                                             select: {
                                                 code: {
                                                     select: {
-                                                        codeName: true,
+                                                        name: true,
                                                     },
                                                 },
                                             },
@@ -137,7 +137,7 @@ export class InterviewCompanyService {
         return new PaginationResponse(list, new PageInfo(listCount));
     }
 
-    async getDetailMember(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
+    async getDetailMember(accountId: number, id: number): Promise<ApplicationCompanyGetDetailMemberResponse> {
         const interview = await this.prismaService.interview.findUnique({
             where: {
                 id,
@@ -157,7 +157,7 @@ export class InterviewCompanyService {
         return await this.applicationCompanyService.getDetailMember(accountId, interview.applicationId);
     }
 
-    async getDetailTeam(accountId: number, id: number): Promise<TeamCompanyGetTeamDetailApplicants> {
+    async getDetailTeam(accountId: number, id: number): Promise<ApplicationCompanyGetDetailTeamResponse> {
         const interview = await this.prismaService.interview.findUnique({
             where: {
                 id,
@@ -228,85 +228,148 @@ export class InterviewCompanyService {
                     postId: body.postId,
                     memberId: body.interviewProposalType === InterviewCompanyType.MEMBER ? body.id : undefined,
                     teamId: body.interviewProposalType === InterviewCompanyType.TEAM ? body.id : undefined,
+                    post: {
+                        company: {
+                            accountId: accountId,
+                        },
+                    },
                 },
             },
         });
         if (interview) {
             throw new ConflictException('Interview existed');
         }
-        switch (body.interviewProposalType) {
-            case InterviewCompanyType.MEMBER: {
-                const member = await this.prismaService.member.findUnique({
-                    where: {
-                        id: body.id,
-                    },
-                });
-                if (!member) throw new NotFoundException('Member not found');
-                await this.prismaService.application.upsert({
-                    create: {
-                        memberId: body.id,
-                        postId: body.postId,
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                        interview: {
-                            create: {
-                                status: InterviewStatus.INTERVIEWING,
+        await this.prismaService.$transaction(async (prisma) => {
+            let application = null;
+            switch (body.interviewProposalType) {
+                case InterviewCompanyType.MEMBER: {
+                    const member = await prisma.member.findUnique({
+                        where: {
+                            id: body.id,
+                            isActive: true,
+                        },
+                    });
+                    if (!member) throw new NotFoundException('Member not found');
+                    const record = await prisma.application.findUnique({
+                        where: {
+                            memberId_postId: {
+                                memberId: body.id,
+                                postId: body.postId,
                             },
                         },
-                    },
-                    update: {
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                        interview: {
-                            create: {
-                                status: InterviewStatus.INTERVIEWING,
-                            },
+                        select: {
+                            status: true,
                         },
-                    },
-                    where: {
-                        memberId_postId: {
+                    });
+                    if (record && record.status !== PostApplicationStatus.APPLY) {
+                        throw new ConflictException('The application status is not set to APPLY');
+                    }
+                    application = await prisma.application.upsert({
+                        create: {
                             memberId: body.id,
                             postId: body.postId,
+                            status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            interview: {
+                                create: {
+                                    status: InterviewStatus.INTERVIEWING,
+                                },
+                            },
+                            category: body.category,
                         },
-                        status: PostApplicationStatus.APPLY,
-                    },
-                });
-                break;
-            }
-            case InterviewCompanyType.TEAM: {
-                const team = await this.prismaService.team.findUnique({
-                    where: {
-                        id: body.id,
-                    },
-                });
-                if (!team) throw new NotFoundException('Team not found');
-                await this.prismaService.application.upsert({
-                    create: {
-                        teamId: body.id,
-                        postId: body.postId,
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                        interview: {
-                            create: {
-                                status: InterviewStatus.INTERVIEWING,
+
+                        update: {
+                            status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            interview: {
+                                create: {
+                                    status: InterviewStatus.INTERVIEWING,
+                                },
+                            },
+                            category: body.category,
+                        },
+                        where: {
+                            memberId_postId: {
+                                memberId: body.id,
+                                postId: body.postId,
+                            },
+                            status: PostApplicationStatus.APPLY,
+                        },
+                        select: {
+                            id: true,
+                        },
+                    });
+
+                    break;
+                }
+                case InterviewCompanyType.TEAM: {
+                    const team = await prisma.team.findUnique({
+                        where: {
+                            id: body.id,
+                            isActive: true,
+                        },
+                    });
+                    if (!team) throw new NotFoundException('Team not found');
+                    const record = await prisma.application.findUnique({
+                        where: {
+                            teamId_postId: {
+                                teamId: body.id,
+                                postId: body.postId,
                             },
                         },
-                    },
-                    update: {
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                        interview: {
-                            create: {
-                                status: InterviewStatus.INTERVIEWING,
-                            },
+                        select: {
+                            status: true,
                         },
-                    },
-                    where: {
-                        teamId_postId: {
+                    });
+                    if (record && record.status !== PostApplicationStatus.APPLY) {
+                        throw new ConflictException('The application status is not set to APPLY');
+                    }
+                    application = await prisma.application.upsert({
+                        create: {
                             teamId: body.id,
                             postId: body.postId,
+                            status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            category: body.category,
                         },
-                        status: PostApplicationStatus.APPLY,
-                    },
-                });
-                break;
+                        update: {
+                            status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            category: body.category,
+                        },
+                        where: {
+                            teamId_postId: {
+                                teamId: body.id,
+                                postId: body.postId,
+                            },
+                            status: PostApplicationStatus.APPLY,
+                        },
+                        select: {
+                            id: true,
+                            interview: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                        },
+                    });
+                    if (application.interview) {
+                        await prisma.interview.update({
+                            where: {
+                                id: application.interview.id,
+                            },
+                            data: {
+                                isActive: true,
+                                status: InterviewStatus.INTERVIEWING,
+                            },
+                        });
+                    } else {
+                        await prisma.interview.create({
+                            data: {
+                                applicationId: application.id,
+                                status: InterviewStatus.INTERVIEWING,
+                            },
+                        });
+                    }
+                    break;
+                }
             }
-        }
+        });
     }
 }

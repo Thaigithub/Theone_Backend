@@ -1,7 +1,6 @@
-import { Account, Company } from '@prisma/client';
-import { CompanyAdminGetDetailCompanySiteList } from '../dto/company-admin-get-detail-site-list.response.dto';
+import { Account, Company, Site } from '@prisma/client';
 
-export class CompanyAdminGetDetailsResponse {
+export class CompanyAdminGetDetailResponse {
     name: Company['name'];
     account: {
         username: Account['username'];
@@ -16,5 +15,8 @@ export class CompanyAdminGetDetailsResponse {
     presentativeName: Company['presentativeName'];
     contactName: Company['contactName'];
     contactPhone: Company['contactPhone'];
-    site: CompanyAdminGetDetailCompanySiteList[];
+    site: {
+        id: Site['id'];
+        name: Site['name'];
+    }[];
 }

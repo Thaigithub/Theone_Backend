@@ -1,6 +1,5 @@
-import { PaymentForm, SalaryType } from '@prisma/client';
+import { PaymentForm, RequestObject, SalaryType } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
-import { ContractType } from '../enum/contract-company-type-contract.enum';
 
 export class ContractCompanyGetDetailResponse {
     companyName: string;
@@ -10,7 +9,7 @@ export class ContractCompanyGetDetailResponse {
     siteEndDate: Date;
     manager: string;
     phoneNumber: string;
-    type: ContractType;
+    type: RequestObject;
     name: string;
     contact: string;
     startDate: Date;

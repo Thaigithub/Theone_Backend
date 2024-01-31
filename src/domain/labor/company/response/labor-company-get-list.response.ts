@@ -1,10 +1,10 @@
+import { RequestObject } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { LaborCompanyGetListType } from '../enum/labor-company-get-list-type.enum';
 
 class GetListResponse {
     contractId: number;
     laborId: number;
-    type: LaborCompanyGetListType;
+    type: RequestObject;
     name: string;
     siteName: string;
     startDate: Date;

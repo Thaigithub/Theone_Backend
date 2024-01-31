@@ -14,6 +14,7 @@ import { InterestMemberGetListResponse } from './response/interest-member-get-li
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class InterestMemberController {
     constructor(private interestMemberService: InterestMemberService) {}
+
     @Get()
     async getList(
         @Req() req: BaseRequest,

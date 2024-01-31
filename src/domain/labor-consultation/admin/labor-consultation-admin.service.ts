@@ -3,7 +3,7 @@ import { AnswerStatus, InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { LaborConsultationAdminGetListSearchCategory } from './enum/labor-consultation-admin-get-list-search-category.enum';
+import { LaborConsultationAdminGetListCategory } from './enum/labor-consultation-admin-get-list-category.enum';
 import { LaborConsultationAdminAnswerRequest } from './request/labor-consultation-admin-answer.request';
 import { LaborConsultationAdminGetListRequest } from './request/labor-consultation-admin-get-list.request';
 import { LaborConsultationAdminGetDetailResponse } from './response/labor-consultation-admin-get-detail.response';
@@ -11,7 +11,7 @@ import { LaborConsultationAdminGetListResponse } from './response/labor-consulta
 
 @Injectable()
 export class LaborConsultationAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: LaborConsultationAdminGetListRequest): Promise<LaborConsultationAdminGetListResponse> {
         const queryFilter: Prisma.LaborConsultationWhereInput = {
@@ -23,12 +23,12 @@ export class LaborConsultationAdminService {
             ...(query.status && { status: query.status }),
             ...(query.inquirerType && { inquirerType: query.inquirerType }),
             ...(query.laborConsultationType && { laborConsultationType: query.laborConsultationType }),
-            ...(query.searchCategory === LaborConsultationAdminGetListSearchCategory.MEMBER_NAME && {
+            ...(query.searchCategory === LaborConsultationAdminGetListCategory.MEMBER_NAME && {
                 member: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
             }),
-            ...(query.searchCategory === LaborConsultationAdminGetListSearchCategory.COMPANY_NAME && {
+            ...(query.searchCategory === LaborConsultationAdminGetListCategory.COMPANY_NAME && {
                 company: {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 },
@@ -186,14 +186,12 @@ export class LaborConsultationAdminService {
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({
                 where: {
-                    answerLaborConsultationFiles: {
-                        some: {
-                            answerLaborConsultationId: id,
-                        },
+                    answerLaborConsultationFile: {
+                        answerLaborConsultationId: id,
                     },
                 },
                 data: {
-                    isDeactivated: true,
+                    isActive: false,
                 },
             });
 

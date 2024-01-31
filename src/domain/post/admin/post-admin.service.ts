@@ -1,14 +1,18 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CodeType, PostHistoryType, PostType, Prisma } from '@prisma/client';
+import { PostHistoryType, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostAdminApplicationSearchCategoryFilter } from './enum/post-admin-application-search-category-filter.enum';
 import { PostAdminApplicationSortCategory } from './enum/post-admin-application-sort-category.enum';
 import { PostAdminApplicationStatusFilter } from './enum/post-admin-application-status-filter.enum';
+import { PostAdminCountCategory } from './enum/post-admin-count-category.enum';
 import { PostAdminPostStatusFilter } from './enum/post-admin-post-status-filter.enum';
 import { PostAdminSearchCategoryFilter } from './enum/post-admin-search-category-filter.enum';
 import { PostAdminDeleteRequest } from './request/post-admin-delete.request';
+import { PostAdminGetCountRequest } from './request/post-admin-get-count.request';
 import { PostAdminGetListForApplicationRequest } from './request/post-admin-get-list-application.request';
 import { PostAdminGetListRequest } from './request/post-admin-get-list.request';
 import { PostAdminUpdateExposureRequest } from './request/post-admin-update-exposure.request';
@@ -36,16 +40,15 @@ export class PostAdminService {
         return post_record;
     }
 
-    async checkCodeType(id: number, codeType: CodeType) {
+    async checkCodeType(id: number) {
         if (id) {
             const code = await this.prismaService.code.findUnique({
                 where: {
                     isActive: true,
                     id,
-                    codeType: codeType,
                 },
             });
-            if (!code) throw new NotFoundException(`Code ID of type ${codeType} does not exist`);
+            if (!code) throw new NotFoundException(`Code ID does not exist`);
         }
     }
 
@@ -162,7 +165,7 @@ export class PostAdminService {
             select: {
                 id: true,
                 name: true,
-                applicants: true,
+                applications: true,
                 startDate: true,
                 status: true,
                 site: {
@@ -177,7 +180,7 @@ export class PostAdminService {
         });
         const postList = tempList.map((application) => ({
             ...application,
-            countApplication: application.applicants.length,
+            countApplication: application.applications.length,
             applicants: undefined, // Remove the 'applicants' attribute if desired
         }));
         const applicationListCount = await this.prismaService.post.count({
@@ -187,24 +190,16 @@ export class PostAdminService {
     }
 
     async getDetail(id: number): Promise<PostAdminGetDetailResponse> {
-        const infor = await this.prismaService.post.findUnique({
+        const item = await this.prismaService.post.findUnique({
             where: {
                 id,
                 isActive: true,
             },
             include: {
-                specialOccupation: {
+                code: {
                     select: {
                         code: true,
-                        codeName: true,
-                        codeType: true,
-                    },
-                },
-                occupation: {
-                    select: {
-                        code: true,
-                        codeName: true,
-                        codeType: true,
+                        name: true,
                     },
                 },
                 site: {
@@ -214,21 +209,82 @@ export class PostAdminService {
                         address: true,
                         originalBuilding: true,
                         personInCharge: true,
-                        district: {
+                        region: {
                             select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: true,
+                                cityKoreanName: true,
+                                cityEnglishName: true,
+                                districtEnglishName: true,
+                                districtKoreanName: true,
                             },
                         },
                     },
                 },
             },
         });
-        if (!infor) {
+
+        const post = {
+            type: item.type,
+            name: item.name,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            experienceType: item.experienceType,
+            numberOfPeople: item.numberOfPeoples,
+            occupation: item.code
+                ? {
+                      codeName: item.code.name,
+                      code: item.code.code,
+                  }
+                : null,
+            salaryType: item.salaryType,
+            salaryAmount: item.salaryAmount,
+            status: item.status,
+            startWorkDate: item.startWorkDate,
+            endWorkDate: item.endWorkDate,
+            workday: item.workdays,
+            startWorkTime: item.startWorkTime,
+            endWorkTime: item.endWorkTime,
+            postEditor: item.postEditor,
+            site: {
+                name: item.site.name,
+                contact: item.site.contact,
+                personInCharge: item.site.personInCharge,
+                originalBuilding: item.site.originalBuilding,
+                address: item.site.address,
+                district: {
+                    englishName: item.site.region.districtEnglishName,
+                    koreanName: item.site.region.districtKoreanName,
+                    city: {
+                        englishName: item.site.region.cityEnglishName,
+                        koreanName: item.site.region.cityKoreanName,
+                    },
+                },
+            },
+        };
+        if (!post) {
             throw new NotFoundException(`The Post Id does not exist`);
         }
-        return infor;
+        return post;
+    }
+
+    async getCount(query: PostAdminGetCountRequest): Promise<CountResponse> {
+        const queryFilter: Prisma.PostWhereInput = {
+            isActive: true,
+            ...(query.category === PostAdminCountCategory.PREMIUM && {
+                type: PostType.PREMIUM,
+            }),
+            ...(query.category === PostAdminCountCategory.GENERAL && {
+                type: PostType.COMMON,
+            }),
+            ...(query.category === PostAdminCountCategory.CLOSED && {
+                endDate: { lt: new Date() },
+            }),
+        };
+        const count = await this.prismaService.post.count({
+            where: queryFilter,
+        });
+        return {
+            count: count,
+        };
     }
 
     async recordPostHistory(postId: number, historyType: PostHistoryType, data: any, content: string | undefined) {
@@ -251,8 +307,7 @@ export class PostAdminService {
     }
 
     async update(id: number, request: PostAdminUpdateRequest) {
-        await this.checkCodeType(request.specialNoteId, CodeType.SPECIAL);
-        await this.checkCodeType(request.occupationId, CodeType.GENERAL);
+        await this.checkCodeType(request.occupationId);
         const FAKE_STAMP = '2023-12-31T';
         request.startWorkTime = request.startWorkTime ? FAKE_STAMP + request.startWorkTime + 'Z' : undefined;
         request.endWorkTime = request.endWorkTime ? FAKE_STAMP + request.endWorkTime + 'Z' : undefined;
@@ -265,8 +320,7 @@ export class PostAdminService {
             startDate: request.startDate && new Date(request.startDate),
             endDate: request.endDate && new Date(request.endDate),
             experienceType: request.experienceType,
-            numberOfPeople: request.numberOfPeople,
-            specialOccupationId: request.specialNoteId || null,
+            numberOfPeoples: request.numberOfPeople,
             occupationId: request.occupationId || null,
             otherInformation: request.otherInformation,
             salaryType: request.salaryType,

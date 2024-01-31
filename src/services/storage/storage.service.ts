@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import {
     ASSET_S3_BUCKET,
     ASSET_S3_CLIENT_PUBLIC_URL,
@@ -39,10 +39,10 @@ export const enum DomainType {
 
 export class StorageService {
     private s3: S3;
-    private readonly bucket: string;
-    private readonly expiration: number;
-    private readonly s3ClientPublicUrl: string;
-    private readonly logger = new Logger(StorageService.name);
+    private bucket: string;
+    private expiration: number;
+    private s3ClientPublicUrl: string;
+    private logger = new Logger(StorageService.name);
 
     constructor() {
         this.bucket = ASSET_S3_BUCKET;
@@ -108,4 +108,27 @@ export class StorageService {
     extractFileNameViaClientPublicKey = (key: string): string => {
         return key.split('/')[1];
     };
+
+    async deleteFile(key: string): Promise<void> {
+        try {
+            await this.s3
+                .deleteObject({
+                    Bucket: ASSET_S3_BUCKET,
+                    Key: key,
+                })
+                .promise();
+        } catch (e) {
+            throw new InternalServerErrorException('S3 error');
+        }
+    }
+
+    async getListKey(): Promise<string[]> {
+        return (
+            await this.s3
+                .listObjectsV2({
+                    Bucket: ASSET_S3_BUCKET,
+                })
+                .promise()
+        ).Contents.map((item) => item.Key);
+    }
 }

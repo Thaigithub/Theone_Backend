@@ -3,14 +3,14 @@ import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } f
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ApplicationCompanyStatus } from './enum/application-company-update-status.enum';
-import { ApplicationCompanyGetListApplicantsRequest } from './request/application-company-get-list-applicants.request';
+import { ApplicationCompanyUpdateStatus } from './enum/application-company-update-status.enum';
+import { ApplicationCompanyGetListPostRequest } from './request/application-company-get-list-post.request';
 import { ApplicationCompanyUpdateStatusRequest } from './request/application-company-update-status.request';
-import { ApplicationCompanyCountApplicationsResponse } from './response/application-company-count-applicants.response';
-import { ApplicationCompanyGetListApplicantsResponse } from './response/application-company-get-list-for post.response';
-import { ApplicationCompanyGetListOfferForPost } from './response/application-company-get-list-offer-for-post.response';
-import { ApplicationCompanyGetMemberDetail } from './response/application-company-get-member-detail.response';
-import { ApplicationCompanyGetTeamDetail } from './response/application-company-get-team-detail.response';
+import { ApplicationCompanyGetListOfferPost } from './response/application-company-get-list-offer-post.response';
+import { ApplicationCompanyGetListPostResponse } from './response/application-company-get-list-post.response';
+import { ApplicationCompanyGetTotalResponse } from './response/application-company-get-total.response';
+import { ApplicationCompanyGetDetailMemberResponse } from './response/application-company-get-detail-member.response';
+import { ApplicationCompanyGetDetailTeamResponse } from './response/application-company-get-detail-team.response';
 
 @Injectable()
 export class ApplicationCompanyService {
@@ -18,9 +18,9 @@ export class ApplicationCompanyService {
 
     async getListPost(
         accountId: number,
-        query: ApplicationCompanyGetListApplicantsRequest,
+        query: ApplicationCompanyGetListPostRequest,
         postId: number,
-    ): Promise<ApplicationCompanyGetListApplicantsResponse> {
+    ): Promise<ApplicationCompanyGetListPostResponse> {
         const queryFilter: Prisma.ApplicationWhereInput = {
             post: {
                 company: {
@@ -48,77 +48,33 @@ export class ApplicationCompanyService {
                 id: true,
                 assignedAt: true,
                 member: {
-                    select: {
-                        id: true,
-                        name: true,
-                        contact: true,
-                        totalExperienceMonths: true,
-                        totalExperienceYears: true,
-                        specialLicenses: {
+                    include: {
+                        licenses: {
                             where: {
                                 isActive: true,
                             },
-                            select: {
-                                code: {
-                                    select: {
-                                        codeName: true,
-                                    },
-                                },
-                                licenseNumber: true,
+                            include: {
+                                code: true,
                             },
                         },
-                        desiredSalary: true,
-                        district: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
-                            },
-                        },
+                        region: true,
                     },
                 },
                 team: {
-                    select: {
-                        id: true,
-                        name: true,
+                    include: {
                         leader: {
-                            select: {
-                                contact: true,
-                                totalExperienceMonths: true,
-                                totalExperienceYears: true,
-                                desiredSalary: true,
-                                specialLicenses: {
+                            include: {
+                                licenses: {
                                     where: {
                                         isActive: true,
                                     },
-                                    select: {
-                                        code: {
-                                            select: {
-                                                codeName: true,
-                                            },
-                                        },
-                                        licenseNumber: true,
+                                    include: {
+                                        code: true,
                                     },
                                 },
                             },
                         },
-                        district: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
-                            },
-                        },
+                        region: true,
                     },
                 },
             },
@@ -140,19 +96,17 @@ export class ApplicationCompanyService {
                           totalExperienceMonths: item.member.totalExperienceYears,
                           totalExperienceYears: item.member.totalExperienceMonths,
                           desiredSalary: item.member.desiredSalary,
-                          specialLicenses: item.member.specialLicenses.map((item) => {
+                          licenses: item.member.licenses.map((item) => {
                               return {
-                                  name: item.code.codeName,
+                                  name: item.code.name,
                                   licenseNumber: item.licenseNumber,
                               };
                           }),
-                          city: {
-                              englishName: item.member.district?.city.englishName || null,
-                              koreanName: item.member.district?.city.koreanName || null,
-                          },
-                          district: {
-                              englishName: item.member.district?.englishName || null,
-                              koreanName: item.member.district?.koreanName || null,
+                          region: {
+                              districtEnglishName: item.member.region?.districtEnglishName || null,
+                              districtKoreanName: item.member.region?.districtKoreanName || null,
+                              cityEnglishName: item.member.region?.cityEnglishName || null,
+                              cityKoreanName: item.member.region?.cityKoreanName || null,
                           },
                       }
                     : null,
@@ -160,22 +114,20 @@ export class ApplicationCompanyService {
                     ? {
                           id: item.team.id,
                           name: item.team.name,
-                          city: {
-                              englishName: item.team.district?.city.englishName || null,
-                              koreanName: item.team.district?.city.koreanName || null,
-                          },
-                          district: {
-                              englishName: item.team.district?.englishName || null,
-                              koreanName: item.team.district?.koreanName || null,
+                          region: {
+                              districtEnglishName: item.team.region?.districtEnglishName || null,
+                              districtKoreanName: item.team.region?.districtKoreanName || null,
+                              cityEnglishName: item.team.region?.cityEnglishName || null,
+                              cityKoreanName: item.team.region?.cityKoreanName || null,
                           },
                           leader: {
                               contact: item.team.leader.contact,
                               totalExperienceMonths: item.team.leader.totalExperienceMonths,
                               totalExperienceYears: item.team.leader.totalExperienceMonths,
                               desiredSalary: item.team.leader.desiredSalary,
-                              specialLicenses: item.team.leader.specialLicenses.map((item) => {
+                              licenses: item.team.leader.licenses.map((item) => {
                                   return {
-                                      name: item.code.codeName,
+                                      name: item.code.name,
                                       licenseNumber: item.licenseNumber,
                                   };
                               }),
@@ -190,7 +142,7 @@ export class ApplicationCompanyService {
         return new PaginationResponse(newApplicationList, new PageInfo(applicationListCount));
     }
 
-    async count(accountId: number): Promise<ApplicationCompanyCountApplicationsResponse> {
+    async count(accountId: number): Promise<ApplicationCompanyGetTotalResponse> {
         const applications = await this.prismaService.application.count({
             where: {
                 post: {
@@ -215,7 +167,7 @@ export class ApplicationCompanyService {
             },
         });
         if (!application) throw new NotFoundException('Application not found');
-        if (body.status === ApplicationCompanyStatus.REJECT) {
+        if (body.status === ApplicationCompanyUpdateStatus.REJECT) {
             await this.prismaService.application.update({
                 where: {
                     id: applicationId,
@@ -252,7 +204,7 @@ export class ApplicationCompanyService {
         }
     }
 
-    async getListOfferPost(accountId: number, postId: number): Promise<ApplicationCompanyGetListOfferForPost> {
+    async getListOfferPost(accountId: number, postId: number): Promise<ApplicationCompanyGetListOfferPost> {
         const offer = (
             await this.prismaService.application.findMany({
                 where: {
@@ -305,7 +257,7 @@ export class ApplicationCompanyService {
         return new PaginationResponse(offer, new PageInfo(offer.length));
     }
 
-    async getDetailMember(accountId: number, id: number): Promise<ApplicationCompanyGetMemberDetail> {
+    async getDetailMember(accountId: number, id: number): Promise<ApplicationCompanyGetDetailMemberResponse> {
         const member = await this.prismaService.application.findUnique({
             where: {
                 id: id,
@@ -328,55 +280,20 @@ export class ApplicationCompanyService {
             where: {
                 id: member.memberId,
             },
-            select: {
-                name: true,
-                contact: true,
-                email: true,
-                district: {
-                    select: {
-                        englishName: true,
-                        koreanName: true,
-                        city: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                            },
-                        },
+            include: {
+                region: true,
+                account: true,
+                careers: {
+                    include: {
+                        code: true,
                     },
                 },
-                desiredSalary: true,
-                totalExperienceYears: true,
-                totalExperienceMonths: true,
-                account: {
-                    select: {
-                        username: true,
-                    },
-                },
-                career: {
-                    select: {
-                        companyName: true,
-                        siteName: true,
-                        occupation: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        startDate: true,
-                        endDate: true,
-                    },
-                },
-                specialLicenses: {
+                licenses: {
                     where: {
                         isActive: true,
                     },
-                    select: {
-                        id: true,
-                        code: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                        licenseNumber: true,
+                    include: {
+                        code: true,
                     },
                 },
                 basicHealthSafetyCertificate: {
@@ -385,19 +302,6 @@ export class ApplicationCompanyService {
                         dateOfCompletion: true,
                         file: true,
                     },
-                },
-                desiredOccupations: {
-                    where: {
-                        isActive: true,
-                    },
-                    select: {
-                        code: {
-                            select: {
-                                codeName: true,
-                            },
-                        },
-                    },
-                    orderBy: { updatedAt: 'desc' },
                 },
             },
         });
@@ -408,42 +312,28 @@ export class ApplicationCompanyService {
             username: memberInfor.account.username,
             contact: memberInfor.contact,
             email: memberInfor.email,
-            city: memberInfor.district
-                ? {
-                      englishName: memberInfor.district.city.englishName,
-                      koreanName: memberInfor.district.city.koreanName,
-                  }
-                : null,
-            district: memberInfor.district
-                ? {
-                      englishName: memberInfor.district.englishName,
-                      koreanName: memberInfor.district.koreanName,
-                  }
-                : null,
+            region: {
+                districtEnglishName: memberInfor.region?.districtEnglishName || null,
+                districtKoreanName: memberInfor.region?.districtKoreanName || null,
+                cityEnglishName: memberInfor.region?.cityEnglishName || null,
+                cityKoreanName: memberInfor.region?.cityKoreanName || null,
+            },
             desiredSalary: memberInfor.desiredSalary,
             totalExperienceMonths: memberInfor.totalExperienceMonths,
             totalExperienceYears: memberInfor.totalExperienceYears,
-            desiredOccupations:
-                memberInfor.desiredOccupations.length > 0
-                    ? memberInfor.desiredOccupations.map((item) => {
-                          return {
-                              codeName: item.code.codeName,
-                          };
-                      })
-                    : [],
-            careers: memberInfor.career.map((item) => {
+            careers: memberInfor.careers.map((item) => {
                 return {
                     startDate: item.startDate,
                     endDate: item.endDate,
                     companyName: item.companyName,
                     siteName: item.siteName,
-                    occupation: item.occupation ? item.occupation.codeName : null,
+                    occupation: item.code ? item.code.name : null,
                 };
             }),
-            specialLicenses: memberInfor.specialLicenses.map((item) => {
+            licenses: memberInfor.licenses.map((item) => {
                 return {
                     id: item.id,
-                    codeName: item.code ? item.code.codeName : null,
+                    codeName: item.code ? item.code.name : null,
                     licenseNumber: item.licenseNumber,
                 };
             }),
@@ -469,7 +359,7 @@ export class ApplicationCompanyService {
         };
     }
 
-    async getDetailTeam(accountId: number, id: number): Promise<ApplicationCompanyGetTeamDetail> {
+    async getDetailTeam(accountId: number, id: number): Promise<ApplicationCompanyGetDetailTeamResponse> {
         const team = await this.prismaService.application.findUnique({
             where: {
                 id: id,
@@ -494,18 +384,10 @@ export class ApplicationCompanyService {
                 id: team.teamId,
             },
             select: {
+                teamCode: true,
                 name: true,
                 totalMembers: true,
-                district: {
-                    include: {
-                        city: true,
-                    },
-                },
-                code: {
-                    select: {
-                        codeName: true,
-                    },
-                },
+                region: true,
                 leader: {
                     select: {
                         id: true,
@@ -514,20 +396,7 @@ export class ApplicationCompanyService {
                         totalExperienceYears: true,
                         totalExperienceMonths: true,
                         desiredSalary: true,
-                        desiredOccupations: {
-                            where: {
-                                isActive: true,
-                            },
-                            select: {
-                                code: {
-                                    select: {
-                                        codeName: true,
-                                    },
-                                },
-                            },
-                            orderBy: { updatedAt: 'desc' },
-                        },
-                        career: {
+                        careers: {
                             where: {
                                 isActive: true,
                             },
@@ -538,7 +407,7 @@ export class ApplicationCompanyService {
                             take: 1,
                             orderBy: { updatedAt: 'desc' },
                         },
-                        specialLicenses: {
+                        licenses: {
                             where: {
                                 isActive: true,
                             },
@@ -546,7 +415,7 @@ export class ApplicationCompanyService {
                                 id: true,
                                 code: {
                                     select: {
-                                        codeName: true,
+                                        name: true,
                                     },
                                 },
                                 licenseNumber: true,
@@ -568,20 +437,7 @@ export class ApplicationCompanyService {
                                 name: true,
                                 contact: true,
                                 desiredSalary: true,
-                                desiredOccupations: {
-                                    where: {
-                                        isActive: true,
-                                    },
-                                    select: {
-                                        code: {
-                                            select: {
-                                                codeName: true,
-                                            },
-                                        },
-                                    },
-                                    orderBy: { updatedAt: 'desc' },
-                                },
-                                career: {
+                                careers: {
                                     where: {
                                         isActive: true,
                                     },
@@ -593,7 +449,7 @@ export class ApplicationCompanyService {
                                 },
                                 totalExperienceYears: true,
                                 totalExperienceMonths: true,
-                                specialLicenses: {
+                                licenses: {
                                     where: {
                                         isActive: true,
                                     },
@@ -601,7 +457,7 @@ export class ApplicationCompanyService {
                                         id: true,
                                         code: {
                                             select: {
-                                                codeName: true,
+                                                name: true,
                                             },
                                         },
                                         licenseNumber: true,
@@ -620,14 +476,14 @@ export class ApplicationCompanyService {
 
         const { leader, members } = application;
 
-        let specialLicenses = [];
+        let licenses = [];
         const memberDetails = [];
         members.forEach((element) => {
-            specialLicenses = specialLicenses.concat(
-                element.member.specialLicenses.map((license) => {
+           licenses = licenses.concat(
+                element.member.licenses.map((license) => {
                     return {
                         id: license.id,
-                        codeName: license.code.codeName,
+                        codeName: license.code.name,
                         licenseNumber: license.licenseNumber,
                     };
                 }),
@@ -636,14 +492,6 @@ export class ApplicationCompanyService {
                 id: element.member.id,
                 name: element.member.name,
                 contact: element.member.contact,
-                desiredOccupation:
-                    element.member.desiredOccupations.length > 0
-                        ? element.member.desiredOccupations.map((item) => {
-                              return {
-                                  codeName: item.code.codeName,
-                              };
-                          })
-                        : [],
                 totalExperienceYears: element.member.totalExperienceYears,
                 totalExperienceMonths: element.member.totalExperienceMonths,
             });
@@ -652,22 +500,14 @@ export class ApplicationCompanyService {
             id: leader.id,
             name: leader.name,
             contact: leader.contact,
-            desiredOccupation:
-                leader.desiredOccupations.length > 0
-                    ? leader.desiredOccupations.map((item) => {
-                          return {
-                              codeName: item.code.codeName,
-                          };
-                      })
-                    : [],
             totalExperienceYears: leader.totalExperienceYears,
             totalExperienceMonths: leader.totalExperienceMonths,
         });
-        specialLicenses = specialLicenses.concat(
-            leader.specialLicenses.map((license) => {
+        licenses = licenses.concat(
+            leader.licenses.map((license) => {
                 return {
                     id: license.id,
-                    codeName: license.code?.codeName,
+                    codeName: license.code?.name,
                     licenseNumber: license.licenseNumber,
                 };
             }),
@@ -684,27 +524,17 @@ export class ApplicationCompanyService {
                 totalExperienceYears: leader.totalExperienceYears,
                 totalExperienceMonths: leader.totalExperienceMonths,
                 desiredSalary: leader.desiredSalary,
-                occupations: leader.desiredOccupations
-                    ? leader.desiredOccupations.map((item) => {
-                          return item.code.codeName;
-                      })
-                    : [],
+                occupations: leader.licenses.map((item) => item.code.name),
             },
             members: memberDetails,
-            city: application.district?.city
-                ? {
-                      englishName: application.district.city.englishName,
-                      koreanName: application.district.city.koreanName,
-                  }
-                : null,
-            district: application.district
-                ? {
-                      englishName: application.district.englishName,
-                      koreanName: application.district.koreanName,
-                  }
-                : null,
-            code: application.code.codeName,
-            specialLicenses: specialLicenses,
+            region: {
+                districtEnglishName: application.region?.districtEnglishName || null,
+                districtKoreanName: application.region?.districtKoreanName || null,
+                cityEnglishName: application.region?.cityEnglishName || null,
+                cityKoreanName: application.region?.cityKoreanName || null,
+            },
+            code: application.teamCode,
+            licenses: licenses,
             status: team.status,
         };
     }

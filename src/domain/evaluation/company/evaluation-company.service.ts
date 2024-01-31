@@ -1,26 +1,27 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { MemberEvaluationByCompany, Prisma, TeamEvaluationByCompany } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { EvaluationStatus } from './enum/evaluation-company-get-list-request.enum';
-import { EvaluationType } from './enum/evaluation-company-type.enum';
+import { EvaluationCompanyGetListStatus } from './enum/evaluation-company-get-list-request.enum';
+import { EvaluationCompanyType } from './enum/evaluation-company-type.enum';
 import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-company-create-evaluation.request';
 import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
-import { MemberEvaluationByCompanyResponse } from './response/evaluation-company-get-list-members.response';
-import { TeamEvaluationByCompanyResponse } from './response/evaluation-company-get-list-teams.response';
+import { EvaluationCompanyGetListMemberResponse } from './response/evaluation-company-get-list-members.response';
+import { EvaluationCompanyGetListTeamResponse } from './response/evaluation-company-get-list-teams.response';
 
 @Injectable()
 export class EvaluationCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     private async checkEvaluationByCompanyExist(
         accountId: number,
-        evaluationType: EvaluationType,
+        evaluationType: EvaluationCompanyType,
         id: number,
     ): Promise<MemberEvaluationByCompany | TeamEvaluationByCompany> {
         let evaluationByCompany: MemberEvaluationByCompany | TeamEvaluationByCompany;
         switch (evaluationType) {
-            case EvaluationType.MEMBER:
+            case EvaluationCompanyType.MEMBER:
                 evaluationByCompany = await this.prismaService.memberEvaluationByCompany.findUnique({
                     where: {
                         isActive: true,
@@ -33,7 +34,7 @@ export class EvaluationCompanyService {
                     },
                 });
                 break;
-            case EvaluationType.TEAM:
+            case EvaluationCompanyType.TEAM:
                 evaluationByCompany = await this.prismaService.teamEvaluationByCompany.findUnique({
                     where: {
                         isActive: true,
@@ -53,12 +54,12 @@ export class EvaluationCompanyService {
     }
 
     private parseConditionFromQuery(
-        evaluationType: EvaluationType,
+        evaluationType: EvaluationCompanyType,
         accountId: number,
         query: EvaluationCompanyGetListRequest,
     ): Prisma.MemberEvaluationByCompanyWhereInput | Prisma.TeamEvaluationByCompanyWhereInput {
         switch (evaluationType) {
-            case EvaluationType.MEMBER:
+            case EvaluationCompanyType.MEMBER:
                 return {
                     isActive: true,
                     site: {
@@ -76,12 +77,12 @@ export class EvaluationCompanyService {
                                                     score: query.score,
                                                 }
                                               : {},
-                                          query.status === EvaluationStatus.INCOMPLETE
+                                          query.status === EvaluationCompanyGetListStatus.INCOMPLETE
                                               ? {
                                                     score: null,
                                                 }
                                               : {},
-                                          query.status === EvaluationStatus.COMPLETE
+                                          query.status === EvaluationCompanyGetListStatus.COMPLETE
                                               ? {
                                                     score: query.score ? query.score : { not: null },
                                                 }
@@ -116,7 +117,7 @@ export class EvaluationCompanyService {
                         },
                     ],
                 } as Prisma.MemberEvaluationByCompanyWhereInput;
-            case EvaluationType.TEAM:
+            case EvaluationCompanyType.TEAM:
                 return {
                     isActive: true,
                     site: {
@@ -134,13 +135,13 @@ export class EvaluationCompanyService {
                                                     score: query.score,
                                                 }
                                               : {},
-                                          query.status === EvaluationStatus.INCOMPLETE
+                                          query.status === EvaluationCompanyGetListStatus.INCOMPLETE
                                               ? {
                                                     score: null,
                                                 }
                                               : {},
 
-                                          query.status === EvaluationStatus.COMPLETE
+                                          query.status === EvaluationCompanyGetListStatus.COMPLETE
                                               ? {
                                                     score: query.score ? query.score : { not: null },
                                                 }
@@ -180,11 +181,11 @@ export class EvaluationCompanyService {
         }
     }
 
-    async evaluateMember(accountId: number, id: number, body: EvaluationCompanyCreateEvaluationRequest): Promise<void> {
+    async updateMemberScore(accountId: number, id: number, body: EvaluationCompanyCreateEvaluationRequest): Promise<void> {
         // Check whether evaluation ticket existed or evaluated
         const memberEvaluationByCompany = (await this.checkEvaluationByCompanyExist(
             accountId,
-            EvaluationType.MEMBER,
+            EvaluationCompanyType.MEMBER,
             id,
         )) as MemberEvaluationByCompany;
 
@@ -212,14 +213,14 @@ export class EvaluationCompanyService {
             },
         });
         const totalEvaluators = memberEvaluation.totalEvaluators + 1;
-        const totalScore = memberEvaluation.totalScore + body.score;
+        const totalScores = memberEvaluation.totalScores + body.score;
 
         // Update member evaluation table
         await this.prismaService.memberEvaluation.update({
             data: {
                 totalEvaluators,
-                totalScore,
-                averageScore: totalScore / totalEvaluators,
+                totalScores,
+                averageScore: totalScores / totalEvaluators,
             },
             where: {
                 isActive: true,
@@ -228,11 +229,11 @@ export class EvaluationCompanyService {
         });
     }
 
-    async evaluateTeam(accountId: number, id: number, body: EvaluationCompanyCreateEvaluationRequest): Promise<void> {
+    async updateTeamScore(accountId: number, id: number, body: EvaluationCompanyCreateEvaluationRequest): Promise<void> {
         // Check whether evaluation ticket existed or evaluated
         const teamEvaluationByCompany = (await this.checkEvaluationByCompanyExist(
             accountId,
-            EvaluationType.TEAM,
+            EvaluationCompanyType.TEAM,
             id,
         )) as TeamEvaluationByCompany;
 
@@ -260,14 +261,14 @@ export class EvaluationCompanyService {
             },
         });
         const totalEvaluators = teamEvaluation.totalEvaluators + 1;
-        const totalScore = teamEvaluation.totalScore + body.score;
+        const totalScores = teamEvaluation.totalScores + body.score;
 
         // Update team evaluation table
         await this.prismaService.teamEvaluation.update({
             data: {
                 totalEvaluators,
-                totalScore,
-                averageScore: totalScore / totalEvaluators,
+                totalScores,
+                averageScore: totalScores / totalEvaluators,
             },
             where: {
                 isActive: true,
@@ -276,28 +277,28 @@ export class EvaluationCompanyService {
         });
     }
 
-    async getListMembers(
+    async getListMember(
         accountId: number,
         query: EvaluationCompanyGetListRequest,
-    ): Promise<MemberEvaluationByCompanyResponse[]> {
-        const listMemberEvaluationByCompany = await this.prismaService.memberEvaluationByCompany.findMany({
-            include: {
-                memberEvaluation: {
-                    include: {
-                        member: true,
+    ): Promise<EvaluationCompanyGetListMemberResponse> {
+        const listMemberEvaluationByCompany = (
+            await this.prismaService.memberEvaluationByCompany.findMany({
+                include: {
+                    memberEvaluation: {
+                        include: {
+                            member: true,
+                        },
                     },
+                    site: true,
                 },
-                site: true,
-            },
-            where: this.parseConditionFromQuery(
-                EvaluationType.MEMBER,
-                accountId,
-                query,
-            ) as Prisma.MemberEvaluationByCompanyWhereInput,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        return listMemberEvaluationByCompany.map((item) => {
+                where: this.parseConditionFromQuery(
+                    EvaluationCompanyType.MEMBER,
+                    accountId,
+                    query,
+                ) as Prisma.MemberEvaluationByCompanyWhereInput,
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 memberName: item.memberEvaluation.member.name,
@@ -306,41 +307,44 @@ export class EvaluationCompanyService {
                 score: item.score,
             };
         });
+
+        const total = await this.getTotalMembers(accountId, query);
+        return new PaginationResponse(listMemberEvaluationByCompany, new PageInfo(total));
     }
 
     async getTotalMembers(accountId: number, query: EvaluationCompanyGetListRequest): Promise<number> {
         return await this.prismaService.memberEvaluationByCompany.count({
             where: this.parseConditionFromQuery(
-                EvaluationType.MEMBER,
+                EvaluationCompanyType.MEMBER,
                 accountId,
                 query,
             ) as Prisma.MemberEvaluationByCompanyWhereInput,
         });
     }
 
-    async getListTeams(accountId: number, query: EvaluationCompanyGetListRequest): Promise<TeamEvaluationByCompanyResponse[]> {
-        const listTeamEvaluationByCompany = await this.prismaService.teamEvaluationByCompany.findMany({
-            include: {
-                teamEvaluation: {
-                    include: {
-                        team: {
-                            include: {
-                                leader: true,
+    async getListTeam(accountId: number, query: EvaluationCompanyGetListRequest): Promise<EvaluationCompanyGetListTeamResponse> {
+        const listTeamEvaluationByCompany = (
+            await this.prismaService.teamEvaluationByCompany.findMany({
+                include: {
+                    teamEvaluation: {
+                        include: {
+                            team: {
+                                include: {
+                                    leader: true,
+                                },
                             },
                         },
                     },
+                    site: true,
                 },
-                site: true,
-            },
-            where: this.parseConditionFromQuery(
-                EvaluationType.TEAM,
-                accountId,
-                query,
-            ) as Prisma.TeamEvaluationByCompanyWhereInput,
-            ...QueryPagingHelper.queryPaging(query),
-        });
-
-        return listTeamEvaluationByCompany.map((item) => {
+                where: this.parseConditionFromQuery(
+                    EvaluationCompanyType.TEAM,
+                    accountId,
+                    query,
+                ) as Prisma.TeamEvaluationByCompanyWhereInput,
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 teamName: item.teamEvaluation.team.name,
@@ -350,12 +354,15 @@ export class EvaluationCompanyService {
                 score: item.score,
             };
         });
+
+        const total = await this.getTotalTeams(accountId, query);
+        return new PaginationResponse(listTeamEvaluationByCompany, new PageInfo(total));
     }
 
     async getTotalTeams(accountId: number, query: EvaluationCompanyGetListRequest): Promise<number> {
         return await this.prismaService.teamEvaluationByCompany.count({
             where: this.parseConditionFromQuery(
-                EvaluationType.TEAM,
+                EvaluationCompanyType.TEAM,
                 accountId,
                 query,
             ) as Prisma.TeamEvaluationByCompanyWhereInput,

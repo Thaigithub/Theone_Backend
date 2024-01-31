@@ -1,58 +1,32 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationAdminContractStatus } from './enum/application-admin-contract-status.enum';
-import { ApplicationAdminGetListRequest } from './request/application-admin-get-list-for-post.request';
+import { ApplicationAdminGetListPostRequest } from './request/application-admin-get-list-post.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
-import { ApplicationAdminGetResponse } from './response/application-admin-get-list-for-post.response';
+import { ApplicationAdminGetLisPostResponse } from './response/application-admin-get-list-post.response';
+import { ApplicationAdminGetCountRequest } from './request/application-admin-get-count.request';
+import { CountResponse } from 'utils/generics/count.response';
 
 @Injectable()
 export class ApplicationAdminService {
     constructor(private prismaService: PrismaService) {}
 
-    async getListForPost(postId: number, query: ApplicationAdminGetListRequest): Promise<ApplicationAdminGetResponse> {
+    async getListPost(postId: number, query: ApplicationAdminGetListPostRequest): Promise<ApplicationAdminGetLisPostResponse> {
         const applications = await this.prismaService.application.findMany({
             where: { postId, post: { isActive: true } },
             select: {
                 id: true,
                 member: {
-                    select: {
-                        name: true,
-                        contact: true,
-                        district: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
-                            },
-                        },
-                        address: true,
-                        totalExperienceYears: true,
-                        totalExperienceMonths: true,
-                        desiredSalary: true,
+                    include: {
+                        region: true,
                     },
                 },
                 team: {
-                    select: {
-                        name: true,
-                        district: {
-                            select: {
-                                englishName: true,
-                                koreanName: true,
-                                city: {
-                                    select: {
-                                        englishName: true,
-                                        koreanName: true,
-                                    },
-                                },
-                            },
-                        },
+                    include: {
+                        region: true,
                     },
                 },
                 assignedAt: true,
@@ -67,14 +41,13 @@ export class ApplicationAdminService {
         });
         const applicationList = applications.map((applicant) => {
             const { id, assignedAt, member, team, interview } = applicant;
-            const { name, district, totalExperienceYears, totalExperienceMonths, desiredSalary } = member || {};
+            const { name, region, totalExperienceYears, totalExperienceMonths, desiredSalary } = member || {};
             return {
                 id: id,
                 name: name ? name : team.name,
                 contact: member?.contact ? member?.contact : null,
                 isTeam: team ? true : false,
-                city: district?.city || null,
-                district: district ? district : null,
+                region: region ? region : null,
                 address: member?.address ? member.address : null,
                 totalExperienceYears,
                 totalExperienceMonths,
@@ -151,5 +124,21 @@ export class ApplicationAdminService {
             interviewRequestDate: application.interview?.requestDate ? application.interview?.requestDate : null,
         };
         return applicationInfor;
+    }
+
+    async getCount(query: ApplicationAdminGetCountRequest): Promise<CountResponse> {
+        const queryFilter: Prisma.ApplicationWhereInput = {
+            ...(query.postType && {
+                post: {
+                    type: query.postType,
+                },
+            }),
+        };
+        const count = await this.prismaService.application.count({
+            where: queryFilter,
+        });
+        return {
+            count: count,
+        };
     }
 }

@@ -37,14 +37,10 @@ export class BannerMemberService {
                                     select: {
                                         logo: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        key: true,
-                                                        type: true,
-                                                        size: true,
-                                                    },
-                                                },
+                                                fileName: true,
+                                                key: true,
+                                                type: true,
+                                                size: true,
                                             },
                                         },
                                     },
@@ -61,12 +57,12 @@ export class BannerMemberService {
                         type: item.banner.file.type,
                         size: Number(item.banner.file.size),
                     },
-                    logoFile: item.request?.company.logo?.file
+                    logoFile: item.request?.company.logo
                         ? {
-                              fileName: item.request?.company.logo.file.fileName,
-                              key: item.request.company.logo.file.fileName,
-                              type: item.request.company.logo.file.type,
-                              size: Number(item.request.company.logo.file.size),
+                              fileName: item.request?.company.logo.fileName,
+                              key: item.request.company.logo.fileName,
+                              type: item.request.company.logo.type,
+                              size: Number(item.request.company.logo.size),
                           }
                         : null,
                     urlLink: item.urlLink,
@@ -108,19 +104,15 @@ export class BannerMemberService {
                                     select: {
                                         logo: {
                                             select: {
-                                                file: {
-                                                    select: {
-                                                        fileName: true,
-                                                        key: true,
-                                                        type: true,
-                                                        size: true,
-                                                    },
-                                                },
+                                                fileName: true,
+                                                key: true,
+                                                type: true,
+                                                size: true,
                                             },
                                         },
                                     },
                                 },
-                                interested: {
+                                interests: {
                                     where: {
                                         member: {
                                             accountId,
@@ -143,19 +135,19 @@ export class BannerMemberService {
                     postId: item.postId,
                     logoFile: item.post.company.logo
                         ? {
-                              fileName: item.post.company.logo.file.fileName,
-                              key: item.post.company.logo.file.key,
-                              size: Number(item.post.company.logo.file.size),
-                              type: item.post.company.logo.file.type,
+                              fileName: item.post.company.logo.fileName,
+                              key: item.post.company.logo.key,
+                              size: Number(item.post.company.logo.size),
+                              type: item.post.company.logo.type,
                           }
                         : null,
                     endDate: item.post.endDate,
                     siteName: item.post.site?.name || null,
                     siteAddress: item.post.site?.address || null,
                     postName: item.post.name,
-                    isInterested: accountId ? (item.post.interested.length !== 0 ? true : false) : null,
+                    isInterested: accountId ? (item.post.interests.length !== 0 ? true : false) : null,
                     urlFile: await this.storageService.getSignedUrl(item.banner.file.key),
-                    urlLogo: await this.storageService.getSignedUrl(item.post.company.logo.file.key),
+                    urlLogo: await this.storageService.getSignedUrl(item.post.company.logo.key),
                 };
             }),
         );

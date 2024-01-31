@@ -8,7 +8,7 @@ import { CurrencyExchangeAdminGetExchangeListRequest } from './request/currency-
 import { CurrencyExchangeAdminUpdateRequest } from './request/currency-exchange-admin-update.request';
 import { CurrencyExchangeAdminGetListResponse } from './response/currency-exchange-admin-get-list.response';
 
-@Controller('/admin/currency-exchange')
+@Controller('/admin/currency-exchanges')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class CurrencyExchangeAdminController {

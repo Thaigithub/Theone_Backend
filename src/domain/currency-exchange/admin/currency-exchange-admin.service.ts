@@ -3,7 +3,7 @@ import { PointStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { CurrencyExchangeAdminSearchCategoryFilter } from './dto/currency-exchange-admin-filter';
+import { CurrencyExchangeAdminGetListCategory } from './dto/currency-exchange-admin-get-list-category.enum';
 import { CurrencyExchangeAdminGetExchangeListRequest } from './request/currency-exchange-admin-get-list.request';
 import { CurrencyExchangeAdminUpdateRequest } from './request/currency-exchange-admin-update.request';
 import { CurrencyExchangeAdminGetListResponse } from './response/currency-exchange-admin-get-list.response';
@@ -23,10 +23,10 @@ export class CurrencyExchangeAdminService {
                 },
             }),
             member: {
-                ...(query.category == CurrencyExchangeAdminSearchCategoryFilter.NAME && {
+                ...(query.category == CurrencyExchangeAdminGetListCategory.NAME && {
                     name: { contains: query.keyword, mode: 'insensitive' },
                 }),
-                ...(query.category == CurrencyExchangeAdminSearchCategoryFilter.CONTACT && {
+                ...(query.category == CurrencyExchangeAdminGetListCategory.CONTACT && {
                     contact: { contains: query.keyword, mode: 'insensitive' },
                 }),
             },

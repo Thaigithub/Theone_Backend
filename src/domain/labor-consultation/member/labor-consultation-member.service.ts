@@ -10,7 +10,7 @@ import { LaborConsultationMemberGetListResponse } from './response/labor-consult
 
 @Injectable()
 export class LaborConsultationMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(
         accountId: number,

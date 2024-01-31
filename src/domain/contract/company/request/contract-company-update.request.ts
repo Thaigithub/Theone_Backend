@@ -1,6 +1,7 @@
-import { FileType, PaymentForm, SalaryType } from '@prisma/client';
+import { PaymentForm, SalaryType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumber, IsString, Matches } from 'class-validator';
+import { IsEnum, IsNotEmptyObject, IsNumber, IsString, Matches } from 'class-validator';
+import { FileRequest } from 'utils/generics/file.request';
 
 export class ContractCompanyUpdateRequest {
     @Expose()
@@ -30,20 +31,8 @@ export class ContractCompanyUpdateRequest {
     amount: number;
 
     @Expose()
-    @IsString()
-    fileKey: string;
-
-    @Expose()
-    @IsString()
-    fileName: string;
-
-    @Expose()
-    @IsEnum(FileType)
-    fileType: FileType;
-
-    @Expose()
-    @IsNumber()
-    fileSize: number;
+    @IsNotEmptyObject()
+    file: FileRequest;
 
     @Expose()
     @IsString()

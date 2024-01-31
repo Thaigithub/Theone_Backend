@@ -16,7 +16,7 @@ import { SiteCompanyService } from './site-company.service';
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
 export class SiteCompanyController {
-    constructor(private readonly siteCompanyService: SiteCompanyService) {}
+    constructor(private siteCompanyService: SiteCompanyService) {}
 
     @Get('/contract')
     async getListContract(

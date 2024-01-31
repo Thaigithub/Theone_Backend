@@ -7,23 +7,23 @@ import { BaseResponse } from '../../../utils/generics/base.response';
 import { CompanyAdminService } from './company-admin.service';
 import { CompanyAdminDownloadListRequest } from './request/company-admin-download-list.request';
 import { CompanyAdminGetListRequest } from './request/company-admin-get-list.request';
+import { ComapnyAdminGetListProductRequest } from './request/company-admin-product-get-list.request';
 import { CompanyAdminUpdateEmailRequest } from './request/company-admin-update-email.request';
 import { CompanyAdminUpdateStatusRequest } from './request/company-admin-update-status.request';
-import { CompanyAdminGetDetailsResponse } from './response/company-admin-get-detail.response';
+import { CompanyAdminGetDetailResponse } from './response/company-admin-get-detail.response';
+import { CompanyAdminGetListProductResponse } from './response/company-admin-get-list-product.response';
 import { CompanyAdminGetListResponse } from './response/company-admin-get-list.response';
-import { ComapnyAdminProductGetListRequest } from './request/company-admin-product-get-list.request';
-import { CompanyAdminProductGetListResponse } from './response/company-admin-product-get-list.response';
 
 @Controller('/admin/companies')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class CompanyAdminController {
-    constructor(private readonly companyAdminService: CompanyAdminService) {}
+    constructor(private companyAdminService: CompanyAdminService) {}
 
-    @Get('product')
+    @Get('/product')
     async getListCompany(
-        @Query() query: ComapnyAdminProductGetListRequest,
-    ): Promise<BaseResponse<CompanyAdminProductGetListResponse>> {
+        @Query() query: ComapnyAdminGetListProductRequest,
+    ): Promise<BaseResponse<CompanyAdminGetListProductResponse>> {
         return BaseResponse.of(await this.companyAdminService.getListCompany(query));
     }
 
@@ -36,11 +36,11 @@ export class CompanyAdminController {
     }
 
     @Get('/:id')
-    async getDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<CompanyAdminGetDetailsResponse>> {
+    async getDetails(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<CompanyAdminGetDetailResponse>> {
         return BaseResponse.of(await this.companyAdminService.getDetails(id));
     }
 
-    @Get(':id/product')
+    @Get('/:id/product')
     async getCompanyInformation(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<any>> {
         return BaseResponse.of(await this.companyAdminService.getCompanyInformation(id));
     }

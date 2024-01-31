@@ -1,20 +1,13 @@
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-
-export enum InterviewStatus {
-    INTERVIEW_PROPOSAL = 'INTERVIEW_PROPOSAL',
-    INTERVIEW_COMPLETED = 'INTERVIEW_COMPLETED',
-    PASS = 'PASS',
-    FAIL = 'FAIL',
-    DEADLINE = 'DEADLINE',
-}
+import { InterviewMemberGetListStatus } from '../enum/interview-member-get-list-status.enum';
 
 export class InterviewMemberGetListRequest extends PaginationRequest {
     @Expose()
     @IsOptional()
-    @IsEnum(InterviewStatus)
-    status: InterviewStatus;
+    @IsEnum(InterviewMemberGetListStatus)
+    status: InterviewMemberGetListStatus;
 
     @Expose()
     @IsString()

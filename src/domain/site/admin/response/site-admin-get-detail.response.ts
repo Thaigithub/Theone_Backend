@@ -1,4 +1,4 @@
-import { City, Company, District, Site } from '@prisma/client';
+import { Company, Site, Region } from '@prisma/client';
 
 export class SiteAdminGetDetailResponse {
     company: {
@@ -8,11 +8,11 @@ export class SiteAdminGetDetailResponse {
     name: Site['name'];
     address: Site['address'];
     district: {
-        koreanName: District['koreanName'];
-        englishName: District['englishName'];
+        koreanName: Region['districtKoreanName'];
+        englishName: Region['districtEnglishName'];
         city: {
-            koreanName: City['koreanName'];
-            englishName: City['englishName'];
+            koreanName: Region['cityKoreanName'];
+            englishName: Region['cityEnglishName'];
         };
     };
     contact: Site['contact'];

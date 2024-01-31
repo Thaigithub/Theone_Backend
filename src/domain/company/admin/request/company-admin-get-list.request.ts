@@ -2,7 +2,7 @@ import { CompanyType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { SearchCategory } from '../dto/company-admin-search-category.dto.request.dto';
+import { CompanyAdminGetListCategory } from '../enum/company-admin-get-list-category.enum';
 export class CompanyAdminGetListRequest extends PaginationRequest {
     @Expose()
     @IsEnum(CompanyType)
@@ -11,8 +11,8 @@ export class CompanyAdminGetListRequest extends PaginationRequest {
 
     @Expose()
     @IsOptional()
-    @IsEnum(SearchCategory)
-    searchCategory: SearchCategory;
+    @IsEnum(CompanyAdminGetListCategory)
+    searchCategory: CompanyAdminGetListCategory;
 
     @Expose()
     @IsOptional()

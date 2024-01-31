@@ -24,7 +24,7 @@ export class ApplicationMemberController {
         @Req() request: BaseRequest,
         @Body() body: ApplicationMemberUpdateStatusRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.applicationMemberService.updateStatus(id, request.user.accountId, body.status));
+        return BaseResponse.of(await this.applicationMemberService.updateStatus(id, request.user.accountId, body));
     }
 
     @Get('/offer')

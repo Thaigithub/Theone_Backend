@@ -2,18 +2,18 @@ import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/comm
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { SalaryReportCompanyService } from './salary-report-company.service';
-import { BaseResponse } from 'utils/generics/base.response';
 import { BaseRequest } from 'utils/generics/base.request';
+import { BaseResponse } from 'utils/generics/base.response';
 import { SalaryReportCompanyCreateRequest } from './request/salary-report-company-create.request';
 import { SalaryReportCompanyGetListRequest } from './request/salary-report-company-get-list.request';
 import { SalaryReportCompanyGetListResponse } from './response/salary-report-company-get-list.response';
+import { SalaryReportCompanyService } from './salary-report-company.service';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.COMPANY)
 @Controller('/company/salary-reports')
 export class SalaryReportCompanyController {
-    constructor(private readonly salaryReportCompanyService: SalaryReportCompanyService) {}
+    constructor(private salaryReportCompanyService: SalaryReportCompanyService) {}
 
     @Post()
     async requestSalaryReport(

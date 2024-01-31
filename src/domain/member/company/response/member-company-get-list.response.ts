@@ -1,16 +1,16 @@
-import { City, District, Member, SpecialLicense } from '@prisma/client';
+import { Region, Member, License } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class GetListResponse {
     id: Member['id'];
     name: Member['name'];
     contact: Member['contact'];
-    cityKoreanName: City['koreanName'];
-    districtKoreanName: District['koreanName'];
+    cityKoreanName: Region['cityKoreanName'];
+    districtKoreanName: Region['districtKoreanName'];
     desiredSalary: Member['desiredSalary'];
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
-    specialLicenses: SpecialLicense[];
+    licenses: License[];
 }
 
 export class MemberCompanyGetListResponse extends PaginationResponse<GetListResponse> {}

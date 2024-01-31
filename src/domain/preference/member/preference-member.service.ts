@@ -5,7 +5,7 @@ import { PreferenceMemberGetDetailResponse } from './response/preference-member-
 
 @Injectable()
 export class PreferenceMemberService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getDetail(accountId: number): Promise<PreferenceMemberGetDetailResponse> {
         const preference = await this.prismaService.preference.findFirst({

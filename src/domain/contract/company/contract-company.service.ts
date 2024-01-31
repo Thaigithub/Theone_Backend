@@ -1,19 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ApplicationCategory, PostApplicationStatus, Prisma, SettlementStatus } from '@prisma/client';
+import { PostApplicationStatus, RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { ContractType } from './enum/contract-company-type-contract.enum';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
 import { ContractCompanyGetListSiteRequest } from './request/contract-company-get-list-for-site.request';
-import { ContractCompanyGetListSettlementRequest } from './request/contract-company-get-list-settlement.request';
-import { ContractCompanyUpdateSettlementStatusRequest } from './request/contract-company-update-settlement-status.request';
 import { ContractCompanyUpdateRequest } from './request/contract-company-update.request';
-import { ContractCompanyGetDetailSettlementMemberResponse } from './response/contract-company-get-detail-settlement-member.response';
-import { ContractCompanyGetDetailSettlementTeamResponse } from './response/contract-company-get-detail-settlement-team.response';
 import { ContractCompanyGetDetailResponse } from './response/contract-company-get-detail.response';
-import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-for-site.response';
-import { ContractCompanyGetListSettlementResponse } from './response/contract-company-get-list-settlement.response';
+import { ContractCompanyGetListForSiteResponse } from './response/contract-company-get-list-site.response';
 import { ContractCompanyGetTotalResponse } from './response/contract-company-get-total.response';
 
 @Injectable()
@@ -72,7 +66,7 @@ export class ContractCompanyService {
         const contracts = (await this.prismaService.contract.findMany(query)).map((item) => {
             return {
                 id: item.id,
-                type: item.application.member ? ContractType.INDIVIDUAL : ContractType.TEAM,
+                type: item.application.member ? RequestObject.INDIVIDUAL : RequestObject.TEAM,
                 name: item.application.member ? item.application.member.name : item.application.team.name,
                 applicantId: item.application.member ? item.application.member.id : item.application.team.id,
                 contact: item.application.member ? item.application.member.contact : item.application.team.leader.contact,
@@ -103,6 +97,16 @@ export class ContractCompanyService {
                 },
             },
             select: {
+                headhuntingRecommendation: {
+                    select: {
+                        id: true,
+                        settlement: {
+                            select: {
+                                id: true,
+                            },
+                        },
+                    },
+                },
                 post: {
                     select: {
                         id: true,
@@ -146,43 +150,51 @@ export class ContractCompanyService {
         if (existContract) {
             throw new BadRequestException('The contract for this application id is exist');
         }
-
-        let isHeadhuntingRecommendation = false;
-        const record = this.prismaService.headhuntingRecommendation.findFirst({
-            where: {
-                ...(application.member && { memberId: application.member.id }),
-                ...(application.team && { teamId: application.team.id }),
-                postId: application.post.id,
-            },
-            select: {
-                id: true,
-            },
-        });
-        if (record) {
-            isHeadhuntingRecommendation = true;
-        }
-
-        await this.prismaService.file.create({
-            data: {
-                key: body.fileKey,
-                fileName: body.fileName,
-                size: body.fileSize,
-                type: body.fileType,
-                contract: {
-                    create: {
-                        applicationId: body.applicationId,
-                        startDate: new Date(body.startDate),
-                        endDate: new Date(body.endDate),
-                        salaryType: body.salaryType,
-                        amount: body.amount,
-                        manager: body.manager,
-                        contact: body.contact,
-                        department: body.department,
-                        paymentForm: body.paymentForm,
-                        settlementStatus: isHeadhuntingRecommendation ? SettlementStatus.UNSETTLED : SettlementStatus.NONE,
+        await this.prismaService.$transaction(async (prisma) => {
+            if (application.headhuntingRecommendation) {
+                await prisma.headhuntingRecommendation.update({
+                    where: {
+                        id: application.headhuntingRecommendation.id,
+                    },
+                    data: {
+                        settlement: {
+                            create: {},
+                        },
+                    },
+                });
+            }
+            await prisma.file.create({
+                data: {
+                    key: body.file.key,
+                    fileName: body.file.fileName,
+                    size: body.file.size,
+                    type: body.file.type,
+                    contract: {
+                        create: {
+                            applicationId: body.applicationId,
+                            startDate: new Date(body.startDate),
+                            endDate: new Date(body.endDate),
+                            salaryType: body.salaryType,
+                            amount: body.amount,
+                            manager: body.manager,
+                            contact: body.contact,
+                            department: body.department,
+                            paymentForm: body.paymentForm,
+                        },
                     },
                 },
-            },
+            });
+            await prisma.site.update({
+                where: {
+                    id: application.post.site.id,
+                },
+                data: {
+                    numberOfContract: application.post.site.numberOfContract + 1,
+                    numberOfWorkers: !application.member
+                        ? application.post.site.numberOfWorkers + application.team._count.members
+                        : application.post.site.numberOfWorkers + 1,
+                },
+            });
         });
         await this.prismaService.site.update({
             where: {
@@ -291,7 +303,7 @@ export class ContractCompanyService {
             siteEndDate: contract.application.post.site.endDate,
             manager: contract.manager,
             phoneNumber: contract.contact,
-            type: contract.application.member ? ContractType.INDIVIDUAL : ContractType.TEAM,
+            type: contract.application.member ? RequestObject.INDIVIDUAL : RequestObject.TEAM,
             name: contract.application.member ? contract.application.member.name : contract.application.team.name,
             contact: contract.application.member ? contract.application.member.contact : contract.application.team.leader.contact,
             startDate: contract.startDate,
@@ -306,323 +318,6 @@ export class ContractCompanyService {
             },
             department: contract.department,
             paymentForm: contract.paymentForm,
-        };
-    }
-
-    async getListSettlement(
-        accountId: number,
-        query: ContractCompanyGetListSettlementRequest,
-    ): Promise<ContractCompanyGetListSettlementResponse> {
-        const queryFilter: Prisma.ContractWhereInput = {
-            ...(query.settlementStatus && { settlementStatus: query.settlementStatus }),
-            ...(!query.settlementStatus && { NOT: { settlementStatus: SettlementStatus.NONE } }),
-            ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
-            ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
-            application: {
-                category: ApplicationCategory.HEADHUNTING,
-                ...(query.object === ContractType.INDIVIDUAL && {
-                    AND: [
-                        { NOT: { memberId: null } },
-                        {
-                            member: {
-                                isActive: true,
-                                ...(query.searchTerm && { name: { contains: query.searchTerm, mode: 'insensitive' } }),
-                            },
-                        },
-                    ],
-                }),
-                ...(query.object === ContractType.TEAM && {
-                    AND: [
-                        { NOT: { teamId: null } },
-                        {
-                            team: {
-                                isActive: true,
-                                ...(query.searchTerm && { name: { contains: query.searchTerm, mode: 'insensitive' } }),
-                            },
-                        },
-                    ],
-                }),
-                post: {
-                    company: {
-                        isActive: true,
-                        accountId: accountId,
-                    },
-                },
-            },
-        };
-        const contracts = (
-            await this.prismaService.contract.findMany({
-                where: queryFilter,
-                select: {
-                    id: true,
-                    application: {
-                        select: {
-                            member: {
-                                select: {
-                                    name: true,
-                                    contact: true,
-                                },
-                            },
-                            team: {
-                                select: {
-                                    name: true,
-                                    leader: {
-                                        select: {
-                                            name: true,
-                                            contact: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    settlementStatus: true,
-                    settlementCompleteDate: true,
-                },
-                ...QueryPagingHelper.queryPaging(query),
-            })
-        ).map((item) => {
-            return {
-                id: item.id,
-                memberInfor: {
-                    name: item.application?.member ? item.application.member.name : null,
-                    contact: item.application?.member ? item.application.member.contact : null,
-                },
-                teamInfor: {
-                    teamName: item.application?.team ? item.application.team.name : null,
-                    leaderName: item.application?.team ? item.application.team.leader.name : null,
-                    contact: item.application?.team ? item.application.team.leader.contact : null,
-                },
-                settlementStatus: item.settlementStatus,
-                settlementCompleteDate: item.settlementCompleteDate,
-            };
-        });
-        const countContract = await this.prismaService.contract.count({
-            where: queryFilter,
-        });
-        return new PaginationResponse(contracts, new PageInfo(countContract));
-    }
-
-    async getDetailSettlementTeam(accountId: number, id: number): Promise<ContractCompanyGetDetailSettlementTeamResponse> {
-        const contract = await this.prismaService.contract.findUnique({
-            where: {
-                id: id,
-                application: {
-                    post: {
-                        isActive: true,
-                        company: {
-                            accountId: accountId,
-                            isActive: true,
-                        },
-                    },
-                    NOT: { team: null },
-                },
-                NOT: { settlementStatus: SettlementStatus.NONE },
-            },
-            select: {
-                application: {
-                    select: {
-                        post: {
-                            select: {
-                                site: {
-                                    select: {
-                                        name: true,
-                                        startDate: true,
-                                        endDate: true,
-                                    },
-                                },
-                            },
-                        },
-                        member: {
-                            select: {
-                                name: true,
-                                contact: true,
-                            },
-                        },
-                        team: {
-                            select: {
-                                name: true,
-                                leader: {
-                                    select: {
-                                        name: true,
-                                        contact: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                startDate: true,
-                endDate: true,
-                labor: {
-                    select: {
-                        id: true,
-                        salaryHistories: {
-                            orderBy: { date: 'desc' },
-                            take: 1,
-                            select: {
-                                base: true,
-                                totalDeductible: true,
-                                totalPayment: true,
-                            },
-                        },
-                        workDates: {
-                            select: {
-                                hours: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        if (!contract) {
-            throw new NotFoundException('The contract id is not found');
-        }
-        const workLoadInformation = () => {
-            const countWorkDays = contract?.labor ? contract.labor.workDates.length : null;
-            const averageWorkLoad =
-                contract?.labor && countWorkDays > 0
-                    ? contract.labor.workDates.reduce((total, current) => {
-                          return total + current.hours;
-                      }, 0) / countWorkDays
-                    : null;
-            return {
-                workDays: countWorkDays,
-                workLoad: averageWorkLoad,
-                laborId: contract.labor ? contract.labor.id : null,
-            };
-        };
-        return {
-            siteInfor: {
-                siteName: contract.application.post.site.name,
-                startDateConstruction: contract.application.post.site.startDate,
-                endDateConstruction: contract.application.post.site.endDate,
-                startDateContract: contract.startDate,
-                endDateContract: contract.endDate,
-                isWorking: new Date() <= contract.endDate && new Date() >= contract.startDate,
-            },
-            wageInfor: contract.labor
-                ? {
-                      wage: contract.labor?.salaryHistories[0]?.base ? contract.labor.salaryHistories[0].base : null,
-                      deductibleAmount: contract.labor?.salaryHistories[0]?.totalDeductible
-                          ? contract.labor.salaryHistories[0].totalDeductible
-                          : null,
-                      actualSalary: contract.labor?.salaryHistories[0]?.totalPayment
-                          ? contract.labor.salaryHistories[0].totalPayment
-                          : null,
-                  }
-                : null,
-            workLoadInfor: workLoadInformation(),
-            teamInfor: {
-                leaderName: contract.application.team.leader.name,
-                teamName: contract.application.team.name,
-                contact: contract.application.team.leader.contact,
-            },
-        };
-    }
-
-    async getDetailSettlementMember(accountId: number, id: number): Promise<ContractCompanyGetDetailSettlementMemberResponse> {
-        const contract = await this.prismaService.contract.findUnique({
-            where: {
-                id: id,
-                application: {
-                    post: {
-                        isActive: true,
-                        company: {
-                            accountId: accountId,
-                            isActive: true,
-                        },
-                    },
-                    NOT: { member: null },
-                },
-                NOT: { settlementStatus: SettlementStatus.NONE },
-            },
-            select: {
-                application: {
-                    select: {
-                        post: {
-                            select: {
-                                site: {
-                                    select: {
-                                        name: true,
-                                        startDate: true,
-                                        endDate: true,
-                                    },
-                                },
-                            },
-                        },
-                        member: {
-                            select: {
-                                name: true,
-                                contact: true,
-                            },
-                        },
-                    },
-                },
-                startDate: true,
-                endDate: true,
-                labor: {
-                    select: {
-                        id: true,
-                        salaryHistories: {
-                            orderBy: { date: 'desc' },
-                            take: 1,
-                            select: {
-                                base: true,
-                                totalDeductible: true,
-                                totalPayment: true,
-                            },
-                        },
-                        workDates: {
-                            select: {
-                                hours: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        if (!contract) {
-            throw new NotFoundException('The contract id is not found');
-        }
-        const workLoadInformation = () => {
-            const countWorkDays = contract?.labor ? contract.labor.workDates.length : null;
-            const totalWorkDays = contract?.labor
-                ? contract.labor.workDates.reduce((total, current) => {
-                      return total + current.hours;
-                  }, 0)
-                : null;
-            return {
-                workDays: countWorkDays,
-                workLoad: totalWorkDays,
-                laborId: contract.labor ? contract.labor.id : null,
-            };
-        };
-        return {
-            siteInfor: {
-                siteName: contract.application.post.site.name,
-                startDateConstruction: contract.application.post.site.startDate,
-                endDateConstruction: contract.application.post.site.endDate,
-                startDateContract: contract.startDate,
-                endDateContract: contract.endDate,
-                isWorking: new Date() <= contract.endDate && new Date() >= contract.startDate,
-            },
-            wageInfor: contract.labor
-                ? {
-                      wage: contract.labor?.salaryHistories[0]?.base ? contract.labor.salaryHistories[0].base : null,
-                      deductibleAmount: contract.labor?.salaryHistories[0]?.totalDeductible
-                          ? contract.labor.salaryHistories[0].totalDeductible
-                          : null,
-                      actualSalary: contract.labor?.salaryHistories[0]?.totalPayment
-                          ? contract.labor.salaryHistories[0].totalPayment
-                          : null,
-                  }
-                : null,
-            workLoadInfor: workLoadInformation(),
-            memberInfor: {
-                name: contract.application.member.name,
-                contact: contract.application.member.contact,
-            },
         };
     }
 
@@ -654,66 +349,13 @@ export class ContractCompanyService {
                 contact: body.contact,
                 file: {
                     update: {
-                        key: body.fileKey,
-                        fileName: body.fileName,
-                        size: body.fileSize,
-                        type: body.fileType,
+                        key: body.file.key,
+                        fileName: body.file.fileName,
+                        size: body.file.size,
+                        type: body.file.type,
                     },
                 },
             },
-        });
-    }
-
-    async updateSettlementStatus(
-        accountId: number,
-        id: number,
-        body: ContractCompanyUpdateSettlementStatusRequest,
-    ): Promise<void> {
-        await this.prismaService.$transaction(async (prisma) => {
-            const contract = await prisma.contract.findUnique({
-                where: {
-                    id: id,
-                    application: {
-                        post: {
-                            isActive: true,
-                            company: {
-                                accountId: accountId,
-                                isActive: true,
-                            },
-                        },
-                    },
-                    NOT: { settlementStatus: SettlementStatus.NONE },
-                },
-                select: {
-                    settlementStatus: true,
-                },
-            });
-            if (!contract) {
-                throw new NotFoundException('The contract is not found');
-            }
-            if (body.settlementStatus && body.settlementStatus === SettlementStatus.NONE) {
-                throw new BadRequestException(`This contract doesn't use HeadHunting service`);
-            }
-            if (contract.settlementStatus !== body.settlementStatus) {
-                await prisma.contract.update({
-                    where: {
-                        id: id,
-                        application: {
-                            post: {
-                                isActive: true,
-                                company: {
-                                    accountId: accountId,
-                                    isActive: true,
-                                },
-                            },
-                        },
-                    },
-                    data: {
-                        settlementRequestDate: new Date(),
-                        settlementStatus: body.settlementStatus,
-                    },
-                });
-            }
         });
     }
 }

@@ -1,90 +1,86 @@
 import { Injectable } from '@nestjs/common';
 import { RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { MatchingCompanyGetListDateEnum } from './dto/matching-company-get-list-date.enum';
+import { MatchingCompanyGetListDate } from './enum/matching-company-get-list-date.enum';
 import { MatchingCompanyGetListRecommendationRequest } from './request/matching-company-get-list-recommendation.request';
-import { TeamMemberDetail } from './response/matching-company-get-item-recommendation-team-detail.response';
-import {
-    MatchingCompanyGetItemRecommendation,
-    MatchingCompanyGetListRecommendation,
-} from './response/matching-company-get-list-recommendation.response';
+import { MatchingCompanyGetListRecommendation } from './response/matching-company-get-list-recommendation.response';
 
 @Injectable()
 export class MatchingCompanyService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
     ): Promise<MatchingCompanyGetListRecommendation> {
         const occupationIds = (query.occupation && query.occupation.split(',')) || null;
-        const specialNoteIds = (query.specialOccupation && query.specialOccupation.split(',')) || null;
         const regionIds = (query.region && query.region.split(',')) || null;
 
-        console.log('MATCHING QUERY', query, occupationIds, specialNoteIds, regionIds);
+        console.log('MATCHING QUERY', query, occupationIds, regionIds);
         const dateQuery: Date = new Date();
         switch (query.date) {
-            case MatchingCompanyGetListDateEnum.ONE_DAY_AGO:
+            case MatchingCompanyGetListDate.ONE_DAY_AGO:
                 dateQuery.setDate(dateQuery.getDate() - 1);
                 break;
-            case MatchingCompanyGetListDateEnum.TWO_DAYS_AGO:
+            case MatchingCompanyGetListDate.TWO_DAYS_AGO:
                 dateQuery.setDate(dateQuery.getDate() - 2);
                 break;
-            case MatchingCompanyGetListDateEnum.THREE_DAYS_AGO:
+            case MatchingCompanyGetListDate.THREE_DAYS_AGO:
                 dateQuery.setDate(dateQuery.getDate() - 3);
                 break;
             default:
                 break;
         }
-        const existMatching = await this.prismaService.matchingRecommendation.findMany({
-            where: {
-                assignedAt: dateQuery,
-            },
-            select: {
-                member: {
-                    select: {
-                        id: true,
-                        name: true,
-                        contact: true,
-                        specialLicenses: {
-                            where: {
-                                isActive: true,
-                            },
-                        },
-                        address: true,
-                        totalExperienceMonths: true,
-                        totalExperienceYears: true,
-                        applyPosts: {
-                            include: {
-                                contract: true,
-                            },
-                        },
-                    },
+        const existMatching = (
+            await this.prismaService.matchingRequest.findMany({
+                where: {
+                    date: dateQuery,
                 },
-                team: {
-                    select: {
-                        name: true,
-                        id: true,
-                        leader: true,
-                        totalExperienceMonths: true,
-                        totalExperienceYears: true,
-                        members: {
-                            include: {
-                                member: {
-                                    include: {
-                                        specialLicenses: {
-                                            where: {
-                                                isActive: true,
-                                            },
+                select: {
+                    recommendations: {
+                        select: {
+                            member: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    contact: true,
+                                    licenses: {
+                                        where: {
+                                            isActive: true,
                                         },
-                                        desiredOccupations: {
-                                            include: {
-                                                code: true,
-                                            },
+                                        include: {
+                                            code: true,
                                         },
-                                        applyPosts: {
-                                            include: {
-                                                contract: true,
+                                    },
+                                    address: true,
+                                    totalExperienceMonths: true,
+                                    totalExperienceYears: true,
+                                    applications: {
+                                        include: {
+                                            contract: true,
+                                        },
+                                    },
+                                },
+                            },
+                            team: {
+                                include: {
+                                    leader: true,
+                                    code: true,
+                                    members: {
+                                        include: {
+                                            member: {
+                                                include: {
+                                                    licenses: {
+                                                        where: {
+                                                            isActive: true,
+                                                        },
+                                                    },
+                                                    applications: {
+                                                        include: {
+                                                            contract: true,
+                                                        },
+                                                    },
+                                                },
                                             },
                                         },
                                     },
@@ -93,8 +89,11 @@ export class MatchingCompanyService {
                         },
                     },
                 },
-            },
-        });
+            })
+        ).reduce((accum, item) => {
+            accum.push(...item.recommendations);
+            return accum;
+        }, []);
 
         if (existMatching.length > 0) {
             const allMembers = existMatching.filter((matching) => !matching.team).map((matching) => matching.member);
@@ -102,15 +101,15 @@ export class MatchingCompanyService {
             return this.mappingResponseDTO(allMembers, allTeams);
         }
 
-        if (!existMatching.length && query.date === MatchingCompanyGetListDateEnum.TODAY) {
+        if (!existMatching.length && query.date === MatchingCompanyGetListDate.TODAY) {
             const members = await this.prismaService.member.findMany({
                 include: {
-                    specialLicenses: {
+                    licenses: {
                         where: {
                             isActive: true,
                         },
                     },
-                    applyPosts: {
+                    applications: {
                         include: {
                             contract: true,
                         },
@@ -126,17 +125,12 @@ export class MatchingCompanyService {
                         include: {
                             member: {
                                 include: {
-                                    specialLicenses: {
+                                    licenses: {
                                         where: {
                                             isActive: true,
                                         },
                                     },
-                                    desiredOccupations: {
-                                        include: {
-                                            code: true,
-                                        },
-                                    },
-                                    applyPosts: {
+                                    applications: {
                                         include: {
                                             contract: true,
                                         },
@@ -148,18 +142,23 @@ export class MatchingCompanyService {
                 },
                 take: 5,
             });
+
             await this.prismaService.company.update({
                 data: {
-                    matchingRecommendation: {
-                        createMany: {
-                            data: [
-                                ...members.map((member) => {
-                                    return { memberId: member.id };
-                                }),
-                                ...teams.map((team) => {
-                                    return { teamId: team.id };
-                                }),
-                            ],
+                    matchingRequests: {
+                        create: {
+                            recommendations: {
+                                createMany: {
+                                    data: [
+                                        ...members.map((member) => {
+                                            return { memberId: member.id };
+                                        }),
+                                        ...teams.map((team) => {
+                                            return { teamId: team.id };
+                                        }),
+                                    ],
+                                },
+                            },
                         },
                     },
                 },
@@ -169,23 +168,6 @@ export class MatchingCompanyService {
             });
             return this.mappingResponseDTO(members, teams);
         }
-    }
-
-    getAllSpecialNoteTeam(team): string[] {
-        const members = team.members;
-        const listSpecial: string[] = [];
-        const setSpecial = new Set<string>();
-        members.forEach((member) => {
-            const specialLicenseList: string[] = member.member.specialLicenses.map((specialLicense) => specialLicense.name);
-            specialLicenseList.forEach((specialLicense) => {
-                setSpecial.add(specialLicense);
-            });
-        });
-        setSpecial.forEach((set) => {
-            listSpecial.push(set);
-        });
-
-        return listSpecial;
     }
 
     mappingResponseDTO(members, teams): MatchingCompanyGetListRecommendation {
@@ -199,18 +181,18 @@ export class MatchingCompanyService {
                         contact: member.contact,
                         totalMonths: member.totalExperienceMonths,
                         totalYears: member.totalExperienceYears,
-                        specialNote: member.specialLicenses.map((special) => special.name),
                         numberOfTeamMembers: null,
                         memberDetail: {
+                            codeName: member.licenses.map((code) => code.name),
                             localInformation: member.address,
                             totalMonths: member.totalExperienceMonths,
                             totalYears: member.totalExperienceYears,
-                            entire: member.applyPosts?.some((application) => application.contract?.endDate > new Date())
+                            entire: member.applications?.some((application) => application.contract?.endDate > new Date())
                                 ? 'On duty'
                                 : 'Looking for a job',
                         },
                         teamDetail: null,
-                    } as MatchingCompanyGetItemRecommendation;
+                    };
                 }),
                 ...teams.map((team) => {
                     return {
@@ -220,10 +202,10 @@ export class MatchingCompanyService {
                         contact: team.leader.contact,
                         totalMonths: team.totalExperienceMonths,
                         totalYears: team.totalExperienceYears,
-                        specialNote: this.getAllSpecialNoteTeam(team),
                         numberOfTeamMembers: team.members.length + 1,
                         memberDetail: null,
                         teamDetail: {
+                            codeName: team.code.name,
                             leaderName: team.leader.name,
                             leaderContact: team.leader.contact,
                             leaderAddress: team.leader.address,
@@ -231,18 +213,13 @@ export class MatchingCompanyService {
                             totalMonths: team.totalExperienceMonths,
                             member: team.members.map((memberTeam) => {
                                 const member = memberTeam.member;
-                                const memberResponse: TeamMemberDetail = {
+                                const memberResponse = {
                                     rank: member.id === team.leaderId ? 'TEAM LEADER' : 'TEAM MEMBER',
                                     name: member.name,
                                     contact: member.contact,
                                     totalYears: member.totalExperienceYears,
                                     totalMonths: member.totalExperienceMonths,
-                                    desiredOccupations: member.desiredOccupations
-                                        ? member.desiredOccupations.map((item) => {
-                                              return item.code.codeName;
-                                          })
-                                        : [],
-                                    workingStatus: member.applyPosts?.some(
+                                    workingStatus: member.applications?.some(
                                         (application) => application.contract?.endDate > new Date(),
                                     )
                                         ? 'On duty'
@@ -252,7 +229,7 @@ export class MatchingCompanyService {
                                 return memberResponse;
                             }),
                         },
-                    } as MatchingCompanyGetItemRecommendation;
+                    };
                 }),
             ],
         };

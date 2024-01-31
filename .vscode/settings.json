@@ -5,7 +5,8 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit",
             "source.fixAll.eslint": "explicit"
-        }
+        },
+        "editor.defaultFormatter": "ms-vsliveshare.vsliveshare"
     },
     "files.eol": "\n",
     "[prisma]": {

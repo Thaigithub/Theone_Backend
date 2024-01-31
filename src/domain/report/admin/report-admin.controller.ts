@@ -2,18 +2,18 @@ import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Pat
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
-import { ReportAdminService } from './report-admin.service';
-import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
 import { BaseResponse } from 'utils/generics/base.response';
+import { ReportAdminService } from './report-admin.service';
 import { ReportAdminGetListRequest } from './request/report-admin-get-list.request';
-import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
+import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
 import { ReportAdminGetDetailResponse } from './response/report-admin-get-detail.response';
+import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
 
 @Controller('/admin/reports')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
 export class ReportAdminController {
-    constructor(private readonly reportAdminService: ReportAdminService) {}
+    constructor(private reportAdminService: ReportAdminService) {}
 
     @Patch('/:id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() body: ReportAdminUpdateRequest): Promise<BaseResponse<void>> {

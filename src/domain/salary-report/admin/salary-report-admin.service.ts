@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'services/prisma/prisma.service';
-import { SalaryReportAdminGetListRequest } from './request/salary-report-admin-get-list.request';
 import { Prisma } from '@prisma/client';
-import { QueryPagingHelper } from 'utils/pagination-query';
+import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { SalaryReportAdminGetListResponse } from './response/salary-report-admin-get-list.response';
+import { QueryPagingHelper } from 'utils/pagination-query';
 import { SalaryReportAdminSearchCategory } from './enum/salary-report-admin-search-category.enum';
+import { SalaryReportAdminGetListRequest } from './request/salary-report-admin-get-list.request';
+import { SalaryReportAdminGetListResponse } from './response/salary-report-admin-get-list.response';
 
 @Injectable()
 export class SalaryReportAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
     async getList(query: SalaryReportAdminGetListRequest): Promise<SalaryReportAdminGetListResponse> {
         const queryFilter: Prisma.SalaryReportWhereInput = {

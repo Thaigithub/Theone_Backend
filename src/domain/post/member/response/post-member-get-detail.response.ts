@@ -6,14 +6,14 @@ export class PostMemberGetDetailResponse {
         name: Post['name'];
         startDate: string;
         endDate: string;
-        numberOfPeople: Post['numberOfPeople'];
+        numberOfPeople: Post['numberOfPeoples'];
         personInCharge: Company['presentativeName'];
     };
 
     eligibility: {
         experienceType: Post['experienceType'];
-        occupation: Code['codeName'];
-        specialNote: Code['codeName'];
+        occupation: Code['name'];
+        codeName: Code['name'];
         otherInformation: Post['otherInformation'];
         isEligibleToApply: boolean;
     };

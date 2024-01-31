@@ -1,7 +1,7 @@
+import { RequestObject } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
-import { LaborCompanyGetListType } from '../enum/labor-company-get-list-type.enum';
 
 export class LaborCompanyGetListRequest extends PaginationRequest {
     @IsOptional()
@@ -20,8 +20,8 @@ export class LaborCompanyGetListRequest extends PaginationRequest {
 
     @IsOptional()
     @Expose()
-    @IsEnum(LaborCompanyGetListType)
-    type: LaborCompanyGetListType;
+    @IsEnum(RequestObject)
+    type: RequestObject;
 
     @IsOptional()
     @Expose()

@@ -13,6 +13,7 @@ import { InterviewMemberGetListResponse } from './response/interview-member-get-
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class InterviewMemberController {
     constructor(private interviewMemberService: InterviewMemberService) {}
+
     @Get()
     async getApplicationList(
         @Req() request: BaseRequest,

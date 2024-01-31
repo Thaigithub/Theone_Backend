@@ -8,7 +8,7 @@ class CareerResponse {
     siteName: Career['siteName'];
     startDate: Career['startDate'];
     endDate: Career['endDate'];
-    occupationName: Code['codeName'];
+    occupationName: Code['name'];
 }
 
 export class CareerMemberGetListGeneralResponse extends PaginationResponse<CareerResponse> {}

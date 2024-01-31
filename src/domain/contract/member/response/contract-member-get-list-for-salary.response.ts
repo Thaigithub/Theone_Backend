@@ -1,7 +1,7 @@
 import { SalaryType } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
-import { ContractStatus } from '../enum/contract-member-status.enum';
+import { ContractMemberGetListStatus } from '../enum/contract-member-get-list-status.enum';
 
 export class GetListForSalaryResponse {
     id: number;
@@ -14,6 +14,6 @@ export class GetListForSalaryResponse {
     totalDays: number;
     totalHours: number;
     siteName: string;
-    status: ContractStatus;
+    status: ContractMemberGetListStatus;
 }
 export class ContractMemberGetListForSalaryResponse extends PaginationResponse<GetListForSalaryResponse> {}

@@ -1,9 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { SalaryType } from '@prisma/client';
+import { Prisma, RequestObject, SalaryType } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { LaborCompanyGetListType } from './enum/labor-company-get-list-type.enum';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
 import { LaborCompanyGetListRequest } from './request/labor-company-get-list.request';
 import { LaborCompanyUpsertSalaryRequest } from './request/labor-company-upsert-salary.request';
@@ -17,91 +17,93 @@ import { LaborCompanyGetListResponse } from './response/labor-company-get-list.r
 export class LaborCompanyService {
     constructor(private prismaService: PrismaService) {}
     async getList(accountId: number, query: LaborCompanyGetListRequest): Promise<LaborCompanyGetListResponse> {
-        const request = {
-            where: {
-                NOT: {
-                    application: {
-                        member: query.type && (query.type === LaborCompanyGetListType.INDIVIDUAL ? null : undefined),
-                        team: query.type && (query.type === LaborCompanyGetListType.TEAM ? null : undefined),
-                    },
-                },
+        const queryFilter: Prisma.ContractWhereInput = {
+            NOT: {
                 application: {
-                    post: {
-                        company: {
-                            accountId,
-                        },
-                        site: {
-                            name: query.keyword && { contains: query.keyword },
-                        },
-                    },
-                },
-                startDate: {
-                    gte: query.startDate && new Date(query.startDate),
-                },
-                endDate: {
-                    lte: query.startDate && new Date(query.endDate),
+                    member: query.type && (query.type === RequestObject.INDIVIDUAL ? null : undefined),
+                    team: query.type && (query.type === RequestObject.TEAM ? null : undefined),
                 },
             },
-            select: {
-                id: true,
-                labor: {
-                    select: {
-                        id: true,
-                        workDates: {
-                            select: {
-                                hours: true,
+            application: {
+                post: {
+                    company: {
+                        accountId,
+                    },
+                    site: {
+                        name: query.keyword && { contains: query.keyword },
+                    },
+                },
+            },
+            startDate: {
+                gte: query.startDate && new Date(query.startDate),
+            },
+            endDate: {
+                lte: query.startDate && new Date(query.endDate),
+            },
+        };
+        const labors = (
+            await this.prismaService.contract.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    labor: {
+                        select: {
+                            id: true,
+                            workDates: {
+                                select: {
+                                    hour: true,
+                                },
                             },
                         },
                     },
-                },
-                application: {
-                    select: {
-                        team: {
-                            select: {
-                                name: true,
+                    application: {
+                        select: {
+                            team: {
+                                select: {
+                                    name: true,
+                                },
                             },
-                        },
-                        member: {
-                            select: {
-                                name: true,
+                            member: {
+                                select: {
+                                    name: true,
+                                },
                             },
-                        },
-                        post: {
-                            select: {
-                                site: {
-                                    select: {
-                                        name: true,
+                            post: {
+                                select: {
+                                    site: {
+                                        select: {
+                                            name: true,
+                                        },
                                     },
                                 },
                             },
                         },
                     },
+                    startDate: true,
+                    endDate: true,
                 },
-                startDate: true,
-                endDate: true,
-            },
-            ...QueryPagingHelper.queryPaging(query),
-        };
-        const labor = (await this.prismaService.contract.findMany(request)).map((item) => {
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 contractId: item.id,
                 laborId: item.labor ? item.labor.id : null,
-                type: item.application.member ? LaborCompanyGetListType.INDIVIDUAL : LaborCompanyGetListType.TEAM,
+                type: item.application.member ? RequestObject.INDIVIDUAL : RequestObject.TEAM,
                 name: item.application.member ? item.application.member.name : item.application.team.name,
                 siteName: item.application.post.site.name,
                 startDate: item.startDate,
                 endDate: item.endDate,
                 numberOfHours: item.labor
                     ? item.labor.workDates.reduce((accum, current) => {
-                          return accum + current.hours;
+                          return accum + current.hour;
                       }, 0)
                     : null,
             };
         });
         const total = await this.prismaService.contract.count({
-            where: request.where,
+            where: queryFilter,
         });
-        return new PaginationResponse(labor, new PageInfo(total));
+        return new PaginationResponse(labors, new PageInfo(total));
     }
     async create(accountId: number, body: LaborCompanyCreateRequest): Promise<void> {
         const contract = await this.prismaService.contract.findUnique({
@@ -164,7 +166,7 @@ export class LaborCompanyService {
                         data: body.workDate.map((item) => {
                             return {
                                 date: new Date(item.date),
-                                hours: item.hours,
+                                hour: item.hours,
                             };
                         }),
                     },
@@ -182,7 +184,7 @@ export class LaborCompanyService {
                 update: {
                     memberId: contract.application.memberId,
                     totalEvaluators: 0,
-                    totalScore: null,
+                    totalScores: null,
                     averageScore: null,
                     createdAt: new Date(),
                 },
@@ -207,7 +209,7 @@ export class LaborCompanyService {
                 update: {
                     siteId: contract.application.post.siteId,
                     totalEvaluators: 0,
-                    totalScore: null,
+                    totalScores: null,
                     averageScore: null,
                     createdAt: new Date(),
                 },
@@ -231,7 +233,7 @@ export class LaborCompanyService {
                 update: {
                     teamId: contract.application.teamId,
                     totalEvaluators: 0,
-                    totalScore: null,
+                    totalScores: null,
                     averageScore: null,
                     createdAt: new Date(),
                 },
@@ -279,7 +281,7 @@ export class LaborCompanyService {
                 workDates: {
                     select: {
                         date: true,
-                        hours: true,
+                        hour: true,
                         id: true,
                     },
                 },
@@ -338,11 +340,11 @@ export class LaborCompanyService {
                 return {
                     id: item.id,
                     date: item.date,
-                    hours: item.hours,
+                    hours: item.hour,
                 };
             }),
             paymentForm: labor.contract.paymentForm,
-            type: labor.contract.application.member ? LaborCompanyGetListType.INDIVIDUAL : LaborCompanyGetListType.TEAM,
+            type: labor.contract.application.member ? RequestObject.INDIVIDUAL : RequestObject.TEAM,
             name: labor.contract.application.member
                 ? labor.contract.application.member.name
                 : labor.contract.application.team.name,
@@ -481,7 +483,7 @@ export class LaborCompanyService {
                 data: body.workDate.map((item) => {
                     return {
                         date: new Date(item.date),
-                        hours: item.hours,
+                        hour: item.hours,
                         laborId: id,
                     };
                 }),
@@ -490,7 +492,7 @@ export class LaborCompanyService {
     }
 
     async getWorkDates(accountId: number, id: number): Promise<LaborCompanyGetListWorkDateResponse> {
-        const workDates = await this.prismaService.workDate.findMany({
+        const workDates =( await this.prismaService.workDate.findMany({
             where: {
                 laborId: id,
                 labor: {
@@ -512,8 +514,13 @@ export class LaborCompanyService {
             },
             select: {
                 date: true,
-                hours: true,
+                hour: true,
             },
+        })).map((item) => {
+            return {
+                hours: item.hour,
+                date: item.date,
+            }
         });
         return {
             workDates: workDates,

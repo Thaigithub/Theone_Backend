@@ -1,19 +1,19 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { SearchCategory } from './dto/company-admin-search-category.dto.request.dto';
+import { CompanyAdminGetListCategory } from './enum/company-admin-get-list-category.enum';
 import { AdminCompanyDownloadRequest, CompanyAdminDownloadListRequest } from './request/company-admin-download-list.request';
 import { CompanyAdminGetListRequest } from './request/company-admin-get-list.request';
 import { CompanyAdminUpdateEmailRequest } from './request/company-admin-update-email.request';
 import { CompanyAdminUpdateStatusRequest } from './request/company-admin-update-status.request';
-import { CompanyAdminGetDetailsResponse } from './response/company-admin-get-detail.response';
 import { CompanyAdminGetListResponse } from './response/company-admin-get-list.response';
-import { ComapnyAdminProductGetListRequest } from './request/company-admin-product-get-list.request';
-import { Prisma } from '@prisma/client';
-import { CompanyAdminProductGetListResponse } from './response/company-admin-product-get-list.response';
+import { CompanyAdminGetDetailResponse } from './response/company-admin-get-detail.response';
+import { CompanyAdminGetListProductResponse } from './response/company-admin-get-list-product.response';
+import { ComapnyAdminGetListProductRequest } from './request/company-admin-product-get-list.request';
 @Injectable()
 export class CompanyAdminService {
     constructor(
@@ -45,7 +45,7 @@ export class CompanyAdminService {
             ...QueryPagingHelper.queryPaging(request),
         };
         switch (request.searchCategory) {
-            case SearchCategory.NAME: {
+            case CompanyAdminGetListCategory.NAME: {
                 search['where'] = {
                     name: { contains: request.searchKeyword },
                     account: {
@@ -54,7 +54,7 @@ export class CompanyAdminService {
                 };
                 break;
             }
-            case SearchCategory.USERNAME: {
+            case CompanyAdminGetListCategory.USERNAME: {
                 search['where'] = {
                     account: {
                         username: {
@@ -65,7 +65,7 @@ export class CompanyAdminService {
                 };
                 break;
             }
-            case SearchCategory.PHONE: {
+            case CompanyAdminGetListCategory.PHONE: {
                 search['where'] = {
                     phone: {
                         contains: request.searchKeyword,
@@ -101,7 +101,7 @@ export class CompanyAdminService {
             new PageInfo(total),
         );
     }
-    async getDetails(CompanyId: number): Promise<CompanyAdminGetDetailsResponse> {
+    async getDetails(CompanyId: number): Promise<CompanyAdminGetDetailResponse> {
         const company = await this.prismaService.company.findUnique({
             where: {
                 id: CompanyId,
@@ -227,17 +227,17 @@ export class CompanyAdminService {
         response.setHeader('Content-Disposition', 'attachment; filename=CompanyList.xlsx');
         excelStream.pipe(response);
     }
-    async getListCompany(query: ComapnyAdminProductGetListRequest): Promise<CompanyAdminProductGetListResponse> {
+    async getListCompany(query: ComapnyAdminGetListProductRequest): Promise<CompanyAdminGetListProductResponse> {
         const queryFilter: Prisma.CompanyWhereInput = {
             isActive: true,
             name: { contains: query.keyword, mode: 'insensitive' },
-            productPaymentHistory: {
+            productPaymentHistories: {
                 some: {},
             },
         };
         const companies = await this.prismaService.company.findMany({
             include: {
-                productPaymentHistory: true,
+                productPaymentHistories: true,
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
@@ -248,7 +248,7 @@ export class CompanyAdminService {
                 companyName: item.name,
                 manager: item.presentativeName,
                 contact: item.contactPhone,
-                totalPaymentAmount: item.productPaymentHistory.reduce((total, item) => {
+                totalPaymentAmount: item.productPaymentHistories.reduce((total, item) => {
                     return total + item.cost;
                 }, 0),
             };
@@ -269,12 +269,12 @@ export class CompanyAdminService {
 
         const company = await this.prismaService.company.findUnique({
             include: {
-                productPaymentHistory: true,
+                productPaymentHistories: true,
             },
             where: {
                 isActive: true,
                 id: companyId,
-                productPaymentHistory: {
+                productPaymentHistories: {
                     some: {},
                 },
             },
@@ -283,7 +283,7 @@ export class CompanyAdminService {
             companyName: company.name,
             manager: company.presentativeName,
             contact: company.contactPhone,
-            totalPaymentAmount: company.productPaymentHistory.reduce((total, item) => {
+            totalPaymentAmount: company.productPaymentHistories.reduce((total, item) => {
                 return total + item.cost;
             }, 0),
         };

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
 import { Response } from 'express';
@@ -8,6 +9,7 @@ import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteAdminGetListCategory } from './enum/site-admin-get-list-category.enum';
 import { SiteAdminGetListLaborCategory } from './enum/site-admin-get_list-labor-category.enum';
+import { SiteAdminGetDetailContractStatus } from './enum/stie-admin-get-detail-contract-status.enum';
 import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
 import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
@@ -16,13 +18,15 @@ import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detai
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
 import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
-import { SiteAdminGetDetailContractStatus } from './enum/stie-admin-get-detail-contract-status.enum';
+import { SiteAdminGetCountRequest } from './request/site-admin-get-count.request';
+import { CountResponse } from 'utils/generics/count.response';
+import { SiteAdminGetCountCategory } from './enum/site-admin-get-count-category.enum';
 
 @Injectable()
 export class SiteAdminService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly excelService: ExcelService,
+        private prismaService: PrismaService,
+        private excelService: ExcelService,
     ) {}
 
     async getList(query: SiteAdminGetListRequest): Promise<SiteAdminGetListResponse> {
@@ -70,7 +74,7 @@ export class SiteAdminService {
     }
 
     async getDetail(id: number): Promise<SiteAdminGetDetailResponse> {
-        const site = await this.prismaService.site.findUnique({
+        const item = await this.prismaService.site.findUnique({
             where: {
                 id: id,
                 isActive: true,
@@ -87,16 +91,12 @@ export class SiteAdminService {
                 siteManagementNumber: true,
                 name: true,
                 address: true,
-                district: {
+                region: {
                     select: {
-                        koreanName: true,
-                        englishName: true,
-                        city: {
-                            select: {
-                                koreanName: true,
-                                englishName: true,
-                            },
-                        },
+                        districtEnglishName: true,
+                        districtKoreanName: true,
+                        cityEnglishName: true,
+                        cityKoreanName: true,
                     },
                 },
                 contact: true,
@@ -110,6 +110,31 @@ export class SiteAdminService {
                 status: true,
             },
         });
+        const site = {
+            company: {
+                name: item.company.name,
+            },
+            siteManagementNumber: item.siteManagementNumber,
+            name: item.name,
+            address: item.address,
+            district: {
+                koreanName: item.region.districtKoreanName,
+                englishName: item.region.districtEnglishName,
+                city: {
+                    koreanName: item.region.cityKoreanName,
+                    englishName: item.region.cityEnglishName,
+                },
+            },
+            contact: item.contact,
+            personInCharge: item.personInCharge,
+            personInChargeContact: item.personInChargeContact,
+            email: item.email,
+            taxInvoiceEmail: item.taxInvoiceEmail,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            contractStatus: item.contractStatus,
+            status: item.status,
+        };
         if (!site) {
             throw new NotFoundException('The site id is not exist');
         }
@@ -150,6 +175,25 @@ export class SiteAdminService {
                 }
             });
         }
+    }
+
+    async getCount(query: SiteAdminGetCountRequest): Promise<CountResponse> {
+        const queryFilter: Prisma.SiteWhereInput = {
+            isActive: true,
+            ...(query.category === SiteAdminGetCountCategory.IN_PROGRESS && {
+                status: SiteStatus.APPROVED,
+                AND: [{ startDate: { lte: new Date() } }, { endDate: { gte: new Date() } }],
+            }),
+            ...(query.category === SiteAdminGetCountCategory.CLOSED && {
+                endDate: { lte: new Date() },
+            }),
+        };
+        const count = await this.prismaService.site.count({
+            where: queryFilter,
+        });
+        return {
+            count: count,
+        };
     }
 
     async download(query: number[], response: Response): Promise<void> {
