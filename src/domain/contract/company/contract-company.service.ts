@@ -196,17 +196,6 @@ export class ContractCompanyService {
                 },
             });
         });
-        await this.prismaService.site.update({
-            where: {
-                id: application.post.site.id,
-            },
-            data: {
-                numberOfContract: application.post.site.numberOfContract + 1,
-                numberOfWorkers: !application.member
-                    ? application.post.site.numberOfWorkers + application.team._count.members
-                    : application.post.site.numberOfWorkers + 1,
-            },
-        });
     }
 
     async count(accountId: number): Promise<ContractCompanyGetTotalResponse> {
