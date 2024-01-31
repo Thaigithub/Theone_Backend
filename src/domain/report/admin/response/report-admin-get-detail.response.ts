@@ -5,10 +5,14 @@ export class ReportAdminGetDetailResponse {
     id: Report['id'];
     questionTitle: Report['questionTitle'];
     questionContent: Report['questionContent'];
+    questionFiles: FileResponse[];
     reportType: Report['reportType'];
     status: Report['status'];
     createAt: Report['createdAt'];
-    questionFiles: FileResponse[];
     memberName: Member['name'];
     memberContact: Member['contact'];
+    answerTitle: Report['answerTitle'];
+    answerContent: Report['answerContent'];
+    answerFiles: FileResponse[];
+    answeredAt: Report['answeredAt'];
 }
