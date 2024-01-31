@@ -2,11 +2,11 @@ import { Body, Controller, Patch, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
 import { CompanyAuthService } from './auth-company.service';
-import { AuthCompanyChangePasswordRequest } from './request/auth-company-change-password.request';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
 import { AuthCompanyOtpVerifyRequest } from './request/auth-company-otp-verify.request';
+import { AuthCompanyUpdatePasswordRequest } from './request/auth-company-update-password.request';
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
@@ -45,7 +45,7 @@ export class CompanyAuthController {
     }
 
     @Patch('/password')
-    async changePassword(@Req() req: Request, @Body() body: AuthCompanyChangePasswordRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.companyAuthService.changePassword(body, req.ip));
+    async updatePassword(@Req() req: Request, @Body() body: AuthCompanyUpdatePasswordRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.companyAuthService.updatePassword(body, req.ip));
     }
 }

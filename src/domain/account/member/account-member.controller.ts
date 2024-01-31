@@ -100,11 +100,11 @@ export class AccountMemberController {
     @Patch('/password')
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async changePassword(
+    async updatePassword(
         @Req() request,
         @Body() body: AccountMemberUpdatePasswordRequest,
     ): Promise<BaseResponse<AccountMemberUpdatePasswordResponse>> {
-        return BaseResponse.of(await this.accountMemberService.changePassword(request.ip, request.user.accountId, body));
+        return BaseResponse.of(await this.accountMemberService.updatePassword(request.ip, request.user.accountId, body));
     }
 
     @Post('/phone/otp')

@@ -7,10 +7,10 @@ import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social
 import { AuthMemberPasswordRequest } from './request/auth-member-otp-send-password.request';
 import { AuthMemberUserIdRequest } from './request/auth-member-otp-send-username.request';
 import { AuthMemberOtpVerifyRequest } from './request/auth-member-otp-verify.request';
+import { AuthMemberUpdatePasswordRequest } from './request/auth-member-update-password.request';
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
 import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
-import { AuthMemberChangePasswordRequest } from './request/auth-member-change-password.request';
 
 @Controller('/member/auth')
 export class MemberAuthController {
@@ -66,7 +66,7 @@ export class MemberAuthController {
     }
 
     @Patch('/password')
-    async changePassword(@Req() req: Request, @Body() body: AuthMemberChangePasswordRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberAuthService.changePassword(body, req.ip));
+    async updatePassword(@Req() req: Request, @Body() body: AuthMemberUpdatePasswordRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.memberAuthService.updatePassword(body, req.ip));
     }
 }

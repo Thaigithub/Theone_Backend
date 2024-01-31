@@ -26,12 +26,12 @@ import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AccountDTO } from './dto/auth-member-account.dto';
-import { AuthMemberChangePasswordRequest } from './request/auth-member-change-password.request';
 import { AuthMemberLoginRequest } from './request/auth-member-login-normal.request';
 import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social.request';
 import { AuthMemberPasswordRequest } from './request/auth-member-otp-send-password.request';
 import { AuthMemberUserIdRequest } from './request/auth-member-otp-send-username.request';
 import { AuthMemberOtpVerifyRequest } from './request/auth-member-otp-verify.request';
+import { AuthMemberUpdatePasswordRequest } from './request/auth-member-update-password.request';
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
 import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
@@ -80,7 +80,7 @@ export class MemberAuthService {
             data: passwordRequest.username ? member.account.username : null,
         });
     }
-    async changePassword(body: AuthMemberChangePasswordRequest, ip: string): Promise<void> {
+    async updatePassword(body: AuthMemberUpdatePasswordRequest, ip: string): Promise<void> {
         const searchOtp = await this.otpService.getOtp(body.otpId, ip);
         if (!searchOtp) throw new NotFoundException('Otp not found');
         if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
