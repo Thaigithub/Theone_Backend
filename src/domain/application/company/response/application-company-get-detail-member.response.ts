@@ -7,11 +7,13 @@ export class ApplicationCompanyGetDetailMemberResponse {
     username: string;
     contact: string;
     email: string;
-    region: {
-        cityEnglishName: Region['cityEnglishName'];
-        cityKoreanName: Region['cityKoreanName'];
-        districtEnglishName: Region['districtEnglishName'];
-        districtKoreanName: Region['districtKoreanName'];
+    city: {
+        englishName: Region['cityEnglishName'];
+        koreanName: Region['cityKoreanName'];
+    };
+    district: {
+        englishName: Region['districtEnglishName'];
+        koreanName: Region['districtKoreanName'];
     };
     desiredSalary: number;
     totalExperienceMonths: number;

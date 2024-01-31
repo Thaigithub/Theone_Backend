@@ -3,10 +3,10 @@ import { HeadhuntingRequestStatus, PaymentStatus, PostCategory, Prisma, ProductT
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
-import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
-import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
 import { HeadhuntingCompanyCreateRequestRequest } from './request/headhunting-company-create-request.request';
+import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
+import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
+import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
 
 @Injectable()
 export class HeadhuntingCompanyService {
@@ -149,11 +149,13 @@ export class HeadhuntingCompanyService {
                                 licenseNumber: item.licenseNumber,
                             };
                         }),
-                        region: {
-                            cityEnglishName: region?.cityEnglishName || null,
-                            cityKoreanName: region?.cityKoreanName || null,
-                            districtEnglishName: region?.districtEnglishName || null,
-                            districtKoreanName: region?.districtKoreanName || null,
+                        city: {
+                            englishName: region?.cityEnglishName || null,
+                            koreanName: region?.cityKoreanName || null,
+                        },
+                        district: {
+                            englishName: region?.districtEnglishName || null,
+                            koreanName: region?.districtKoreanName || null,
                         },
                     },
                 };
@@ -175,11 +177,13 @@ export class HeadhuntingCompanyService {
                                 };
                             }),
                         },
-                        region: {
-                            cityEnglishName: region?.cityEnglishName || null,
-                            cityKoreanName: region?.cityKoreanName || null,
-                            districtEnglishName: region?.districtEnglishName || null,
-                            districtKoreanName: region?.districtKoreanName || null,
+                        city: {
+                            englishName: region?.cityEnglishName || null,
+                            koreanName: region?.cityKoreanName || null,
+                        },
+                        district: {
+                            englishName: region?.districtEnglishName || null,
+                            koreanName: region?.districtKoreanName || null,
                         },
                     },
                 };
