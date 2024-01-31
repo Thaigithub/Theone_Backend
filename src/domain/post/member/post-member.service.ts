@@ -275,7 +275,6 @@ export class PostMemberService {
             },
             eligibility: {
                 experienceType: post.experienceType,
-                occupation: post.code ? post.code.name : null,
                 codeName: post.code ? post.code.name : null,
                 otherInformation: post.otherInformation,
                 isEligibleToApply: memberRegisteredCodeIdsList
