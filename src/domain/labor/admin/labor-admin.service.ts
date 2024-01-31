@@ -6,6 +6,7 @@ import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborAdminGetListHistoryRequest } from './request/labor-admin-get-list-history.request';
 import { GetListHistoryResponse, LaborAdminGetListHistoryResponse } from './response/labor-admin-get-list-history.response';
+import { LaborAdminGetListWorkDateResponse } from './response/labor-admin-get-list-workdates.response';
 
 @Injectable()
 export class LaborAdminService {
@@ -124,6 +125,28 @@ export class LaborAdminService {
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         response.setHeader('Content-Disposition', `attachment; filename=WorkHistory_${query.date}.xlsx`);
         excelStream.pipe(response);
+    }
+
+    async getWorkDates(id: number): Promise<LaborAdminGetListWorkDateResponse> {
+        const workDates = (
+            await this.prismaService.workDate.findMany({
+                where: {
+                    laborId: id,
+                },
+                select: {
+                    date: true,
+                    hour: true,
+                },
+            })
+        ).map((item) => {
+            return {
+                hours: item.hour,
+                date: item.date,
+            };
+        });
+        return {
+            workDates: workDates,
+        };
     }
 
     displayListExcelTemplate(numberOfDays: number, targetDate: string, listResponse: GetListHistoryResponse[]) {

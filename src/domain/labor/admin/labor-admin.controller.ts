@@ -7,6 +7,7 @@ import { BaseResponse } from 'utils/generics/base.response';
 import { LaborAdminService } from './labor-admin.service';
 import { LaborAdminGetListHistoryRequest } from './request/labor-admin-get-list-history.request';
 import { LaborAdminGetListHistoryResponse } from './response/labor-admin-get-list-history.response';
+import { LaborAdminGetListWorkDateResponse } from './response/labor-admin-get-list-workdates.response';
 
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.ADMIN)
@@ -30,5 +31,10 @@ export class LaborAdminController {
         @Query() query: LaborAdminGetListHistoryRequest,
     ): Promise<BaseResponse<void>> {
         return BaseResponse.of(await this.laborAdminService.downloadHistory(id, query, response));
+    }
+
+    @Get('/:id/workDate')
+    async getWorkDates(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<LaborAdminGetListWorkDateResponse>> {
+        return BaseResponse.of(await this.laborAdminService.getWorkDates(id));
     }
 }
