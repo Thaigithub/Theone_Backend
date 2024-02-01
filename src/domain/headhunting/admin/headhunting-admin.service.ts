@@ -505,7 +505,10 @@ export class HeadhuntingAdminService {
             where: {
                 id,
             },
-            data: body,
+            data: {
+                paymentStatus: body.paymentStatus,
+                paymentDate: new Date(body.paymentDate),
+            },
         });
     }
 

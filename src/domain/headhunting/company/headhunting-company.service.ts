@@ -20,7 +20,6 @@ export class HeadhuntingCompanyService {
         const headhunting = await this.prismaService.headhunting.findUnique({
             where: {
                 id,
-                isActive: true,
                 post: {
                     company: {
                         accountId,
@@ -200,7 +199,6 @@ export class HeadhuntingCompanyService {
         return await this.prismaService.headhunting.findUnique({
             where: {
                 id,
-                isActive: true,
             },
             select: {
                 requests: {
