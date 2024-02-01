@@ -418,10 +418,12 @@ export class ApplicationMemberService {
                     member: null,
                 },
                 {
-                    member: {
-                        accountId,
-                    },
-                    team: null,
+                    ...(body.status !== ApplicationMemberGetListOfferFilter.TEAM_LEADER_WAITING && {
+                        member: {
+                            accountId,
+                        },
+                        team: null,
+                    }),
                 },
             ],
             ...(body.status === ApplicationMemberGetListOfferFilter.ACCEPTED && {
