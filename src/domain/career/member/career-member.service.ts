@@ -159,7 +159,7 @@ export class CareerMemberService {
                 endDate: new Date(endDate),
                 experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
                 experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
-                codeId: occupation.id,
+                codeId: body.occupationId,
             },
             where: {
                 id,
