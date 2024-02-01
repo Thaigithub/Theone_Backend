@@ -14,6 +14,7 @@ class MatchingCompanyGetItemRecommendation {
         totalYears: number;
         totalMonths: number;
         entire: string;
+        occupations: string[];
     };
     teamDetail: {
         codeName: string;
@@ -22,6 +23,7 @@ class MatchingCompanyGetItemRecommendation {
         leaderAddress: string;
         totalYears: number;
         totalMonths: number;
+        occupation: string;
         member: {
             rank: string;
             name: string;
@@ -29,6 +31,7 @@ class MatchingCompanyGetItemRecommendation {
             totalYears: number;
             totalMonths: number;
             workingStatus: string;
+            occupations: string[];
         };
     };
 }
