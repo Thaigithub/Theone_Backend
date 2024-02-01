@@ -1,4 +1,4 @@
-import { PostStatus, PostType } from '@prisma/client';
+import { PostCategory, PostStatus, PostType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -18,4 +18,9 @@ export class PostCompanyGetListRequest extends PaginationRequest {
     @IsEnum(PostStatus)
     @IsOptional()
     status: PostStatus;
+
+    @Expose()
+    @IsEnum(PostCategory)
+    @IsOptional()
+    category: PostCategory;
 }
