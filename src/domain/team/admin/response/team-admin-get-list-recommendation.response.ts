@@ -1,4 +1,4 @@
-import { Account, Code, Member, MemberEvaluation, Team } from '@prisma/client';
+import { Account, Code, Member, MemberEvaluation, MemberLevel, Team } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 class TeamAdminGetRecommendationResponse {
@@ -11,6 +11,7 @@ class TeamAdminGetRecommendationResponse {
     licenses: Code['name'][];
     averageScore: MemberEvaluation['averageScore'];
     isSuggest: boolean;
+    leaderLevel: MemberLevel;
 }
 
 export class TeamAdminGetListRecommendationResponse extends PaginationResponse<TeamAdminGetRecommendationResponse> {}

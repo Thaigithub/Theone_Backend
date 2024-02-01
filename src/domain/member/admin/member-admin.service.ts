@@ -13,6 +13,7 @@ import { MemberAdminSearchCategoryFilter } from './enum/member-admin-search-cate
 import { MemberAdminSortCategoryFilter } from './enum/member-admin-sort-category.enum';
 import { MemberAdminGetCountRequest } from './request/member-admin-count.request';
 import { MemberAdminGetListRecommendationRequest } from './request/member-admin-get-list-recommendation.request';
+import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 import { MemberAdminGetPointListRequest } from './request/member-admin-get-point-list.request';
 import { ChangeMemberRequest, GetMembersListRequest } from './request/member-admin.request';
 import { MemberAdminGetDetailResponse } from './response/member-admin-get-detail.response';
@@ -21,7 +22,6 @@ import { MemberAdminGetListResponse } from './response/member-admin-get-list.res
 import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
 import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
 import { MemberAdminGetPointListResponse } from './response/member-admin-get-point-list.response';
-import { MemberAdminGetPoinDetailtListRequest } from './request/member-admin-get-point-detail-list.request';
 
 @Injectable()
 export class MemberAdminService {
@@ -399,9 +399,7 @@ export class MemberAdminService {
         return new PaginationResponse(results, new PageInfo(count));
     }
 
-    async getListRecommendation(
-        query: MemberAdminGetListRecommendationRequest,
-    ): Promise<MemberAdminGetListRecommendationResponse> {
+    async getListHeadhunting(query: MemberAdminGetListRecommendationRequest): Promise<MemberAdminGetListRecommendationResponse> {
         const queryFilter: Prisma.MemberWhereInput = {
             isActive: true,
             ...(query.tier && { level: query.tier }),
@@ -420,6 +418,7 @@ export class MemberAdminService {
         const list = await this.prismaService.member.findMany({
             select: {
                 id: true,
+                level: true,
                 name: true,
                 contact: true,
                 careers: {
@@ -489,7 +488,7 @@ export class MemberAdminService {
             where: queryFilter,
         });
 
-        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+        const recommendation = await this.prismaService.headhuntingRequest.findUnique({
             where: {
                 id: query.requestId,
                 isActive: true,
@@ -497,11 +496,21 @@ export class MemberAdminService {
             select: {
                 headhunting: {
                     select: {
-                        postId: true,
+                        recommendations: {
+                            select: {
+                                memberId: true,
+                            },
+                            where: {
+                                NOT: {
+                                    member: null,
+                                },
+                            },
+                        },
                     },
                 },
             },
         });
+        if (!recommendation) throw new NotFoundException('Headhunting request not found');
 
         const responseList = list.map((item) => {
             return {
@@ -509,6 +518,7 @@ export class MemberAdminService {
                 name: item.name,
                 username: item.account.username,
                 contact: item.contact,
+                level: item.level,
                 desiredOccupations:
                     item.careers && item.careers.length > 0
                         ? item.careers.map((item) => {
@@ -521,12 +531,7 @@ export class MemberAdminService {
                       })
                     : [],
                 averageScore: item.memberEvaluation ? item.memberEvaluation.averageScore : null,
-                isSuggest:
-                    headhuntingRequest && headhuntingRequest.headhunting.postId
-                        ? item.headhuntingRecommendations
-                              .map((recommend) => recommend.headhuntingRequest.headhunting.postId)
-                              .includes(headhuntingRequest.headhunting.postId)
-                        : false,
+                isSuggest: recommendation.headhunting.recommendations.map((item) => item.memberId).includes(item.id),
             };
         });
 
