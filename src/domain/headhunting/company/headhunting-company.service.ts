@@ -304,7 +304,7 @@ export class HeadhuntingCompanyService {
                         status: HeadhuntingRequestStatus.APPLY,
                         headhunting: {
                             connect: {
-                                postId: id,
+                                id: id,
                             },
                         },
                         usageHistory: {
