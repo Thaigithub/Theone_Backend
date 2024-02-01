@@ -23,8 +23,8 @@ import { PostCompanyGetListRequest } from './request/post-company-get-list.reque
 import { PostCompanyUpdatePullUpStatusRequest } from './request/post-company-update-pull-up-status.request';
 import { PostCompanyUpdateTypeRequest } from './request/post-company-update-type.request';
 import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
-import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
+import { PostCompanyGetDetailResponse } from './response/post-company-get-detail.response';
 import { PostCompanyGetListApplicationResponse } from './response/post-company-get-list-application.response';
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
@@ -194,12 +194,12 @@ export class PostCompanyService {
                         ? {
                               create: {},
                           }
-                        : null,
+                        : undefined,
             },
         });
     }
 
-    async getDetail(accountId: number, id: number): Promise<PostCompanyDetailResponse> {
+    async getDetail(accountId: number, id: number): Promise<PostCompanyGetDetailResponse> {
         await this.checkPostExist(id, accountId);
 
         const record = await this.prismaService.post.findUnique({
@@ -219,6 +219,7 @@ export class PostCompanyService {
                 },
                 site: {
                     select: {
+                        id: true,
                         name: true,
                         contact: true,
                         address: true,
@@ -254,6 +255,7 @@ export class PostCompanyService {
             endWorkTime: record.endWorkTime,
             site: {
                 name: record.site.name,
+                id: record.site.id
             },
             postEditor: record.postEditor,
         };

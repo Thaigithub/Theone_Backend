@@ -1,8 +1,7 @@
-import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
+import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Site, Workday } from '@prisma/client';
 import { PostCompanyCodeDTO } from '../dto/post-company-code.dto';
-import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list.response';
 
-export class PostCompanyDetailResponse {
+export class PostCompanyGetDetailResponse {
     type: PostType;
     category: PostCategory;
     status: PostStatus;
@@ -20,6 +19,9 @@ export class PostCompanyDetailResponse {
     workday: Workday[];
     startWorkTime: Date;
     endWorkTime: Date;
-    site: PostCompanyGetItemListSiteResponse;
+    site: {
+        name: string;
+        id: Site['id'];
+    };
     postEditor: string;
 }

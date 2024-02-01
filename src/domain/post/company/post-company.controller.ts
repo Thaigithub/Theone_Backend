@@ -12,8 +12,8 @@ import { PostCompanyGetListRequest } from './request/post-company-get-list.reque
 import { PostCompanyUpdatePullUpStatusRequest } from './request/post-company-update-pull-up-status.request';
 import { PostCompanyUpdateTypeRequest } from './request/post-company-update-type.request';
 import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-company-check-pull-up-availability.response';
-import { PostCompanyDetailResponse } from './response/post-company-detail.response';
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
+import { PostCompanyGetDetailResponse } from './response/post-company-get-detail.response';
 import { PostCompanyGetListApplicationResponse } from './response/post-company-get-list-application.response';
 import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
@@ -58,7 +58,7 @@ export class PostCompanyController {
     async getDetail(
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
-    ): Promise<BaseResponse<PostCompanyDetailResponse>> {
+    ): Promise<BaseResponse<PostCompanyGetDetailResponse>> {
         return BaseResponse.of(await this.postCompanyService.getDetail(request.user.accountId, id));
     }
 
