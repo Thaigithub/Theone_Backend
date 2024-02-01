@@ -1,4 +1,4 @@
-import { Account, BasicHealthSafetyCertificate, Career, Code, Member, License } from '@prisma/client';
+import { Account, BasicHealthSafetyCertificate, Career, Code, License, Member } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 
 export class MemberCompanyGetDetailResponse {
@@ -33,4 +33,5 @@ export class MemberCompanyGetDetailResponse {
         dateOfCompletion: BasicHealthSafetyCertificate['dateOfCompletion'];
         file: FileResponse;
     };
+    occupations: Code['name'][];
 }

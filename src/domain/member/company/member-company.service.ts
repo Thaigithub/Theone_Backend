@@ -137,7 +137,7 @@ export class MemberCompanyService {
         return new PaginationResponse(members, new PageInfo(total));
     }
 
-    async getMemberDetailManpower(id: number): Promise<MemberCompanyGetDetailResponse> {
+    async getDetail(id: number): Promise<MemberCompanyGetDetailResponse> {
         const memberExist = await this.prismaService.member.count({
             where: {
                 isActive: true,
@@ -217,6 +217,7 @@ export class MemberCompanyService {
                       };
                   })
                 : [],
+                occupations:member.licenses.map(item=>item.code.name),
             basicHealthSafetyCertificate: {
                 registrationNumber: member.basicHealthSafetyCertificate
                     ? member.basicHealthSafetyCertificate.registrationNumber
