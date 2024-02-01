@@ -291,8 +291,7 @@ export class InterviewCompanyService {
                             const count = await this.prismaService.application.count({
                                 where: {
                                     postId: body.postId,
-                                    memberId: body.interviewProposalType === InterviewCompanyType.MEMBER ? body.id : undefined,
-                                    teamId: body.interviewProposalType !== InterviewCompanyType.MEMBER ? body.id : undefined,
+                                    memberId: body.id,
                                     post: {
                                         company: {
                                             accountId: accountId,
@@ -321,6 +320,28 @@ export class InterviewCompanyService {
                             break;
                         }
                     }
+                    const headhunting = await prisma.member.findUnique({
+                        where: {
+                            id: member.id,
+                            headhuntingRecommendations: {
+                                some: {
+                                    headhunting: {
+                                        postId: body.postId,
+                                    },
+                                },
+                            },
+                        },
+                        select: {
+                            headhuntingRecommendations: {
+                                where: {
+                                    headhunting: {
+                                        postId: body.postId,
+                                    },
+                                },
+                                take: 1,
+                            },
+                        },
+                    });
                     application = await prisma.application.upsert({
                         create: {
                             memberId: body.id,
@@ -332,6 +353,13 @@ export class InterviewCompanyService {
                                 },
                             },
                             category: body.category,
+                            headhuntingRecommendation: headhunting
+                                ? {
+                                      connect: {
+                                          id: headhunting.headhuntingRecommendations[0].id,
+                                      },
+                                  }
+                                : undefined,
                         },
 
                         update: {
@@ -379,12 +407,98 @@ export class InterviewCompanyService {
                     if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new ConflictException('The application status is not set to APPLY');
                     }
+
+                    switch (body.category) {
+                        case ApplicationCategory.HEADHUNTING: {
+                            const count = await prisma.headhunting.count({
+                                where: {
+                                    post: {
+                                        id: body.postId,
+                                        category: ApplicationCategory.HEADHUNTING,
+                                    },
+                                },
+                            });
+                            if (count === 0) throw new ConflictException('Post is not belong to headhunting type');
+                            break;
+                        }
+                        case ApplicationCategory.MATCHING: {
+                            const count = await prisma.post.count({
+                                where: {
+                                    id: body.postId,
+                                    category: ApplicationCategory.MATCHING,
+                                },
+                            });
+                            if (count === 0) throw new ConflictException('Post is not belong to matching type');
+                            break;
+                        }
+                        default: {
+                            const count = await this.prismaService.application.count({
+                                where: {
+                                    postId: body.postId,
+                                    teamId: body.id,
+                                    post: {
+                                        company: {
+                                            accountId: accountId,
+                                        },
+                                    },
+                                },
+                            });
+                            if (count === 0) {
+                                const countMatching = await prisma.post.count({
+                                    where: {
+                                        id: body.postId,
+                                        category: ApplicationCategory.MATCHING,
+                                    },
+                                });
+                                if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
+                                const countHeadhunting = await prisma.headhunting.count({
+                                    where: {
+                                        post: {
+                                            id: body.postId,
+                                            category: ApplicationCategory.HEADHUNTING,
+                                        },
+                                    },
+                                });
+                                if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                            }
+                            break;
+                        }
+                    }
+                    const headhunting = await prisma.member.findUnique({
+                        where: {
+                            id: team.id,
+                            headhuntingRecommendations: {
+                                some: {
+                                    headhunting: {
+                                        postId: body.postId,
+                                    },
+                                },
+                            },
+                        },
+                        select: {
+                            headhuntingRecommendations: {
+                                where: {
+                                    headhunting: {
+                                        postId: body.postId,
+                                    },
+                                },
+                                take: 1,
+                            },
+                        },
+                    });
                     application = await prisma.application.upsert({
                         create: {
                             teamId: body.id,
                             postId: body.postId,
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
                             category: body.category,
+                            headhuntingRecommendation: headhunting
+                                ? {
+                                      connect: {
+                                          id: headhunting.headhuntingRecommendations[0].id,
+                                      },
+                                  }
+                                : undefined,
                         },
                         update: {
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
