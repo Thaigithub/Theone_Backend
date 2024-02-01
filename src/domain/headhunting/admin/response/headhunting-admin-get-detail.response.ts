@@ -6,6 +6,7 @@ import {
     Headhunting,
     HeadhuntingMatchingStatus,
     HeadhuntingPaymentStatus,
+    HeadhuntingRequest,
     Member,
     Post,
     RequestObject,
@@ -15,6 +16,7 @@ import {
 import { HeadhuntingAdminGetDetailRecommendationRank } from '../enum/headhunting-admin-get-detail-recommendation-rank.enum';
 
 export class HeadhuntingAdminGetDetailResponse {
+    requestId: HeadhuntingRequest['id'];
     id: Headhunting['id'];
     companyName: Company['name'];
     phone: Company['phone'];
