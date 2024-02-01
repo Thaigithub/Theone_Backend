@@ -80,15 +80,6 @@ export class HeadhuntingAdminService {
                 },
                 paymentDate: true,
                 paymentStatus: true,
-                requests: {
-                    take: 1,
-                    orderBy: {
-                        updatedAt: 'desc',
-                    },
-                    where: {
-                        status: HeadhuntingRequestStatus.APPROVED,
-                    },
-                },
             },
             where: queryFilter,
             orderBy: {
@@ -102,12 +93,11 @@ export class HeadhuntingAdminService {
         });
 
         const responseList = list.map((item) => {
-            const { post, requests, ...rest } = item;
+            const { post, ...rest } = item;
             const res = {
                 ...rest,
                 siteName: post.site?.name || null,
                 postName: post.name,
-                requestId: requests[0].id,
             };
 
             return res;
@@ -220,14 +210,13 @@ export class HeadhuntingAdminService {
                     },
                 },
                 requests: {
-                    select: {
-                        object: true,
-                        detail: true,
-                    },
-                    orderBy: {
-                        date: 'desc',
-                    },
                     take: 1,
+                    orderBy: {
+                        updatedAt: 'desc',
+                    },
+                    where: {
+                        status: HeadhuntingRequestStatus.APPROVED,
+                    },
                 },
                 paymentDate: true,
                 paymentStatus: true,
@@ -407,6 +396,7 @@ export class HeadhuntingAdminService {
         });
         if (!headhunting) throw new NotFoundException('Headhunting not found');
         return {
+            requestId: headhunting.requests[0].id,
             id: headhunting.id,
             paymentStatus: headhunting.paymentStatus,
             paymentDate: headhunting.paymentDate,
