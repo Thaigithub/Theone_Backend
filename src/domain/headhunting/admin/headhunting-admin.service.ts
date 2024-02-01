@@ -484,7 +484,6 @@ export class HeadhuntingAdminService {
             data: {
                 recommendations: {
                     create: {
-                        id: 11,
                         teamId: headhunting.requests[0].object === RequestObject.TEAM ? body.id : null,
                         memberId: headhunting.requests[0].object === RequestObject.INDIVIDUAL ? body.id : null,
                         headhuntingRequestId: headhunting.requests[0].id,
