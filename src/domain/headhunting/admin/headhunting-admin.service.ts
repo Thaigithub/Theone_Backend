@@ -104,7 +104,10 @@ export class HeadhuntingAdminService {
     async getListRequest(query: HeadhuntingAdminGetListRequestRequest): Promise<HeadhuntingAdminGetListRequestResponse> {
         const queryInput: Prisma.HeadhuntingRequestWhereInput = {
             isActive: true,
-            date: query.requestDate && new Date(query.requestDate),
+            date: {
+                gte: query.startRequestDate && new Date(query.startRequestDate),
+                lte: query.endRequestDate && new Date(query.endRequestDate),
+            },
             headhunting: {
                 post: {
                     name:
@@ -426,6 +429,18 @@ export class HeadhuntingAdminService {
                         status: HeadhuntingRequestStatus.APPROVED,
                     },
                 },
+                recommendations: {
+                    where: {
+                        OR: [
+                            {
+                                teamId: body.id,
+                            },
+                            {
+                                memberId: body.id,
+                            },
+                        ],
+                    },
+                },
             },
         });
         if (!headhunting) throw new NotFoundException('Headhunting not found');
@@ -438,6 +453,13 @@ export class HeadhuntingAdminService {
                 },
             });
             if (!team) throw new NotFoundException('Team not found');
+            if (
+                headhunting.recommendations
+                    .filter((item) => item.teamId)
+                    .map((item) => item.teamId)
+                    .includes(body.id)
+            )
+                throw new BadRequestException('Team has been recommended');
         }
         if (headhunting.requests[0].object === RequestObject.INDIVIDUAL) {
             const member = await this.prismaService.member.findUnique({
@@ -446,7 +468,14 @@ export class HeadhuntingAdminService {
                     isActive: true,
                 },
             });
-            if (!member) throw new NotFoundException('Team not found');
+            if (!member) throw new NotFoundException('Member not found');
+            if (
+                headhunting.recommendations
+                    .filter((item) => item.memberId)
+                    .map((item) => item.memberId)
+                    .includes(body.id)
+            )
+                throw new BadRequestException('Member has been recommended');
         }
         await this.prismaService.headhunting.update({
             where: {
@@ -455,6 +484,7 @@ export class HeadhuntingAdminService {
             data: {
                 recommendations: {
                     create: {
+                        id: 11,
                         teamId: headhunting.requests[0].object === RequestObject.TEAM ? body.id : null,
                         memberId: headhunting.requests[0].object === RequestObject.INDIVIDUAL ? body.id : null,
                         headhuntingRequestId: headhunting.requests[0].id,

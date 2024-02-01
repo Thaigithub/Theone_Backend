@@ -4,12 +4,12 @@ import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { Response } from 'express';
 import { BaseResponse } from 'utils/generics/base.response';
+import { TeamAdminGetListRecommendationRequest } from './request/team-admin-get-list-recommendation.request';
 import { TeamAdminGetListRequest } from './request/team-admin-get-list.request';
 import { TeamAdminGetDetailResponse } from './response/team-admin-get-detail.response';
+import { TeamAdminGetListRecommendationResponse } from './response/team-admin-get-list-recommendation.response';
 import { TeamAdminGetListResponse } from './response/team-admin-get-list.response';
 import { TeamAdminService } from './team-admin.service';
-import { TeamAdminGetListRecommendationResponse } from './response/team-admin-get-list-recommendation.response';
-import { TeamAdminGetListRecommendationRequest } from './request/team-admin-get-list-recommendation.request';
 @Controller('/admin/teams')
 @Roles(AccountType.ADMIN)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
@@ -26,10 +26,10 @@ export class TeamAdminController {
     }
 
     @Get('/headhunting')
-    async getListRecommendation(
+    async getListHeadhunting(
         @Query() query: TeamAdminGetListRecommendationRequest,
     ): Promise<BaseResponse<TeamAdminGetListRecommendationResponse>> {
-        return BaseResponse.of(await this.teamAdminService.getListRecommendation(query));
+        return BaseResponse.of(await this.teamAdminService.getListHeadhunting(query));
     }
 
     @Get('/download')

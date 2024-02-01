@@ -13,9 +13,10 @@ import { SettlementAdminGetListResponse } from './response/settlement-admin-get-
 
 @Injectable()
 export class SettlementAdminService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
     async getList(query: SettlementAdminGetListRequest): Promise<SettlementAdminGetListResponse> {
         const queryFilter: Prisma.SettlementWhereInput = {
+            status: query.status,
             headHuntingRecommendation: {
                 application: {
                     category: ApplicationCategory.HEADHUNTING,

@@ -174,7 +174,7 @@ export class TeamAdminService {
         return new PaginationResponse(results, new PageInfo(teamListCount));
     }
 
-    async getListRecommendation(query: TeamAdminGetListRecommendationRequest): Promise<TeamAdminGetListRecommendationResponse> {
+    async getListHeadhunting(query: TeamAdminGetListRecommendationRequest): Promise<TeamAdminGetListRecommendationResponse> {
         const queryFilter: Prisma.TeamWhereInput = {
             isActive: true,
             ...(query.tier && { leader: { level: query.tier } }),
@@ -282,7 +282,7 @@ export class TeamAdminService {
             where: queryFilter,
         });
 
-        const headhuntingRequest = await this.prismaService.headhuntingRequest.findUnique({
+        const recommendation = await this.prismaService.headhuntingRequest.findUnique({
             where: {
                 id: query.requestId,
                 isActive: true,
@@ -290,12 +290,21 @@ export class TeamAdminService {
             select: {
                 headhunting: {
                     select: {
-                        postId: true,
+                        recommendations: {
+                            select: {
+                                teamId: true,
+                            },
+                            where: {
+                                NOT: {
+                                    team: null,
+                                },
+                            },
+                        },
                     },
                 },
             },
         });
-
+        if (!recommendation) throw new NotFoundException('Headhunting request not found');
         const responseList = list.map((item) => {
             let licenses = item.leader.licenses.map((item) => {
                 return item.code.name;
@@ -309,17 +318,13 @@ export class TeamAdminService {
                 id: item.id,
                 name: item.name,
                 leaderName: item.leader.name,
+                leaderLevel: item.leader.level,
                 username: item.leader.account.username,
                 contact: item.leader.contact,
                 desiredOccupations: item.code.name,
                 licenses: licenses,
                 averageScore: item.teamEvaluation ? item.teamEvaluation.averageScore : null,
-                isSuggest:
-                    headhuntingRequest && headhuntingRequest.headhunting.postId
-                        ? item.headhuntingRecommendations
-                              .map((recommend) => recommend.headhunting.postId)
-                              .includes(headhuntingRequest.headhunting.postId)
-                        : false,
+                isSuggest: recommendation.headhunting.recommendations.map((item) => item.teamId).includes(item.id),
             };
         });
 

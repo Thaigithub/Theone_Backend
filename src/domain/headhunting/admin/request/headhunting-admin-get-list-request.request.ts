@@ -11,7 +11,15 @@ export class HeadhuntingAdminGetListRequestRequest extends PaginationRequest {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'Date must be in the format yyyy-mm-dd.',
     })
-    requestDate: string;
+    startRequestDate: string;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'Date must be in the format yyyy-mm-dd.',
+    })
+    endRequestDate: string;
 
     @Expose()
     @IsEnum(HeadhuntingAdminGetListRequestCategory)

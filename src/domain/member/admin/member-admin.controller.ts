@@ -52,10 +52,10 @@ export class MemberAdminController {
     }
 
     @Get('/headhunting')
-    async getListMemberRecommendation(
+    async getListHeadhunting(
         @Query() query: MemberAdminGetListRecommendationRequest,
     ): Promise<BaseResponse<MemberAdminGetListRecommendationResponse>> {
-        return BaseResponse.of(await this.memberAdminService.getListRecommendation(query));
+        return BaseResponse.of(await this.memberAdminService.getListHeadhunting(query));
     }
 
     @Get('/point')
