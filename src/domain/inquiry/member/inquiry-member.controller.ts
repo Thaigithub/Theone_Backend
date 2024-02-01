@@ -45,12 +45,4 @@ export class InquiryMemberController {
     ): Promise<BaseResponse<InquiryMemberGetDetailResponse>> {
         return BaseResponse.of(await this.inquiryMemberService.getDetail(req.user.accountId, id));
     }
-
-    @Get('/count')
-    async getTotal(
-        @Req() req: BaseRequest,
-        @Query() query: InquiryMemberGetCountRequest,
-    ): Promise<BaseResponse<InquiryMemberGetCountResponse>> {
-        return BaseResponse.of(await this.inquiryMemberService.getCount(req.user.accountId, query));
-    }
 }
