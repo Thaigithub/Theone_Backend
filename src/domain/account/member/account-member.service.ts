@@ -259,32 +259,36 @@ export class AccountMemberService {
     }
 
     async update(accountId: number, body: AccountMemberUpdateRequest): Promise<void> {
-        const usernameExist = await this.prismaService.account.findUnique({
-            where: {
-                username: body.username,
-                NOT: {
+        if (body.username) {
+            const usernameExist = await this.prismaService.account.findUnique({
+                where: {
+                    username: body.username,
+                    NOT: {
+                        id: accountId,
+                    },
+                },
+            });
+            if (usernameExist) throw new ConflictException('Username already existed');
+            await this.prismaService.account.update({
+                data: {
+                    username: body.username,
+                },
+                where: {
                     id: accountId,
                 },
-            },
-        });
-        if (usernameExist) throw new ConflictException('Username already existed');
-        await this.prismaService.account.update({
-            data: {
-                username: body.username,
-            },
-            where: {
-                id: accountId,
-            },
-        });
+            });
+        }
 
-        const isEntireCityId = await this.prismaService.region.findUnique({
-            where: {
-                isActive: true,
-                id: body.districtId,
-                cityEnglishName: 'All',
-            },
-        });
-        if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+        if (body.districtId) {
+            const isEntireCityId = await this.prismaService.region.findUnique({
+                where: {
+                    isActive: true,
+                    id: body.districtId,
+                    cityEnglishName: 'All',
+                },
+            });
+            if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+        }
 
         await this.prismaService.member.update({
             data: {

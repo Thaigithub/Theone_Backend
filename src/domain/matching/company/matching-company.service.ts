@@ -13,9 +13,14 @@ export class MatchingCompanyService {
         accountId: number,
         query: MatchingCompanyGetListRecommendationRequest,
     ): Promise<MatchingCompanyGetListRecommendation> {
-        const occupationIds = (query.occupation && query.occupation.split(',')).map((item) => parseInt(item)) || undefined;
+        const occupationIds = (query.occupation && query.occupation.split(',').map((item) => parseInt(item))) || undefined;
         const regionIds =
-            (query.region && query.region.split(',')).map((item) => item.split('-')[1]).map((item) => parseInt(item)) || null;
+            (query.region &&
+                query.region
+                    .split(',')
+                    .map((item) => item.split('-')[1])
+                    .map((item) => parseInt(item))) ||
+            undefined;
         const dateQuery: Date = new Date();
         switch (query.date) {
             case MatchingCompanyGetListDate.ONE_DAY_AGO:
