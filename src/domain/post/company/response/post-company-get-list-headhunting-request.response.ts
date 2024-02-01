@@ -4,6 +4,7 @@ import { PostCompanyGetListHeadhuntingRequestDTO } from '../dto/post-company-get
 import { PostCompanyGetItemListSiteResponse } from './post-company-get-item-list.response';
 
 export class PostCompanyGetItemHeadhuntingRequestResponse {
+    id: number;
     name: string;
     status: PostStatus;
     startDate: Post['startDate'];

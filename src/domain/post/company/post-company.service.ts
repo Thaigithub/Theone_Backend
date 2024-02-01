@@ -577,6 +577,7 @@ export class PostCompanyService {
             })
         ).map((item) => {
             return {
+                id: item.id,
                 name: item.name,
                 status: item.status,
                 startDate: item.startDate,
