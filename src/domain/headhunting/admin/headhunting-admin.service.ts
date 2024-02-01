@@ -531,7 +531,11 @@ export class HeadhuntingAdminService {
                         post: {
                             select: {
                                 experienceType: true,
-                                code: true,
+                                code: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
                                 name: true,
                                 company: {
                                     select: {
@@ -567,7 +571,7 @@ export class HeadhuntingAdminService {
             detail: request.detail,
             object: request.object,
             phone: request.headhunting.post.company.phone,
-            occupation: request.headhunting.post.code.name,
+            occupation: request.headhunting.post.code ? request.headhunting.post.code.name : null,
             careerType: request.headhunting.post.experienceType,
             status: request.status,
             headhuntingId: request.headhunting.id,

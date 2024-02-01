@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemoMemberGetListRequest } from './request/memo-member-get-list.request';
@@ -17,28 +16,7 @@ export class MemoMemberService {
         startDate.setDate(startDate.getDate() - 7);
         endDate.setMonth(endDate.getMonth() + 1);
         endDate.setDate(endDate.getDate() + 7);
-        const queryInput: Prisma.MemoWhereInput = {
-            isActive: true,
-            member: {
-                accountId,
-            },
-            NOT: {
-                OR: [
-                    {
-                        startDate: {
-                            gte: endDate,
-                        },
-                    },
-                    {
-                        endDate: {
-                            lt: startDate,
-                        },
-                    },
-                ],
-            },
-        };
         const memos = await this.prismaService.memo.findMany({
-            where: queryInput,
             select: {
                 note: true,
                 startDate: true,
