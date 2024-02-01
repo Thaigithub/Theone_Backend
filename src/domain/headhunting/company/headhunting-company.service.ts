@@ -28,7 +28,6 @@ export class HeadhuntingCompanyService {
                 },
             },
         });
-
         if (!headhunting) throw new NotFoundException('Headhunting not found');
 
         const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {

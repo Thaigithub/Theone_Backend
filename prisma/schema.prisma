@@ -725,7 +725,7 @@ model HeadhuntingRequest {
   detail          String                      @default("")
   rejectReason    String?                     @default("") @map("reject_reason")
   headhunting     Headhunting                 @relation(fields: [headhuntingId], references: [id])
-  headhuntingId   Int                         @unique @map("headhunting_id")
+  headhuntingId   Int                         @map("headhunting_id")
   usageHistory    UsageHistory                @relation(fields: [usageHistoryId], references: [id])
   usageHistoryId  Int                         @unique @map("usage_history_id")
   recommendations HeadhuntingRecommendation[]

@@ -169,7 +169,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeoples: request.numberOfPeople,
-                ...(request.occupationId && { codeId: request.occupationId }),
+                ...(request.occupationId && { code:{connect:{id:request.occupationId}}  }),
                 otherInformation: request.otherInformation || '',
                 salaryType: request.salaryType,
                 salaryAmount: request.salaryAmount,
@@ -179,8 +179,16 @@ export class PostCompanyService {
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor || '',
-                siteId: request.siteId || null,
-                companyId: account.company.id,
+                site: request.siteId && {
+                    connect: {
+                        id: request.siteId
+                    }
+                },
+                company:{
+                    connect:{
+                        id: account.company.id,
+                    }
+                },
                 headhunting:
                     request.category === PostCategory.HEADHUNTING
                         ? {
