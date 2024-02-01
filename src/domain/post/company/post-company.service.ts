@@ -17,8 +17,9 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostCompanyCheckPullUpStatus } from './enum/post-company-check-pull-up-status.enum';
 import { PostCompanyGetListHeadhuntingCategory } from './enum/post-company-get-list-headhunting-category.enum';
 import { PostCompanyCreateRequest } from './request/post-company-create.request';
-import { PostCompanyGetListApplicantSiteRequest } from './request/post-company-get-list-applicant-site.request';
+import { PostCompanyGetListApplicationRequest } from './request/post-company-get-list-application.request';
 import { PostCompanyGetListHeadhuntingRequest } from './request/post-company-get-list-headhunting.request';
+import { PostCompanyGetListSiteRequest } from './request/post-company-get-list-site.request';
 import { PostCompanyGetListRequest } from './request/post-company-get-list.request';
 import { PostCompanyUpdatePullUpStatusRequest } from './request/post-company-update-pull-up-status.request';
 import { PostCompanyUpdateTypeRequest } from './request/post-company-update-type.request';
@@ -26,8 +27,8 @@ import { PostCompanyCheckPullUpAvailabilityResponse } from './response/post-comp
 import { PostCompanyCountPostsResponse } from './response/post-company-get-count-post.response';
 import { PostCompanyGetDetailResponse } from './response/post-company-get-detail.response';
 import { PostCompanyGetListApplicationResponse } from './response/post-company-get-list-application.response';
-import { PostCompanyGetListBySite } from './response/post-company-get-list-by-site.response';
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
+import { PostCompanyGetListSiteResponse } from './response/post-company-get-list-site.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
 
 @Injectable()
@@ -67,7 +68,6 @@ export class PostCompanyService {
             company: {
                 accountId,
             },
-            ...(query.category && { category: query.category})
         };
 
         const postList = (
@@ -436,7 +436,7 @@ export class PostCompanyService {
 
     async getListApplication(
         accountId: number,
-        query: PostCompanyGetListApplicantSiteRequest,
+        query: PostCompanyGetListApplicationRequest,
     ): Promise<PostCompanyGetListApplicationResponse> {
         const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
@@ -592,7 +592,7 @@ export class PostCompanyService {
         return new PaginationResponse(postLists, new PageInfo(postListCount));
     }
 
-    async getListSite(accountId: number, siteId: number): Promise<PostCompanyGetListBySite> {
+    async getListSite(accountId: number, siteId: number, query: PostCompanyGetListSiteRequest): Promise<PostCompanyGetListSiteResponse> {
         const posts = (
             await this.prismaService.post.findMany({
                 where: {
@@ -601,6 +601,7 @@ export class PostCompanyService {
                     },
                     siteId,
                     isActive: true,
+                    category: query.category
                 },
                 select: {
                     id: true,
