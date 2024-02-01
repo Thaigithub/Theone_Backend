@@ -157,7 +157,17 @@ export class PostCompanyService {
         if(request.occupationId) {
             await this.checkCodeType(request.occupationId);
         }
-        
+        if(request.category === PostCategory.HEADHUNTING){
+            const site = request.siteId ? await this.prismaService.site.findUnique({
+                where: {
+                    id: request.siteId,
+                    isActive: true,
+                },
+            }) : null;
+            if(!site) {
+                throw new BadRequestException('Post category is Headhunting must have been included valid site id');
+            }
+        }
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -358,6 +368,18 @@ export class PostCompanyService {
                     throw new BadRequestException('Headhunting recommendation has been added');
             }
         }
+        if(request.category === PostCategory.HEADHUNTING && request.siteId){
+            const site = await this.prismaService.site.findUnique({
+                where: {
+                    id: request.siteId,
+                    isActive: true,
+                },
+            });
+            if(!site) {
+                throw new BadRequestException('Post category is Headhunting must have been included valid site id');
+            }
+        }
+
         if (post.category === PostCategory.MATCHING) {
             if (request.category && request.category !== PostCategory.MATCHING) {
                 if (post.company.matchingRequests.length !== 0)

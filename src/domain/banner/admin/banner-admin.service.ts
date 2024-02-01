@@ -334,7 +334,6 @@ export class BannerAdminService {
                     update: {
                         urlLink: request.advertisingBanner.urlLink,
                         title: request.advertisingBanner.title,
-                        priority: count + 1,
                     },
                 },
             },
@@ -732,7 +731,6 @@ export class BannerAdminService {
                 postBanner: {
                     update: {
                         postId: request.postBanner.postId,
-                        priority: count + 1,
                     },
                 },
             },

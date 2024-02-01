@@ -107,6 +107,13 @@ export class MemberCompanyService {
                         where: {
                             isActive: true,
                         },
+                        include: {
+                            code: {
+                                select: {
+                                    name: true,
+                                }
+                            }
+                        }
                     },
                     region: {
                         select: {
@@ -129,6 +136,7 @@ export class MemberCompanyService {
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
                 licenses: item.licenses,
+                occupations: item.licenses.map((item)=>{return item.code.name;}),
             };
         });
         const total = await this.prismaService.member.count({
