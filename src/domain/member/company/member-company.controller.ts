@@ -22,8 +22,8 @@ export class MemberCompanyController {
     }
 
     @Get('/:id')
-    async getMemberDetailManpower(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberCompanyGetDetailResponse>> {
-        return BaseResponse.of(await this.memberCompanyService.getMemberDetailManpower(id));
+    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberCompanyGetDetailResponse>> {
+        return BaseResponse.of(await this.memberCompanyService.getDetail(id));
     }
 
     @Get()
