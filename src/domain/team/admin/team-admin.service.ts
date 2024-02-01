@@ -132,6 +132,7 @@ export class TeamAdminService {
             ...(query.searchCategory == TeamAdminGetListCategory.TEAM_LEADER && {
                 leader: { name: { contains: query.searchKeyword, mode: 'insensitive' } },
             }),
+            isActive: true,
         };
 
         const teamList = await this.prismaService.team.findMany({
