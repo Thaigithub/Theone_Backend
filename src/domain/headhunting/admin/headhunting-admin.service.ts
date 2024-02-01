@@ -58,6 +58,11 @@ export class HeadhuntingAdminService {
                 gte: query.startPaymentDate && new Date(query.startPaymentDate),
                 lte: query.endPaymentDate && new Date(query.endPaymentDate),
             },
+            requests: {
+                some: {
+                    status: HeadhuntingRequestStatus.APPROVED,
+                },
+            },
         };
 
         const list = await this.prismaService.headhunting.findMany({
