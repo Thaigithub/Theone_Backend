@@ -46,7 +46,7 @@ export class PostMemberService {
                 {
                     site: {
                         region: {
-                            id: { in: ids },
+                            id: query.regionList && { in: ids },
                         },
                     },
                 },
@@ -54,7 +54,7 @@ export class PostMemberService {
             siteId,
             type: query.postType,
             experienceType: query.experienceTypeList && { in: experienceTypeList },
-            OR: [
+            OR: (query.occupationList || query.constructionMachineryList) && [
                 { codeId: query.occupationList && { in: occupationList } },
                 { codeId: query.constructionMachineryList && { in: constructionMachineryList } },
             ],
