@@ -30,6 +30,14 @@ export class InquiryMemberController {
         return BaseResponse.of(await this.inquiryMemberService.create(req.user.accountId, body));
     }
 
+    @Get('/count')
+    async getTotal(
+        @Req() req: BaseRequest,
+        @Query() query: InquiryMemberGetCountRequest,
+    ): Promise<BaseResponse<InquiryMemberGetCountResponse>> {
+        return BaseResponse.of(await this.inquiryMemberService.getCount(req.user.accountId, query));
+    }
+
     @Get('/:id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
