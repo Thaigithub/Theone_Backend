@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InterviewStatus, PostApplicationStatus, Prisma, RequestObject } from '@prisma/client';
+import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma, RequestObject } from '@prisma/client';
 import { ApplicationCompanyService } from 'domain/application/company/application-company.service';
 import { ApplicationCompanyGetDetailMemberResponse } from 'domain/application/company/response/application-company-get-detail-member.response';
 import { ApplicationCompanyGetDetailTeamResponse } from 'domain/application/company/response/application-company-get-detail-team.response';
@@ -236,7 +236,7 @@ export class InterviewCompanyService {
                 },
             },
         });
-        if (interview) {
+        if (interview !== 0) {
             throw new ConflictException('Interview existed');
         }
         await this.prismaService.$transaction(async (prisma) => {
@@ -263,6 +263,49 @@ export class InterviewCompanyService {
                     });
                     if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new ConflictException('The application status is not set to APPLY');
+                    }
+                    switch (body.category) {
+                        case ApplicationCategory.HEADHUNTING: {
+                            const count = await prisma.headhunting.count({
+                                where: {
+                                    post: {
+                                        id: body.postId,
+                                        category: ApplicationCategory.HEADHUNTING,
+                                    },
+                                },
+                            });
+                            if (count === 0) throw new ConflictException('Post is not belong to headhunting type');
+                            break;
+                        }
+                        case ApplicationCategory.MATCHING: {
+                            const count = await prisma.post.count({
+                                where: {
+                                    id: body.postId,
+                                    category: ApplicationCategory.MATCHING,
+                                },
+                            });
+                            if (count === 0) throw new ConflictException('Post is not belong to matching type');
+                            break;
+                        }
+                        default: {
+                            const countMatching = await prisma.post.count({
+                                where: {
+                                    id: body.postId,
+                                    category: ApplicationCategory.MATCHING,
+                                },
+                            });
+                            if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
+                            const countHeadhunting = await prisma.headhunting.count({
+                                where: {
+                                    post: {
+                                        id: body.postId,
+                                        category: ApplicationCategory.HEADHUNTING,
+                                    },
+                                },
+                            });
+                            if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                            break;
+                        }
                     }
                     application = await prisma.application.upsert({
                         create: {
