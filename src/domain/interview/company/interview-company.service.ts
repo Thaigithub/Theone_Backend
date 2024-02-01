@@ -288,22 +288,36 @@ export class InterviewCompanyService {
                             break;
                         }
                         default: {
-                            const countMatching = await prisma.post.count({
+                            const count = await this.prismaService.application.count({
                                 where: {
-                                    id: body.postId,
-                                    category: ApplicationCategory.MATCHING,
-                                },
-                            });
-                            if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
-                            const countHeadhunting = await prisma.headhunting.count({
-                                where: {
+                                    postId: body.postId,
+                                    memberId: body.interviewProposalType === InterviewCompanyType.MEMBER ? body.id : undefined,
+                                    teamId: body.interviewProposalType !== InterviewCompanyType.MEMBER ? body.id : undefined,
                                     post: {
-                                        id: body.postId,
-                                        category: ApplicationCategory.HEADHUNTING,
+                                        company: {
+                                            accountId: accountId,
+                                        },
                                     },
                                 },
                             });
-                            if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                            if (count === 0) {
+                                const countMatching = await prisma.post.count({
+                                    where: {
+                                        id: body.postId,
+                                        category: ApplicationCategory.MATCHING,
+                                    },
+                                });
+                                if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
+                                const countHeadhunting = await prisma.headhunting.count({
+                                    where: {
+                                        post: {
+                                            id: body.postId,
+                                            category: ApplicationCategory.HEADHUNTING,
+                                        },
+                                    },
+                                });
+                                if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                            }
                             break;
                         }
                     }
