@@ -80,6 +80,15 @@ export class HeadhuntingAdminService {
                 },
                 paymentDate: true,
                 paymentStatus: true,
+                requests: {
+                    take: 1,
+                    orderBy: {
+                        updatedAt: 'desc',
+                    },
+                    where: {
+                        status: HeadhuntingRequestStatus.APPROVED,
+                    },
+                },
             },
             where: queryFilter,
             orderBy: {
@@ -93,11 +102,12 @@ export class HeadhuntingAdminService {
         });
 
         const responseList = list.map((item) => {
-            const { post, ...rest } = item;
+            const { post, requests, ...rest } = item;
             const res = {
                 ...rest,
                 siteName: post.site?.name || null,
                 postName: post.name,
+                requestId: requests[0].id,
             };
 
             return res;
