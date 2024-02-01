@@ -33,7 +33,8 @@ export class AccountMemberGetDetailResponse {
     contact: Member['contact'];
     email: Member['email'];
     desiredSalary: Member['desiredSalary'];
-    regionId: Region['id'];
+    districtId: Region['id'];
+    cityId: Region['cityId'];
     account: {
         username: Account['username'];
         status: Account['status'];

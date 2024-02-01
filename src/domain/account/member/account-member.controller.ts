@@ -5,15 +5,9 @@ import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { AccountMemberService } from './account-member.service';
-import { AccountMemberUpdateRequestDTO } from './dto/account-member-update-request.dto';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
-import { AccountMemberUpdateDesiredSalaryRequest } from './request/account-member-update-desired-salary.request';
-import { AccountMemberUpdateNameRequest } from './request/account-member-update-name.request';
-import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
-import { AccountMemberUpdateRegionRequest } from './request/account-member-update-region.request';
-import { AccountMemberUpdateUsernameRequest } from './request/account-member-update-username.request';
 import { AccountMemberUpsertBankAccountRequest } from './request/account-member-upsert-bankaccount.request';
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
@@ -25,6 +19,8 @@ import { AccountMemberGetDetailResponse } from './response/account-member-get-de
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
+import { AccountMemberUpdateRequest } from './request/account-member-update.request';
+import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
@@ -45,46 +41,11 @@ export class AccountMemberController {
         return BaseResponse.of(await this.accountMemberService.usernameCheck(username));
     }
 
-    @Patch('/username')
+    @Patch()
     @Roles(AccountType.MEMBER)
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async updateUsername(
-        @Req() request: BaseRequest,
-        @Body() body: AccountMemberUpdateUsernameRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(
-            await this.accountMemberService.update(request.user.accountId, body as AccountMemberUpdateRequestDTO),
-        );
-    }
-
-    @Patch('/name')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async updateName(@Req() request: BaseRequest, @Body() body: AccountMemberUpdateNameRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(
-            await this.accountMemberService.update(request.user.accountId, body as AccountMemberUpdateRequestDTO),
-        );
-    }
-
-    @Patch('/region')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async updateRegion(@Req() request: BaseRequest, @Body() body: AccountMemberUpdateRegionRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(
-            await this.accountMemberService.update(request.user.accountId, body as AccountMemberUpdateRequestDTO),
-        );
-    }
-
-    @Patch('/desired-salary')
-    @Roles(AccountType.MEMBER)
-    @UseGuards(AuthJwtGuard, AuthRoleGuard)
-    async update(
-        @Req() request: BaseRequest,
-        @Body() body: AccountMemberUpdateDesiredSalaryRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(
-            await this.accountMemberService.update(request.user.accountId, body as AccountMemberUpdateRequestDTO),
-        );
+    async update(@Req() request: BaseRequest, @Body() body: AccountMemberUpdateRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.accountMemberService.update(request.user.accountId, body));
     }
 
     @Post('/password/phone/otp')
