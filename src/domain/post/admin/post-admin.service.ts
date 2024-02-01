@@ -204,6 +204,7 @@ export class PostAdminService {
                 },
                 site: {
                     select: {
+                        id: true,
                         name: true,
                         contact: true,
                         address: true,
@@ -223,6 +224,8 @@ export class PostAdminService {
         });
 
         const post = {
+            siteId: item.site?.id ||null,
+            category: item.category,
             type: item.type,
             name: item.name,
             startDate: item.startDate,

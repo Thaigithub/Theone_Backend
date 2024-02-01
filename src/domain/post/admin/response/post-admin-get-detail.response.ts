@@ -1,7 +1,9 @@
-import { ExperienceType, PostStatus, PostType, SalaryType, Workday } from '@prisma/client';
+import { ExperienceType, PostCategory, PostStatus, PostType, SalaryType, Site, Workday } from '@prisma/client';
 import { PostAdminCodeDTO } from '../dto/post-admin-code.dto';
 
 export class PostAdminGetDetailResponse {
+    siteId: Site['id'];
+    category: PostCategory;
     type: PostType;
     name: string;
     startDate: Date;
