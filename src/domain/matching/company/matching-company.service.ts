@@ -211,7 +211,7 @@ export class MatchingCompanyService {
                         totalYears: member.totalExperienceYears,
                         numberOfTeamMembers: null,
                         memberDetail: {
-                            codeName: member.licenses.map((code) => code.name),
+                            occupations: member.licenses.map((code) => code.name),
                             localInformation: member.address,
                             totalMonths: member.totalExperienceMonths,
                             totalYears: member.totalExperienceYears,
@@ -233,7 +233,7 @@ export class MatchingCompanyService {
                         numberOfTeamMembers: team.members.length + 1,
                         memberDetail: null,
                         teamDetail: {
-                            codeName: team.code.name,
+                            occupation: team.code.name,
                             leaderName: team.leader.name,
                             leaderContact: team.leader.contact,
                             leaderAddress: team.leader.address,
@@ -252,6 +252,7 @@ export class MatchingCompanyService {
                                     )
                                         ? 'On duty'
                                         : 'Looking for a job',
+                                    occupations: member.licenses.map((code) => code.name),
                                 };
 
                                 return memberResponse;
