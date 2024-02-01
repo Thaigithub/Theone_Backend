@@ -2,6 +2,7 @@ import {
     Code,
     Company,
     ExperienceType,
+    Headhunting,
     HeadhuntingRequest,
     HeadhuntingRequestStatus,
     Post,
@@ -22,4 +23,5 @@ export class HeadhuntingAdminGetDetailRequestResponse {
     occupation: Code['name'];
     careerType: ExperienceType;
     status: HeadhuntingRequestStatus;
+    headhuntingId: Headhunting['id'];
 }
