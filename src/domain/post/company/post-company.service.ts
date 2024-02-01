@@ -154,7 +154,10 @@ export class PostCompanyService {
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException('Site is not found');
         }
-        await this.checkCodeType(request.occupationId);
+        if(request.occupationId) {
+            await this.checkCodeType(request.occupationId);
+        }
+        
 
         //Modified Time to timestampz
         const FAKE_STAMP = '2023-12-31T';
@@ -282,7 +285,10 @@ export class PostCompanyService {
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException('Site not found');
         }
-        await this.checkCodeType(request.occupationId);
+        if(request.occupationId) {
+            await this.checkCodeType(request.occupationId);
+        }
+        
         const post = await this.prismaService.post.findUnique({
             where: {
                 id,
@@ -347,13 +353,13 @@ export class PostCompanyService {
         request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
         if (!post) throw new NotFoundException('Post not found');
         if (post.category === PostCategory.HEADHUNTING) {
-            if (request.category !== PostCategory.HEADHUNTING) {
+            if (request.category && request.category !== PostCategory.HEADHUNTING) {
                 if (post.headhunting.requests.length !== 0)
                     throw new BadRequestException('Headhunting recommendation has been added');
             }
         }
         if (post.category === PostCategory.MATCHING) {
-            if (request.category !== PostCategory.MATCHING) {
+            if (request.category && request.category !== PostCategory.MATCHING) {
                 if (post.company.matchingRequests.length !== 0)
                     throw new BadRequestException('Matching recommendation has been added');
             }
@@ -372,9 +378,9 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeoples: request.numberOfPeople,
-                codeId: request.occupationId || null,
-                otherInformation: request.otherInformation,
-                salaryType: request.salaryType,
+                ...(request.occupationId && {codeId: request.occupationId}),
+                ...(request.otherInformation && { otherInformation: request.otherInformation}),
+                ...(request.salaryType && { salaryType: request.salaryType}),
                 salaryAmount: request.salaryAmount,
                 startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
                 endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
