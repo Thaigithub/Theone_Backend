@@ -78,6 +78,9 @@ export class MatchingCompanyService {
                                                         where: {
                                                             isActive: true,
                                                         },
+                                                        include: {
+                                                            code: true,
+                                                        },
                                                     },
                                                     applications: {
                                                         include: {
@@ -126,6 +129,9 @@ export class MatchingCompanyService {
                         where: {
                             isActive: true,
                         },
+                        include: {
+                            code: true,
+                        },
                     },
                     applications: {
                         include: {
@@ -148,7 +154,23 @@ export class MatchingCompanyService {
                     },
                 },
                 include: {
-                    leader: true,
+                    leader: {
+                        include: {
+                            licenses: {
+                                where: {
+                                    isActive: true,
+                                },
+                                include: {
+                                    code: true,
+                                },
+                            },
+                            applications: {
+                                include: {
+                                    contract: true,
+                                },
+                            },
+                        },
+                    },
                     members: {
                         include: {
                             member: {
@@ -156,6 +178,9 @@ export class MatchingCompanyService {
                                     licenses: {
                                         where: {
                                             isActive: true,
+                                        },
+                                        include: {
+                                            code: true,
                                         },
                                     },
                                     applications: {
@@ -211,7 +236,7 @@ export class MatchingCompanyService {
                         totalYears: member.totalExperienceYears,
                         numberOfTeamMembers: null,
                         memberDetail: {
-                            occupations: member.licenses.map((code) => code.name),
+                            occupations: member.licenses.map((item) => item.code.name),
                             localInformation: member.address,
                             totalMonths: member.totalExperienceMonths,
                             totalYears: member.totalExperienceYears,
@@ -234,9 +259,19 @@ export class MatchingCompanyService {
                         memberDetail: null,
                         teamDetail: {
                             occupation: team.code.name,
-                            leaderName: team.leader.name,
-                            leaderContact: team.leader.contact,
-                            leaderAddress: team.leader.address,
+                            leader: {
+                                name: team.leader.name,
+                                contact: team.leader.contact,
+                                totalYears: team.leader.totalExperienceYears,
+                                totalMonths: team.leader.totalExperienceMonths,
+                                occupations: team.leader.licenses ? team.leader.licenses.map((item) => item.code.name) : [],
+                                workingStatus: team.leader.applications?.some(
+                                    (application) => application.contract?.endDate > new Date(),
+                                )
+                                    ? 'On duty'
+                                    : 'Looking for a job',
+                            },
+                            region: team.region,
                             totalYears: team.totalExperienceYears,
                             totalMonths: team.totalExperienceMonths,
                             member: team.members.map((memberTeam) => {
@@ -252,7 +287,11 @@ export class MatchingCompanyService {
                                     )
                                         ? 'On duty'
                                         : 'Looking for a job',
-                                    occupations: member.licenses.map((code) => code.name),
+                                    occupations: member.licenses.map((item) => {
+                                        console.log(item);
+                                        console.log('code: ', item.code);
+                                        return item.code.name;
+                                    }),
                                 };
 
                                 return memberResponse;

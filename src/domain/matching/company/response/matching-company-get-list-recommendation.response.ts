@@ -9,7 +9,6 @@ class MatchingCompanyGetItemRecommendation {
     totalYears: number;
     numberOfTeamMembers: number;
     memberDetail: {
-        codeName: string[];
         localInformation: string;
         totalYears: number;
         totalMonths: number;
@@ -17,12 +16,17 @@ class MatchingCompanyGetItemRecommendation {
         occupations: string[];
     };
     teamDetail: {
-        codeName: string;
-        leaderName: string;
-        leaderContact: string;
-        leaderAddress: string;
+        name: string;
+        leader: {
+            name: string;
+            contact: string;
+            totalYears: number;
+            totalMonths: number;
+            occupations: string[];
+        };
         totalYears: number;
         totalMonths: number;
+        region: string;
         occupation: string;
         member: {
             rank: string;
