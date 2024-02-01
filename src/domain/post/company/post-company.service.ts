@@ -67,6 +67,7 @@ export class PostCompanyService {
             company: {
                 accountId,
             },
+            ...(query.category && { category: query.category})
         };
 
         const postList = (
