@@ -113,7 +113,7 @@ export class TeamMemberService {
                 code: {
                     select: {
                         id: true,
-                        codeName: true,
+                        name: true,
                         code: true,
                     },
                 },
@@ -142,7 +142,11 @@ export class TeamMemberService {
             id: team.id,
             name: team.name,
             status: team.status,
-            code: team.code,
+            code: {
+                id: team.code.id,
+                codeName: team.code.name,
+                code: team.code.code,
+            },
             exposureStatus: team.exposureStatus,
             isActive: team.isActive,
             numberOfRecruitments: team.numberOfRecruitments,
@@ -540,7 +544,7 @@ export class TeamMemberService {
                         introduction: true,
                     },
                 },
-                invitationStatus: true,
+                status: true,
                 createdAt: true,
                 updatedAt: true,
             },
@@ -559,7 +563,7 @@ export class TeamMemberService {
                 contact: invitation.team.leader.contact,
                 invitationDate: invitation.updatedAt ? invitation.updatedAt : invitation.createdAt,
                 introduction: invitation.team.introduction,
-                invitationStatus: invitation.invitationStatus,
+                invitationStatus: invitation.status,
             };
         });
         const invitaionListCount = await this.prismaService.teamInvitation.count({
