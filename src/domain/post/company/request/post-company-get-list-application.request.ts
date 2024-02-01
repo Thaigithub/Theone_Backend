@@ -3,7 +3,7 @@ import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class PostCompanyGetListApplicantSiteRequest extends PaginationRequest {
+export class PostCompanyGetListApplicationRequest extends PaginationRequest {
     @Expose()
     @IsString()
     @IsOptional()
