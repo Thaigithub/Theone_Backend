@@ -1,4 +1,4 @@
-import { Region, Member, License } from '@prisma/client';
+import { License, Member, Region } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class GetListResponse {
@@ -11,6 +11,7 @@ export class GetListResponse {
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
     licenses: License[];
+    occupations: string[];
 }
 
 export class MemberCompanyGetListResponse extends PaginationResponse<GetListResponse> {}

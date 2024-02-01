@@ -323,7 +323,9 @@ export class ApplicationMemberService {
                     {
                         id,
                         team: {
-                            leaderId: accountId,
+                            leader: {
+                                accountId,
+                            },
                         },
                     },
                 ],
