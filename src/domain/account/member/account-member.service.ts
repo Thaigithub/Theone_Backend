@@ -6,7 +6,6 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { AccountMemberUpdateRequestDTO } from './dto/account-member-update-request.dto';
 import { AccountMemberUpdatePasswordRequestStatus } from './enum/account-member-update-password-request-status.enum';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
@@ -23,6 +22,7 @@ import { AccountMemberGetDetailResponse } from './response/account-member-get-de
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
+import { AccountMemberUpdateRequest } from './request/account-member-update.request';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -225,7 +225,8 @@ export class AccountMemberService {
         const { foreignWorker, disability, basicHealthSafetyCertificate, region, ...rest } = member;
         return {
             ...rest,
-            regionId: region ? region.id : null,
+            districtId: region?.id || null,
+            cityId: region?.cityId || null,
             foreignWorker: {
                 englishName: foreignWorker ? foreignWorker.englishName : null,
                 registrationNumber: foreignWorker ? foreignWorker.registrationNumber : null,
@@ -257,7 +258,7 @@ export class AccountMemberService {
         };
     }
 
-    async update(accountId: number, body: AccountMemberUpdateRequestDTO): Promise<void> {
+    async update(accountId: number, body: AccountMemberUpdateRequest): Promise<void> {
         const usernameExist = await this.prismaService.account.findUnique({
             where: {
                 username: body.username,
@@ -279,7 +280,7 @@ export class AccountMemberService {
         const isEntireCityId = await this.prismaService.region.findUnique({
             where: {
                 isActive: true,
-                id: body.regionId,
+                id: body.districtId,
                 cityEnglishName: 'All',
             },
         });
@@ -287,9 +288,8 @@ export class AccountMemberService {
 
         await this.prismaService.member.update({
             data: {
-                name: body.name,
                 desiredSalary: body.desiredSalary,
-                regionId: body.regionId,
+                regionId: body.districtId,
             },
             where: {
                 accountId,

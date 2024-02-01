@@ -9,6 +9,8 @@ import { InquiryMemberCreateRequest } from './request/inquiry-member-create.requ
 import { InquiryMemberGetListRequest } from './request/inquiry-member-get-list.request';
 import { InquiryMemberGetDetailResponse } from './response/inquiry-member-get-detail.response';
 import { InquiryMemberGetListResponse } from './response/inquiry-member-get-list.response';
+import { InquiryMemberGetCountRequest } from './request/inquiry-member-get-count.request';
+import { InquiryMemberGetCountResponse } from './response/inquiry-member-get-count.response';
 @Controller('/member/inquiries')
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 @Roles(AccountType.MEMBER)
@@ -34,5 +36,13 @@ export class InquiryMemberController {
         @Req() req: BaseRequest,
     ): Promise<BaseResponse<InquiryMemberGetDetailResponse>> {
         return BaseResponse.of(await this.inquiryMemberService.getDetail(req.user.accountId, id));
+    }
+
+    @Get('/count')
+    async getTotal(
+        @Req() req: BaseRequest,
+        @Query() query: InquiryMemberGetCountRequest,
+    ): Promise<BaseResponse<InquiryMemberGetCountResponse>> {
+        return BaseResponse.of(await this.inquiryMemberService.getCount(req.user.accountId, query));
     }
 }

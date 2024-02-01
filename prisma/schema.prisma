@@ -808,6 +808,7 @@ model Region {
   isActive            Boolean  @default(true) @map("is_active")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+  cityId              Int      @default(1) @map("city_id")
   districtKoreanName  String   @map("district_korean_name")
   districtEnglishName String   @map("district_english_name")
   cityKoreanName      String   @map("city_korean_name")

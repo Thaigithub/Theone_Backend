@@ -7,6 +7,9 @@ import { InquiryMemberCreateRequest } from './request/inquiry-member-create.requ
 import { InquiryMemberGetListRequest } from './request/inquiry-member-get-list.request';
 import { InquiryMemberGetDetailResponse } from './response/inquiry-member-get-detail.response';
 import { InquiryMemberGetListResponse } from './response/inquiry-member-get-list.response';
+import { InquiryMemberGetCountRequest } from './request/inquiry-member-get-count.request';
+import { InquiryMemberGetCountType } from './enum/inquiry-member-get-count-type.enum';
+import { InquiryMemberGetCountResponse } from './response/inquiry-member-get-count.response';
 
 @Injectable()
 export class InquiryMemberService {
@@ -146,5 +149,18 @@ export class InquiryMemberService {
                 };
             }),
         };
+    }
+
+    async getCount(accountId: number, query: InquiryMemberGetCountRequest): Promise<InquiryMemberGetCountResponse> {
+        const count = await this.prismaService.inquiry.count({
+            where: {
+                isActive: true,
+                member: {
+                    accountId,
+                },
+                answerTitle: query.type === InquiryMemberGetCountType.REPLIED ? { not: null } : undefined,
+            },
+        });
+        return { count };
     }
 }

@@ -18,12 +18,13 @@ export class RegionService {
                     districtEnglishName: true,
                     cityKoreanName: true,
                     cityEnglishName: true,
+                    cityId: true,
                 },
             })
         ).reduce((accum, current) => {
             if (accum.length === 0) {
                 accum.push({
-                    id: accum.length,
+                    id: current.cityId,
                     koreanName: current.cityKoreanName,
                     englishName: current.cityEnglishName,
                     district: [
@@ -50,7 +51,7 @@ export class RegionService {
                     });
                 } else {
                     accum.push({
-                        id: accum.length,
+                        id: current.cityId,
                         koreanName: current.cityKoreanName,
                         englishName: current.cityEnglishName,
                         district: [
