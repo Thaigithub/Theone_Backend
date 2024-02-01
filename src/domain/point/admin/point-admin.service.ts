@@ -108,8 +108,8 @@ export class PointAdminService {
         if (!point) {
             throw new NotFoundException('The point request id is not found');
         }
-        if (body.status === PointStatus.APPROVED && (!body.amount || !body.reason)) {
-            throw new BadRequestException('Appprove must include the amount point and reason to give');
+        if (body.status === PointStatus.APPROVED && !body.amount) {
+            throw new BadRequestException('Appprove must include the amount point greater than 0 to give');
         }
         if (body.status === PointStatus.REJECTED && !body.reason) {
             throw new BadRequestException('Reject must include the reason to deny the request');
