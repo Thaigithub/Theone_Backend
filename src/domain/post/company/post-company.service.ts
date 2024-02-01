@@ -2,7 +2,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     HeadhuntingRequestStatus,
-    NotificationType,
     PaymentStatus,
     Post,
     PostCategory,
@@ -189,44 +188,6 @@ export class PostCompanyService {
                           }
                         : null,
             },
-        });
-        await this.prismaService.$transaction(async (prisma) => {
-            const memberAccountIds = (
-                await prisma.site.findUnique({
-                    where: {
-                        id: request.siteId,
-                    },
-                    select: {
-                        interests: {
-                            where: {
-                                NOT: { member: null },
-                                member: {
-                                    isActive: true,
-                                },
-                            },
-                            select: {
-                                member: {
-                                    select: {
-                                        accountId: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                })
-            ).interests.map((item) => {
-                return item.member.accountId;
-            });
-            for (const id of memberAccountIds) {
-                await prisma.notification.createMany({
-                    data: {
-                        title: '관심 업체(현장) 공고 등록',
-                        content: '관심 업체(현장)가 공고를 등록했습니다.',
-                        type: NotificationType.POST,
-                        accountId: id,
-                    },
-                });
-            }
         });
     }
 
