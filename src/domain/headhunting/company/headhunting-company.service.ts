@@ -296,6 +296,7 @@ export class HeadhuntingCompanyService {
             await this.prismaService.$transaction(async (prisma) => {
                 await prisma.headhuntingRequest.create({
                     data: {
+                        isActive: true,
                         detail: body.detail,
                         object: body.object,
                         status: HeadhuntingRequestStatus.APPLY,
