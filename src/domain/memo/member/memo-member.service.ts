@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
-import { MemoMemberGetListRequest } from './request/memo-member-get-list.request';
 import { MemoMemberUpsertRequest } from './request/memo-member-upsert.request';
 import { MemoMemberGetDetailResponse } from './response/memo-member-get-detail.response';
 import { MemoMemberGetListResponse } from './response/memo-member-get-list.response';
@@ -10,13 +9,13 @@ import { MemoMemberGetListResponse } from './response/memo-member-get-list.respo
 export class MemoMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(accountId: number, query: MemoMemberGetListRequest): Promise<MemoMemberGetListResponse> {
-        const startDate = new Date(query.month.concat('-01'));
-        const endDate = new Date(startDate);
-        startDate.setDate(startDate.getDate() - 7);
-        endDate.setMonth(endDate.getMonth() + 1);
-        endDate.setDate(endDate.getDate() + 7);
+    async getList(accountId: number): Promise<MemoMemberGetListResponse> {
         const memos = await this.prismaService.memo.findMany({
+            where: {
+                member: {
+                    accountId,
+                },
+            },
             select: {
                 note: true,
                 startDate: true,

@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MemoMemberService } from './memo-member.service';
-import { MemoMemberGetListRequest } from './request/memo-member-get-list.request';
 import { MemoMemberUpsertRequest } from './request/memo-member-upsert.request';
 import { MemoMemberGetDetailResponse } from './response/memo-member-get-detail.response';
 import { MemoMemberGetListResponse } from './response/memo-member-get-list.response';
@@ -39,11 +38,8 @@ export class MemoMemberController {
     }
 
     @Get()
-    async getList(
-        @Req() req: BaseRequest,
-        @Query() query: MemoMemberGetListRequest,
-    ): Promise<BaseResponse<MemoMemberGetListResponse>> {
-        return BaseResponse.of(await this.memoMemberService.getList(req.user.accountId, query));
+    async getList(@Req() req: BaseRequest): Promise<BaseResponse<MemoMemberGetListResponse>> {
+        return BaseResponse.of(await this.memoMemberService.getList(req.user.accountId));
     }
 
     @Post()
