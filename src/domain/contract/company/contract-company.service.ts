@@ -151,17 +151,19 @@ export class ContractCompanyService {
             throw new BadRequestException('The contract for this application id is exist');
         }
         await this.prismaService.$transaction(async (prisma) => {
-            if (application.post.headhunting.recommendations.length !== 0) {
-                await prisma.headhuntingRecommendation.update({
-                    where: {
-                        id: application.post.headhunting.recommendations[0].id,
-                    },
-                    data: {
-                        settlement: {
-                            create: {},
+            if (application.post.headhunting) {
+                if (application.post.headhunting.recommendations.length !== 0) {
+                    await prisma.headhuntingRecommendation.update({
+                        where: {
+                            id: application.post.headhunting.recommendations[0].id,
                         },
-                    },
-                });
+                        data: {
+                            settlement: {
+                                create: {},
+                            },
+                        },
+                    });
+                }
             }
             await prisma.file.create({
                 data: {

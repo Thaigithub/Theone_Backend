@@ -16,8 +16,16 @@ export class ReportAdminService {
         const report = await this.prismaService.report.findUnique({
             include: {
                 member: true,
-                questionFiles: true,
-                answerFiles: true,
+                questionFiles: {
+                    include: {
+                        file: true,
+                    },
+                },
+                answerFiles: {
+                    include: {
+                        file: true,
+                    },
+                },
             },
             where: {
                 isActive: true,
@@ -31,21 +39,29 @@ export class ReportAdminService {
 
     async update(reportId: number, body: ReportAdminUpdateRequest): Promise<void> {
         await this.checkReportExist(reportId);
-
-        await this.prismaService.report.update({
-            where: {
-                id: reportId,
-            },
-            data: {
-                answerTitle: body.title,
-                answerContent: body.content,
-                answerFiles: {
-                    createMany: {
-                        data: body.files,
-                    },
+        await this.prismaService.$transaction(async (prisma) => {
+            const report = await prisma.report.update({
+                where: {
+                    id: reportId,
                 },
-                status: AnswerStatus.COMPLETE,
-            },
+                data: {
+                    answerTitle: body.title,
+                    answerContent: body.content,
+                    status: AnswerStatus.COMPLETE,
+                },
+            });
+            await prisma.file.createMany({
+                data: body.files.map((item) => {
+                    return {
+                        ...item,
+                        reportFile: {
+                            create: {
+                                answerReportId: report.id,
+                            },
+                        },
+                    };
+                }),
+            });
         });
     }
 
@@ -93,10 +109,10 @@ export class ReportAdminService {
             questionFiles:
                 report.questionFiles?.map((item) => {
                     return {
-                        fileName: item.fileName,
-                        type: item.type,
-                        key: item.key,
-                        size: Number(item.size),
+                        fileName: item.file.fileName,
+                        type: item.file.type,
+                        key: item.file.key,
+                        size: Number(item.file.size),
                     };
                 }) || [],
             reportType: report.reportType,
@@ -109,10 +125,10 @@ export class ReportAdminService {
             answerFiles:
                 report.answerFiles?.map((item) => {
                     return {
-                        fileName: item.fileName,
-                        type: item.type,
-                        key: item.key,
-                        size: Number(item.size),
+                        fileName: item.file.fileName,
+                        type: item.file.type,
+                        key: item.file.key,
+                        size: Number(item.file.size),
                     };
                 }) || [],
             answeredAt: report.answeredAt,

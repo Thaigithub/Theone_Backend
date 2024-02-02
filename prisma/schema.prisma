@@ -303,15 +303,12 @@ model File {
   questionInquiryFile           InquiryFile?                  @relation("question_file")
   answerInquiryFile             InquiryFile?                  @relation("answer_file")
   faqFile                       FaqFile?
-  questionReport                Report?                       @relation("question_files", fields: [questionReportId], references: [id])
-  answerReport                  Report?                       @relation("answer_files", fields: [answerReportId], references: [id])
-  questionReportId              Int?
-  answerReportId                Int?
   questionLaborConsultationFile LaborConsultationFile?        @relation("question_file")
   answerLaborConsultationFile   LaborConsultationFile?        @relation("answer_file")
   point                         Point?
   logo                          Company?                      @relation("logo")
   contactCard                   Company?                      @relation("contact_card")
+  reportFile                    ReportFile?
 
   @@map("files")
 }
@@ -1163,10 +1160,22 @@ model Report {
   reportType      ReportType   @map("report_type")
   status          AnswerStatus @default(WAITING)
   member          Member       @relation(fields: [memberId], references: [id])
-  questionFiles   File[]       @relation("question_files")
-  answerFiles     File[]       @relation("answer_files")
+  questionFiles   ReportFile[] @relation("question_files")
+  answerFiles     ReportFile[] @relation("answer_files")
 
   @@map("reports")
+}
+
+model ReportFile {
+  id               Int     @id @default(autoincrement())
+  fileId           Int     @unique
+  file             File    @relation(fields: [fileId], references: [id])
+  questionReport   Report? @relation("question_files", fields: [questionReportId], references: [id])
+  answerReport     Report? @relation("answer_files", fields: [answerReportId], references: [id])
+  questionReportId Int?
+  answerReportId   Int?
+
+  @@map("report_files")
 }
 
 model LaborConsultation {
