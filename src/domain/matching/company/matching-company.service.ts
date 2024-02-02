@@ -154,6 +154,7 @@ export class MatchingCompanyService {
                     },
                 },
                 include: {
+                    code: true,
                     leader: {
                         include: {
                             licenses: {
