@@ -13,22 +13,35 @@ export class ReportMemberService {
     constructor(private prismaService: PrismaService) {}
 
     async create(accountId: number, body: ReportMemberCreateRequest): Promise<void> {
-        await this.prismaService.report.create({
-            data: {
-                member: {
-                    connect: {
-                        accountId,
+        await this.prismaService.$transaction(async (prisma) => {
+            const report = await prisma.report.create({
+                data: {
+                    member: {
+                        connect: {
+                            accountId,
+                        },
                     },
+                    questionTitle: body.title,
+                    questionContent: body.content,
+                    reportType: body.type,
                 },
-                questionTitle: body.title,
-                questionContent: body.content,
-                reportType: body.type,
-                questionFiles: {
-                    createMany: {
-                        data: body.files,
-                    },
+                select: {
+                    id: true,
                 },
-            },
+            });
+
+            await prisma.file.createMany({
+                data: body.files.map((item) => {
+                    return {
+                        ...item,
+                        reportFile: {
+                            create: {
+                                questionReportId: report.id,
+                            },
+                        },
+                    };
+                }),
+            });
         });
     }
 
@@ -61,8 +74,16 @@ export class ReportMemberService {
     async getDetail(accountId: number, reportId: number): Promise<ReportMemberGetDetailResponse> {
         const report = await this.prismaService.report.findUnique({
             include: {
-                questionFiles: true,
-                answerFiles: true,
+                questionFiles: {
+                    include: {
+                        file: true,
+                    },
+                },
+                answerFiles: {
+                    include: {
+                        file: true,
+                    },
+                },
             },
             where: {
                 isActive: true,
@@ -80,10 +101,10 @@ export class ReportMemberService {
             questionFiles:
                 report.questionFiles?.map((item) => {
                     return {
-                        fileName: item.fileName,
-                        type: item.type,
-                        key: item.key,
-                        size: Number(item.size),
+                        fileName: item.file.fileName,
+                        type: item.file.type,
+                        key: item.file.key,
+                        size: Number(item.file.size),
                     };
                 }) || [],
             reportType: report.reportType,
@@ -94,10 +115,10 @@ export class ReportMemberService {
             answerFiles:
                 report.answerFiles?.map((item) => {
                     return {
-                        fileName: item.fileName,
-                        type: item.type,
-                        key: item.key,
-                        size: Number(item.size),
+                        fileName: item.file.fileName,
+                        type: item.file.type,
+                        key: item.file.key,
+                        size: Number(item.file.size),
                     };
                 }) || [],
             answeredAt: report.answeredAt,
