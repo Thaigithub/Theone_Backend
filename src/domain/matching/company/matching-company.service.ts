@@ -289,8 +289,6 @@ export class MatchingCompanyService {
                                         ? 'On duty'
                                         : 'Looking for a job',
                                     occupations: member.licenses.map((item) => {
-                                        console.log(item);
-                                        console.log('code: ', item.code);
                                         return item.code.name;
                                     }),
                                 };
