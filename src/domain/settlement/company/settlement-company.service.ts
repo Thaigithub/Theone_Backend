@@ -15,9 +15,11 @@ export class SettlementCompanyService {
         const queryFilter: Prisma.SettlementWhereInput = {
             ...(query.status === SettlementCompanyStatus.REQUESTED && { status: SettlementStatus.REQUESTED }),
             ...(query.status === SettlementCompanyStatus.UNSETTLED && { status: SettlementStatus.UNSETTLED }),
-            ...(query.status === SettlementCompanyStatus.UNSETTLED && { status: SettlementStatus.SETTLED }),
-            ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
-            ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
+            ...(query.status === SettlementCompanyStatus.SETTLED && { status: SettlementStatus.SETTLED }),
+            completeDate: {
+                ...(query.startDate && { gte: new Date(query.startDate) }),
+                ...(query.endDate && { lte: new Date(query.endDate) }),
+            },
             headHuntingRecommendation: {
                 AND: [
                     { NOT: { applicationId: null } },
@@ -30,7 +32,6 @@ export class SettlementCompanyService {
                                     { NOT: { memberId: null } },
                                     {
                                         member: {
-                                            isActive: true,
                                             ...(query.keyword && {
                                                 name: { contains: query.keyword, mode: 'insensitive' },
                                             }),
@@ -43,7 +44,6 @@ export class SettlementCompanyService {
                                     { NOT: { teamId: null } },
                                     {
                                         team: {
-                                            isActive: true,
                                             ...(query.keyword && {
                                                 name: { contains: query.keyword, mode: 'insensitive' },
                                             }),
