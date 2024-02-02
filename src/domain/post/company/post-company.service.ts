@@ -400,7 +400,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeoples: request.numberOfPeople,
-                ...(request.occupationId && {codeId: request.occupationId}),
+                ...(request.occupationId && {code: {connect:{id:request.occupationId}}}),
                 ...(request.otherInformation && { otherInformation: request.otherInformation}),
                 ...(request.salaryType && { salaryType: request.salaryType}),
                 salaryAmount: request.salaryAmount,
@@ -410,7 +410,11 @@ export class PostCompanyService {
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor,
-                siteId: request.siteId,
+                site: {
+                    connect:{
+                        id: request.siteId
+                    }
+                },
                 headhunting:
                     request.category === PostCategory.MATCHING
                         ? post.headhunting
