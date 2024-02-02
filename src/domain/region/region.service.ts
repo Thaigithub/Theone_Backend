@@ -73,22 +73,40 @@ export class RegionService {
     async parseFromRegionList(regionList: string[]): Promise<{ ids: number[] }> {
         const list = regionList
             ? regionList.map((item) => {
-                  return parseInt(item.split('-')[1]);
+                  const cityId = parseInt(item.split('-')[0]);
+                  const districtId = parseInt(item.split('-')[1]);
+                  return [cityId, districtId];
               })
             : [];
-        const districtEntireCitiesList = (
-            await this.prismaService.region.findMany({
-                where: {
-                    id: { in: list },
-                    isActive: true,
-                },
-                select: {
-                    id: true,
-                },
-            })
-        ).map((item) => {
-            return item.id;
-        });
+
+        const districtEntireCitiesList = [];
+
+        await Promise.all(
+            list.map(async (item) => {
+                const region = await this.prismaService.region.findUnique({
+                    where: {
+                        id: item[1],
+                    },
+                    select: {
+                        districtEnglishName: true,
+                    },
+                });
+
+                if (region.districtEnglishName === 'All') {
+                    const regionIds = await this.prismaService.region.findMany({
+                        where: {
+                            cityId: item[0],
+                        },
+                        select: {
+                            id: true,
+                        },
+                    });
+
+                    districtEntireCitiesList.push(...regionIds.map((item) => item.id));
+                } else districtEntireCitiesList.push(item[1]);
+            }),
+        );
+
         return { ids: districtEntireCitiesList };
     }
 }

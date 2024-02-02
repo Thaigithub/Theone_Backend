@@ -53,7 +53,7 @@ export class PortoneService {
                 })
             ).data.response;
             const { amount, merchant_uid, status } = data;
-            console.log(data);
+
             if (status === 'ready') {
                 const payment = await this.prismaService.productPaymentHistory.findUnique({
                     where: {
@@ -84,7 +84,6 @@ export class PortoneService {
                 }
             }
         } catch (e) {
-            console.log(e);
             throw new NotFoundException('Payment not found');
         }
     }
