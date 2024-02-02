@@ -30,7 +30,7 @@ deploy-prod:
         - ssh-keyscan -H $PROD_AWS_EC2_IP >> ~/.ssh/known_hosts
     script:
         - echo "Deploying started..."
-        - ssh $PROD_AWS_EC2_USER@$AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sh $PROD_AWS_SCRIPT_PATH"
+        - ssh $PROD_AWS_EC2_USER@$PROD_AWS_EC2_IP "eval \"\$(ssh-agent -s)\" && sh $PROD_AWS_SCRIPT_PATH"
         - echo "Finished deploying the app."
     only:
         - main
