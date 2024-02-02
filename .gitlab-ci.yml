@@ -1,5 +1,18 @@
 stages:
+    - build
     - deploy
+
+build:
+    stage: build
+    image: node:18
+    script:
+        - echo "Building..."
+        - npm i
+        - npm i cross-env dotenv-cli
+        - timeout 2m npm run build || { echo "Build process was terminated due to timeout"; exit 1; }
+    only:
+        - develop
+        - main
 
 deploy-dev:
     stage: deploy
