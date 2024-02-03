@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, PostType, Prisma } from '@prisma/client';
+import { ExperienceType, NotificationType, PostType, Prisma } from '@prisma/client';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { StorageService } from 'services/storage/storage.service';
@@ -20,6 +21,7 @@ export class PostMemberService {
         private prismaService: PrismaService,
         private regionService: RegionService,
         private storageService: StorageService,
+        private notificationMemberService: NotificationMemberService,
     ) {}
 
     protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
@@ -308,7 +310,12 @@ export class PostMemberService {
                 isActive: true,
             },
             include: {
-                member: true,
+                member: {
+                    select:{
+                        id: true,
+                        name: true,
+                    }
+                }
             },
         });
 
@@ -318,6 +325,10 @@ export class PostMemberService {
                 id,
                 isActive: true,
             },
+            select: {
+                id: true,
+                name: true,
+            }
         });
         if (!post) {
             throw new BadRequestException('Post does not exist');
@@ -340,6 +351,13 @@ export class PostMemberService {
                 post: { connect: { id: id } },
             },
         });
+        this.notificationMemberService.create(
+            accountId,
+            account.member.name + ' ' + post.name + ' 공고에 지원했습니다.',
+            '',
+            NotificationType.POST,
+            id,
+        );
     }
 
     async addApplyPostTeam(accountId: number, postId: number, teamId: number) {
@@ -350,6 +368,9 @@ export class PostMemberService {
                 },
                 id: teamId,
             },
+            select: {
+                name: true,
+            }
         });
         if (!isTeamLeader) return BaseResponse.error('You are not leader of this team');
         //Check exist post
@@ -358,6 +379,10 @@ export class PostMemberService {
                 id: postId,
                 isActive: true,
             },
+            select: {
+                id: true,
+                name: true,
+            }
         });
 
         if (!post) {
@@ -383,6 +408,35 @@ export class PostMemberService {
                 post: { connect: { id: postId } },
             },
         });
+        await this.notificationMemberService.create(
+            accountId,
+            isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.',
+            '',
+            NotificationType.POST,
+            postId,
+        );
+        const memberOnTeams = await this.prismaService.membersOnTeams.findMany({
+            where: {
+                teamId,
+            },
+            select: {
+                member: {
+                    select: {
+                        accountId: true,
+                    }
+                }
+            }
+        });
+        memberOnTeams.forEach(async (item)=> {
+            await this.notificationMemberService.create(
+                item.member.accountId, 
+                isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.', 
+                '', 
+                NotificationType.POST, 
+                postId
+            );
+        });
+
         return BaseResponse.of(newApplication);
     }
 

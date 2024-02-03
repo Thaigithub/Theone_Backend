@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PostHistoryType, PostType, Prisma } from '@prisma/client';
+import { NotificationType, PostHistoryType, PostType, Prisma } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -25,7 +26,10 @@ import { PostAdminGetListResponse } from './response/post-admin-get-list.respons
 
 @Injectable()
 export class PostAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationCompanyService: NotificationCompanyService
+    ) {}
 
     async checkExistPost(id: number) {
         const post_record = await this.prismaService.post.findUnique({
@@ -290,25 +294,6 @@ export class PostAdminService {
         };
     }
 
-    async recordPostHistory(postId: number, historyType: PostHistoryType, data: any, content: string | undefined) {
-        await this.prismaService.post.update({
-            where: {
-                id: postId,
-                isActive: true,
-            },
-            data: {
-                ...data,
-                postHistory: {
-                    create: {
-                        content: content,
-                        historyType: historyType,
-                    },
-                },
-            },
-        });
-        return true;
-    }
-
     async update(id: number, request: PostAdminUpdateRequest) {
         await this.checkCodeType(request.occupationId);
         const FAKE_STAMP = '2023-12-31T';
@@ -351,16 +336,35 @@ export class PostAdminService {
 
     async deletePost(id: number, query: PostAdminDeleteRequest) {
         await this.checkExistPost(id);
-        const data = {
-            isActive: false,
-        };
-        await this.recordPostHistory(id, PostHistoryType.DELETED, data, query.deleteReason);
+        const post = await this.prismaService.post.update({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            data: {
+                isActive: false,
+                postHistories: {
+                    create: {
+                        content: query.deleteReason,
+                        historyType: PostHistoryType.DELETED,
+                    },
+                },
+            },
+            select: {
+                company: {
+                    select: {
+                        accountId: true,
+                    }
+                }
+            }
+        });
+        await this.notificationCompanyService.create(post.company.accountId, '공고가 반려되었습니다', '', NotificationType.POST, id);
     }
 
     async updateExposure(id: number, payload: PostAdminUpdateExposureRequest) {
         const post_record = await this.checkExistPost(id);
-        if (post_record.isHidden != payload.isHidden) {
-            await this.prismaService.post.update({
+        if (post_record.isHidden !== payload.isHidden) {
+            const post = await this.prismaService.post.update({
                 where: {
                     id: id,
                     isActive: true,
@@ -368,7 +372,19 @@ export class PostAdminService {
                 data: {
                     isHidden: payload.isHidden,
                 },
+                select: {
+                    company: {
+                        select: {
+                            accountId: true,
+                        }
+                    }
+                }
             });
+            if(payload.isHidden === true) {
+                await this.notificationCompanyService.create(post.company.accountId, '공고가 반려되었습니다', '', NotificationType.POST, id);
+            } else {
+                await this.notificationCompanyService.create(post.company.accountId, '공고가 처리되었습니다', '', NotificationType.POST, id);
+            }
         }
     }
 

@@ -6,9 +6,10 @@ import { InterviewCompanyController } from './company/interview-company.controll
 import { InterviewCompanyService } from './company/interview-company.service';
 import { InterviewMemberController } from './member/interview-member.controller';
 import { InterviewMemberService } from './member/interview-member.service';
+import { NotificationModule } from 'domain/notification/notification.module';
 
 @Module({
-    imports: [PrismaModule, MemberModule, ApplicationModule],
+    imports: [PrismaModule, MemberModule, ApplicationModule, NotificationModule],
     controllers: [InterviewCompanyController, InterviewMemberController],
     providers: [InterviewCompanyService, InterviewMemberService],
 })

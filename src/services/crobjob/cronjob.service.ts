@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { BannerStatus, PostStatus, PostType } from '@prisma/client';
+import { BannerStatus, NotificationType, PostStatus, PostType } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { StorageService } from 'services/storage/storage.service';
 
@@ -9,6 +11,8 @@ export class CronJobService {
     constructor(
         private prismaService: PrismaService,
         private storageService: StorageService,
+        private readonly notificationMemberService: NotificationMemberService,
+        private readonly notificationCompanyService: NotificationCompanyService,
     ) {}
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -46,6 +50,101 @@ export class CronJobService {
         );
     }
 
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    async notifySite() {
+        // Calculate the datetime that is 1 day ago
+        const currentDate = new Date();
+        const previousDate = new Date(currentDate);
+        previousDate.setDate(currentDate.getDate() - 1);
+        const sites = await this.prismaService.site.findMany({
+            where: {
+                endDate: {
+                    gte: previousDate,
+                    lt: currentDate,
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+                company: {
+                    select: {
+                        accountId: true,
+                    },
+                },
+            },
+        });
+        sites.forEach(async (site) => {
+            await this.notificationCompanyService.create(
+                site.company.accountId,
+                '현장 ' + site.name + ' 공사기간이 종료되었습니다.',
+                '',
+                NotificationType.SITE,
+                site.id,
+            );
+        });
+    }
+
+    @Cron(CronExpression.EVERY_HOUR)
+    async notifyPost() {
+        const currentDate = new Date();
+        const nextDay = new Date(currentDate);
+        nextDay.setDate(currentDate.getDate() + 1);
+        const previousDate = new Date(currentDate);
+        previousDate.setDate(currentDate.getDate() - 1);
+        const posts = await this.prismaService.post.findMany({
+            where: {
+                endDate: {
+                    gt: currentDate,
+                    lte: nextDay,
+                },
+            },
+            select: {
+                id: true,
+                interests: {
+                    where: {
+                        member: {
+                            isActive: true,
+                        },
+                    },
+                    select: {
+                        member: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        // Notify for member that the interest post has 1 day before deadline
+        for (const post of posts) {
+            for (const interest of post.interests) {
+                const notification = await this.prismaService.notification.findFirst({
+                    where: {
+                        type: NotificationType.POST,
+                        typeId: post.id,
+                        createdAt: {
+                            gt: previousDate,
+                        },
+                        accountId: interest.member.accountId,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                });
+                if (!notification) {
+                    await this.notificationMemberService.create(
+                        interest.member.accountId,
+                        '관심 공고 마갑 1일전!!!',
+                        '관심 공고 마감 1일 전입니다.',
+                        NotificationType.POST,
+                        post.id,
+                    );
+                }
+            }
+        }
+    }
+
     @Cron(CronExpression.EVERY_HOUR)
     async resetFreePullUpPost() {
         await this.prismaService.post.updateMany({
@@ -74,23 +173,13 @@ export class CronJobService {
                 pullUpExpirationTime: { lt: new Date() },
             },
         });
-        // const currentDate = new Date(); // Lấy ngày hiện tại
-        // const previousDate = new Date(currentDate); // Tạo một đối tượng date mới với ngày hiện tại
-
-        // previousDate.setTime(currentDate.getTime() - 24 * 60 * 60 * 1000);
-        // const deadlineInterestPost = await this.prismaService.interest.findMany({
-        //     where: {
-        //         NOT: { post: null},
-        //         post: {
-        //             updatedAt: { lte: }
-        //             endDate: {}
-        //         }
-        //     }
-        // });
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    @Cron(CronExpression.EVERY_DAY_AT_1AM)
     async changePostStatus() {
+        const currentDate = new Date();
+        const previousDate = new Date(currentDate);
+        previousDate.setDate(currentDate.getDate() - 1);
         await this.prismaService.post.updateMany({
             data: {
                 status: PostStatus.DEADLINE,
@@ -98,9 +187,92 @@ export class CronJobService {
             where: {
                 isActive: true,
                 status: { not: PostStatus.DEADLINE },
-                endDate: { lt: new Date() },
+                endDate: {
+                    lt: currentDate,
+                    gte: previousDate,
+                },
             },
         });
+        const posts = await this.prismaService.post.findMany({
+            where: {
+                status: PostStatus.DEADLINE,
+                endDate: { lt: new Date() },
+                interests: {
+                    some: {
+                        member: {
+                            isActive: true,
+                        },
+                    },
+                },
+            },
+            select: {
+                id: true,
+                interests: {
+                    where: {
+                        member: {
+                            isActive: true,
+                        },
+                    },
+                    select: {
+                        member: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Notify for member that the interest post has been closed
+        for (const post of posts) {
+            for (const interest of post.interests) {
+                const notification = await this.prismaService.notification.findFirst({
+                    where: {
+                        type: NotificationType.POST,
+                        typeId: post.id,
+                        accountId: interest.member.accountId,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                });
+                if (!notification) {
+                    await this.notificationMemberService.create(
+                        interest.member.accountId,
+                        '관심 공고 마감',
+                        '관심 공고가 마감되었습니다',
+                        NotificationType.POST,
+                        post.id,
+                    );
+                }
+            }
+        }
+
+        // Notify for member that the interest post has been closed
+        for (const post of posts) {
+            for (const interest of post.interests) {
+                const notification = await this.prismaService.notification.findFirst({
+                    where: {
+                        type: NotificationType.POST,
+                        typeId: post.id,
+                        accountId: interest.member.accountId,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                });
+                if (!notification) {
+                    await this.notificationMemberService.create(
+                        interest.member.accountId,
+                        '관심 공고 마감',
+                        '관심 공고가 마감되었습니다',
+                        NotificationType.POST,
+                        post.id,
+                    );
+                }
+            }
+        }
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

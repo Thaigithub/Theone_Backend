@@ -7,9 +7,10 @@ import { TeamCompanyController } from './company/team-company.controller';
 import { TeamCompanyService } from './company/team-company.service';
 import { TeamMemberController } from './member/team-member.controller';
 import { TeamMemberService } from './member/team-member.service';
+import { NotificationModule } from 'domain/notification/notification.module';
 
 @Module({
-    imports: [PrismaModule, ExcelModule],
+    imports: [PrismaModule, ExcelModule, NotificationModule],
     controllers: [TeamAdminController, TeamMemberController, TeamCompanyController],
     providers: [TeamAdminService, TeamMemberService, TeamCompanyService],
 })

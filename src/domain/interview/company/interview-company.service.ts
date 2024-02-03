@@ -1,8 +1,16 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma, RequestObject } from '@prisma/client';
+import {
+    ApplicationCategory,
+    InterviewStatus,
+    NotificationType,
+    PostApplicationStatus,
+    Prisma,
+    RequestObject,
+} from '@prisma/client';
 import { ApplicationCompanyService } from 'domain/application/company/application-company.service';
 import { ApplicationCompanyGetDetailMemberResponse } from 'domain/application/company/response/application-company-get-detail-member.response';
 import { ApplicationCompanyGetDetailTeamResponse } from 'domain/application/company/response/application-company-get-detail-team.response';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -16,6 +24,7 @@ export class InterviewCompanyService {
     constructor(
         private prismaService: PrismaService,
         private applicationCompanyService: ApplicationCompanyService,
+        private notificationMemberService: NotificationMemberService,
     ) {}
 
     async getList(accountId: number, query: InterviewCompanyGetListRequest): Promise<InterviewCompanyGetListResponse> {
@@ -192,7 +201,7 @@ export class InterviewCompanyService {
             },
         });
         if (!interview) throw new NotFoundException('No interview found');
-        await this.prismaService.interview.update({
+        const afterUpdateInterview = await this.prismaService.interview.update({
             where: {
                 id,
             },
@@ -207,7 +216,36 @@ export class InterviewCompanyService {
                     },
                 },
             },
+            select: {
+                status: true,
+                application: {
+                    select: {
+                        member: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
+        if (afterUpdateInterview.status === InterviewStatus.PASS) {
+            await this.notificationMemberService.create(
+                afterUpdateInterview.application.member.accountId,
+                '출근일정 확인',
+                '지원현장에 지정일에 출근해 주세요.',
+                NotificationType.INTERVIEW,
+                id,
+            );
+        } else if (afterUpdateInterview.status === InterviewStatus.FAIL) {
+            await this.notificationMemberService.create(
+                afterUpdateInterview.application.member.accountId,
+                '공고 지원결과',
+                '지원현장에 채용되지 않았습니다. 다른 현장에 지원해 보세요.',
+                NotificationType.INTERVIEW,
+                id,
+            );
+        }
     }
 
     async create(body: InterviewCompanyProposeRequest, accountId: number): Promise<void> {
@@ -539,6 +577,34 @@ export class InterviewCompanyService {
                         });
                     }
                     break;
+                }
+            }
+            if (application) {
+                const interview = await prisma.interview.findUnique({
+                    where: {
+                        applicationId: application.id,
+                    },
+                    select: {
+                        id: true,
+                        application: {
+                            select: {
+                                member: {
+                                    select: {
+                                        accountId: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+                if (interview) {
+                    await this.notificationMemberService.create(
+                        interview.application.member.accountId,
+                        '면접요청',
+                        '지원현장에서 면접을 요청하였습니다',
+                        NotificationType.INTERVIEW,
+                        interview.id,
+                    );
                 }
             }
         });

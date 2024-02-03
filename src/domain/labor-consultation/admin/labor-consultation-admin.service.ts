@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AnswerStatus, InquirerType, Prisma } from '@prisma/client';
+import { AnswerStatus, InquirerType, NotificationType, Prisma } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
@@ -11,7 +13,11 @@ import { LaborConsultationAdminGetListResponse } from './response/labor-consulta
 
 @Injectable()
 export class LaborConsultationAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationCompanyService: NotificationCompanyService,
+        private notifcationMemberService: NotificationMemberService,
+    ) {}
 
     async getList(query: LaborConsultationAdminGetListRequest): Promise<LaborConsultationAdminGetListResponse> {
         const queryFilter: Prisma.LaborConsultationWhereInput = {
@@ -179,6 +185,18 @@ export class LaborConsultationAdminService {
                 isActive: true,
                 id,
             },
+            select: {
+                member: {
+                    select: {
+                        accountId: true,
+                    },
+                },
+                company: {
+                    select: {
+                        accountId: true,
+                    },
+                },
+            },
         });
 
         if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
@@ -197,7 +215,7 @@ export class LaborConsultationAdminService {
 
             await tx.laborConsultationFile.deleteMany({
                 where: {
-                    answerLaborConsultationId: laborConsultation.id,
+                    answerLaborConsultationId: id,
                 },
             });
 
@@ -235,5 +253,22 @@ export class LaborConsultationAdminService {
                 },
             });
         });
+        if (laborConsultation.company) {
+            await this.notificationCompanyService.create(
+                laborConsultation.company.accountId,
+                '노무상담에 대한 답변이 달렸습니다.',
+                '',
+                NotificationType.LABOR_CONSULTATION,
+                id,
+            );
+        } else if (laborConsultation.member) {
+            await this.notifcationMemberService.create(
+                laborConsultation.company.accountId,
+                '노무상담에 대한 답변이 달렸습니다.',
+                '',
+                NotificationType.LABOR_CONSULTATION,
+                id,
+            );
+        }
     }
 }

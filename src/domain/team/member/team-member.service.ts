@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InvitationStatus, Prisma, TeamStatus } from '@prisma/client';
+import { InvitationStatus, NotificationType, Prisma, TeamStatus } from '@prisma/client';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -14,7 +15,10 @@ import { TeamMemberGetListResponse } from './response/team-member-get-list.respo
 
 @Injectable()
 export class TeamMemberService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationMemberService: NotificationMemberService,
+    ) {}
 
     getTeamCode(sequenceDigit: string): string {
         const currentDate = new Date();
@@ -363,6 +367,9 @@ export class TeamMemberService {
             where: {
                 id: body.id,
             },
+            select: {
+                name: true,
+            },
         });
         if (!member) throw new NotFoundException('Member not found');
         const memberOnTeam = await this.prismaService.team.findUnique({
@@ -399,10 +406,11 @@ export class TeamMemberService {
                 status: true,
             },
         });
+        let teamInvitation = null;
         if (teamMemberInvitation) {
             if (teamMemberInvitation.isActive) {
                 if (teamMemberInvitation.status === InvitationStatus.DECLIENED) {
-                    await this.prismaService.teamInvitation.update({
+                    teamInvitation = await this.prismaService.teamInvitation.update({
                         where: {
                             id: teamMemberInvitation.id,
                             isActive: true,
@@ -411,10 +419,18 @@ export class TeamMemberService {
                             status: InvitationStatus.REQUESTED,
                             updatedAt: new Date(),
                         },
+                        select: {
+                            id: true,
+                            member: {
+                                select: {
+                                    accountId: true,
+                                },
+                            },
+                        },
                     });
                 }
             } else {
-                await this.prismaService.teamInvitation.update({
+                teamInvitation = await this.prismaService.teamInvitation.update({
                     where: {
                         id: teamMemberInvitation.id,
                     },
@@ -423,10 +439,18 @@ export class TeamMemberService {
                         status: InvitationStatus.REQUESTED,
                         updatedAt: new Date(),
                     },
+                    select: {
+                        id: true,
+                        member: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
+                    },
                 });
             }
         } else {
-            await this.prismaService.teamInvitation.create({
+            teamInvitation = await this.prismaService.teamInvitation.create({
                 data: {
                     isActive: true,
                     status: InvitationStatus.REQUESTED,
@@ -441,7 +465,32 @@ export class TeamMemberService {
                         },
                     },
                 },
+                select: {
+                    id: true,
+                    member: {
+                        select: {
+                            accountId: true,
+                        },
+                    },
+                },
             });
+        }
+        if (teamInvitation) {
+            const host = await this.prismaService.member.findUnique({
+                where: {
+                    accountId: accountId,
+                },
+                select: {
+                    name: true,
+                },
+            });
+            await this.notificationMemberService.create(
+                teamInvitation.member.accountId,
+                host.name + ' 님이 최강크루에 초대하셨습니다. 초대를 수락하시겠습니까?',
+                '',
+                NotificationType.TEAM,
+                teamInvitation.id,
+            );
         }
     }
 

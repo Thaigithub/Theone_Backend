@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { HeadhuntingMatchingStatus, HeadhuntingRequestStatus, Prisma, RequestObject } from '@prisma/client';
+import { HeadhuntingMatchingStatus, HeadhuntingRequestStatus, NotificationType, Prisma, RequestObject } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -21,7 +22,10 @@ import { HeadhuntingAdminGetListResponse } from './response/headhunting-admin-ge
 
 @Injectable()
 export class HeadhuntingAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationCompanyService: NotificationCompanyService,
+    ) {}
 
     async getCount(query: HeadhuntingAdminGetCountRequest): Promise<CountResponse> {
         const queryFilter: Prisma.HeadhuntingRequestWhereInput = {
@@ -584,6 +588,23 @@ export class HeadhuntingAdminService {
                 id,
                 isActive: true,
             },
+            select: {
+                headhunting: {
+                    select: {
+                        id: true,
+                        post: {
+                            select: {
+                                company: {
+                                    select: {
+                                        accountId: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                status: true,
+            },
         });
         if (!request) throw new NotFoundException('Headhunting request not found');
         if (request.status !== HeadhuntingRequestStatus.APPLY && request.status !== HeadhuntingRequestStatus.RE_APPLY)
@@ -599,5 +620,22 @@ export class HeadhuntingAdminService {
                 rejectReason: body.status === HeadhuntingRequestStatus.REJECTED ? body.reason : null,
             },
         });
+        if (body.status === HeadhuntingRequestStatus.APPROVED) {
+            await this.notificationCompanyService.create(
+                request.headhunting.post.company.accountId,
+                '인력요청 서비스가 정상적으로 처리되었습니다.',
+                '',
+                NotificationType.HEADHUNTING,
+                request.headhunting.id,
+            );
+        } else if (body.status === HeadhuntingRequestStatus.REJECTED) {
+            await this.notificationCompanyService.create(
+                request.headhunting.post.company.accountId,
+                '인력요청에 대한 확인이 필요하여 별도로 연락드리겠습니다.',
+                '',
+                NotificationType.HEADHUNTING,
+                request.headhunting.id,
+            );
+        }
     }
 }
