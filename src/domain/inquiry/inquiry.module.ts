@@ -6,8 +6,9 @@ import { InquiryCompanyController } from './company/inquiry-company.controller';
 import { InquiryCompanyService } from './company/inquiry-company.service';
 import { InquiryMemberController } from './member/inquiry-member.controller';
 import { InquiryMemberService } from './member/inquiry-member.service';
+import { NotificationModule } from 'domain/notification/notification.module';
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, NotificationModule],
     controllers: [InquiryMemberController, InquiryCompanyController, InquiryAdminController],
     providers: [InquiryMemberService, InquiryCompanyService, InquiryAdminService],
 })

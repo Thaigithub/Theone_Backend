@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AnswerStatus, InquirerType, Prisma } from '@prisma/client';
+import { AnswerStatus, InquirerType, NotificationType, Prisma } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
@@ -11,7 +13,11 @@ import { InquiryAdminGetListResponse } from './response/inquiry-admin-get-list.r
 
 @Injectable()
 export class InquiryAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationMemberService: NotificationMemberService,
+        private notificationCompanyService: NotificationCompanyService,
+    ) {}
 
     async getList(query: InquiryAdminGetListRequest): Promise<InquiryAdminGetListResponse> {
         const queryFilter: Prisma.InquiryWhereInput = {
@@ -179,6 +185,18 @@ export class InquiryAdminService {
                 isActive: true,
                 id,
             },
+            select: {
+                company: {
+                    select: {
+                        accountId: true,
+                    },
+                },
+                member: {
+                    select: {
+                        accountId: true,
+                    },
+                },
+            },
         });
 
         if (!inquiry) throw new NotFoundException('Inquiry does not exist');
@@ -197,7 +215,7 @@ export class InquiryAdminService {
 
             await tx.inquiryFile.deleteMany({
                 where: {
-                    answerInquiryId: inquiry.id,
+                    answerInquiryId: id,
                 },
             });
 
@@ -235,5 +253,22 @@ export class InquiryAdminService {
                 },
             });
         });
+        if (inquiry.company) {
+            await this.notificationCompanyService.create(
+                inquiry.company.accountId,
+                '1:1문의에 대한 답변이 달렸습니다.',
+                '',
+                NotificationType.INQUIRY,
+                id,
+            );
+        } else if (inquiry.member) {
+            await this.notificationMemberService.create(
+                inquiry.company.accountId,
+                '1:1문의에 대한 답변이 달렸습니다.',
+                '',
+                NotificationType.INQUIRY,
+                id,
+            );
+        }
     }
 }

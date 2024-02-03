@@ -2,6 +2,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     HeadhuntingRequestStatus,
+    NotificationType,
     PaymentStatus,
     Post,
     PostCategory,
@@ -10,6 +11,7 @@ import {
     Prisma,
     ProductType
 } from '@prisma/client';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -36,6 +38,7 @@ export class PostCompanyService {
     constructor(
         private prismaService: PrismaService,
         private productCompanyService: ProductCompanyService,
+        private notificationMemberService: NotificationMemberService
     ) {}
 
     private async checkPostExist(postId: number, accountId: number): Promise<Post> {
@@ -174,7 +177,7 @@ export class PostCompanyService {
         request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
         request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
 
-        await this.prismaService.post.create({
+        const post = await this.prismaService.post.create({
             data: {
                 category: request.category,
                 status: this.getStatus(new Date(request.startDate), new Date(request.endDate)),
@@ -211,6 +214,43 @@ export class PostCompanyService {
                         : undefined,
             },
         });
+
+        const memberAccountIds = (
+            await this.prismaService.site.findUnique({
+                where: {
+                    id: request.siteId,
+                },
+                select: {
+                    interests: {
+                        where: {
+                            member: {
+                                isActive: true,
+                            },
+                        },
+                        select: {
+                            member: {
+                                select: {
+                                    accountId: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        ).interests.map((item) => {
+            return item.member.accountId;
+        });
+        for (const id of memberAccountIds) {
+            await this.notificationMemberService.create(
+                id, 
+                '관심 업체(현장) 공고 등록', 
+                '관심 업체(현장)가 공고를 등록했습니다.', 
+                NotificationType.POST,
+                post.id,
+            );
+        }
+
+
     }
 
     async getDetail(accountId: number, id: number): Promise<PostCompanyGetDetailResponse> {

@@ -11,9 +11,10 @@ import { RegionModule } from 'domain/region/region.module';
 import { PostGuestController } from './guest/post-guest.controller';
 import { ProductModule } from 'domain/product/product.module';
 import { StorageService } from 'services/storage/storage.service';
+import { NotificationModule } from 'domain/notification/notification.module';
 
 @Module({
-    imports: [PrismaModule, TeamModule, RegionModule, ProductModule],
+    imports: [PrismaModule, TeamModule, RegionModule, ProductModule, NotificationModule],
     controllers: [PostAdminController, PostCompanyController, PostMemberController, PostGuestController],
     providers: [PostAdminService, PostCompanyService, PostMemberService, StorageService],
     exports: [PostAdminService, PostCompanyService, PostMemberService],

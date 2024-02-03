@@ -1,15 +1,19 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, RequestObject, SiteStatus } from '@prisma/client';
+import { NotificationType, Prisma, RequestObject, SiteStatus } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { SiteAdminGetCountCategory } from './enum/site-admin-get-count-category.enum';
 import { SiteAdminGetListCategory } from './enum/site-admin-get-list-category.enum';
 import { SiteAdminGetListLaborCategory } from './enum/site-admin-get_list-labor-category.enum';
 import { SiteAdminGetDetailContractStatus } from './enum/stie-admin-get-detail-contract-status.enum';
+import { SiteAdminGetCountRequest } from './request/site-admin-get-count.request';
 import { SiteAdminGetListLaborRequest } from './request/site-admin-get-list-labor.request';
 import { SiteAdminGetListRequest } from './request/site-admin-get-list.request';
 import { SiteAdminUpdateRequest } from './request/site-admin-update-status.request';
@@ -18,15 +22,13 @@ import { SiteAdminGetDetailLaborResponse } from './response/site-admin-get-detai
 import { SiteAdminGetDetailResponse } from './response/site-admin-get-detail.response';
 import { SiteAdminGetListLaborResponse } from './response/site-admin-get-list-labor.response';
 import { SiteAdminGetListResponse } from './response/site-admin-get-list.response';
-import { SiteAdminGetCountRequest } from './request/site-admin-get-count.request';
-import { CountResponse } from 'utils/generics/count.response';
-import { SiteAdminGetCountCategory } from './enum/site-admin-get-count-category.enum';
 
 @Injectable()
 export class SiteAdminService {
     constructor(
         private prismaService: PrismaService,
         private excelService: ExcelService,
+        private notificationCompanyService: NotificationCompanyService,
     ) {}
 
     async getList(query: SiteAdminGetListRequest): Promise<SiteAdminGetListResponse> {
@@ -153,7 +155,7 @@ export class SiteAdminService {
         });
         if (site.status !== body.status) {
             await this.prismaService.$transaction(async (prisma) => {
-                await prisma.site.update({
+                const site = await prisma.site.update({
                     where: {
                         id: id,
                         isActive: true,
@@ -161,6 +163,13 @@ export class SiteAdminService {
                     data: {
                         status: body.status,
                     },
+                    select: {
+                        company: {
+                            select: {
+                                accountId: true,
+                            }
+                        }
+                    }
                 });
                 if (body.status === SiteStatus.SUSPENDED) {
                     if (!body.content) {
@@ -172,6 +181,13 @@ export class SiteAdminService {
                             siteId: id,
                         },
                     });
+                    await this.notificationCompanyService.create(
+                        site.company.accountId, 
+                        '관리자가 현장을 정지시켰습니다.', 
+                        '', 
+                        NotificationType.SITE, 
+                        id
+                    );
                 }
             });
         }

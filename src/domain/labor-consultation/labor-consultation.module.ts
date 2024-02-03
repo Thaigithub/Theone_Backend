@@ -6,9 +6,10 @@ import { LaborConsultationCompanyController } from './company/labor-consultation
 import { LaborConsultationCompanyService } from './company/labor-consultation-company.service';
 import { LaborConsultationMemberController } from './member/labor-consultation-member.controller';
 import { LaborConsultationMemberService } from './member/labor-consultation-member.service';
+import { NotificationModule } from 'domain/notification/notification.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, NotificationModule],
     controllers: [LaborConsultationCompanyController, LaborConsultationAdminController, LaborConsultationMemberController],
     providers: [LaborConsultationCompanyService, LaborConsultationAdminService, LaborConsultationMemberService],
 })

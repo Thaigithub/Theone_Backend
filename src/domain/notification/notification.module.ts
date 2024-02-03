@@ -9,5 +9,6 @@ import { NotificationMemberService } from './member/notification-member.service'
     imports: [PrismaModule],
     controllers: [NotificationCompanyController, NotificationMemberController],
     providers: [NotificationCompanyService, NotificationMemberService],
+    exports: [NotificationMemberService, NotificationCompanyService],
 })
 export class NotificationModule {}

@@ -36,7 +36,21 @@ export class NotificationMemberService {
                     memberId: account.member.id,
                 },
             });
+            if (!preference) {
+                await this.prismaService.notification.create({
+                    data: {
+                        title,
+                        ...(content && { content }),
+                        type,
+                        accountId,
+                        ...(typeId && { typeId }),
+                    },
+                });
+                console.log('ok');
+                return;
+            }
             if (!preference.isNoticeNotificationActive) {
+                // console.log('Turn off all notifications');
                 return;
             }
             if (
@@ -48,9 +62,11 @@ export class NotificationMemberService {
                     NotificationType.CONTRACT,
                 ).includes(type)
             ) {
+                // console.log('turn off POST, APPLICATION, INTERVIEW, CONTACT');
                 return;
             }
-            if (!preference.isTeamNotificationActive && NotificationType.TEAM) {
+            if (!preference.isTeamNotificationActive && type === NotificationType.TEAM) {
+                // console.log('Turn off Team & Invitation notification');
                 return;
             }
             await this.prismaService.notification.create({

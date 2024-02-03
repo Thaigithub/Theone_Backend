@@ -15,6 +15,7 @@ export class MemoMemberService {
                 member: {
                     accountId,
                 },
+                isActive: true,
             },
             select: {
                 note: true,
