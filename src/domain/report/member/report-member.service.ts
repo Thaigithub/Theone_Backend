@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ReportMemberCreateRequest } from './request/report-member-create.request';
 import { ReportMemberGetListRequest } from './request/report-member-get-list.request';
 import { ReportMemberGetDetailResponse } from './response/report-member-get-detail.response';
 import { ReportMemberGetListResponse } from './response/report-member-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ReportMemberService {
@@ -30,19 +30,21 @@ export class ReportMemberService {
                     id: true,
                 },
             });
-
-            await prisma.file.createMany({
-                data: body.files.map((item) => {
-                    return {
-                        ...item,
+            for (const item of body.files) {
+                await prisma.file.create({
+                    data: {
+                        key: item.key,
+                        fileName: item.fileName,
+                        size: item.size,
+                        type: item.type,
                         reportFile: {
                             create: {
                                 questionReportId: report.id,
                             },
                         },
-                    };
-                }),
-            });
+                    },
+                });
+            }
         });
     }
 
