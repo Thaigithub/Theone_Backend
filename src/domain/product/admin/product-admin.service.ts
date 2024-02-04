@@ -23,6 +23,7 @@ import { ProductAdminGetListSettlementResponse } from './response/product-admin-
 import { ProductAdminGetListUsageCycleResponse } from './response/product-admin-get-list-usage-cycle.response';
 import { ProductAdminGetAmountRequest } from './request/product-admin-get-amount.request';
 import { CountResponse } from 'utils/generics/count.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ProductAdminService {
@@ -307,7 +308,7 @@ export class ProductAdminService {
                 createdAt: true,
             },
         });
-        if (!refund) throw new NotFoundException('Refund not found');
+        if (!refund) throw new NotFoundException(Error.REFUND_NOT_FOUND);
         return {
             companyName: refund.productPaymentHistory.company.name,
             presentativeName: refund.productPaymentHistory.company.presentativeName,
@@ -327,7 +328,7 @@ export class ProductAdminService {
                 id,
             },
         });
-        if (!refund) throw new NotFoundException('Refund not found');
+        if (!refund) throw new NotFoundException(Error.REFUND_NOT_FOUND);
         await this.prismaService.refund.update({
             where: {
                 id,

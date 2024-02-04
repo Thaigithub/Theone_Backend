@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { MemoMemberUpsertRequest } from './request/memo-member-upsert.request';
 import { MemoMemberGetDetailResponse } from './response/memo-member-get-detail.response';
@@ -37,15 +38,14 @@ export class MemoMemberService {
                 isActive: true,
             },
         });
-        if (!memo) throw new NotFoundException('Memo not found');
+        if (!memo) throw new NotFoundException(Error.MEMO_NOT_FOUND);
         delete memo.id;
         delete memo.memberId;
         return memo;
     }
 
     async create(accountId: number, body: MemoMemberUpsertRequest): Promise<void> {
-        if (new Date(body.startDate) > new Date(body.endDate))
-            throw new BadRequestException('startDate must be earlier than endDate');
+        if (new Date(body.startDate) > new Date(body.endDate)) throw new BadRequestException(Error.REQUEST_NOT_APPROPRIATE);
         await this.prismaService.memo.create({
             data: {
                 member: {
@@ -61,8 +61,7 @@ export class MemoMemberService {
     }
 
     async update(accountId: number, id: number, body: MemoMemberUpsertRequest): Promise<void> {
-        if (new Date(body.startDate) > new Date(body.endDate))
-            throw new BadRequestException('startDate must be earlier than endDate');
+        if (new Date(body.startDate) > new Date(body.endDate)) throw new BadRequestException(Error.REQUEST_NOT_APPROPRIATE);
         const memo = await this.prismaService.memo.findUnique({
             where: {
                 member: {
@@ -72,7 +71,7 @@ export class MemoMemberService {
                 isActive: true,
             },
         });
-        if (!memo) throw new NotFoundException('Memo not found');
+        if (!memo) throw new NotFoundException(Error.MEMO_NOT_FOUND);
         await this.prismaService.memo.update({
             where: {
                 id,
@@ -95,7 +94,7 @@ export class MemoMemberService {
                 isActive: true,
             },
         });
-        if (!memo) throw new NotFoundException('Memo not found');
+        if (!memo) throw new NotFoundException(Error.MEMO_NOT_FOUND);
         await this.prismaService.memo.update({
             where: {
                 id,

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AnnouncementAdminCreateRequest } from './request/announcement-admin-create.request';
@@ -100,7 +101,7 @@ export class AnnouncementAdminService {
             },
         });
         if (!record) {
-            throw new NotFoundException('The announcement id is not exist');
+            throw new NotFoundException(Error.ANNOUNCEMENT_NOT_FOUND);
         }
         return {
             title: record.title,
@@ -119,7 +120,7 @@ export class AnnouncementAdminService {
 
     async createAnnouncement(accountId: number, body: AnnouncementAdminCreateRequest) {
         if (body.files && body.files.length > 3) {
-            throw new BadRequestException('3 is maxium number of file uploads');
+            throw new BadRequestException(Error.FILE_EXCEED_ALLOWANCE);
         }
         const admin = await this.prismaService.admin.findUnique({
             where: {
@@ -131,7 +132,7 @@ export class AnnouncementAdminService {
             },
         });
         if (!admin) {
-            throw new NotFoundException('The admin id is not exist');
+            throw new NotFoundException(Error.ADMIN_NOT_FOUND);
         }
         await this.prismaService.$transaction(async (prisma) => {
             const announcement = await prisma.announcement.create({
@@ -180,7 +181,7 @@ export class AnnouncementAdminService {
             },
         });
         if (!record) {
-            throw new NotFoundException('The announcement is not found');
+            throw new NotFoundException(Error.ANNOUNCEMENT_NOT_FOUND);
         }
         await this.prismaService.$transaction(async (prisma) => {
             await prisma.announcementFile.deleteMany({

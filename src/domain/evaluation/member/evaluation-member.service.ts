@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { EvaluationMemberStatus } from './dto/evaluation-member-get-list.enum';
@@ -72,8 +73,8 @@ export class EvaluationMemberService {
                 },
             },
         });
-        if (!siteEvaluationByMember) throw new NotFoundException('Evaluation ticket not found');
-        if (siteEvaluationByMember.score) throw new BadRequestException('This site is already evaluated');
+        if (!siteEvaluationByMember) throw new NotFoundException(Error.EVALUATION_NOT_FOUND);
+        if (siteEvaluationByMember.score) throw new BadRequestException(Error.EVALUATION_HAS_BEEN_MADE);
 
         // Update evaluation ticket
         await this.prismaService.siteEvaluationByContract.update({

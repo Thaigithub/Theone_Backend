@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, AdminLevel, FunctionName, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { AdminAdminSearchCategories } from './enum/admin-admin-search-category.enum';
@@ -106,7 +107,7 @@ export class AdminAdminService {
                 account: true,
             },
         });
-        if (!existAdmin) throw new NotFoundException('Admin not found');
+        if (!existAdmin) throw new NotFoundException(Error.ADMIN_NOT_FOUND);
         await this.prismaService.admin.update({
             where: {
                 isActive: true,

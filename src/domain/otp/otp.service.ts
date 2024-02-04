@@ -9,6 +9,7 @@ import { OtpSendRequest } from './request/otp-send.request';
 import { OtpCheckValidRequest } from './request/otp-verify.request';
 import { OtpSendResponse } from './response/otp-send.response';
 import { OtpStatus, OtpVerifyResponse } from './response/otp-verify.response';
+import { Error } from 'utils/error.enum';
 @Injectable()
 export class OtpService {
     constructor(
@@ -27,7 +28,7 @@ export class OtpService {
         });
         if (existedOtp) {
             if (getTimeDifferenceInMinutes(existedOtp.createdAt) < 1) {
-                throw new BadRequestException('Wait for 1 minute till next request');
+                throw new BadRequestException(Error.A_MINUTE_MINIMUM_TILL_NEXT_REQUEST);
             }
         }
         const otp = await this.prismaService.otpProvider.create({

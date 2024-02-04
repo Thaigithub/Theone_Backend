@@ -9,6 +9,7 @@ import { FaqAdminGetListRequest } from './request/faq-admin-get-list.request';
 import { FaqAdminUpdateRequest } from './request/faq-admin-update.request';
 import { FaqAdminGetDetailResponse } from './response/faq-admin-get-detail.response';
 import { FaqAdminGetListResponse } from './response/faq-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 @Injectable()
 export class FaqAdminService {
     constructor(private prismaService: PrismaService) {}
@@ -115,7 +116,7 @@ export class FaqAdminService {
             },
         });
 
-        if (!faq) throw new NotFoundException('Faq does not exist');
+        if (!faq) throw new NotFoundException(Error.FAQ_NOT_FOUND);
 
         return {
             id: faq.id,
@@ -144,7 +145,7 @@ export class FaqAdminService {
             },
         });
 
-        if (!faq) throw new NotFoundException('Faq does not exist');
+        if (!faq) throw new NotFoundException(Error.FAQ_NOT_FOUND);
 
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({

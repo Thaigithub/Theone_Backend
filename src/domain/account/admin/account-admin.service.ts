@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { AccountAdminUpdatePasswordRequest } from './request/account-admin-update-password.request';
 import { AccountAdminGetDetailResponse } from './response/account-admin-get-detail.response';
-
 @Injectable()
 export class AccountAdminService {
     constructor(private prismaService: PrismaService) {}
@@ -23,7 +23,7 @@ export class AccountAdminService {
             },
         });
 
-        if (!admin) throw new NotFoundException('Admin not found');
+        if (!admin) throw new NotFoundException(Error.ADMIN_NOT_FOUND);
 
         return {
             name: admin.name,
@@ -41,7 +41,7 @@ export class AccountAdminService {
             },
         });
 
-        if (!account) throw new NotFoundException('Admin not found');
+        if (!account) throw new NotFoundException(Error.ADMIN_NOT_FOUND);
 
         await this.prismaService.account.update({
             where: {

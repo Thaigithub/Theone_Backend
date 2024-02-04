@@ -3,6 +3,7 @@ import { CareerCertificationType, CareerType, Member as MemberPrisma, PointStatu
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -79,7 +80,7 @@ export class MemberAdminService {
             },
         });
         if (!member) {
-            throw new NotFoundException('The id is not exist');
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         }
         return member.currencyExchanges.reduce((sum, current) => sum + current.amount, 0);
     }
@@ -194,7 +195,7 @@ export class MemberAdminService {
             },
         });
 
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         const member = await this.prismaService.member.findUnique({
             where: {
@@ -349,7 +350,7 @@ export class MemberAdminService {
             },
         });
         if (!member) {
-            throw new NotFoundException('The id is not exist');
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         }
         const totalExchangePoint = await this.calculateExchange(id);
         return {
@@ -510,7 +511,7 @@ export class MemberAdminService {
                 },
             },
         });
-        if (!recommendation) throw new NotFoundException('Headhunting request not found');
+        if (!recommendation) throw new NotFoundException(Error.HEADHUNTING_REQUEST_NOT_FOUND);
 
         const responseList = list.map((item) => {
             return {
@@ -545,7 +546,7 @@ export class MemberAdminService {
             },
         });
 
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         const account = await this.prismaService.member.findUnique({
             select: {
@@ -579,7 +580,7 @@ export class MemberAdminService {
                         accountId: account.accountId,
                     },
                 });
-            } else throw new BadRequestException('Missing message');
+            } else throw new BadRequestException(Error.REQUEST_NOT_APPROPRIATE);
         }
     }
 

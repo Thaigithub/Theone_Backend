@@ -6,6 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { SalaryReportAdminSearchCategory } from './enum/salary-report-admin-search-category.enum';
 import { SalaryReportAdminGetListRequest } from './request/salary-report-admin-get-list.request';
 import { SalaryReportAdminGetListResponse } from './response/salary-report-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class SalaryReportAdminService {
@@ -69,7 +70,7 @@ export class SalaryReportAdminService {
                         isAdminDeleted: false,
                     },
                 });
-                if (!salaryReport) throw new NotFoundException(`Salary Report with id: ${item} does not exist`);
+                if (!salaryReport) throw new NotFoundException(Error.SALARY_REPORT_NOT_FOUND);
             }),
         );
         await this.prismaService.salaryReport.updateMany({

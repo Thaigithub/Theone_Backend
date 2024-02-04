@@ -1,4 +1,4 @@
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
     ASSET_S3_BUCKET,
     ASSET_S3_CLIENT_PUBLIC_URL,
@@ -118,7 +118,7 @@ export class StorageService {
                 })
                 .promise();
         } catch (e) {
-            throw new InternalServerErrorException('S3 error');
+            console.log('S3 error');
         }
     }
 

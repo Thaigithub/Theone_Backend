@@ -7,6 +7,7 @@ import { SettlementCompanyStatus } from './enum/settlement-company-status.enum';
 import { SettlementCompanyGetListRequest } from './request/settlement-company-get-list.request';
 import { SettlementCompanyGetDetail } from './response/settlement-company-get-detail.response';
 import { SettlementCompanyGetListResponse } from './response/settlement-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class SettlementCompanyService {
@@ -211,7 +212,7 @@ export class SettlementCompanyService {
             },
         });
         if (!settlement) {
-            throw new NotFoundException('The settlement id is not found');
+            throw new NotFoundException(Error.SETTLEMENT_NOT_FOUND);
         }
         const workLoadInformation = () => {
             const countWorkDays = settlement.headHuntingRecommendation.application.contract.labor
@@ -297,7 +298,7 @@ export class SettlementCompanyService {
                 },
             });
             if (!settlement) {
-                throw new NotFoundException('The settlement is not found');
+                throw new NotFoundException(Error.SETTLEMENT_NOT_FOUND);
             }
             if (settlement.status === SettlementStatus.UNSETTLED) {
                 await prisma.settlement.update({

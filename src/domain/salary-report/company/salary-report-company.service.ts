@@ -6,6 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { SalaryReportCompanyCreateRequest } from './request/salary-report-company-create.request';
 import { SalaryReportCompanyGetListRequest } from './request/salary-report-company-get-list.request';
 import { SalaryReportCompanyGetListResponse } from './response/salary-report-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class SalaryReportCompanyService {
@@ -23,7 +24,7 @@ export class SalaryReportCompanyService {
                         },
                     },
                 });
-                if (!siteExist) throw new NotFoundException(`Site with id: ${item} does not exist`);
+                if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
             }),
         );
         await this.prismaService.salaryReport.createMany({

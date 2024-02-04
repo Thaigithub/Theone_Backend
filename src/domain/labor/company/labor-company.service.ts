@@ -12,6 +12,7 @@ import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-ge
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListWorkDateResponse } from './response/labor-company-get-list-workdates.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborCompanyService {
@@ -131,8 +132,8 @@ export class LaborCompanyService {
                 labor: true,
             },
         });
-        if (!contract) throw new NotFoundException('Contract not found');
-        if (contract.labor) throw new BadRequestException('Labor existed!');
+        if (!contract) throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
+        if (contract.labor) throw new BadRequestException(Error.LABOR_EXISTED);
         if (contract.salaryType === SalaryType.MONTHLY) {
             const count = body.salaryHistory
                 .map((item) => {
@@ -146,7 +147,7 @@ export class LaborCompanyService {
                         return accum;
                     } else return accum;
                 }, []);
-            if (count.length !== body.salaryHistory.length) throw new BadRequestException('Only one payment each month');
+            if (count.length !== body.salaryHistory.length) throw new BadRequestException(Error.SALARY_PAYMENT_REQUEST_IS_NOT_APPROPRIATE);
         } else if (contract.salaryType === SalaryType.DAILY) {
             const count = body.salaryHistory
                 .map((item) => item.date)
@@ -156,7 +157,7 @@ export class LaborCompanyService {
                         return accum;
                     } else return accum;
                 }, []);
-            if (count.length !== body.salaryHistory.length) throw new BadRequestException('Only one payment each day');
+            if (count.length !== body.salaryHistory.length) throw new BadRequestException(Error.SALARY_PAYMENT_REQUEST_IS_NOT_APPROPRIATE);
         }
         const labor = await this.prismaService.labor.create({
             data: {
@@ -376,7 +377,7 @@ export class LaborCompanyService {
                 },
             },
         });
-        if (!salary) throw new NotFoundException('Salary not found');
+        if (!salary) throw new NotFoundException(Error.SALARY_NOT_FOUND);
         return {
             ...salary,
             date: salary.date,
@@ -397,14 +398,14 @@ export class LaborCompanyService {
                 },
             },
         });
-        if (!labor) throw new NotFoundException('Labor not found');
+        if (!labor) throw new NotFoundException(Error.LABOR_NOT_FOUND);
         const count = await this.prismaService.salaryHistory.count({
             where: {
                 laborId: id,
                 date: new Date(body.date),
             },
         });
-        if (count !== 0) throw new BadRequestException('Salary has been registered for this month');
+        if (count !== 0) throw new BadRequestException(Error.SALARY_EXISTED);
         const { date, ...rest } = body;
         await this.prismaService.salaryHistory.create({
             data: {
@@ -437,7 +438,7 @@ export class LaborCompanyService {
                 },
             },
         });
-        if (!salary) throw new NotFoundException('Salary not found');
+        if (!salary) throw new NotFoundException(Error.SALARY_NOT_FOUND);
         const { date, ...rest } = body;
         await this.prismaService.salaryHistory.update({
             where: {
@@ -472,7 +473,7 @@ export class LaborCompanyService {
                 },
             },
         });
-        if (!labor) throw new NotFoundException('Labor not found');
+        if (!labor) throw new NotFoundException(Error.LABOR_NOT_FOUND);
         await this.prismaService.workDate.deleteMany({
             where: {
                 laborId: id,

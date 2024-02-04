@@ -1,12 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { AccountCompanySignupRequest } from './request/account-company-signup.request';
 import { AccountCompanyUpdateRequest } from './request/account-company-update.request';
 import { AccountCompanyCheckExistedResponse } from './response/account-company-check-existed.response';
 import { AccountCompanyGetDetailResponse } from './response/account-company-get-detail.response';
-
 @Injectable()
 export class AccountCompanyService {
     constructor(private prismaService: PrismaService) {}
@@ -37,25 +37,25 @@ export class AccountCompanyService {
                 username: request.username,
             },
         });
-        if (userIdCount !== 0) throw new ConflictException('UserId has been used');
+        if (userIdCount !== 0) throw new BadRequestException(Error.USERNAME_EXISTED);
         const businessRegNumCount = await this.prismaService.company.count({
             where: {
                 businessRegNumber: request.businessRegNum,
             },
         });
-        if (businessRegNumCount !== 0) throw new ConflictException('Business registration number has been used');
+        if (businessRegNumCount !== 0) throw new BadRequestException(Error.BUSSINESS_REGISTRATION_NUMBER_EXISTED);
         const corporateRegNumCount = await this.prismaService.company.count({
             where: {
                 corporateRegNumber: request.corporateRegNum,
             },
         });
-        if (corporateRegNumCount !== 0) throw new ConflictException('Corporate registration number has been used');
+        if (corporateRegNumCount !== 0) throw new BadRequestException(Error.CORPORATE_REGISTRATION_NUMBER_EXISTED);
         const email = await this.prismaService.company.count({
             where: {
                 email: request.email,
             },
         });
-        if (email !== 0) throw new ConflictException('Email has been used');
+        if (email !== 0) throw new BadRequestException(Error.EMAIL_EXISTED);
         await this.prismaService.account.create({
             data: {
                 username: request.username,
@@ -114,7 +114,7 @@ export class AccountCompanyService {
                 contactCard: true,
             },
         });
-        if (!company) throw new NotFoundException('Company not found');
+        if (!company) throw new NotFoundException(Error.COMPANY_NOT_FOUND);
 
         return {
             id: company.account.username,
@@ -165,7 +165,7 @@ export class AccountCompanyService {
                 },
             },
         });
-        if (companyEmailCount !== 0) throw new ConflictException('Email has been registered');
+        if (companyEmailCount !== 0) throw new BadRequestException(Error.EMAIL_EXISTED);
 
         const userCount = await this.prismaService.account.count({
             where: {
@@ -175,7 +175,7 @@ export class AccountCompanyService {
                 },
             },
         });
-        if (userCount !== 0) throw new ConflictException('Username has been used');
+        if (userCount !== 0) throw new BadRequestException(Error.USERNAME_EXISTED);
         await this.prismaService.$transaction(async (tx) => {
             const listFile = (
                 await tx.file.findMany({

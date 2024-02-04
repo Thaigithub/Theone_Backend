@@ -9,6 +9,7 @@ import { ApplicationAdminGetDetailResponse } from './response/application-admin-
 import { ApplicationAdminGetLisPostResponse } from './response/application-admin-get-list-post.response';
 import { ApplicationAdminGetCountRequest } from './request/application-admin-get-count.request';
 import { CountResponse } from 'utils/generics/count.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ApplicationAdminService {
@@ -106,7 +107,7 @@ export class ApplicationAdminService {
             },
         });
         if (!application) {
-            throw new NotFoundException('Application not found');
+            throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         }
         const applicationInfor = {
             status: application.status,

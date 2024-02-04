@@ -9,6 +9,7 @@ import { MemberCompanyGetListRequest } from './request/member-company-get-list.r
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyGetDetailResponse } from './response/member-company-get-detail.response';
 import { MemberCompanyGetListResponse } from './response/member-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class MemberCompanyService {
@@ -152,7 +153,7 @@ export class MemberCompanyService {
                 id,
             },
         });
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         const member = await this.prismaService.member.findUnique({
             include: {

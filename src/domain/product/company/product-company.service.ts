@@ -3,16 +3,17 @@ import { PaymentStatus, PaymentType, Prisma, ProductType, RefundStatus, TaxBillS
 import { nanoid } from 'nanoid';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { FileResponse } from 'utils/generics/file.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ProductCompanyTaxInvoiceType } from './enum/product-company-tax-invoice-type.enum';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
-import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 @Injectable()
 export class ProductCompanyService {
     constructor(
@@ -235,10 +236,10 @@ export class ProductCompanyService {
             },
         });
         if (!record) {
-            throw new NotFoundException('The taxbill id is not found');
+            throw new NotFoundException(Error.TAX_BILL_NOT_FOUND);
         }
         if (!record.taxBill.file) {
-            throw new NotFoundException('The file is not found');
+            throw new NotFoundException(Error.FILE_NOT_FOUND);
         }
         return {
             fileName: record.taxBill.file.fileName,
@@ -278,10 +279,10 @@ export class ProductCompanyService {
             },
         });
         if (!record) {
-            throw new NotFoundException('The card receipt id is not found');
+            throw new NotFoundException(Error.CARD_RECEIPT_FOUND);
         }
         if (!record.cardReceipt.file) {
-            throw new NotFoundException('The file is not found');
+            throw new NotFoundException(Error.FILE_NOT_FOUND);
         }
         return {
             fileName: record.cardReceipt.file.fileName,
@@ -312,7 +313,7 @@ export class ProductCompanyService {
             },
         });
         if (!paymentHistory) {
-            throw new NotFoundException('The payment history id is not found');
+            throw new NotFoundException(Error.PAYMENT_NOT_FOUND);
         }
         if (!paymentHistory.taxBill) {
             await this.prismaService.taxBill.create({
@@ -326,7 +327,7 @@ export class ProductCompanyService {
 
     async createPaymentHistory(id: number, accountId: number): Promise<ProductCompanyPaymentCreateResponse> {
         const product = await this.prismaService.product.findUnique({ where: { id } });
-        if (!product) throw new NotFoundException('Product not found');
+        if (!product) throw new NotFoundException(Error.PRODUCT_NOT_FOUND);
         const merchantId = await this.prismaService.$transaction(async (prisma) => {
             const date = new Date();
             const companyId = (
@@ -385,16 +386,16 @@ export class ProductCompanyService {
             },
         });
         if (!paymentHistory) {
-            throw new NotFoundException('The payment history id is not found');
+            throw new NotFoundException(Error.PAYMENT_NOT_FOUND);
         }
         if (!paymentHistory.refund) {
             if (paymentHistory.usageHistories.length > 0) {
-                throw new BadRequestException('The product has been used');
+                throw new BadRequestException(Error.PRODUCT_HAS_BEEN_USED);
             }
             const pastDate = paymentHistory.expirationDate;
             pastDate.setDate(pastDate.getDate() + 7);
             if (pastDate <= new Date()) {
-                throw new BadRequestException('No refund after 7 days');
+                throw new BadRequestException(Error.REFUND_AVAILABLE_IN_SEVEN_DAYS);
             }
             await this.prismaService.refund.create({
                 data: {
@@ -403,7 +404,7 @@ export class ProductCompanyService {
                 },
             });
         } else {
-            throw new BadRequestException('The refund request has been handled');
+            throw new BadRequestException(Error.REFUND_REQUEST_HAS_BEEN_HANDLED);
         }
     }
 

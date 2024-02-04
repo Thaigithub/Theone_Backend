@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteMemberGetListRequest } from './request/site-member-get-list.request';
@@ -23,7 +24,7 @@ export class SiteMemberService {
             },
         });
         if (!siteRecord) {
-            throw new NotFoundException('The Site Id is not found');
+            throw new NotFoundException(Error.SITE_NOT_FOUND);
         }
         return siteRecord;
     }
@@ -255,7 +256,7 @@ export class SiteMemberService {
             },
         });
         if (!siteRecord) {
-            throw new NotFoundException('The site id is not found');
+            throw new NotFoundException(Error.SITE_NOT_FOUND);
         }
 
         const siteInfor = {

@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'app.config';
 import { ExtractJwt, JwtFromRequestFunction, Strategy } from 'passport-jwt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { UID } from 'utils/uid-generator';
 
 export interface AuthJwtFakePayloadData {
@@ -50,7 +51,7 @@ export class AuthJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         });
 
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
 
         const payloadData: AuthJwtPayloadData = {

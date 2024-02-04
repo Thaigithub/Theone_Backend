@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostApplicationStatus, RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractCompanyCreateRequest } from './request/contract-company-create.request';
@@ -137,8 +138,8 @@ export class ContractCompanyService {
                 category: true,
             },
         });
-        if (!application) throw new NotFoundException('Application not found or not ready');
-        if (!application.post.site) throw new BadRequestException('This post has no site to create contract');
+        if (!application) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
+        if (!application.post.site) throw new BadRequestException(Error.POST_HAS_NO_SITE);
         const existContract = await this.prismaService.contract.findUnique({
             where: {
                 applicationId: body.applicationId,
@@ -148,7 +149,7 @@ export class ContractCompanyService {
             },
         });
         if (existContract) {
-            throw new BadRequestException('The contract for this application id is exist');
+            throw new BadRequestException(Error.CONTRACT_EXISTED);
         }
         await this.prismaService.$transaction(async (prisma) => {
             if (application.post.headhunting) {
@@ -285,7 +286,7 @@ export class ContractCompanyService {
                 },
             },
         });
-        if (!contract) throw new NotFoundException('Contract not found');
+        if (!contract) throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         return {
             companyName: contract.application.post.company.name,
             siteName: contract.application.post.site.name,
@@ -325,7 +326,7 @@ export class ContractCompanyService {
                 },
             },
         });
-        if (!contract) throw new NotFoundException('Contract not found');
+        if (!contract) throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         await this.prismaService.contract.update({
             where: {
                 id: contractId,

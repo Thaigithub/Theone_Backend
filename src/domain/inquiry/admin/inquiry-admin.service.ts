@@ -3,6 +3,7 @@ import { AnswerStatus, InquirerType, NotificationType, Prisma } from '@prisma/cl
 import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { InquiryAdminGetListCategory } from './enum/inquiry-admin-get-list-category.enum';
@@ -136,7 +137,7 @@ export class InquiryAdminService {
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!inquiry) throw new NotFoundException(Error.INQUIRY_NOT_FOUND);
 
         return {
             id: inquiry.id,
@@ -199,7 +200,7 @@ export class InquiryAdminService {
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!inquiry) throw new NotFoundException(Error.INQUIRY_NOT_FOUND);
 
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({

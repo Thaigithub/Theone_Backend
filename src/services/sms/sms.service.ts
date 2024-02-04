@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { COOLSMS_KEY, COOLSMS_SECRET } from 'app.config';
 import CoolsmsMessageService from 'coolsms-node-sdk';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class SmsService {
@@ -17,7 +18,7 @@ export class SmsService {
                     autoTypeDetect: true,
                 });
         } catch (error) {
-            throw new NotFoundException('Phone number not found');
+            throw new NotFoundException(Error.PHONE_NOT_FOUND);
         }
     }
 }

@@ -7,6 +7,7 @@ import { HeadhuntingCompanyCreateRequestRequest } from './request/headhunting-co
 import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
 import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
 import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class HeadhuntingCompanyService {
@@ -27,7 +28,7 @@ export class HeadhuntingCompanyService {
                 },
             },
         });
-        if (!headhunting) throw new NotFoundException('Headhunting not found');
+        if (!headhunting) throw new NotFoundException(Error.HEADHUNTING_NOT_FOUND);
 
         const queryFilter: Prisma.HeadhuntingRecommendationWhereInput = {
             headhunting: {
@@ -245,7 +246,7 @@ export class HeadhuntingCompanyService {
         });
 
         if (!headhunting) {
-            throw new BadRequestException('Headhunting not found');
+            throw new BadRequestException(Error.HEADHUNTING_NOT_FOUND);
         }
 
         const existRequest = await this.prismaService.headhuntingRequest.findFirst({
@@ -289,7 +290,7 @@ export class HeadhuntingCompanyService {
             ],
         });
         if (!currentProduct) {
-            throw new BadRequestException(`The product hasn't been bought yet`);
+            throw new BadRequestException(Error.PRODUCT_NOT_FOUND);
         }
 
         if (!existRequest) {
@@ -328,7 +329,7 @@ export class HeadhuntingCompanyService {
                 existRequest.status === HeadhuntingRequestStatus.APPLY ||
                 existRequest.status === HeadhuntingRequestStatus.RE_APPLY
             ) {
-                throw new BadRequestException('Headhunting request is already applied');
+                throw new BadRequestException(Error.HEADHUNTING_REQUEST_EXISTED);
             } else {
                 await this.prismaService.$transaction(async (prisma) => {
                     await prisma.headhuntingRequest.create({

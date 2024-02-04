@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ApplicationCategory, InterviewStatus, PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationCompanyUpdateStatus } from './enum/application-company-update-status.enum';
@@ -170,7 +171,7 @@ export class ApplicationCompanyService {
                 },
             },
         });
-        if (!application) throw new NotFoundException('Application not found');
+        if (!application) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         if (body.status === ApplicationCompanyUpdateStatus.REJECT) {
             await this.prismaService.application.update({
                 where: {
@@ -278,7 +279,7 @@ export class ApplicationCompanyService {
             },
         });
         if (!member) {
-            throw new NotFoundException('The member id is not found');
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         }
         const memberInfor = await this.prismaService.member.findUnique({
             where: {
@@ -382,7 +383,7 @@ export class ApplicationCompanyService {
             },
         });
         if (!team) {
-            throw new NotFoundException('The application id applying for team is not found');
+            throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         }
 
         const application = await this.prismaService.team.findUnique({
@@ -477,7 +478,7 @@ export class ApplicationCompanyService {
         });
 
         if (!application) {
-            throw new NotFoundException('The application applying for team is not exist');
+            throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         }
 
         const { leader, members } = application;

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountType } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
 import { AuthAdminLoginRequest } from './request/auth-admin-login-normal.request';
@@ -25,13 +26,13 @@ export class AdminAuthService {
         });
 
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
 
         const passwordMatch = await compare(loginData.password, account.password);
 
         if (!passwordMatch) {
-            throw new UnauthorizedException('Invalid username or password');
+            throw new UnauthorizedException(Error.LOGIN_PASSWORD_IS_INCORRECT);
         }
         await this.prismaService.account.update({
             where: {
@@ -66,7 +67,7 @@ export class AdminAuthService {
         });
 
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
 
         const payloadData: AuthJwtPayloadData = {

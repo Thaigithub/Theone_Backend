@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BannerType, Prisma, RequestBannerStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { BannerAdminAdvertisingSearchCategory } from './enum/banner-admin-advertisng-search-category.enum';
@@ -235,7 +236,7 @@ export class BannerAdminService {
         const check = body.data.filter((item) => {
             return !priority.includes(item.priority);
         });
-        if (check.length !== 0) throw new BadRequestException('Banners priority changes is not fully listed');
+        if (check.length !== 0) throw new BadRequestException(Error.BANNER_PRIORITY_CHANGES_MISSED);
         await Promise.all(
             body.data.map(async (item) => {
                 await this.prismaService.advertisingBanner.update({
@@ -281,7 +282,7 @@ export class BannerAdminService {
                 },
             },
         });
-        if (!banner) throw new NotFoundException('Banner not found');
+        if (!banner) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         return {
             file: {
                 key: banner.banner.file.key,
@@ -318,7 +319,7 @@ export class BannerAdminService {
                 ],
             },
         });
-        if (count === 0) throw new NotFoundException('Banner not found');
+        if (count === 0) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         await this.prismaService.banner.update({
             where: {
                 id,
@@ -352,7 +353,7 @@ export class BannerAdminService {
                 },
             },
         });
-        if (count === 0) throw new NotFoundException('Banner request not found');
+        if (count === 0) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
         const banner = await this.prismaService.bannerRequest.findUnique({
             where: { id },
             select: {
@@ -413,7 +414,7 @@ export class BannerAdminService {
 
     async createPost(request: BannerAdminUpsertPostRequest): Promise<void> {
         const post = await this.prismaService.post.findUnique({ where: { id: request.postBanner.postId } });
-        if (!post) throw new NotFoundException('Post not found');
+        if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         const count = await this.prismaService.postBanner.count({
             where: {
                 banner: {
@@ -618,7 +619,7 @@ export class BannerAdminService {
         const check = body.data.filter((item) => {
             return !priority.includes(item.priority);
         });
-        if (check.length !== 0) throw new BadRequestException('Banners priority changes is not fully listed');
+        if (check.length !== 0) throw new BadRequestException(Error.BANNER_PRIORITY_CHANGES_MISSED);
         await Promise.all(
             body.data.map(async (item) => {
                 await this.prismaService.postBanner.update({
@@ -651,7 +652,7 @@ export class BannerAdminService {
                 ],
             },
         });
-        if (count === 0) throw new NotFoundException('Banner not found');
+        if (count === 0) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         const banner = await this.prismaService.postBanner.findUnique({
             where: { id },
             select: {
@@ -718,7 +719,7 @@ export class BannerAdminService {
                 ],
             },
         });
-        if (count === 0) throw new NotFoundException('Banner not found');
+        if (count === 0) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         await this.prismaService.banner.update({
             where: { id },
             data: {
@@ -749,7 +750,7 @@ export class BannerAdminService {
                 },
             },
         });
-        if (count === 0) throw new NotFoundException('Banner request not found');
+        if (count === 0) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
         const banner = await this.prismaService.bannerRequest.findUnique({
             where: { id },
             select: {
@@ -869,7 +870,7 @@ export class BannerAdminService {
                 },
             },
         });
-        if (!banner) throw new NotFoundException('Banner not found');
+        if (!banner) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         if (banner.advertisingBanner) {
             await this.prismaService.$transaction(async (prisma) => {
                 await prisma.advertisingBanner.update({
@@ -966,8 +967,8 @@ export class BannerAdminService {
                 advertisingBanner: isAdvertising ? { type: BannerType.COMPANY } : undefined,
             },
         });
-        if (!request) throw new NotFoundException('Banner request Id not found');
-        if (request.status !== RequestBannerStatus.PENDING) throw new BadRequestException('Banner has been approved or rejected');
+        if (!request) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
+        if (request.status !== RequestBannerStatus.PENDING) throw new BadRequestException(Error.BANNER_STATUS_IS_NOT_APPROPRIATE);
         if (!isAdvertising) {
             const count = await this.prismaService.postBanner.count({
                 where: {

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     ApplicationCategory,
     InterviewStatus,
@@ -12,6 +12,7 @@ import { ApplicationCompanyGetDetailMemberResponse } from 'domain/application/co
 import { ApplicationCompanyGetDetailTeamResponse } from 'domain/application/company/response/application-company-get-detail-team.response';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { InterviewCompanyType } from './enum/interview-company-type.enum';
@@ -161,7 +162,7 @@ export class InterviewCompanyService {
             },
         });
 
-        if (!interview) throw new BadRequestException('No interview found');
+        if (!interview) throw new BadRequestException(Error.INTERVIEW_NOT_FOUND);
 
         return await this.applicationCompanyService.getDetailMember(accountId, interview.applicationId);
     }
@@ -181,7 +182,7 @@ export class InterviewCompanyService {
             },
         });
 
-        if (!interview) throw new BadRequestException('No interview found');
+        if (!interview) throw new BadRequestException(Error.INTERVIEW_NOT_FOUND);
 
         return await this.applicationCompanyService.getDetailTeam(accountId, interview.applicationId);
     }
@@ -200,7 +201,7 @@ export class InterviewCompanyService {
                 },
             },
         });
-        if (!interview) throw new NotFoundException('No interview found');
+        if (!interview) throw new NotFoundException(Error.INTERVIEW_NOT_FOUND);
         const afterUpdateInterview = await this.prismaService.interview.update({
             where: {
                 id,
@@ -259,7 +260,7 @@ export class InterviewCompanyService {
                 },
             },
         });
-        if (!postExist) throw new NotFoundException('Post does not exist');
+        if (!postExist) throw new NotFoundException(Error.POST_NOT_FOUND);
         const interview = await this.prismaService.interview.count({
             where: {
                 application: {
@@ -275,7 +276,7 @@ export class InterviewCompanyService {
             },
         });
         if (interview !== 0) {
-            throw new ConflictException('Interview existed');
+            throw new BadRequestException(Error.INTERVIEW_EXISTED);
         }
         await this.prismaService.$transaction(async (prisma) => {
             let application = null;
@@ -287,7 +288,7 @@ export class InterviewCompanyService {
                             isActive: true,
                         },
                     });
-                    if (!member) throw new NotFoundException('Member not found');
+                    if (!member) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
                     const record = await prisma.application.findUnique({
                         where: {
                             memberId_postId: {
@@ -300,7 +301,7 @@ export class InterviewCompanyService {
                         },
                     });
                     if (record && record.status !== PostApplicationStatus.APPLY) {
-                        throw new ConflictException('The application status is not set to APPLY');
+                        throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
                     switch (body.category) {
                         case ApplicationCategory.HEADHUNTING: {
@@ -312,7 +313,7 @@ export class InterviewCompanyService {
                                     },
                                 },
                             });
-                            if (count === 0) throw new ConflictException('Post is not belong to headhunting type');
+                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         case ApplicationCategory.MATCHING: {
@@ -322,7 +323,7 @@ export class InterviewCompanyService {
                                     category: ApplicationCategory.MATCHING,
                                 },
                             });
-                            if (count === 0) throw new ConflictException('Post is not belong to matching type');
+                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         default: {
@@ -344,7 +345,7 @@ export class InterviewCompanyService {
                                         category: ApplicationCategory.MATCHING,
                                     },
                                 });
-                                if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
+                                if (countMatching !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                                 const countHeadhunting = await prisma.headhunting.count({
                                     where: {
                                         post: {
@@ -353,7 +354,7 @@ export class InterviewCompanyService {
                                         },
                                     },
                                 });
-                                if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                                if (countHeadhunting === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             }
                             break;
                         }
@@ -430,7 +431,7 @@ export class InterviewCompanyService {
                             isActive: true,
                         },
                     });
-                    if (!team) throw new NotFoundException('Team not found');
+                    if (!team) throw new NotFoundException(Error.TEAM_NOT_FOUND);
                     const record = await prisma.application.findUnique({
                         where: {
                             teamId_postId: {
@@ -443,7 +444,7 @@ export class InterviewCompanyService {
                         },
                     });
                     if (record && record.status !== PostApplicationStatus.APPLY) {
-                        throw new ConflictException('The application status is not set to APPLY');
+                        throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
 
                     switch (body.category) {
@@ -456,7 +457,7 @@ export class InterviewCompanyService {
                                     },
                                 },
                             });
-                            if (count === 0) throw new ConflictException('Post is not belong to headhunting type');
+                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         case ApplicationCategory.MATCHING: {
@@ -466,7 +467,7 @@ export class InterviewCompanyService {
                                     category: ApplicationCategory.MATCHING,
                                 },
                             });
-                            if (count === 0) throw new ConflictException('Post is not belong to matching type');
+                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         default: {
@@ -488,7 +489,7 @@ export class InterviewCompanyService {
                                         category: ApplicationCategory.MATCHING,
                                     },
                                 });
-                                if (countMatching !== 0) throw new ConflictException('Post is not belong to manpower type');
+                                if (countMatching !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                                 const countHeadhunting = await prisma.headhunting.count({
                                     where: {
                                         post: {
@@ -497,7 +498,7 @@ export class InterviewCompanyService {
                                         },
                                     },
                                 });
-                                if (countHeadhunting === 0) throw new ConflictException('Post is not belong to manpower type');
+                                if (countHeadhunting === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             }
                             break;
                         }

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SiteCompanyGetListStatus } from './enum/site-company-get-list-status.enum';
@@ -88,7 +89,7 @@ export class SiteCompanyService {
                 },
             },
         });
-        if (!siteExist) throw new NotFoundException('Site does not exist');
+        if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
 
         const site = await this.prismaService.site.findUnique({
             include: {
@@ -180,7 +181,7 @@ export class SiteCompanyService {
                 },
             },
         });
-        if (!siteExist) throw new NotFoundException('Site does not exist');
+        if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
 
         if (body.startDate) body.startDate = new Date(body.startDate).toISOString();
         if (body.endDate) body.endDate = new Date(body.endDate).toISOString();
@@ -208,7 +209,7 @@ export class SiteCompanyService {
                 },
             },
         });
-        if (!siteExist) throw new NotFoundException('Site does not exist');
+        if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
 
         await this.prismaService.site.update({
             where: {

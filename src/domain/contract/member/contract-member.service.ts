@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ContractMemberGetListStatus } from './enum/contract-member-get-list-status.enum';
@@ -340,7 +341,7 @@ export class ContractMemberService {
                 accountId,
             },
         });
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         return await this.prismaService.contract.count({
             where: {
@@ -426,7 +427,7 @@ export class ContractMemberService {
                 },
             },
         });
-        if (!contract) throw new NotFoundException('Contract not found');
+        if (!contract) throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         return {
             companyName: contract.application.post.company.name,
             siteName: contract.application.post.site.name,

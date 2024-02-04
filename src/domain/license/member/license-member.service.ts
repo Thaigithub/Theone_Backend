@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LicenseMemberGetListRequest } from './request/license-member-get-list.request';
@@ -20,13 +21,13 @@ export class LicenseService {
                 isActive: true,
             },
         });
-        if (count !== 0) throw new ConflictException('License has been registered');
+        if (count !== 0) throw new BadRequestException(Error.LICENSE_EXISTED);
         const code = await this.prismaService.code.findUnique({
             where: {
                 id: request.codeId,
             },
         });
-        if (!code) throw new NotFoundException('CodeId not found');
+        if (!code) throw new NotFoundException(Error.OCCUPATION_NOT_FOUND);
         const member = await this.prismaService.account.findUnique({
             where: { id: accountId },
             select: { member: { select: { id: true } } },
@@ -104,13 +105,13 @@ export class LicenseService {
                 isActive: true,
             },
         });
-        if (!license) throw new BadRequestException('License not found');
+        if (!license) throw new BadRequestException(Error.LICENSE_NOT_FOUND);
         const code = await this.prismaService.code.findUnique({
             where: {
                 id: request.codeId,
             },
         });
-        if (!code) throw new NotFoundException('CodeId not found');
+        if (!code) throw new NotFoundException(Error.OCCUPATION_NOT_FOUND);
         const file = await this.prismaService.license.update({
             where: {
                 id,
@@ -179,7 +180,7 @@ export class LicenseService {
             },
         });
         if (!record) {
-            throw new NotFoundException('License not found');
+            throw new NotFoundException(Error.LICENSE_NOT_FOUND);
         }
         await this.prismaService.license.update({
             where: {

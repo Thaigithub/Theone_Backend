@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, TeamStatus } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { TeamAdminGetListCategory } from './enum/team-admin-get-list-category.enum';
@@ -41,9 +42,9 @@ export class TeamAdminService {
             memberlist.push(...memberIds.map((item) => parseInt(item)));
         } else if (typeof memberIds === 'string') {
             memberlist.push(parseInt(memberIds));
-        } else throw new BadRequestException('MemberIds required');
+        } else return;
         const teamDetails = await this.getDetail(teamId);
-        if (teamDetails.members.length === 0) throw new NotFoundException('No members found');
+        if (teamDetails.members.length === 0) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         const excelData = teamDetails.members
             .filter((item) => memberlist.includes(item.id))
             .map((member) => {
@@ -305,7 +306,7 @@ export class TeamAdminService {
                 },
             },
         });
-        if (!recommendation) throw new NotFoundException('Headhunting request not found');
+        if (!recommendation) throw new NotFoundException(Error.HEADHUNTING_REQUEST_NOT_FOUND);
         const responseList = list.map((item) => {
             let licenses = item.leader.licenses.map((item) => {
                 return item.code.name;
@@ -339,7 +340,7 @@ export class TeamAdminService {
         } else if (typeof query === 'string') {
             list.push(parseInt(query));
         }
-        if (list.length === 0) throw new BadRequestException('Missing teamIds');
+        if (list.length === 0) return;
         const teams = (
             await this.prismaService.team.findMany({
                 where: {
@@ -371,7 +372,7 @@ export class TeamAdminService {
             totalMembers: team.totalMembers,
             status: this.getStatus(team),
         }));
-        if (teams.length === 0) throw new NotFoundException('Team not found');
+        if (teams.length === 0) throw new NotFoundException(Error.TEAM_NOT_FOUND);
         const excelStream = await this.excelService.createExcelFile(teams, 'Teams');
         response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         response.setHeader('Content-Disposition', 'attachment; filename=MemberList.xlsx');

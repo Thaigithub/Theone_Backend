@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { Error } from './error.enum';
 
 export function ParseBoolean(): PropertyDecorator {
     /* The custom decorator is use to transform string value to boolean value */
@@ -11,7 +12,7 @@ export function ParseBoolean(): PropertyDecorator {
 
         const setter = function (newValue: string) {
             if (newValue != 'true' && newValue !== 'false') {
-                throw new BadRequestException(`The value must be 'true' or 'false' which type is string`);
+                throw new BadRequestException(Error.REQUEST_NOT_APPROPRIATE);
             }
             value = newValue;
         };

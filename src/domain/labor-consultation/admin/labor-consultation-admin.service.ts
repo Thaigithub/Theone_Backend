@@ -10,6 +10,7 @@ import { LaborConsultationAdminAnswerRequest } from './request/labor-consultatio
 import { LaborConsultationAdminGetListRequest } from './request/labor-consultation-admin-get-list.request';
 import { LaborConsultationAdminGetDetailResponse } from './response/labor-consultation-admin-get-detail.response';
 import { LaborConsultationAdminGetListResponse } from './response/labor-consultation-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborConsultationAdminService {
@@ -136,7 +137,7 @@ export class LaborConsultationAdminService {
             },
         });
 
-        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
+        if (!laborConsultation) throw new NotFoundException(Error.LABOR_CONSULTATION_NOT_FOUND);
 
         return {
             id: laborConsultation.id,
@@ -199,7 +200,7 @@ export class LaborConsultationAdminService {
             },
         });
 
-        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
+        if (!laborConsultation) throw new NotFoundException(Error.LABOR_CONSULTATION_NOT_FOUND);
 
         await this.prismaService.$transaction(async (tx) => {
             await tx.file.updateMany({

@@ -6,6 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { TeamCompanyGetListRequest } from './request/team-company-get-list.request';
 import { TeamCompanyGetDetailResponse } from './response/team-company-get-detail.response';
 import { TeamCompanyGetListResponse } from './response/team-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class TeamCompanyService {
@@ -182,7 +183,7 @@ export class TeamCompanyService {
                 id,
             },
         });
-        if (!teamExist) throw new NotFoundException('Team does not exist');
+        if (!teamExist) throw new NotFoundException(Error.TEAM_NOT_FOUND);
 
         const team = await this.prismaService.team.findUnique({
             include: {

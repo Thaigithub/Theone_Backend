@@ -7,6 +7,7 @@ import { ReportAdminGetListRequest } from './request/report-admin-get-list.reque
 import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
 import { ReportAdminGetDetailResponse } from './response/report-admin-get-detail.response';
 import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ReportAdminService {
@@ -33,7 +34,7 @@ export class ReportAdminService {
                 isAdminDeleted: false,
             },
         });
-        if (!report) throw new NotFoundException(`Report with id: ${reportId} does not exist`);
+        if (!report) throw new NotFoundException(Error.REPORT_NOT_FOUND);
         return report;
     }
 

@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { Error } from 'utils/error.enum';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { EvaluationCompanyGetListStatus } from './enum/evaluation-company-get-list-request.enum';
@@ -41,7 +42,7 @@ export class EvaluationCompanyController {
         @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListMemberResponse>> {
         if (query.score && query.status === EvaluationCompanyGetListStatus.INCOMPLETE)
-            throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
+            throw new BadRequestException(Error.EVALUATION_STATUS_IS_NOT_APPROPRIATE);
         return BaseResponse.of(await this.evaluationCompanyService.getListMember(request.user.accountId, query));
     }
 
@@ -51,7 +52,7 @@ export class EvaluationCompanyController {
         @Query() query: EvaluationCompanyGetListRequest,
     ): Promise<BaseResponse<EvaluationCompanyGetListTeamResponse>> {
         if (query.score && query.status === EvaluationCompanyGetListStatus.INCOMPLETE)
-            throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
+            throw new BadRequestException(Error.EVALUATION_STATUS_IS_NOT_APPROPRIATE);
         return BaseResponse.of(await this.evaluationCompanyService.getListTeam(request.user.accountId, query));
     }
 }

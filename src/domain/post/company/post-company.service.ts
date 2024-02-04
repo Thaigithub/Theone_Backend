@@ -32,6 +32,7 @@ import { PostCompanyGetListApplicationResponse } from './response/post-company-g
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListSiteResponse } from './response/post-company-get-list-site.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostCompanyService {
@@ -51,7 +52,7 @@ export class PostCompanyService {
                 },
             },
         });
-        if (!post) throw new NotFoundException('Post does not exist');
+        if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
 
         return post;
     }
@@ -155,7 +156,7 @@ export class PostCompanyService {
         });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
-            throw new BadRequestException('Site is not found');
+            throw new BadRequestException(Error.SITE_NOT_FOUND);
         }
         if(request.occupationId) {
             await this.checkCodeType(request.occupationId);
@@ -168,7 +169,7 @@ export class PostCompanyService {
                 },
             }) : null;
             if(!site) {
-                throw new BadRequestException('Post category is Headhunting must have been included valid site id');
+                throw new BadRequestException(Error.SITE_IS_REQURIED_FOR_HEADHUNTING_POST);
             }
         }
 
@@ -333,7 +334,7 @@ export class PostCompanyService {
         });
 
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
-            throw new BadRequestException('Site not found');
+            throw new BadRequestException(Error.SITE_NOT_FOUND);
         }
         if(request.occupationId) {
             await this.checkCodeType(request.occupationId);
@@ -401,11 +402,11 @@ export class PostCompanyService {
         const FAKE_STAMP = '2023-12-31T';
         request.startWorkTime = request.startWorkTime && FAKE_STAMP + request.startWorkTime + 'Z';
         request.endWorkTime = request.endWorkTime && FAKE_STAMP + request.endWorkTime + 'Z';
-        if (!post) throw new NotFoundException('Post not found');
+        if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         if (post.category === PostCategory.HEADHUNTING) {
             if (request.category && request.category !== PostCategory.HEADHUNTING) {
                 if (post.headhunting.requests.length !== 0)
-                    throw new BadRequestException('Headhunting recommendation has been added');
+                    throw new BadRequestException(Error.HEADHUNTING_RECOMMENDATION_EXISTED);
             }
         }
         if(request.category === PostCategory.HEADHUNTING && request.siteId){
@@ -416,14 +417,14 @@ export class PostCompanyService {
                 },
             });
             if(!site) {
-                throw new BadRequestException('Post category is Headhunting must have been included valid site id');
+                throw new BadRequestException(Error.SITE_IS_REQURIED_FOR_HEADHUNTING_POST);
             }
         }
 
         if (post.category === PostCategory.MATCHING) {
             if (request.category && request.category !== PostCategory.MATCHING) {
                 if (post.company.matchingRequests.length !== 0)
-                    throw new BadRequestException('Matching recommendation has been added');
+                    throw new BadRequestException(Error.MATCHING_RECOMMENDATION_EXISTED);
             }
         }
         await this.prismaService.post.update({
@@ -482,7 +483,7 @@ export class PostCompanyService {
                 id,
             },
         });
-        if (!post) throw new NotFoundException('Post not found');
+        if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         await this.prismaService.post.update({
             where: {
                 id,
@@ -502,7 +503,7 @@ export class PostCompanyService {
                 },
             });
 
-            if (!code) throw new BadRequestException(`Code ID does not exist`);
+            if (!code) throw new BadRequestException(Error.OCCUPATION_NOT_FOUND);
         }
     }
 
@@ -700,7 +701,7 @@ export class PostCompanyService {
                 },
             },
         });
-        if (!post) throw new NotFoundException('Post does not exist');
+        if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         if (post.freePullUp)
             return { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.FREE_PULL_UP_AVAILABLE, remainingTimes: null };
         else {
@@ -732,7 +733,7 @@ export class PostCompanyService {
 
     async updatePullUpStatus(postId: number, accountId: number, body: PostCompanyUpdatePullUpStatusRequest): Promise<void> {
         const post = await this.checkPostExist(postId, accountId);
-        if (post.isPulledUp) throw new BadRequestException('Post is already pulled up');
+        if (post.isPulledUp) throw new BadRequestException(Error.POST_HAS_BEEN_PULLED_UP);
         const availablePullUp = await this.checkPullUpAvailability(postId, accountId);
         const now = new Date();
         if (availablePullUp.pullUpAvailableStatus !== PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE) {
@@ -776,7 +777,7 @@ export class PostCompanyService {
                     });
                 }
             }
-        } else throw new BadRequestException("You don't have free pull up or any PULL_UP produdct");
+        } else throw new BadRequestException(Error.PRODUCT_NOT_FOUND);
 
         await this.prismaService.post.update({
             data: {
@@ -810,7 +811,7 @@ export class PostCompanyService {
                 },
             });
             if (!productPaymentHistory)
-                throw new NotFoundException(`Can not find PREMIUM product with id ${body.productPaymentHistoryId}`);
+                throw new NotFoundException(Error.PRODUCT_NOT_FOUND);
 
             await this.prismaService.productPaymentHistory.update({
                 data: {
@@ -821,9 +822,9 @@ export class PostCompanyService {
                     id: productPaymentHistory.id,
                 },
             });
-        } else throw new BadRequestException("You don't have any PREMIUM_POST produdct");
+        } else throw new BadRequestException(Error.PRODUCT_NOT_FOUND);
 
-        if (post.type === PostType.PREMIUM) throw new BadRequestException('Post is already PREMIUM type');
+        if (post.type === PostType.PREMIUM) throw new BadRequestException(Error.POST_HAS_BEEN_PREMIUM);
 
         const now = new Date();
         await this.prismaService.post.update({

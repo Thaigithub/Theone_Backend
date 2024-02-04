@@ -16,6 +16,7 @@ import { AuthCompanyUpdatePasswordRequest } from './request/auth-company-update-
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class CompanyAuthService {
@@ -33,11 +34,11 @@ export class CompanyAuthService {
             },
         });
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
         const passwordMatch = await compare(loginData.password, account.password);
         if (!passwordMatch) {
-            throw new UnauthorizedException('Invalid username or password');
+            throw new UnauthorizedException(Error.LOGIN_PASSWORD_IS_INCORRECT);
         }
         await this.prismaService.account.update({
             where: {
@@ -59,9 +60,9 @@ export class CompanyAuthService {
 
     async updatePassword(body: AuthCompanyUpdatePasswordRequest, ip: string): Promise<void> {
         const searchOtp = await this.otpService.getOtp(body.otpId, ip);
-        if (!searchOtp) throw new NotFoundException('Otp not found');
+        if (!searchOtp) throw new NotFoundException(Error.OTP_NOT_FOUND);
         if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
-            throw new BadRequestException('Otp verification is expired');
+            throw new BadRequestException(Error.OTP_EXPIRED);
         }
         await this.otpService.usedOtp(searchOtp.id);
         await this.prismaService.account.update({
@@ -99,7 +100,7 @@ export class CompanyAuthService {
             },
         });
         if (!company) {
-            throw new NotFoundException(`Account not found `);
+            throw new NotFoundException(Error.ACCOUNT_NOT_FOUND);
         }
         return await this.otpService.sendOtp({
             email: null,
@@ -122,7 +123,7 @@ export class CompanyAuthService {
             },
         });
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
         const payloadData: AuthJwtPayloadData = {
             accountId: account.id,

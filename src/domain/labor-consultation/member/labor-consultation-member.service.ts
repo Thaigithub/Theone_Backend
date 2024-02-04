@@ -7,6 +7,7 @@ import { LaborConsultationMemberCreateRequest } from './request/labor-consultati
 import { LaborConsultationMemberGetListRequest } from './request/labor-consultation-member-get-list.request';
 import { LaborConsultationMemberGetDetailResponse } from './response/labor-consultation-member-get-detail.response';
 import { LaborConsultationMemberGetListResponse } from './response/labor-consultation-member-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborConsultationMemberService {
@@ -120,7 +121,7 @@ export class LaborConsultationMemberService {
             },
         });
 
-        if (!laborConsultation) throw new NotFoundException('Labor consultation does not exist');
+        if (!laborConsultation) throw new NotFoundException(Error.LABOR_CONSULTATION_NOT_FOUND);
 
         return {
             id: laborConsultation.id,

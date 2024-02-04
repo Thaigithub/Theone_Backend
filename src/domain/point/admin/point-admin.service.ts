@@ -8,6 +8,7 @@ import { PointAdminCategoryFilter } from './enum/point-admin-category-filter';
 import { PointAdminGetListRequest } from './request/point-admin-get-list.request';
 import { PointAdminUpdateRequest } from './request/point-admin-update.request';
 import { PointAdminGetListResponse } from './response/point-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PointAdminService {
@@ -106,13 +107,13 @@ export class PointAdminService {
             },
         });
         if (!point) {
-            throw new NotFoundException('The point request id is not found');
+            throw new NotFoundException(Error.POINT_REQUEST_NOT_FOUND);
         }
         if (body.status === PointStatus.APPROVED && !body.amount) {
-            throw new BadRequestException('Appprove must include the amount point greater than 0 to give');
+            throw new BadRequestException(Error.POINT_MUST_GREATER_THAN_0);
         }
         if (body.status === PointStatus.REJECTED && !body.reason) {
-            throw new BadRequestException('Reject must include the reason to deny the request');
+            throw new BadRequestException(Error.REASON_IS_REQUIRED);
         }
         if (point.status === PointStatus.REQUESTING) {
             await this.prismaService.$transaction(async (prisma) => {

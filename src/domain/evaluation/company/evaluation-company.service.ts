@@ -9,6 +9,7 @@ import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-c
 import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
 import { EvaluationCompanyGetListMemberResponse } from './response/evaluation-company-get-list-members.response';
 import { EvaluationCompanyGetListTeamResponse } from './response/evaluation-company-get-list-teams.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class EvaluationCompanyService {
@@ -48,8 +49,8 @@ export class EvaluationCompanyService {
                 });
                 break;
         }
-        if (!evaluationByCompany) throw new NotFoundException('Evaluation ticket not found');
-        if (evaluationByCompany.score) throw new BadRequestException('This member/team is already evaluated');
+        if (!evaluationByCompany) throw new NotFoundException(Error.EVALUATION_NOT_FOUND);
+        if (evaluationByCompany.score) throw new BadRequestException(Error.EVALUATION_HAS_BEEN_MADE);
         return evaluationByCompany;
     }
 

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { HeadhuntingMatchingStatus, HeadhuntingRequestStatus, NotificationType, Prisma, RequestObject } from '@prisma/client';
 import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -398,7 +399,7 @@ export class HeadhuntingAdminService {
                 matchingDate: item.settlement?.createdAt || null,
             };
         });
-        if (!headhunting) throw new NotFoundException('Headhunting not found');
+        if (!headhunting) throw new NotFoundException(Error.HEADHUNTING_NOT_FOUND);
         return {
             requestId: headhunting.requests[0].id,
             id: headhunting.id,
@@ -452,8 +453,8 @@ export class HeadhuntingAdminService {
                 },
             },
         });
-        if (!headhunting) throw new NotFoundException('Headhunting not found');
-        if (headhunting.requests.length === 0) throw new BadRequestException('Approve request not found');
+        if (!headhunting) throw new NotFoundException(Error.HEADHUNTING_NOT_FOUND);
+        if (headhunting.requests.length === 0) throw new BadRequestException(Error.HEADHUNTING_REQUEST_APPROVE_NOT_FOUND);
         if (headhunting.requests[0].object === RequestObject.TEAM) {
             const team = await this.prismaService.team.findUnique({
                 where: {
@@ -461,14 +462,14 @@ export class HeadhuntingAdminService {
                     isActive: true,
                 },
             });
-            if (!team) throw new NotFoundException('Team not found');
+            if (!team) throw new NotFoundException(Error.TEAM_NOT_FOUND);
             if (
                 headhunting.recommendations
                     .filter((item) => item.teamId)
                     .map((item) => item.teamId)
                     .includes(body.id)
             )
-                throw new BadRequestException('Team has been recommended');
+                throw new BadRequestException(Error.TEAM_HAS_BEEN_RECOMMENDED);
         }
         if (headhunting.requests[0].object === RequestObject.INDIVIDUAL) {
             const member = await this.prismaService.member.findUnique({
@@ -477,14 +478,14 @@ export class HeadhuntingAdminService {
                     isActive: true,
                 },
             });
-            if (!member) throw new NotFoundException('Member not found');
+            if (!member) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
             if (
                 headhunting.recommendations
                     .filter((item) => item.memberId)
                     .map((item) => item.memberId)
                     .includes(body.id)
             )
-                throw new BadRequestException('Member has been recommended');
+                throw new BadRequestException(Error.MEMBER_HAS_BEEN_RECOMMENDED);
         }
         await this.prismaService.headhunting.update({
             where: {
@@ -509,7 +510,7 @@ export class HeadhuntingAdminService {
                 isActive: true,
             },
         });
-        if (!headhunting) throw new NotFoundException('Headhunting not found');
+        if (!headhunting) throw new NotFoundException(Error.HEADHUNTING_NOT_FOUND);
         await this.prismaService.headhunting.update({
             where: {
                 id,
@@ -564,7 +565,7 @@ export class HeadhuntingAdminService {
                 status: true,
             },
         });
-        if (!request) throw new NotFoundException('Headhunting request not found');
+        if (!request) throw new NotFoundException(Error.HEADHUNTING_REQUEST_NOT_FOUND);
         return {
             id: request.id,
             companyName: request.headhunting.post.company.name,
@@ -606,11 +607,11 @@ export class HeadhuntingAdminService {
                 status: true,
             },
         });
-        if (!request) throw new NotFoundException('Headhunting request not found');
+        if (!request) throw new NotFoundException(Error.HEADHUNTING_REQUEST_NOT_FOUND);
         if (request.status !== HeadhuntingRequestStatus.APPLY && request.status !== HeadhuntingRequestStatus.RE_APPLY)
-            throw new BadRequestException('status not correct');
+            throw new BadRequestException(Error.HEADHUNTING_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         if (body.status !== HeadhuntingRequestStatus.REJECTED && body.status !== HeadhuntingRequestStatus.APPROVED)
-            throw new BadRequestException('status request not correct');
+            throw new BadRequestException(Error.REQUEST_NOT_APPROPRIATE);
         await this.prismaService.headhuntingRequest.update({
             where: {
                 id,

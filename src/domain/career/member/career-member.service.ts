@@ -1,6 +1,7 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CareerCertificationRequestStatus, CareerCertificationType, CareerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { BaseResponse } from 'utils/generics/base.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { GovernmentService } from '../../../services/government/government.service';
@@ -80,7 +81,7 @@ export class CareerMemberService {
                 certificationType: CareerCertificationType.NONE,
             },
         });
-        if (!response) throw new NotFoundException('Career does not exist');
+        if (!response) throw new NotFoundException(Error.CAREER_NOT_FOUND);
         const { code, ...rest } = response;
         return {
             ...rest,
@@ -97,7 +98,7 @@ export class CareerMemberService {
             },
         });
 
-        if (!occupation) throw new NotFoundException('Occupation not found');
+        if (!occupation) throw new NotFoundException(Error.OCCUPATION_NOT_FOUND);
 
         if (!body.isExperienced) {
             const isNotExperienceCareerExist = await this.prismaService.career.findFirst({
@@ -143,14 +144,14 @@ export class CareerMemberService {
                 certificationType: CareerCertificationType.NONE,
             },
         });
-        if (!career) throw new NotFoundException('Career not found');
+        if (!career) throw new NotFoundException(Error.CAREER_NOT_FOUND);
         const occupation = await this.prismaService.code.findUnique({
             where: {
                 id: body.occupationId,
                 isActive: true,
             },
         });
-        if (!occupation) throw new NotFoundException('Occupation not found');
+        if (!occupation) throw new NotFoundException(Error.OCCUPATION_NOT_FOUND);
         const { startDate, endDate, ...restBody } = body;
         await this.prismaService.career.update({
             data: {
@@ -179,7 +180,7 @@ export class CareerMemberService {
                 certificationType: CareerCertificationType.NONE,
             },
         });
-        if (!career) throw new NotFoundException('Career not found');
+        if (!career) throw new NotFoundException(Error.CAREER_NOT_FOUND);
 
         await this.prismaService.career.update({
             where: {
@@ -210,7 +211,7 @@ export class CareerMemberService {
             },
         });
         if (!member) {
-            throw new NotFoundException('The member id is not found');
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         }
         if (!member.careerCertificationRequest) {
             return {
@@ -288,7 +289,7 @@ export class CareerMemberService {
                 status: CareerCertificationRequestStatus.APPROVED,
             },
         });
-        if (request < 1) throw new ConflictException('Request already approved');
+        if (request < 1) throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
 
         await this.prismaService.member.update({
             where: {
@@ -320,8 +321,9 @@ export class CareerMemberService {
                 },
             })
         ).careerCertificationRequest;
-        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
-            throw new ForbiddenException('Application not exist or not approved');
+        if (!application) throw new NotFoundException(Error.CAREER_REQUEST_NOT_FOUND);
+        if (application.status != CareerCertificationRequestStatus.APPROVED)
+            throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationExperienceHealthInsurance(accountId);
     }
 
@@ -336,8 +338,9 @@ export class CareerMemberService {
                 },
             })
         ).careerCertificationRequest;
-        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
-            throw new ForbiddenException('Application not exist or not approved');
+        if (!application) throw new NotFoundException(Error.CAREER_REQUEST_NOT_FOUND);
+        if (application.status != CareerCertificationRequestStatus.APPROVED)
+            throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationExperienceEmploymentInsurance(accountId);
     }
 
@@ -352,8 +355,9 @@ export class CareerMemberService {
                 },
             })
         ).careerCertificationRequest;
-        if (!application || application.status != CareerCertificationRequestStatus.APPROVED)
-            throw new ForbiddenException('Application not exist or not approved');
+        if (!application) throw new NotFoundException(Error.CAREER_REQUEST_NOT_FOUND);
+        if (application.status != CareerCertificationRequestStatus.APPROVED)
+            throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationTheOneSite(accountId);
     }
 }

@@ -7,6 +7,7 @@ import { InquiryCompanyCreateRequest } from './request/inquiry-company-create.re
 import { InquiryCompanyGetListRequest } from './request/inquiry-company-get-list.request';
 import { InquiryCompanyGetDetailResponse } from './response/inquiry-company-get-detail.response';
 import { InquiryCompanyGetListResponse } from './response/inquiry-company-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class InquiryCompanyService {
@@ -120,7 +121,7 @@ export class InquiryCompanyService {
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!inquiry) throw new NotFoundException(Error.INQUIRY_NOT_FOUND);
 
         return {
             id: inquiry.id,

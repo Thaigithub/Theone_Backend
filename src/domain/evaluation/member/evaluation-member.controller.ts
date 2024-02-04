@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch,
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
+import { Error } from 'utils/error.enum';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { EvaluationMemberStatus } from './dto/evaluation-member-get-list.enum';
@@ -36,7 +37,7 @@ export class EvaluationMemberController {
         @Query() query: EvaluationMemberGetListSiteRequest,
     ): Promise<BaseResponse<EvaluationMemberGetListSiteResponse>> {
         if (query.score && query.status === EvaluationMemberStatus.INCOMPLETE)
-            throw new BadRequestException("Evaluation status INCOMPLETE can't be requested along with score");
+            throw new BadRequestException(Error.EVALUATION_STATUS_IS_NOT_APPROPRIATE);
         return BaseResponse.of(await this.evaluationMemberService.getListSite(request.user.accountId, query));
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ApplicationCategory, Prisma, RequestObject, SettlementStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -210,7 +211,7 @@ export class SettlementAdminService {
             },
         });
         if (!settlement) {
-            throw new NotFoundException('The settlement id is not found');
+            throw new NotFoundException(Error.SETTLEMENT_NOT_FOUND);
         }
         const workLoadInformation = () => {
             const countWorkDays = settlement.headHuntingRecommendation.application.contract.labor

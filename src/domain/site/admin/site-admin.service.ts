@@ -5,6 +5,7 @@ import { NotificationCompanyService } from 'domain/notification/company/notifica
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
@@ -138,7 +139,7 @@ export class SiteAdminService {
             status: item.status,
         };
         if (!site) {
-            throw new NotFoundException('The site id is not exist');
+            throw new NotFoundException(Error.SITE_NOT_FOUND);
         }
         return site;
     }
@@ -173,7 +174,7 @@ export class SiteAdminService {
                 });
                 if (body.status === SiteStatus.SUSPENDED) {
                     if (!body.content) {
-                        throw new BadRequestException('The reason for suspend must be filled');
+                        throw new BadRequestException(Error.REASON_IS_REQUIRED);
                     }
                     await prisma.siteHistory.create({
                         data: {
@@ -357,7 +358,7 @@ export class SiteAdminService {
                 email: true,
             },
         });
-        if (!detailSite) throw new NotFoundException('Site not found');
+        if (!detailSite) throw new NotFoundException(Error.SITE_NOT_FOUND);
         const detailContractors = await this.prismaService.contract.findMany({
             where: {
                 application: {

@@ -7,6 +7,7 @@ import { CurrencyExchangeAdminGetListCategory } from './dto/currency-exchange-ad
 import { CurrencyExchangeAdminGetExchangeListRequest } from './request/currency-exchange-admin-get-list.request';
 import { CurrencyExchangeAdminUpdateRequest } from './request/currency-exchange-admin-update.request';
 import { CurrencyExchangeAdminGetListResponse } from './response/currency-exchange-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class CurrencyExchangeAdminService {
@@ -93,12 +94,12 @@ export class CurrencyExchangeAdminService {
             },
         });
         if (!currencyExchange) {
-            throw new NotFoundException(`The currency exchange request with id = ${id} is not exist`);
+            throw new NotFoundException(Error.CURRENCY_EXCHANGE_REQUEST_NOT_FOUND);
         }
         if (body.status === PointStatus.APPROVED && currencyExchange.status !== PointStatus.REQUESTING) {
-            throw new BadRequestException('Invalid state transition request');
+            throw new BadRequestException(Error.CURRENCY_EXCHANGE_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         } else if (body.status === PointStatus.REJECTED && (currencyExchange.status !== PointStatus.REQUESTING || !body.reason)) {
-            throw new BadRequestException('Invalid state transition request');
+            throw new BadRequestException(Error.CURRENCY_EXCHANGE_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         }
         if (currencyExchange.status === PointStatus.REQUESTING) {
             await this.prismaService.$transaction(async (prisma) => {

@@ -7,6 +7,7 @@ import { ReportMemberCreateRequest } from './request/report-member-create.reques
 import { ReportMemberGetListRequest } from './request/report-member-get-list.request';
 import { ReportMemberGetDetailResponse } from './response/report-member-get-detail.response';
 import { ReportMemberGetListResponse } from './response/report-member-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ReportMemberService {
@@ -93,7 +94,7 @@ export class ReportMemberService {
                 },
             },
         });
-        if (!report) throw new NotFoundException('Report does not exist');
+        if (!report) throw new NotFoundException(Error.REPORT_NOT_FOUND);
         return {
             id: report.id,
             questionTitle: report.questionTitle,

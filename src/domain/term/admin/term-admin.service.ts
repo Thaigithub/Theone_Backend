@@ -9,6 +9,7 @@ import { TermAdminGetListRequest } from './request/term-admin-get-list.request';
 import { TermAdminUpdateRequest } from './request/term-admin-update.request';
 import { TermAdminGetDetailResponse } from './response/term-admin-get-detail.response';
 import { TermAdminGetListResponse } from './response/term-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class TermAdminService {
@@ -58,7 +59,7 @@ export class TermAdminService {
             },
         });
 
-        if (!term) throw new NotFoundException('Terms of service does not exist');
+        if (!term) throw new NotFoundException(Error.TERM_NOT_FOUND);
 
         await this.prismaService.term.update({
             where: {
@@ -83,7 +84,7 @@ export class TermAdminService {
             },
         });
 
-        if (!term) throw new NotFoundException('Terms of service does not exist');
+        if (!term) throw new NotFoundException(Error.TERM_NOT_FOUND);
 
         return term;
     }
@@ -96,7 +97,7 @@ export class TermAdminService {
             },
         });
 
-        if (!term) throw new NotFoundException('Terms of service does not exist');
+        if (!term) throw new NotFoundException(Error.TERM_NOT_FOUND);
 
         await this.prismaService.term.update({
             where: {

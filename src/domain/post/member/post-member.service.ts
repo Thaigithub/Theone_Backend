@@ -14,6 +14,7 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostMemberService {
@@ -77,7 +78,7 @@ export class PostMemberService {
                     id: siteId,
                 },
             });
-            if (!siteExist) throw new NotFoundException('Site does not exist');
+            if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
         }
 
         const posts = (
@@ -177,7 +178,7 @@ export class PostMemberService {
                 id,
             },
         });
-        if (!postExist) throw new NotFoundException('Post does not exist');
+        if (!postExist) throw new NotFoundException(Error.POST_NOT_FOUND);
 
         let memberRegisteredCodeIdsList = null;
         if (accountId) {
@@ -331,7 +332,7 @@ export class PostMemberService {
             }
         });
         if (!post) {
-            throw new BadRequestException('Post does not exist');
+            throw new BadRequestException(Error.POST_NOT_FOUND);
         }
 
         const application = await this.prismaService.application.findUnique({
@@ -343,7 +344,7 @@ export class PostMemberService {
             },
         });
         if (application) {
-            throw new BadRequestException('This job post is already applied');
+            throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
         await this.prismaService.application.create({
             data: {
@@ -386,7 +387,7 @@ export class PostMemberService {
         });
 
         if (!post) {
-            throw new BadRequestException('Post does not exist');
+            throw new BadRequestException(Error.POST_NOT_FOUND);
         }
 
         //Check exist team - post
@@ -399,7 +400,7 @@ export class PostMemberService {
             },
         });
         if (application) {
-            throw new BadRequestException('This job post is already applied');
+            throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
 
         const newApplication = await this.prismaService.application.create({
@@ -459,7 +460,7 @@ export class PostMemberService {
         });
 
         if (!post) {
-            throw new BadRequestException('Post does not exist');
+            throw new BadRequestException(Error.POST_NOT_FOUND);
         }
 
         //Check exist member - post

@@ -10,6 +10,7 @@ import { InquiryMemberGetListResponse } from './response/inquiry-member-get-list
 import { InquiryMemberGetCountRequest } from './request/inquiry-member-get-count.request';
 import { InquiryMemberGetCountType } from './enum/inquiry-member-get-count-type.enum';
 import { InquiryMemberGetCountResponse } from './response/inquiry-member-get-count.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class InquiryMemberService {
@@ -120,7 +121,7 @@ export class InquiryMemberService {
             },
         });
 
-        if (!inquiry) throw new NotFoundException('Inquiry does not exist');
+        if (!inquiry) throw new NotFoundException(Error.INQUIRY_NOT_FOUND);
 
         return {
             id: inquiry.id,

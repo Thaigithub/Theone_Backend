@@ -23,6 +23,7 @@ import { PostAdminUpdateRequest } from './request/post-admin-update.request';
 import { PostAdminGetDetailResponse } from './response/post-admin-get-detail.response';
 import { PostAdminGetListForApplicationResponse } from './response/post-admin-get-list-application.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostAdminService {
@@ -39,7 +40,7 @@ export class PostAdminService {
             },
         });
         if (!post_record) {
-            throw new NotFoundException('The Post id is not found');
+            throw new NotFoundException(Error.POST_NOT_FOUND);
         }
         return post_record;
     }
@@ -52,7 +53,7 @@ export class PostAdminService {
                     id,
                 },
             });
-            if (!code) throw new NotFoundException(`Code ID does not exist`);
+            if (!code) throw new NotFoundException(Error.OCCUPATION_NOT_FOUND);
         }
     }
 
@@ -268,7 +269,7 @@ export class PostAdminService {
             },
         };
         if (!post) {
-            throw new NotFoundException(`The Post Id does not exist`);
+            throw new NotFoundException(Error.POST_NOT_FOUND);
         }
         return post;
     }

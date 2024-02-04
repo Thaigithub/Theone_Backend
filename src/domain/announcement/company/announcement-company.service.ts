@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { AnnouncementCompanyGetListRequest } from './request/announcement-company-get-list.request';
@@ -97,7 +98,7 @@ export class AnnouncementCompanyService {
             },
         });
 
-        if (!announcement) throw new NotFoundException('Announcement does not exist');
+        if (!announcement) throw new NotFoundException(Error.ANNOUNCEMENT_NOT_FOUND);
 
         return {
             id: announcement.id,

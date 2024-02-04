@@ -3,6 +3,7 @@ import { PaymentStatus } from '@prisma/client';
 import { PORTONE_API_KEY, PORTONE_API_SECRET, PORTONE_HOST } from 'app.config';
 import axios from 'axios';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PortoneService {
@@ -84,7 +85,7 @@ export class PortoneService {
                 }
             }
         } catch (e) {
-            throw new NotFoundException('Payment not found');
+            throw new NotFoundException(Error.PAYMENT_NOT_FOUND);
         }
     }
 }

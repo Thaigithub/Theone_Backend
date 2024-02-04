@@ -6,6 +6,7 @@ import { QueryPagingHelper } from 'utils/pagination-query';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
 import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class NotificationMemberService {
@@ -128,7 +129,7 @@ export class NotificationMemberService {
             },
         });
         if (!notification) {
-            throw new NotFoundException('The Notification id is not exist');
+            throw new NotFoundException(Error.NOTIFICATION_NOT_FOUND);
         }
         if (notification.status !== body.status) {
             await this.prismaService.notification.update({
@@ -154,7 +155,7 @@ export class NotificationMemberService {
             },
         });
         if (!notification) {
-            throw new NotFoundException('The notification id is not found');
+            throw new NotFoundException(Error.NOTIFICATION_NOT_FOUND);
         }
         await this.prismaService.notification.update({
             where: {

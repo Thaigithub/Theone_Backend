@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { EvaluationAdmingetListSiteCategory } from './enum/evaluation-admin-get-list-site-category.enum';
@@ -168,7 +169,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+        if (!evaluationExist) throw new NotFoundException(Error.EVALUATION_NOT_FOUND);
 
         const siteEvaluation = await this.prismaService.siteEvaluation.findUnique({
             select: {
@@ -283,7 +284,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+        if (!evaluationExist) throw new NotFoundException(Error.EVALUATION_NOT_FOUND);
 
         const teamEvaluation = await this.prismaService.teamEvaluation.findUnique({
             select: {
@@ -382,7 +383,7 @@ export class EvaluationAdminService {
                 id,
             },
         });
-        if (!evaluationExist) throw new NotFoundException('Evaluation does not exist');
+        if (!evaluationExist) throw new NotFoundException(Error.EVALUATION_NOT_FOUND);
 
         const memberEvaluation = await this.prismaService.memberEvaluation.findUnique({
             select: {

@@ -1,18 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, SiteStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { SitePeriodStatus, getSiteStatus } from 'utils/get-site-status';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { ContractAdminCountCategory } from './enum/contract-admin-get-count-category.enum';
 import { ContractAdminGetListCategory } from './enum/contract-admin-get-list-category.enum';
 import { ContractAdminGetListSort } from './enum/contract-admin-get-list-sort.enum';
 import { ContractAdminGetListStatus } from './enum/contract-admin-get-list-status.enum';
+import { ContractAdminGetCountRequest } from './request/contract-admin-get-count.request';
 import { ContractAdminGetListRequest } from './request/contract-admin-get-list.request';
 import { ContractAdminUpsertFileRequest } from './request/contract-admin-upsert-file.request';
 import { ContractAdminGetItemResponse, ContractAdminGetListResponse } from './response/contract-admin-get-list.response';
-import { ContractAdminCountCategory } from './enum/contract-admin-get-count-category.enum';
-import { ContractAdminGetCountRequest } from './request/contract-admin-get-count.request';
-import { CountResponse } from 'utils/generics/count.response';
 
 @Injectable()
 export class ContractAdminService {
@@ -144,7 +145,7 @@ export class ContractAdminService {
         });
 
         if (!contract) {
-            throw new NotFoundException('Contract not found');
+            throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         }
 
         await this.prismaService.contract.update({
@@ -168,7 +169,7 @@ export class ContractAdminService {
         });
 
         if (!contract) {
-            throw new NotFoundException('Contract not found');
+            throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         }
 
         await this.prismaService.file.update({

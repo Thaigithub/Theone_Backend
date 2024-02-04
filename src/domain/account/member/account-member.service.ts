@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, MemberLevel, OtpType, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
 import { compare, hash } from 'bcrypt';
@@ -6,11 +6,13 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { AccountMemberUpdatePasswordRequestStatus } from './enum/account-member-update-password-request-status.enum';
 import { AccountMemberSendOtpVerifyPhoneRequest } from './request/account-member-send-otp-verify-phone.request';
 import { AccountMemberSignupSnsRequest } from './request/account-member-signup-sns.request';
 import { AccountMemberSignupRequest } from './request/account-member-signup.request';
 import { AccountMemberUpdatePasswordRequest } from './request/account-member-update-password.request';
+import { AccountMemberUpdateRequest } from './request/account-member-update.request';
 import { AccountMemberUpsertBankAccountRequest } from './request/account-member-upsert-bankaccount.request';
 import { AccountMemberUpsertDisabilityRequest } from './request/account-member-upsert-disability.request';
 import { AccountMemberUpsertForeignWorkerRequest } from './request/account-member-upsert-foreignworker.request';
@@ -22,7 +24,6 @@ import { AccountMemberGetDetailResponse } from './response/account-member-get-de
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
-import { AccountMemberUpdateRequest } from './request/account-member-update.request';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
 @Injectable()
@@ -89,14 +90,14 @@ export class AccountMemberService {
                     username: request.recommenderId,
                 },
             });
-            if (numRecommender !== 1) throw new NotFoundException('Recommender userId not found');
+            if (numRecommender !== 1) throw new NotFoundException(Error.RECOMMENDER_USERNAME_NOT_EXISTED);
         }
         const numAccount = await this.prismaService.account.count({
             where: {
                 username: request.username,
             },
         });
-        if (numAccount !== 0) throw new ConflictException('UserId has been used');
+        if (numAccount !== 0) throw new BadRequestException(Error.USERNAME_EXISTED);
         await this.prismaService.account.create({
             data: {
                 username: request.username,
@@ -146,7 +147,7 @@ export class AccountMemberService {
                     username: request.recommenderId,
                 },
             });
-            if (numRecommender !== 1) throw new NotFoundException('Recommender userId not found');
+            if (numRecommender !== 1) throw new NotFoundException(Error.RECOMMENDER_USERNAME_NOT_EXISTED);
         }
         const numAccount = await this.prismaService.account.count({
             where: {
@@ -155,8 +156,8 @@ export class AccountMemberService {
                 },
             },
         });
-        if (numAccount !== 0) throw new ConflictException('Email has been used');
-        if (request.signupMethod === SignupMethodType.GENERAL) throw new BadRequestException('Wrong signupMethod');
+        if (numAccount !== 0) throw new BadRequestException(Error.EMAIL_EXISTED);
+        if (request.signupMethod === SignupMethodType.GENERAL) throw new BadRequestException(Error.WRONG_SIGNUP_METHOD);
         await this.prismaService.account.create({
             data: {
                 username: payload.email,
@@ -268,7 +269,7 @@ export class AccountMemberService {
                     },
                 },
             });
-            if (usernameExist) throw new ConflictException('Username already existed');
+            if (usernameExist) throw new BadRequestException(Error.USERNAME_EXISTED);
             await this.prismaService.account.update({
                 data: {
                     username: body.username,
@@ -287,7 +288,7 @@ export class AccountMemberService {
                     cityEnglishName: 'All',
                 },
             });
-            if (isEntireCityId) throw new BadRequestException('Can not use Entire City as district for member');
+            if (isEntireCityId) throw new BadRequestException(Error.ENTIRE_CITY_CANNOT_BE_USED);
         }
 
         await this.prismaService.member.update({
@@ -312,7 +313,7 @@ export class AccountMemberService {
                 id: accountId,
             },
         });
-        if (!account) throw new NotFoundException('Account does not exist');
+        if (!account) throw new NotFoundException(Error.ACCOUNT_NOT_FOUND);
 
         const passwordMatch = await compare(body.currentPassword, account.password);
         if (!passwordMatch) return { status: AccountMemberUpdatePasswordRequestStatus.PASSWORD_NOT_MATCH };
@@ -349,7 +350,7 @@ export class AccountMemberService {
                 name: request.bankName,
             },
         });
-        if (!bankNameExist) throw new BadRequestException('Bank name does not exist');
+        if (!bankNameExist) throw new BadRequestException(Error.BANK_NOT_FOUND);
 
         await this.prismaService.member.update({
             where: { accountId: id },

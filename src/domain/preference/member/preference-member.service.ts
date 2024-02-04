@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PreferenceMemberUpdateRequest } from './request/preference-member-update.request';
 import { PreferenceMemberGetDetailResponse } from './response/preference-member-get-preference.response';
 
@@ -27,7 +28,7 @@ export class PreferenceMemberService {
             },
         });
 
-        if (!preference) throw new NotFoundException('Preference not found');
+        if (!preference) throw new NotFoundException(Error.PREFERENCE_NOT_FOUND);
 
         return {
             id: preference.id,

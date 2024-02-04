@@ -9,6 +9,7 @@ import { PointMemberCreateRequest } from './request/point-member-create-point.re
 import { PointMemberGetListRequest } from './request/point-member-get-list.request';
 import { PointMemberGetCountResponse } from './response/point-member-get-count.response';
 import { PointMemberGetListResponse } from './response/point-member-get-list.response.ts';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PointMemberService {
@@ -25,7 +26,7 @@ export class PointMemberService {
             },
         });
         if (!points) {
-            throw new NotFoundException('The member id not exist');
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         }
         return {
             count: points.totalPoint,
@@ -157,7 +158,7 @@ export class PointMemberService {
                 },
             });
             if (!bankAccount) {
-                throw new NotFoundException('The bank account is not found');
+                throw new NotFoundException(Error.BANK_ACCOUNT_NOT_FOUND);
             }
 
             // Check if member is have enough points
@@ -171,7 +172,7 @@ export class PointMemberService {
                 },
             });
             if (member.totalPoint < body.amount) {
-                throw new ForbiddenException(`The points are not enough to exchange`);
+                throw new ForbiddenException(Error.POINTS_ARE_NOT_ENOUGH);
             }
 
             // Update the points of member

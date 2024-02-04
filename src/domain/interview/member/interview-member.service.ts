@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostApplicationStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { InterviewMemberGetListStatus } from './enum/interview-member-get-list-status.enum';
 import { InterviewMemberGetListRequest } from './request/interview-member-get-list.request';
 import { InterviewMemberGetListResponse } from './response/interview-member-get-list.response';
-import { InterviewMemberGetListStatus } from './enum/interview-member-get-list-status.enum';
 
 @Injectable()
 export class InterviewMemberService {
@@ -193,7 +194,7 @@ export class InterviewMemberService {
                 accountId,
             },
         });
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         return await this.prismaService.interview.count({
             where: {

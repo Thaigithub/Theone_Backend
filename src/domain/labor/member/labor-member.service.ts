@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { LaborMemberGetTotalWorkDateResponse } from './response/labor-member-get-total-workdate.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborMemberService {
@@ -13,7 +14,7 @@ export class LaborMemberService {
                 accountId,
             },
         });
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         return {
             total: await this.prismaService.workDate.count({
                 where: {

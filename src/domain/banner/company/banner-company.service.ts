@@ -9,6 +9,7 @@ import { BannerCompanyGetListRequestRequest } from './request/banner-company-get
 import { BannerCompanyUpsertRequestRequest } from './request/banner-company-upsert.request';
 import { BannerCompanyGetDetailRequestResponse } from './response/banner-company-get-detail-request.response';
 import { BannerCompanyGetListRequestResponse } from './response/banner-company-get-list-request.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class BannerCompanyService {
@@ -119,7 +120,7 @@ export class BannerCompanyService {
     }
 
     async createRequest(accountId: number, body: BannerCompanyUpsertRequestRequest): Promise<void> {
-        if (!body.advertisingBanner && !body.postBanner) throw new BadRequestException('Information for the banner is undefined');
+        if (!body.advertisingBanner && !body.postBanner) throw new BadRequestException(Error.BANNER_REQUEST_IS_NOT_APPROPRIATE);
         if (body.postBanner) {
             const post = await this.prismaService.post.findUnique({
                 where: {
@@ -130,7 +131,7 @@ export class BannerCompanyService {
                     isActive: true,
                 },
             });
-            if (!post) throw new NotFoundException('Post not found');
+            if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         }
         const companyId = (await this.prismaService.company.findUnique({ where: { accountId }, select: { id: true } })).id;
         if (body.advertisingBanner) {
@@ -229,7 +230,7 @@ export class BannerCompanyService {
                 },
             },
         });
-        if (!request) throw new NotFoundException('Request not found');
+        if (!request) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
         if (request.advertisingBanner) {
             return {
                 type: BannerCompanyBannerType.ADVERTISING,
@@ -279,7 +280,7 @@ export class BannerCompanyService {
                 isActive: true,
             },
         });
-        if (!request) throw new NotFoundException('Request not found');
+        if (!request) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
         await this.prismaService.bannerRequest.update({
             where: {
                 id,

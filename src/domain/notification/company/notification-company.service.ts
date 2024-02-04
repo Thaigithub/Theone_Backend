@@ -5,6 +5,7 @@ import { PrismaService } from '../../../services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { QueryPagingHelper } from '../../../utils/pagination-query';
 import { CompanyGetNotificationResponse, NotificationCompanyGetListResponse } from './response/company-notification.response';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class NotificationCompanyService {
@@ -94,7 +95,7 @@ export class NotificationCompanyService {
             },
         });
         if (!notification) {
-            throw new NotFoundException('The Notification is not found');
+            throw new NotFoundException(Error.NOTIFICATION_NOT_FOUND);
         }
         await this.prismaService.notification.update({
             where: queryFilter,

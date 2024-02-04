@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InvitationStatus, NotificationType, Prisma, TeamStatus } from '@prisma/client';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -42,10 +43,10 @@ export class TeamMemberService {
             },
         });
         if (!team) {
-            throw new BadRequestException('You do not have permission to update this team');
+            throw new BadRequestException(Error.PERMISSION_DENIED);
         }
         if (team.status == TeamStatus.STOPPED) {
-            throw new BadRequestException('The team had been forced to be stopped activity by administrator');
+            throw new BadRequestException(Error.TEAM_IS_STOPPED_BY_ADMIN);
         }
     }
 
@@ -231,7 +232,7 @@ export class TeamMemberService {
                 },
             },
         });
-        if (!team) throw new NotFoundException(`Team with id ${id} not found`);
+        if (!team) throw new NotFoundException(Error.TEAM_NOT_FOUND);
 
         const members = await this.prismaService.membersOnTeams.findMany({
             where: {
@@ -371,7 +372,7 @@ export class TeamMemberService {
                 name: true,
             },
         });
-        if (!member) throw new NotFoundException('Member not found');
+        if (!member) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
         const memberOnTeam = await this.prismaService.team.findUnique({
             where: {
                 id: teamId,
@@ -394,7 +395,7 @@ export class TeamMemberService {
                 ],
             },
         });
-        if (memberOnTeam) throw new BadRequestException('Member has been on team');
+        if (memberOnTeam) throw new BadRequestException(Error.MEMBER_EXISTED);
         const teamMemberInvitation = await this.prismaService.teamInvitation.findFirst({
             where: {
                 memberId: body.id,
@@ -514,7 +515,7 @@ export class TeamMemberService {
                     },
                 });
             } else {
-                throw new NotFoundException(`The invitation has been accepted by other team member`);
+                throw new NotFoundException(Error.INVITATION_HAS_BEEN_ACCEPTED);
             }
         });
     }
@@ -537,7 +538,7 @@ export class TeamMemberService {
                 },
             },
         });
-        if (applications) throw new ConflictException(`Cannot delete team because some team's contracts are active`);
+        if (applications) throw new ConflictException(Error.TEAM_IS_UNDER_CONTRACT);
         await this.prismaService.$transaction(async (prisma) => {
             await prisma.team.update({
                 where: {
@@ -643,9 +644,8 @@ export class TeamMemberService {
                 status: true,
             },
         });
-        if (!teamInvitation) throw new NotFoundException(`The invitation is not exist`);
-        if (teamInvitation.status !== InvitationStatus.REQUESTED)
-            throw new ConflictException(`The invitation had been accept or reject`);
+        if (!teamInvitation) throw new NotFoundException(Error.INVITATION_NOT_FOUND);
+        if (teamInvitation.status !== InvitationStatus.REQUESTED) throw new ConflictException(Error.INVITATION_HAS_BEEN_ACCEPTED);
         if (body.status === InvitationStatus.DECLIENED) {
             await this.prismaService.teamInvitation.update({
                 where: {

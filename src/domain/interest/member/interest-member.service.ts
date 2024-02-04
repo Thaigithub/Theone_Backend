@@ -9,6 +9,7 @@ import { InterestMemberGetListCategory } from './enum/interest-member-get-filter
 import { InterestMemberDeleteRequest } from './request/interest-member-delete.request';
 import { InterestMemberGetListRequest } from './request/interest-member-get-list.request';
 import { InterestMemberGetListResponse } from './response/interest-member-get-list.response.ts';
+import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class InterestMemberService {
@@ -170,19 +171,19 @@ export class InterestMemberService {
             },
         });
         if (!interest) {
-            throw new NotFoundException('The interest is not exist');
+            throw new NotFoundException(Error.INTEREST_NOT_FOUND);
         }
         if (body.interestType === InterestMemberGetListCategory.POST) {
             if (interest.postId) {
                 await this.postMemberService.updateInterest(accountId, interest.postId);
             } else {
-                throw new NotFoundException('The Post of interest is not exist');
+                throw new NotFoundException(Error.POST_INTEREST_NOT_FOUND);
             }
         } else {
             if (interest.siteId) {
                 await this.siteMemberService.updateInterest(accountId, interest.siteId);
             } else {
-                throw new NotFoundException('The Site of interest is not exist');
+                throw new NotFoundException(Error.SITE_INTEREST_NOT_FOUND);
             }
         }
     }

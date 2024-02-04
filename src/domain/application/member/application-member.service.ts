@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ApplicationCategory, InterviewStatus, PostApplicationStatus, PostStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationMemberGetListOfferFilter } from './enum/application-member-get-list-offer-filter.enum';
@@ -266,7 +267,7 @@ export class ApplicationMemberService {
                 },
             },
         });
-        if (!application) throw new NotFoundException('Application not found');
+        if (!application) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         return {
             isLeader: application.team?.leader.accountId === accountId || null,
             companyLogo: {
@@ -339,12 +340,12 @@ export class ApplicationMemberService {
                 },
             },
         });
-        if (!application) throw new NotFoundException('Application not found');
+        if (!application) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
         if (
             application.status !== PostApplicationStatus.APPROVE_BY_COMPANY ||
             (application.interview && application.interview.status !== InterviewStatus.PASS)
         )
-            throw new BadRequestException('Application is not at the correct status to change');
+            throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
         await this.prismaService.application.update({
             where: {
                 id,
@@ -597,7 +598,7 @@ export class ApplicationMemberService {
                 accountId,
             },
         });
-        if (!memberExist) throw new NotFoundException('Member does not exist');
+        if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
 
         return await this.prismaService.application.count({
             where: {

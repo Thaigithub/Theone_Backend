@@ -35,6 +35,7 @@ import { AuthMemberUpdatePasswordRequest } from './request/auth-member-update-pa
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
 import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
+import { Error } from 'utils/error.enum';
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 const appleClient = new JwksClient({
@@ -70,7 +71,7 @@ export class MemberAuthService {
             },
         });
         if (!member) {
-            throw new NotFoundException(`Account not found `);
+            throw new NotFoundException(Error.ACCOUNT_NOT_FOUND);
         }
         return await this.otpService.sendOtp({
             email: null,
@@ -82,9 +83,9 @@ export class MemberAuthService {
     }
     async updatePassword(body: AuthMemberUpdatePasswordRequest, ip: string): Promise<void> {
         const searchOtp = await this.otpService.getOtp(body.otpId, ip);
-        if (!searchOtp) throw new NotFoundException('Otp not found');
+        if (!searchOtp) throw new NotFoundException(Error.OTP_NOT_FOUND);
         if (getTimeDifferenceInMinutes(searchOtp.createdAt) > parseInt(OTP_VERIFICATION_VALID_TIME, 10)) {
-            throw new BadRequestException('Otp verification is expired');
+            throw new BadRequestException(Error.OTP_EXPIRED);
         }
         await this.otpService.usedOtp(searchOtp.id);
         await this.prismaService.account.update({
@@ -112,13 +113,13 @@ export class MemberAuthService {
         });
 
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
 
         const passwordMatch = await compare(loginData.password, account.password);
 
         if (!passwordMatch) {
-            throw new UnauthorizedException('Invalid username or password');
+            throw new UnauthorizedException(Error.LOGIN_PASSWORD_IS_INCORRECT);
         }
 
         await this.prismaService.account.update({
@@ -153,7 +154,7 @@ export class MemberAuthService {
         });
 
         if (!account) {
-            throw new UnauthorizedException('Account not found');
+            throw new UnauthorizedException(Error.ACCOUNT_NOT_FOUND);
         }
 
         const payloadData: AuthJwtPayloadData = {
@@ -178,7 +179,7 @@ export class MemberAuthService {
                 audience: GOOGLE_CLIENT_ID,
             })
         ).getPayload();
-        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!payload) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -197,7 +198,7 @@ export class MemberAuthService {
                 },
             },
         });
-        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!profile) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -209,7 +210,7 @@ export class MemberAuthService {
         const kid = json.header.kid;
         const applekey = (await appleClient.getSigningKey(kid)).getPublicKey();
         const payload = await this.jwtService.verify(applekey, json);
-        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!payload) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -228,7 +229,7 @@ export class MemberAuthService {
                 },
             },
         });
-        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!profile) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -242,7 +243,7 @@ export class MemberAuthService {
                 'Content-Type': 'application/json; charset=utf-8',
             },
         }).then((response) => response.data)['kakao_account'];
-        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!payload) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -261,7 +262,7 @@ export class MemberAuthService {
                 },
             },
         });
-        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!profile) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
@@ -275,7 +276,7 @@ export class MemberAuthService {
                 'Content-Type': 'application/json; charset=utf-8',
             },
         }).then((response) => response.data)['reponse'];
-        if (!payload) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!payload) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         const profile = await this.prismaService.member.findUnique({
             where: {
                 email: payload.email,
@@ -294,7 +295,7 @@ export class MemberAuthService {
                 },
             },
         });
-        if (!profile) throw new HttpException('Account not found', HttpStatus.OK);
+        if (!profile) throw new HttpException(Error.ACCOUNT_NOT_FOUND, HttpStatus.OK);
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,

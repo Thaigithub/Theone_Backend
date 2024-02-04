@@ -1,19 +1,20 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { ExcelService } from 'services/excel/excel.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CompanyAdminGetListCategory } from './enum/company-admin-get-list-category.enum';
 import { AdminCompanyDownloadRequest, CompanyAdminDownloadListRequest } from './request/company-admin-download-list.request';
 import { CompanyAdminGetListRequest } from './request/company-admin-get-list.request';
+import { ComapnyAdminGetListProductRequest } from './request/company-admin-product-get-list.request';
 import { CompanyAdminUpdateEmailRequest } from './request/company-admin-update-email.request';
 import { CompanyAdminUpdateStatusRequest } from './request/company-admin-update-status.request';
-import { CompanyAdminGetListResponse } from './response/company-admin-get-list.response';
 import { CompanyAdminGetDetailResponse } from './response/company-admin-get-detail.response';
 import { CompanyAdminGetListProductResponse } from './response/company-admin-get-list-product.response';
-import { ComapnyAdminGetListProductRequest } from './request/company-admin-product-get-list.request';
+import { CompanyAdminGetListResponse } from './response/company-admin-get-list.response';
 @Injectable()
 export class CompanyAdminService {
     constructor(
@@ -114,7 +115,7 @@ export class CompanyAdminService {
                 sites: true,
             },
         });
-        if (!company) throw new NotFoundException('Company id not found');
+        if (!company) throw new NotFoundException(Error.COMPANY_NOT_FOUND);
         else
             return {
                 name: company.name,
@@ -176,7 +177,7 @@ export class CompanyAdminService {
         } else if (typeof request === 'string') {
             list.push(parseInt(request));
         }
-        if (list.length === 0) throw new BadRequestException('Missing teamIds');
+        if (list.length === 0) return;
 
         const companies = await this.prismaService.company.findMany({
             where: {
@@ -265,7 +266,7 @@ export class CompanyAdminService {
                 companyId,
             },
         });
-        if (!companyExist) throw new NotFoundException('Company does not exist');
+        if (!companyExist) throw new NotFoundException(Error.COMPANY_NOT_FOUND);
 
         const company = await this.prismaService.company.findUnique({
             include: {
