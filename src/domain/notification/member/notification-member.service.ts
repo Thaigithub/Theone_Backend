@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AccountStatus, AccountType, NotificationType, Prisma } from '@prisma/client';
+import { AccountStatus, AccountType, NotificationStatus, NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
-import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
 import { Error } from 'utils/error.enum';
 
@@ -111,7 +110,7 @@ export class NotificationMemberService {
         return new PaginationResponse(notifications, new PageInfo(count));
     }
 
-    async update(accountId: number, id: number, body: NotificationMemberUpdateRequest): Promise<void> {
+    async update(accountId: number, id: number): Promise<void> {
         const queryFilter: Prisma.NotificationWhereUniqueInput = {
             id: id,
             isActive: true,
@@ -131,11 +130,11 @@ export class NotificationMemberService {
         if (!notification) {
             throw new NotFoundException(Error.NOTIFICATION_NOT_FOUND);
         }
-        if (notification.status !== body.status) {
+        if (notification.status === NotificationStatus.NOT_READ) {
             await this.prismaService.notification.update({
                 where: queryFilter,
                 data: {
-                    status: body.status,
+                    status: NotificationStatus.READ,
                 },
             });
         }

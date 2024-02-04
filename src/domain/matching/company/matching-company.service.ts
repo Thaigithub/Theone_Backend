@@ -21,7 +21,7 @@ export class MatchingCompanyService {
                     .map((item) => item.split('-')[1])
                     .map((item) => parseInt(item))) ||
             undefined;
-        const dateQuery: Date = new Date();
+        const dateQuery = new Date();
         switch (query.date) {
             case MatchingCompanyGetListDate.ONE_DAY_AGO:
                 dateQuery.setDate(dateQuery.getDate() - 1);
@@ -35,6 +35,8 @@ export class MatchingCompanyService {
             default:
                 break;
         }
+        console.log(dateQuery);
+        console.log(query.date);
         const existMatching = (
             await this.prismaService.matchingRequest.findMany({
                 where: {
@@ -196,24 +198,29 @@ export class MatchingCompanyService {
                 },
                 take: 5,
             });
-
             await this.prismaService.company.update({
                 data: {
                     matchingRequests: {
-                        create: {
-                            recommendations: {
-                                createMany: {
-                                    data: [
-                                        ...members.map((member) => {
-                                            return { memberId: member.id };
-                                        }),
-                                        ...teams.map((team) => {
-                                            return { teamId: team.id };
-                                        }),
-                                    ],
+                        ...(members.length + teams.length > 0 && {
+                            create: {
+                                recommendations: {
+                                    createMany: {
+                                        data: [
+                                            ...(members.length > 0
+                                                ? members.map((member) => {
+                                                      return { memberId: member.id };
+                                                  })
+                                                : []),
+                                            ...(teams.length > 0
+                                                ? teams.map((team) => {
+                                                      return { teamId: team.id };
+                                                  })
+                                                : []),
+                                        ],
+                                    },
                                 },
                             },
-                        },
+                        }),
                     },
                 },
                 where: {

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -6,7 +6,6 @@ import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { NotificationMemberService } from './notification-member.service';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
-import { NotificationMemberUpdateRequest } from './request/notification-member-update-request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
 
 @Controller('/member/notifications')
@@ -23,12 +22,8 @@ export class NotificationMemberController {
     }
 
     @Patch('/:id/status')
-    async update(
-        @Req() req: BaseRequest,
-        @Param('id', ParseIntPipe) id: number,
-        @Body() body: NotificationMemberUpdateRequest,
-    ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationMemberService.update(req.user.accountId, id, body));
+    async update(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.notificationMemberService.update(req.user.accountId, id));
     }
 
     @Delete('/:id')
