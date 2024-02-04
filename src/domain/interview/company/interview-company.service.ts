@@ -594,18 +594,37 @@ export class InterviewCompanyService {
                                         accountId: true,
                                     },
                                 },
+                                team: {
+                                    select: {
+                                        leader: {
+                                            select: {
+                                                accountId: true,
+                                            },
+                                        },
+                                    },
+                                },
                             },
                         },
                     },
                 });
                 if (interview) {
-                    await this.notificationMemberService.create(
-                        interview.application.member.accountId,
-                        '면접요청',
-                        '지원현장에서 면접을 요청하였습니다',
-                        NotificationType.INTERVIEW,
-                        interview.id,
-                    );
+                    if (interview.application.member) {
+                        await this.notificationMemberService.create(
+                            interview.application.member.accountId,
+                            '면접요청',
+                            '지원현장에서 면접을 요청하였습니다',
+                            NotificationType.INTERVIEW,
+                            interview.id,
+                        );
+                    } else if (interview.application.team) {
+                        await this.notificationMemberService.create(
+                            interview.application.team.leader.accountId,
+                            '면접요청',
+                            '지원현장에서 면접을 요청하였습니다',
+                            NotificationType.INTERVIEW,
+                            interview.id,
+                        );
+                    }
                 }
             }
         });
