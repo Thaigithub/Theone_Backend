@@ -194,7 +194,21 @@ export class SiteCompanyService {
                 },
             },
             data: {
-                ...body,
+                name: body.name,
+                address: body.address,
+                regionId: body.districtId,
+                originalBuilding: body.originalBuilding,
+                contact: body.contact,
+                personInCharge: body.personInCharge,
+                personInChargeContact: body.personInChargeContact,
+                email: body.email,
+                taxInvoiceEmail: body.taxInvoiceEmail,
+                siteManagementNumber: body.siteManagementNumber,
+                contractStatus: body.contractStatus,
+                longitude: body.longitude,
+                latitude: body.latitude,
+                startDate: body.startDate,
+                endDate: body.endDate,
             },
         });
     }

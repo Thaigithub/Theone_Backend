@@ -346,6 +346,7 @@ export class PostCompanyService {
                 company: {
                     accountId,
                 },
+                isActive: true,
             },
             select: {
                 category: true,
@@ -358,6 +359,8 @@ export class PostCompanyService {
                         },
                     },
                 },
+                siteId: true,
+                codeId: true,
                 company: {
                     select: {
                         matchingRequests: {
@@ -394,6 +397,7 @@ export class PostCompanyService {
                                 },
                             },
                         },
+
                     },
                 },
             },
@@ -441,7 +445,16 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeoples: request.numberOfPeople,
-                ...(request.occupationId && {code: {connect:{id:request.occupationId}}}),
+                ...(request.occupationId && request.occupationId !== post.codeId && {
+                    code: {
+                        ...(post.codeId && {disconnect: { id: post.codeId} }),
+                    },
+                }),
+                ...(request.occupationId && {
+                    code: {
+                        connect: { id: request.occupationId},
+                    },
+                }),
                 ...(request.otherInformation && { otherInformation: request.otherInformation}),
                 ...(request.salaryType && { salaryType: request.salaryType}),
                 salaryAmount: request.salaryAmount,
@@ -451,16 +464,21 @@ export class PostCompanyService {
                 startWorkTime: request.startWorkTime,
                 endWorkTime: request.endWorkTime,
                 postEditor: request.postEditor,
-                site: {
-                    connect:{
-                        id: request.siteId
+                ...(request.siteId && request.siteId !== post.siteId && post.siteId && {
+                    site: {
+                        disconnect: {id: post.siteId},
+                    },
+                }),
+                ...(request.siteId && {
+                    site: {
+                        connect: { id: request.siteId},
                     }
-                },
+                }),
                 headhunting:
                     request.category === PostCategory.MATCHING
                         ? post.headhunting
                             ? { update: { isActive: false } }
-                            : null
+                            : undefined
                         : request.category === PostCategory.HEADHUNTING
                           ? post.headhunting
                               ? { update: { isActive: true } }
@@ -469,7 +487,7 @@ export class PostCompanyService {
                                 }
                           : post.headhunting
                             ? { update: { isActive: false } }
-                            : null,
+                            : undefined,
             },
         });
     }

@@ -29,6 +29,8 @@ export class MatchingCompanyService {
             default:
                 break;
         }
+        console.log(dateQuery);
+        console.log(query.date);
         const existMatching = (
             await this.prismaService.matchingRequest.findMany({
                 where: {
