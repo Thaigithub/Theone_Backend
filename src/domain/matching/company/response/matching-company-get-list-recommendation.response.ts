@@ -14,6 +14,7 @@ class MatchingCompanyGetItemRecommendation {
         totalMonths: number;
         entire: string;
         occupations: string[];
+        isActive: boolean;
     };
     teamDetail: {
         name: string;
@@ -23,6 +24,7 @@ class MatchingCompanyGetItemRecommendation {
             totalYears: number;
             totalMonths: number;
             occupations: string[];
+            isActive: boolean;
         };
         totalYears: number;
         totalMonths: number;
@@ -36,7 +38,9 @@ class MatchingCompanyGetItemRecommendation {
             totalMonths: number;
             workingStatus: string;
             occupations: string[];
+            isActive: boolean;
         };
+        isActive: boolean;
     };
 }
 export class MatchingCompanyGetListRecommendation {

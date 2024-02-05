@@ -27,6 +27,9 @@ export class FaqMemberService {
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
+            orderBy: {
+                createdAt: Prisma.SortOrder.desc,
+            },
         };
         const faqs = (await this.prismaService.faq.findMany(search)).map((item) => {
             return {

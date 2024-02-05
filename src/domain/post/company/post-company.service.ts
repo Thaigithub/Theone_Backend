@@ -14,6 +14,7 @@ import {
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostCompanyCheckPullUpStatus } from './enum/post-company-check-pull-up-status.enum';
@@ -32,7 +33,6 @@ import { PostCompanyGetListApplicationResponse } from './response/post-company-g
 import { PostCompanyGetListHeadhuntingRequestResponse } from './response/post-company-get-list-headhunting-request.response';
 import { PostCompanyGetListSiteResponse } from './response/post-company-get-list-site.response';
 import { PostCompanyGetListResponse } from './response/post-company-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostCompanyService {
@@ -637,6 +637,7 @@ export class PostCompanyService {
                     site: {
                         select: {
                             name: true,
+                            isActive: true,
                         },
                     },
                     startDate: true,
@@ -675,6 +676,7 @@ export class PostCompanyService {
                 endDate: item.endDate,
                 site: {
                     name: item.site.name,
+                    isActive: item.site.isActive,
                 },
                 headhuntingRequest:
                     item.headhunting && item.headhunting.requests.length > 0 ? item.headhunting.requests[0] : null,

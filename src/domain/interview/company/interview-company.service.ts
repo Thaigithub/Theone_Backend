@@ -100,6 +100,11 @@ export class InterviewCompanyService {
                                         },
                                     },
                                 },
+                                account: {
+                                    select: {
+                                        isActive: true,
+                                    },
+                                },
                             },
                         },
                         team: {
@@ -120,8 +125,14 @@ export class InterviewCompanyService {
                                                 },
                                             },
                                         },
+                                        account: {
+                                            select: {
+                                                isActive: true,
+                                            },
+                                        },
                                     },
                                 },
+                                isActive: true,
                             },
                         },
                         post: {
@@ -329,9 +340,13 @@ export class InterviewCompanyService {
                             status: true,
                         },
                     });
-                    if (record && record.status !== PostApplicationStatus.APPLY) {
+
+                    if (!record) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
+
+                    if (record.status !== PostApplicationStatus.APPLY) {
                         throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
+
                     switch (body.category) {
                         case ApplicationCategory.HEADHUNTING: {
                             const count = await prisma.headhunting.count({

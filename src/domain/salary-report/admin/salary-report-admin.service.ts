@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { SalaryReportAdminSearchCategory } from './enum/salary-report-admin-search-category.enum';
 import { SalaryReportAdminGetListRequest } from './request/salary-report-admin-get-list.request';
 import { SalaryReportAdminGetListResponse } from './response/salary-report-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class SalaryReportAdminService {
@@ -42,6 +42,9 @@ export class SalaryReportAdminService {
                 },
                 where: queryFilter,
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    createdAt: Prisma.SortOrder.desc,
+                },
             })
         ).map((item) => {
             return {
