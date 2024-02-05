@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -196,11 +196,23 @@ export class MatchingCompanyService {
         const occupationIds = query.occupationList || undefined;
         const regionIds =
             (query.regionList && query.regionList.map((item) => item.split('-')[1]).map((item) => parseInt(item))) || undefined;
+        const company = await this.prismaService.company.findUnique({
+            where: {
+                accountId: accountId,
+                isActive: true,
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (!company) {
+            throw new NotFoundException(Error.ACCOUNT_NOT_FOUND);
+        }
         const request = await this.prismaService.matchingRequest.findUnique({
             where: {
-                date: new Date(),
-                company: {
-                    accountId,
+                date_companyId: {
+                    date: new Date(),
+                    companyId: company.id,
                 },
             },
             select: {
@@ -214,126 +226,102 @@ export class MatchingCompanyService {
             )
                 throw new BadRequestException(Error.RECOMMENDATION_IS_FULL_TODAY);
         }
-        const members = await this.prismaService.member.findMany({
-            where: {
-                regionId: {
-                    in: regionIds,
-                },
-                licenses: {
-                    some: {
-                        code: {
-                            id: {
-                                in: occupationIds,
-                            },
-                        },
+        const members = (
+            await this.prismaService.member.findMany({
+                where: {
+                    regionId: {
+                        in: regionIds,
                     },
-                },
-                ...(request?.recommendations &&
-                    request.recommendations.length > 0 && {
-                        NOT: {
-                            id: {
-                                in: request.recommendations.filter((item) => item.memberId).map((item) => item.id),
-                            },
-                        },
-                    }),
-            },
-            take: 10 - (request?.recommendations ? request.recommendations.filter((item) => item.memberId).length : 0),
-        });
-
-        const teams = await this.prismaService.team.findMany({
-            where: {
-                regionId: {
-                    in: regionIds,
-                },
-                code: {
-                    id: {
-                        in: occupationIds,
-                    },
-                },
-                ...(request?.recommendations &&
-                    request?.recommendations.length > 0 && {
-                        NOT: {
-                            id: {
-                                in: request.recommendations.filter((item) => item.teamId).map((item) => item.id),
-                            },
-                        },
-                    }),
-            },
-            take: 5 - (request?.recommendations ? request.recommendations.filter((item) => item.teamId).length : 0),
-        });
-
-        await this.prismaService.company.update({
-            data: {
-                matchingRequests: {
-                    upsert: {
-                        where: {
-                            date: new Date(),
-                        },
-                        create: {
-                            recommendations: {
-                                createMany: {
-                                    data: [
-                                        ...members
-                                            .filter(
-                                                (member) =>
-                                                    !request.recommendations
-                                                        .filter((item) => item.memberId)
-                                                        .map((item) => item.id)
-                                                        .includes(member.id),
-                                            )
-                                            .map((member) => {
-                                                return { memberId: member.id };
-                                            }),
-                                        ...teams
-                                            .filter(
-                                                (team) =>
-                                                    !request.recommendations
-                                                        .filter((item) => item.teamId)
-                                                        .map((item) => item.id)
-                                                        .includes(team.id),
-                                            )
-                                            .map((team) => {
-                                                return { teamId: team.id };
-                                            }),
-                                    ],
+                    licenses: {
+                        some: {
+                            code: {
+                                id: {
+                                    in: occupationIds,
                                 },
                             },
                         },
-                        update: {
-                            recommendations: {
-                                createMany: {
-                                    data: [
-                                        ...members
-                                            .filter(
-                                                (member) =>
-                                                    !request.recommendations
-                                                        .filter((item) => item.memberId)
-                                                        .map((item) => item.id)
-                                                        .includes(member.id),
-                                            )
-                                            .map((member) => {
-                                                return { memberId: member.id };
-                                            }),
-                                        ...teams
-                                            .filter(
-                                                (team) =>
-                                                    !request.recommendations
-                                                        .filter((item) => item.teamId)
-                                                        .map((item) => item.id)
-                                                        .includes(team.id),
-                                            )
-                                            .map((team) => {
-                                                return { teamId: team.id };
-                                            }),
-                                    ],
+                    },
+                    ...(request?.recommendations &&
+                        request.recommendations.length > 0 && {
+                            NOT: {
+                                id: {
+                                    in: request.recommendations.filter((item) => item.memberId).map((item) => item.id),
                                 },
                             },
-                        }
+                        }),
+                },
+                take: 10 - (request?.recommendations ? request.recommendations.filter((item) => item.memberId).length : 0),
+            })
+        )
+            .filter(
+                (member) =>
+                    !request.recommendations
+                        .filter((item) => item.memberId)
+                        .map((item) => item.id)
+                        .includes(member.id),
+            )
+            .map((member) => {
+                return { memberId: member.id };
+            });
+        const teams = (
+            await this.prismaService.team.findMany({
+                where: {
+                    regionId: {
+                        in: regionIds,
                     },
+                    code: {
+                        id: {
+                            in: occupationIds,
+                        },
+                    },
+                    ...(request?.recommendations &&
+                        request?.recommendations.length > 0 && {
+                            NOT: {
+                                id: {
+                                    in: request.recommendations.filter((item) => item.teamId).map((item) => item.id),
+                                },
+                            },
+                        }),
+                },
+                take: 5 - (request?.recommendations ? request.recommendations.filter((item) => item.teamId).length : 0),
+            })
+        )
+            .filter(
+                (team) =>
+                    !request.recommendations
+                        .filter((item) => item.teamId)
+                        .map((item) => item.id)
+                        .includes(team.id),
+            )
+            .map((team) => {
+                return { teamId: team.id };
+            });
+        await this.prismaService.matchingRequest.upsert({
+            where: {
+                date_companyId: {
+                    date: new Date(),
+                    companyId: company.id,
                 },
             },
-            where: {
-                accountId,
+            create: {
+                date: new Date(),
+                companyId: company.id,
+                recommendations: {
+                    ...(members.length + teams.length > 0 && {
+                        createMany: {
+                            data: [...(members.length > 0 && members), ...(teams.length > 0 && teams)],
+                        },
+                    }),
+                },
+            },
+            update: {
+                recommendations: {
+                    ...(members.length + teams.length > 0 && {
+                        createMany: {
+                            data: [...(members.length > 0 && members), ...(teams.length > 0 && teams)],
+                        },
+                    }),
+                },
             },
         });
     }

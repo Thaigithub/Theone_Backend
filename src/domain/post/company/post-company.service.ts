@@ -315,8 +315,8 @@ export class PostCompanyService {
             startWorkTime: record.startWorkTime,
             endWorkTime: record.endWorkTime,
             site: {
-                name: record.site.name,
-                id: record.site.id
+                name: record.site ? record.site.name : null,
+                id: record.site ? record.site.id : null,
             },
             postEditor: record.postEditor,
         };

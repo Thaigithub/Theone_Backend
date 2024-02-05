@@ -18,7 +18,7 @@ export class PostGuestController {
         constructionMachineryList: [string],
         experienceTypeList: [string] | undefined,
         regionList: [string] | undefined,
-        siteId: number,
+        siteId: number | undefined,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         query = { ...query, occupationList, constructionMachineryList, experienceTypeList, regionList };
         return BaseResponse.of(await this.postMemberService.getList(undefined, query, siteId));

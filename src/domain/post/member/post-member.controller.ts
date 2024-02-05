@@ -25,7 +25,7 @@ export class PostMemberController {
         constructionMachineryList: [string],
         experienceTypeList: [string] | undefined,
         regionList: [string] | undefined,
-        siteId: number,
+        siteId: number | undefined,
     ): Promise<BaseResponse<PostMemberGetListResponse>> {
         query = { ...query, occupationList, constructionMachineryList, experienceTypeList, regionList };
         return BaseResponse.of(await this.postMemberService.getList(request.user?.accountId, query, siteId));
