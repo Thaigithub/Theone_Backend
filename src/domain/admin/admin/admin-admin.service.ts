@@ -16,7 +16,18 @@ export class AdminAdminService {
     constructor(private prismaService: PrismaService) {}
 
     async getList(query: AdminAdminGetListRequest): Promise<AdminAdminGetListResponse> {
-        const search = {
+        const queryFilter: Prisma.AdminWhereInput = {
+            isActive: true,
+            ...(query.level && { level: AdminLevel[query.level] }),
+            ...(query.category === AdminAdminSearchCategories.ID && {
+                account: { username: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } },
+            }),
+            ...(query.category === AdminAdminSearchCategories.ADMIN_NAME && {
+                name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
+            }),
+        };
+        const list = await this.prismaService.admin.findMany({
+            where: queryFilter,
             select: {
                 id: true,
                 name: true,
@@ -28,24 +39,13 @@ export class AdminAdminService {
                     },
                 },
             },
-            where: {
-                isActive: true,
-                ...(query.level && { level: AdminLevel[query.level] }),
-                ...(query.category === AdminAdminSearchCategories.ID && {
-                    account: { username: { contains: query.keyword, mode: Prisma.QueryMode.insensitive } },
-                }),
-                ...(query.category === AdminAdminSearchCategories.ADMIN_NAME && {
-                    name: { contains: query.keyword, mode: Prisma.QueryMode.insensitive },
-                }),
-            },
             orderBy: {
                 createdAt: Prisma.SortOrder.desc,
             },
             ...QueryPagingHelper.queryPaging(query),
-        };
-        const list = await this.prismaService.admin.findMany(search);
-        const total = await this.prismaService.admin.count({ where: search.where });
-        return new PaginationResponse(list, new PageInfo(total));
+        });
+        const count = await this.prismaService.admin.count({ where: queryFilter });
+        return new PaginationResponse(list, new PageInfo(count));
     }
 
     async create(query: AdminAdminUpsertRequest): Promise<void> {

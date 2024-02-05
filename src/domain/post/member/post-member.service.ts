@@ -5,6 +5,7 @@ import { NotificationMemberService } from 'domain/notification/member/notificati
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { StorageService } from 'services/storage/storage.service';
+import { Error } from 'utils/error.enum';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -14,7 +15,6 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostMemberService {
@@ -25,13 +25,26 @@ export class PostMemberService {
         private notificationMemberService: NotificationMemberService,
     ) {}
 
-    protected async parseConditionFromQuery(query: PostMemberGetListRequest, siteId: number): Promise<Prisma.PostWhereInput> {
+    async getList(
+        accountId: number | undefined,
+        query: PostMemberGetListRequest,
+        siteId: number | undefined
+    ): Promise<PostMemberGetListResponse> {
+        if (siteId) {
+            const siteExist = await this.prismaService.site.count({
+                where: {
+                    isActive: true,
+                    id: siteId,
+                },
+            });
+            if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
+        }
         const experienceTypeList = query.experienceTypeList?.map((item) => ExperienceType[item]);
         const occupationList = query.occupationList?.map((item) => parseInt(item));
         const constructionMachineryList = query.constructionMachineryList?.map((item) => parseInt(item));
         const { ids } = await this.regionService.parseFromRegionList(query.regionList);
 
-        return {
+        const queryFilter: Prisma.PostWhereInput = {
             isActive: true,
             AND: [
                 {
@@ -47,11 +60,13 @@ export class PostMemberService {
                     ],
                 },
                 {
-                    site: {
-                        region: {
-                            id: query.regionList && { in: ids },
+                    ...(query.regionList && {
+                        site: {
+                            region: {
+                                id: query.regionList && { in: ids },
+                            },
                         },
-                    },
+                    }),
                 },
             ],
             siteId,
@@ -64,23 +79,6 @@ export class PostMemberService {
             startDate: { lte: new Date() },
             endDate: { gte: new Date() },
         };
-    }
-
-    async getList(
-        accountId: number | undefined,
-        query: PostMemberGetListRequest,
-        siteId: number,
-    ): Promise<PostMemberGetListResponse> {
-        if (siteId) {
-            const siteExist = await this.prismaService.site.count({
-                where: {
-                    isActive: true,
-                    id: siteId,
-                },
-            });
-            if (!siteExist) throw new NotFoundException(Error.SITE_NOT_FOUND);
-        }
-
         const posts = (
             await this.prismaService.post.findMany({
                 select: {
@@ -122,7 +120,7 @@ export class PostMemberService {
                         take: 1,
                     },
                 },
-                where: await this.parseConditionFromQuery(query, siteId),
+                where: queryFilter,
                 orderBy: [
                     {
                         isPulledUp: 'desc',
@@ -160,17 +158,11 @@ export class PostMemberService {
             };
         });
         const count = await this.prismaService.post.count({
-            where: await this.parseConditionFromQuery(query, siteId),
+            where: queryFilter,
         });
         return new PaginationResponse(posts, new PageInfo(count));
     }
-
-    async getTotal(query: PostMemberGetListRequest, siteId: number): Promise<number> {
-        return await this.prismaService.post.count({
-            where: await this.parseConditionFromQuery(query, siteId),
-        });
-    }
-
+    
     async getDetail(id: number, accountId: number | undefined): Promise<PostMemberGetDetailResponse> {
         const postExist = await this.prismaService.post.count({
             where: {
