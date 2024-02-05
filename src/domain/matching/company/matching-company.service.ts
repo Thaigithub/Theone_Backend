@@ -207,6 +207,7 @@ export class MatchingCompanyService {
                 recommendations: true,
             },
         });
+        console.log('request ', request);
         if (request) {
             if (
                 request.recommendations.filter((item) => item.teamId).length === 5 &&
