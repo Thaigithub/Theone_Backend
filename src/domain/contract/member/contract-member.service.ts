@@ -34,7 +34,22 @@ export class ContractMemberService {
                         },
                         {
                             team: {
-                                members: {},
+                                OR: [
+                                    {
+                                        leader: {
+                                            accountId,
+                                        },
+                                    },
+                                    {
+                                        members: {
+                                            some: {
+                                                member: {
+                                                    accountId,
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
                             },
                         },
                     ],
@@ -131,13 +146,22 @@ export class ContractMemberService {
                     {
                         application: {
                             team: {
-                                members: {
-                                    some: {
-                                        member: {
+                                OR: [
+                                    {
+                                        leader: {
                                             accountId,
                                         },
                                     },
-                                },
+                                    {
+                                        members: {
+                                            some: {
+                                                member: {
+                                                    accountId,
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
                             },
                         },
                     },
@@ -176,6 +200,9 @@ export class ContractMemberService {
                 },
             },
         });
+        if (!contract) {
+            throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
+        }
         return {
             companyLogo: {
                 fileName: contract.application.post.company.logo.fileName,
