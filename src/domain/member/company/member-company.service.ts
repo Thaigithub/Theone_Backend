@@ -3,13 +3,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, Prisma } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { MemberCompanyGetListRequest } from './request/member-company-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyGetDetailResponse } from './response/member-company-get-detail.response';
 import { MemberCompanyGetListResponse } from './response/member-company-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class MemberCompanyService {
@@ -104,6 +104,11 @@ export class MemberCompanyService {
         const members = (
             await this.prismaService.member.findMany({
                 include: {
+                    account: {
+                        select: {
+                            isActive: true,
+                        },
+                    },
                     licenses: {
                         where: {
                             isActive: true,
@@ -138,6 +143,7 @@ export class MemberCompanyService {
                 totalExperienceMonths: item.totalExperienceMonths,
                 licenses: item.licenses,
                 occupations: item.licenses.map((item)=>{return item.code.name;}),
+                isActive: item.account.isActive,
             };
         });
         const total = await this.prismaService.member.count({

@@ -59,6 +59,9 @@ export class ReportMemberService {
             await this.prismaService.report.findMany({
                 where: queryFilter,
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    createdAt: Prisma.SortOrder.desc,
+                },
             })
         ).map((item) => {
             return {

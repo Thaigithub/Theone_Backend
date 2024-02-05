@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { MemberEvaluationByCompany, Prisma, TeamEvaluationByCompany } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { EvaluationCompanyGetListStatus } from './enum/evaluation-company-get-list-request.enum';
@@ -9,7 +10,6 @@ import { EvaluationCompanyCreateEvaluationRequest } from './request/evaluation-c
 import { EvaluationCompanyGetListRequest } from './request/evaluation-company-get-list.request';
 import { EvaluationCompanyGetListMemberResponse } from './response/evaluation-company-get-list-members.response';
 import { EvaluationCompanyGetListTeamResponse } from './response/evaluation-company-get-list-teams.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class EvaluationCompanyService {
@@ -287,7 +287,11 @@ export class EvaluationCompanyService {
                 include: {
                     memberEvaluation: {
                         include: {
-                            member: true,
+                            member: {
+                                include: {
+                                    account: true,
+                                },
+                            },
                         },
                     },
                     site: true,
@@ -306,6 +310,7 @@ export class EvaluationCompanyService {
                 contact: item.memberEvaluation.member.contact,
                 siteName: item.site.name,
                 score: item.score,
+                memberIsActive: item.memberEvaluation.member.account.isActive,
             };
         });
 
@@ -353,6 +358,7 @@ export class EvaluationCompanyService {
                 leaderContact: item.teamEvaluation.team.leader.contact,
                 siteName: item.site.name,
                 score: item.score,
+                teamIsActive: item.teamEvaluation.team.isActive,
             };
         });
 

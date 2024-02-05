@@ -8,6 +8,7 @@ class GetListTeamResponse {
     leaderContact: Member['contact'];
     siteName: Site['name'];
     score: TeamEvaluationByCompany['score'];
+    teamIsActive: boolean;
 }
 
 export class EvaluationCompanyGetListTeamResponse extends PaginationResponse<GetListTeamResponse> {}

@@ -22,6 +22,7 @@ export class GetListPostResponse {
             englishName: Region['districtEnglishName'];
             koreanName: Region['districtKoreanName'];
         };
+        isActive: boolean;
     };
     team: {
         name: Team['name'];
@@ -43,6 +44,7 @@ export class GetListPostResponse {
                 licenseNumber: License['licenseNumber'];
             }[];
         };
+        isActive: boolean;
     };
 }
 

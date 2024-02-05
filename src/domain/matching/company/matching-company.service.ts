@@ -29,8 +29,7 @@ export class MatchingCompanyService {
             default:
                 break;
         }
-        console.log(dateQuery);
-        console.log(query.date);
+
         const existMatching = (
             await this.prismaService.matchingRequest.findMany({
                 where: {
@@ -61,6 +60,11 @@ export class MatchingCompanyService {
                                     applications: {
                                         include: {
                                             contract: true,
+                                        },
+                                    },
+                                    account: {
+                                        select: {
+                                            isActive: true,
                                         },
                                     },
                                 },
@@ -123,6 +127,7 @@ export class MatchingCompanyService {
                                 entire: member.applications?.some((application) => application.contract?.endDate > new Date())
                                     ? 'On duty'
                                     : 'Looking for a job',
+                                isActive: member.account.isActive,
                             },
                             teamDetail: null,
                         };
@@ -151,6 +156,7 @@ export class MatchingCompanyService {
                                     )
                                         ? 'On duty'
                                         : 'Looking for a job',
+                                    isActive: team.leader.account.isActive,
                                 },
                                 region: team.region,
                                 totalYears: team.totalExperienceYears,
@@ -171,10 +177,12 @@ export class MatchingCompanyService {
                                         occupations: member.licenses.map((item) => {
                                             return item.code.name;
                                         }),
+                                        isActive: member.account.isActive,
                                     };
 
                                     return memberResponse;
                                 }),
+                                isActive: team.isActive,
                             },
                         };
                     }),

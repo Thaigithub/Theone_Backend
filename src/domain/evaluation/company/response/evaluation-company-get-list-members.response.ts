@@ -7,6 +7,7 @@ class GetListMemberResponse {
     contact: Member['contact'];
     siteName: Site['name'];
     score: MemberEvaluationByCompany['score'];
+    memberIsActive: boolean;
 }
 
 export class EvaluationCompanyGetListMemberResponse extends PaginationResponse<GetListMemberResponse> {}

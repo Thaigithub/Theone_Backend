@@ -59,6 +59,7 @@ export class ApplicationCompanyService {
                             },
                         },
                         region: true,
+                        account: true,
                     },
                 },
                 team: {
@@ -111,6 +112,7 @@ export class ApplicationCompanyService {
                               englishName: item.member.region?.districtEnglishName || null,
                               koreanName: item.member.region?.districtKoreanName || null,
                           },
+                          isActive: item.member.account.isActive,
                       }
                     : null,
                 team: item.team
@@ -137,6 +139,7 @@ export class ApplicationCompanyService {
                                   };
                               }),
                           },
+                          isActive: item.team.isActive,
                       }
                     : null,
             };

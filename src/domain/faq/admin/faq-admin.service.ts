@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { FaqAdminGetListCategory } from './enum/faq-admin-get-list-category.enum';
@@ -9,7 +10,6 @@ import { FaqAdminGetListRequest } from './request/faq-admin-get-list.request';
 import { FaqAdminUpdateRequest } from './request/faq-admin-update.request';
 import { FaqAdminGetDetailResponse } from './response/faq-admin-get-detail.response';
 import { FaqAdminGetListResponse } from './response/faq-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 @Injectable()
 export class FaqAdminService {
     constructor(private prismaService: PrismaService) {}
@@ -40,7 +40,11 @@ export class FaqAdminService {
             },
             where: queryFilter,
             ...QueryPagingHelper.queryPaging(query),
+            orderBy: {
+                createdAt: Prisma.SortOrder.desc,
+            },
         };
+
         const faqs = await this.prismaService.faq.findMany(search);
         const total = await this.prismaService.faq.count({ where: search.where });
 

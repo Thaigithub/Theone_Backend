@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AnswerStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ReportAdminGetListRequest } from './request/report-admin-get-list.request';
 import { ReportAdminUpdateRequest } from './request/report-admin-update.request';
 import { ReportAdminGetDetailResponse } from './response/report-admin-get-detail.response';
 import { ReportAdminGetListResponse } from './response/report-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ReportAdminService {
@@ -84,6 +84,9 @@ export class ReportAdminService {
                 },
                 where: queryFilter,
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    createdAt: Prisma.SortOrder.desc,
+                },
             })
         ).map((item) => {
             return {
