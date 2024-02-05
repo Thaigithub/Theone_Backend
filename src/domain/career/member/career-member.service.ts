@@ -112,6 +112,8 @@ export class CareerMemberService {
             });
             if (isNotExperienceCareerExist) return BaseResponse.error('Only 1 No Experience Career can be registered');
         }
+        const codeId = body.occupationId;
+        delete body.occupationId;
         await this.prismaService.member.update({
             where: {
                 accountId,
@@ -123,7 +125,9 @@ export class CareerMemberService {
                         experiencedYears: getTimeDifferenceInYears(new Date(body.startDate), new Date(body.endDate)),
                         experiencedMonths: getTimeDifferenceInMonths(new Date(body.startDate), new Date(body.endDate)),
                         type: CareerType.GENERAL,
-                        codeId: occupation.id,
+                        code: {
+                            connect: { id: codeId },
+                        },
                         certificationType: CareerCertificationType.NONE,
                     },
                 },
