@@ -1,6 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'services/prisma/prisma.service';
-import { Error } from 'utils/error.enum';
 import { PreferenceMemberUpdateRequest } from './request/preference-member-update.request';
 import { PreferenceMemberGetDetailResponse } from './response/preference-member-get-preference.response';
 
@@ -9,7 +8,7 @@ export class PreferenceMemberService {
     constructor(private prismaService: PrismaService) {}
 
     async getDetail(accountId: number): Promise<PreferenceMemberGetDetailResponse> {
-        const preference = await this.prismaService.preference.findFirst({
+        let preference = await this.prismaService.preference.findFirst({
             select: {
                 id: true,
                 isPushNotificationActive: true,
@@ -28,7 +27,17 @@ export class PreferenceMemberService {
             },
         });
 
-        if (!preference) throw new NotFoundException(Error.PREFERENCE_NOT_FOUND);
+        if (!preference) {
+            preference = await this.prismaService.preference.create({
+                data: {
+                    member: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                },
+            });
+        }
 
         return {
             id: preference.id,
