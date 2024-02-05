@@ -207,7 +207,6 @@ export class MatchingCompanyService {
                 recommendations: true,
             },
         });
-        console.log('request ', request);
         if (request) {
             if (
                 request.recommendations.filter((item) => item.teamId).length === 5 &&
@@ -266,35 +265,70 @@ export class MatchingCompanyService {
         await this.prismaService.company.update({
             data: {
                 matchingRequests: {
-                    create: {
-                        recommendations: {
-                            createMany: {
-                                data: [
-                                    ...members
-                                        .filter(
-                                            (member) =>
-                                                !request.recommendations
-                                                    .filter((item) => item.memberId)
-                                                    .map((item) => item.id)
-                                                    .includes(member.id),
-                                        )
-                                        .map((member) => {
-                                            return { memberId: member.id };
-                                        }),
-                                    ...teams
-                                        .filter(
-                                            (team) =>
-                                                !request.recommendations
-                                                    .filter((item) => item.teamId)
-                                                    .map((item) => item.id)
-                                                    .includes(team.id),
-                                        )
-                                        .map((team) => {
-                                            return { teamId: team.id };
-                                        }),
-                                ],
+                    upsert: {
+                        where: {
+                            date: new Date(),
+                        },
+                        create: {
+                            recommendations: {
+                                createMany: {
+                                    data: [
+                                        ...members
+                                            .filter(
+                                                (member) =>
+                                                    !request.recommendations
+                                                        .filter((item) => item.memberId)
+                                                        .map((item) => item.id)
+                                                        .includes(member.id),
+                                            )
+                                            .map((member) => {
+                                                return { memberId: member.id };
+                                            }),
+                                        ...teams
+                                            .filter(
+                                                (team) =>
+                                                    !request.recommendations
+                                                        .filter((item) => item.teamId)
+                                                        .map((item) => item.id)
+                                                        .includes(team.id),
+                                            )
+                                            .map((team) => {
+                                                return { teamId: team.id };
+                                            }),
+                                    ],
+                                },
                             },
                         },
+                        update: {
+                            recommendations: {
+                                createMany: {
+                                    data: [
+                                        ...members
+                                            .filter(
+                                                (member) =>
+                                                    !request.recommendations
+                                                        .filter((item) => item.memberId)
+                                                        .map((item) => item.id)
+                                                        .includes(member.id),
+                                            )
+                                            .map((member) => {
+                                                return { memberId: member.id };
+                                            }),
+                                        ...teams
+                                            .filter(
+                                                (team) =>
+                                                    !request.recommendations
+                                                        .filter((item) => item.teamId)
+                                                        .map((item) => item.id)
+                                                        .includes(team.id),
+                                            )
+                                            .map((team) => {
+                                                return { teamId: team.id };
+                                            }),
+                                    ],
+                                },
+                            },
+                        }
                     },
                 },
             },
