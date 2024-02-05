@@ -1,17 +1,15 @@
 import { ExperienceType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 
 export class MatchingCompanyCreateRecommendationRequest {
     @Expose()
-    @IsString()
     @IsOptional()
-    occupation: string;
+    occupationList: number[];
 
     @Expose()
-    @IsString()
     @IsOptional()
-    region: string;
+    regionList: string[];
 
     @Expose()
     @IsEnum(ExperienceType)

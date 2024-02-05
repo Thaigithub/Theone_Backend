@@ -185,15 +185,9 @@ export class MatchingCompanyService {
     }
 
     async create(accountId: number, query: MatchingCompanyCreateRecommendationRequest): Promise<void> {
-        const occupationIds = (query.occupation && query.occupation.split(',').map((item) => parseInt(item))) || undefined;
+        const occupationIds = query.occupationList || undefined;
         const regionIds =
-            (query.region &&
-                query.region
-                    .split(',')
-                    .map((item) => item.split('-')[1])
-                    .map((item) => parseInt(item))) ||
-            undefined;
-
+            (query.regionList && query.regionList.map((item) => item.split('-')[1]).map((item) => parseInt(item))) || undefined;
         const request = await this.prismaService.matchingRequest.findUnique({
             where: {
                 date: new Date(),
@@ -226,13 +220,16 @@ export class MatchingCompanyService {
                         },
                     },
                 },
-                NOT: {
-                    id: {
-                        in: request.recommendations.filter((item) => item.memberId).map((item) => item.id),
-                    },
-                },
+                ...(request?.recommendations &&
+                    request.recommendations.length > 0 && {
+                        NOT: {
+                            id: {
+                                in: request.recommendations.filter((item) => item.memberId).map((item) => item.id),
+                            },
+                        },
+                    }),
             },
-            take: 10 - request.recommendations.filter((item) => item.memberId).length,
+            take: 10 - (request?.recommendations ? request.recommendations.filter((item) => item.memberId).length : 0),
         });
 
         const teams = await this.prismaService.team.findMany({
@@ -245,13 +242,16 @@ export class MatchingCompanyService {
                         in: occupationIds,
                     },
                 },
-                NOT: {
-                    id: {
-                        in: request.recommendations.filter((item) => item.teamId).map((item) => item.id),
-                    },
-                },
+                ...(request?.recommendations &&
+                    request?.recommendations.length > 0 && {
+                        NOT: {
+                            id: {
+                                in: request.recommendations.filter((item) => item.teamId).map((item) => item.id),
+                            },
+                        },
+                    }),
             },
-            take: 5 - request.recommendations.filter((item) => item.teamId).length,
+            take: 5 - (request?.recommendations ? request.recommendations.filter((item) => item.teamId).length : 0),
         });
 
         await this.prismaService.company.update({

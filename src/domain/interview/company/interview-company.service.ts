@@ -226,26 +226,55 @@ export class InterviewCompanyService {
                                 accountId: true,
                             },
                         },
+                        team: {
+                            select: {
+                                leader: {
+                                    select: {
+                                        accountId: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
         });
         if (afterUpdateInterview.status === InterviewStatus.PASS) {
-            await this.notificationMemberService.create(
-                afterUpdateInterview.application.member.accountId,
-                '출근일정 확인',
-                '지원현장에 지정일에 출근해 주세요.',
-                NotificationType.INTERVIEW,
-                id,
-            );
+            if (afterUpdateInterview.application.member) {
+                await this.notificationMemberService.create(
+                    afterUpdateInterview.application.member.accountId,
+                    '출근일정 확인',
+                    '지원현장에 지정일에 출근해 주세요.',
+                    NotificationType.INTERVIEW,
+                    id,
+                );
+            } else if (afterUpdateInterview.application.team) {
+                await this.notificationMemberService.create(
+                    afterUpdateInterview.application.team.leader.accountId,
+                    '출근일정 확인',
+                    '지원현장에 지정일에 출근해 주세요.',
+                    NotificationType.INTERVIEW,
+                    id,
+                );
+            }
         } else if (afterUpdateInterview.status === InterviewStatus.FAIL) {
-            await this.notificationMemberService.create(
-                afterUpdateInterview.application.member.accountId,
-                '공고 지원결과',
-                '지원현장에 채용되지 않았습니다. 다른 현장에 지원해 보세요.',
-                NotificationType.INTERVIEW,
-                id,
-            );
+            if (afterUpdateInterview.application.member) {
+                await this.notificationMemberService.create(
+                    afterUpdateInterview.application.member.accountId,
+                    '공고 지원결과',
+                    '지원현장에 채용되지 않았습니다. 다른 현장에 지원해 보세요.',
+                    NotificationType.INTERVIEW,
+                    id,
+                );
+            } else if (afterUpdateInterview.application.team) {
+                await this.notificationMemberService.create(
+                    afterUpdateInterview.application.team.leader.accountId,
+                    '공고 지원결과',
+                    '지원현장에 채용되지 않았습니다. 다른 현장에 지원해 보세요.',
+                    NotificationType.INTERVIEW,
+                    id,
+                );
+            }
         }
     }
 
