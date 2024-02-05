@@ -103,7 +103,7 @@ export class PostCompanyService {
                 id: item.id,
                 name: item.name,
                 site: {
-                    name: item.site.name,
+                    name: item.site ? item.site.name : '',
                 },
                 startDate: item.startDate,
                 endDate: item.endDate,
@@ -214,42 +214,48 @@ export class PostCompanyService {
                           }
                         : undefined,
             },
+            select: {
+                id: true,
+                siteId: true,
+            },
         });
-
-        const memberAccountIds = (
-            await this.prismaService.site.findUnique({
-                where: {
-                    id: request.siteId,
-                },
-                select: {
-                    interests: {
-                        where: {
-                            member: {
-                                isActive: true,
+        if(post.siteId) {
+            const memberAccountIds = (
+                await this.prismaService.site.findUnique({
+                    where: {
+                        id: request.siteId,
+                    },
+                    select: {
+                        interests: {
+                            where: {
+                                member: {
+                                    isActive: true,
+                                },
                             },
-                        },
-                        select: {
-                            member: {
-                                select: {
-                                    accountId: true,
+                            select: {
+                                member: {
+                                    select: {
+                                        accountId: true,
+                                    },
                                 },
                             },
                         },
                     },
-                },
-            })
-        ).interests.map((item) => {
-            return item.member.accountId;
-        });
-        for (const id of memberAccountIds) {
-            await this.notificationMemberService.create(
-                id, 
-                '관심 업체(현장) 공고 등록', 
-                '관심 업체(현장)가 공고를 등록했습니다.', 
-                NotificationType.POST,
-                post.id,
-            );
+                })
+            ).interests.map((item) => {
+                return item.member.accountId;
+            });
+            for (const id of memberAccountIds) {
+                await this.notificationMemberService.create(
+                    id, 
+                    '관심 업체(현장) 공고 등록', 
+                    '관심 업체(현장)가 공고를 등록했습니다.', 
+                    NotificationType.POST,
+                    post.id,
+                );
+            }
         }
+        
 
 
     }

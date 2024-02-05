@@ -21,7 +21,8 @@
         "prisma:pull": "dotenv -e .env.development -- npx prisma db pull",
         "prisma:generate": "dotenv -e .env.development -- npx prisma generate",
         "prisma:create": "dotenv -e .env.development -- npx prisma migrate dev",
-        "prisma:push": "dotenv -e .env.development -- npx prisma db push"
+        "prisma:push": "dotenv -e .env.development -- npx prisma db push",
+        "prisma:studio": "dotenv -e .env.development -- npx prisma studio"
     },
     "dependencies": {
         "@nestjs-modules/mailer": "^1.9.1",

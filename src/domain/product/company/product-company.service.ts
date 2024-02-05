@@ -198,7 +198,7 @@ export class ProductCompanyService {
                     createdAt: item.createdAt,
                     expirationDate: item._min.expirationDate,
                     numberOfUses: item._count.id,
-                    remainNumber: item._min.remainNumber,
+                    remainNumber: item._min.remainNumbers,
                 };
             }),
         );
