@@ -9,7 +9,7 @@ build:
         - echo "Building..."
         - npm i
         - npm i cross-env dotenv-cli
-        - timeout 2m npm run build || { echo "Build process was terminated due to timeout"; exit 1; }
+        - timeout 5m npm run build || { echo "Build process was terminated due to timeout"; exit 1; }
     only:
         - develop
         - main
