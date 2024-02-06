@@ -51,43 +51,26 @@ export class TeamMemberService {
     }
 
     async create(accountId: number, request: TeamMemberUpsertRequest): Promise<void> {
-        await this.prismaService.$transaction(async (prisma) => {
-            const team = await prisma.team.create({
-                data: {
-                    name: request.teamName,
-                    region: {
-                        connect: { id: request.dictrictId },
-                    },
-                    leader: {
-                        connect: {
-                            accountId,
-                        },
-                    },
-                    introduction: request.introduction,
-                    code: {
-                        connect: {
-                            id: request.codeId,
-                        },
-                    },
-                    teamCode: this.getTeamCode(request.sequence),
-                    totalMembers: 1,
+        await this.prismaService.team.create({
+            data: {
+                name: request.teamName,
+                region: {
+                    connect: { id: request.dictrictId },
                 },
-            });
-
-            await prisma.membersOnTeams.create({
-                data: {
-                    member: {
-                        connect: {
-                            accountId,
-                        },
-                    },
-                    team: {
-                        connect: {
-                            id: team.id,
-                        },
+                leader: {
+                    connect: {
+                        accountId,
                     },
                 },
-            });
+                introduction: request.introduction,
+                code: {
+                    connect: {
+                        id: request.codeId,
+                    },
+                },
+                teamCode: this.getTeamCode(request.sequence),
+                totalMembers: 1,
+            },
         });
     }
 

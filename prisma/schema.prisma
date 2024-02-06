@@ -846,8 +846,8 @@ model MatchingRecommendation {
   matchingRequest   MatchingRequest @relation(fields: [matchingRequestId], references: [id])
   matchingRequestId Int
 
-  @@unique([memberId, assignedAt])
-  @@unique([teamId, assignedAt])
+  @@unique([memberId, matchingRequestId])
+  @@unique([teamId, matchingRequestId])
   @@map("matching_recommendations")
 }
 

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { RequestObject } from '@prisma/client';
+import { ExperienceType, RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { MatchingCompanyGetListDate } from './enum/matching-company-get-list-date.enum';
@@ -10,6 +10,21 @@ import { MatchingCompanyGetListRecommendation } from './response/matching-compan
 @Injectable()
 export class MatchingCompanyService {
     constructor(private prismaService: PrismaService) {}
+
+    filterExperience(types: ExperienceType[], totalExperienceMonths: number): boolean {
+        for (const type of types) {
+            if (type === ExperienceType.REGARDLESS && totalExperienceMonths <= 12) {
+                return true;
+            } else if (type === ExperienceType.SHORT && totalExperienceMonths > 12 && totalExperienceMonths <= 60) {
+                return true;
+            } else if (type === ExperienceType.MEDIUM && totalExperienceMonths > 60 && totalExperienceMonths <= 120) {
+                return true;
+            } else if (type === ExperienceType.LONG && totalExperienceMonths > 120) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     async getList(
         accountId: number,
@@ -226,21 +241,58 @@ export class MatchingCompanyService {
             )
                 throw new BadRequestException(Error.RECOMMENDATION_IS_FULL_TODAY);
         }
+        const recommendationHistories = (
+            await this.prismaService.matchingRecommendation.findMany({
+                where: {
+                    matchingRequest: {
+                        companyId: company.id,
+                    },
+                    NOT: {
+                        AND: [{ teamId: null }, { memberId: null }],
+                    },
+                },
+                select: {
+                    memberId: true,
+                    teamId: true,
+                },
+            })
+        ).map((item) => {
+            if (item.memberId) {
+                return {
+                    memberId: item.memberId,
+                };
+            }
+            return {
+                teamId: item.teamId,
+            };
+        });
+
+        // Get Member and Team match the conditions
         const members = (
             await this.prismaService.member.findMany({
                 where: {
-                    regionId: {
-                        in: regionIds,
-                    },
-                    licenses: {
-                        some: {
-                            code: {
-                                id: {
-                                    in: occupationIds,
+                    ...(regionIds && {
+                        regionId: {
+                            in: regionIds,
+                        },
+                    }),
+                    ...(occupationIds && {
+                        licenses: {
+                            some: {
+                                code: {
+                                    id: {
+                                        in: occupationIds,
+                                    },
                                 },
                             },
                         },
-                    },
+                    }),
+                    ...(query.keyword && {
+                        OR: [
+                            { name: { contains: query.keyword, mode: 'insensitive' } },
+                            { contact: { contains: query.keyword, mode: 'insensitive' } },
+                        ],
+                    }),
                     ...(request?.recommendations &&
                         request.recommendations.length > 0 && {
                             NOT: {
@@ -250,30 +302,116 @@ export class MatchingCompanyService {
                             },
                         }),
                 },
-                take: 10 - (request?.recommendations ? request.recommendations.filter((item) => item.memberId).length : 0),
+                select: {
+                    id: true,
+                    desiredSalary: true,
+                    totalExperienceYears: true,
+                    totalExperienceMonths: true,
+                    applications: {
+                        where: {
+                            contract: {
+                                startDate: {
+                                    lt: new Date(),
+                                },
+                            },
+                            ...(occupationIds &&
+                                occupationIds.length > 0 && {
+                                    post: {
+                                        codeId: { in: occupationIds },
+                                    },
+                                }),
+                        },
+                        select: {
+                            contract: {
+                                select: {
+                                    startDate: true,
+                                    endDate: true,
+                                },
+                            },
+                        },
+                    },
+                },
             })
         )
-            .filter(
-                (member) =>
-                    !request.recommendations
-                        .filter((item) => item.memberId)
-                        .map((item) => item.id)
-                        .includes(member.id),
-            )
+            .filter((member) => {
+                if (recommendationHistories.length === 0) {
+                    return true;
+                }
+                return !recommendationHistories
+                    .filter((item) => item.memberId)
+                    .map((item) => item.memberId)
+                    .includes(member.id);
+            })
+            .filter(async (item) => {
+                // Career experience only (not care about occupations)
+                if (
+                    query.careerList &&
+                    query.careerList.length > 0 &&
+                    (!query.occupationList || query.occupationList.length === 0)
+                ) {
+                    // Calculate experience
+                    const totalExperienceMonths = Math.max(
+                        item.totalExperienceYears * 12 + item.totalExperienceMonths,
+                        item.applications.reduce((sum, current) => {
+                            const today = new Date();
+                            const endDate = current.contract.endDate > today ? today : current.contract.endDate;
+                            return (
+                                sum +
+                                ((endDate.getFullYear() - current.contract.startDate.getFullYear()) * 12 +
+                                    endDate.getMonth() -
+                                    current.contract.startDate.getMonth() +
+                                    1)
+                            );
+                        }, 0),
+                    );
+                    return this.filterExperience(query.careerList, totalExperienceMonths);
+                }
+                // Total experiences of specific occupations.
+                else if (
+                    query.careerList &&
+                    query.careerList.length > 0 &&
+                    query.occupationList &&
+                    query.occupationList.length > 0
+                ) {
+                    const totalExperienceMonths = item.applications.reduce((sum, current) => {
+                        const today = new Date();
+                        const endDate = current.contract.endDate > today ? today : current.contract.endDate;
+                        return (
+                            sum +
+                            ((endDate.getFullYear() - current.contract.startDate.getFullYear()) * 12 +
+                                endDate.getMonth() -
+                                current.contract.startDate.getMonth() +
+                                1)
+                        );
+                    }, 0);
+                    return this.filterExperience(query.careerList, totalExperienceMonths);
+                }
+                return true;
+            })
+            .sort((a, b) => {
+                return query.salary ? Math.abs(a.desiredSalary - query.salary) - Math.abs(b.desiredSalary - query.salary) : 0;
+            })
+            .slice(0, 10 - (request?.recommendations ? request.recommendations.filter((item) => item.memberId).length : 0))
             .map((member) => {
                 return { memberId: member.id };
             });
+
+        // Get team recommendations
         const teams = (
             await this.prismaService.team.findMany({
                 where: {
-                    regionId: {
-                        in: regionIds,
-                    },
-                    code: {
-                        id: {
-                            in: occupationIds,
+                    ...(regionIds && {
+                        regionId: {
+                            in: regionIds,
                         },
-                    },
+                    }),
+                    ...(occupationIds && {
+                        code: {
+                            id: {
+                                in: occupationIds,
+                            },
+                        },
+                    }),
                     ...(request?.recommendations &&
                         request?.recommendations.length > 0 && {
                             NOT: {
@@ -282,20 +420,106 @@ export class MatchingCompanyService {
                                 },
                             },
                         }),
+                    ...(query.keyword && {
+                        OR: [
+                            { name: { contains: query.keyword, mode: 'insensitive' } },
+                            { leader: { contact: { contains: query.keyword, mode: 'insensitive' } } },
+                        ],
+                    }),
                 },
-                take: 5 - (request?.recommendations ? request.recommendations.filter((item) => item.teamId).length : 0),
+                select: {
+                    id: true,
+                    desiredSalary: true,
+                    totalExperienceYears: true,
+                    totalExperienceMonths: true,
+                    applications: {
+                        where: {
+                            contract: {
+                                endDate: { lte: new Date() },
+                            },
+                            ...(occupationIds &&
+                                occupationIds.length > 0 && {
+                                    post: {
+                                        codeId: { in: occupationIds },
+                                    },
+                                }),
+                        },
+                        select: {
+                            contract: {
+                                select: {
+                                    startDate: true,
+                                    endDate: true,
+                                },
+                            },
+                        },
+                    },
+                },
             })
         )
-            .filter(
-                (team) =>
-                    !request.recommendations
-                        .filter((item) => item.teamId)
-                        .map((item) => item.id)
-                        .includes(team.id),
-            )
+            .filter((team) => {
+                if (recommendationHistories.length === 0) {
+                    return true;
+                }
+                return !recommendationHistories
+                    .filter((item) => item.teamId)
+                    .map((item) => item.teamId)
+                    .includes(team.id);
+            })
+            .filter((item) => {
+                // Career experience only (not care about occupations)
+                if (
+                    query.careerList &&
+                    query.careerList.length > 0 &&
+                    (!query.occupationList || query.occupationList.length === 0)
+                ) {
+                    const totalExperienceMonths = Math.max(
+                        item.totalExperienceYears * 12 + item.totalExperienceMonths,
+                        item.applications.reduce((sum, current) => {
+                            const today = new Date();
+                            const endDate = current.contract.endDate > today ? today : current.contract.endDate;
+                            return (
+                                sum +
+                                ((endDate.getFullYear() - current.contract.startDate.getFullYear()) * 12 +
+                                    endDate.getMonth() -
+                                    current.contract.startDate.getMonth() +
+                                    1)
+                            );
+                        }, 0),
+                    );
+                    return this.filterExperience(query.careerList, totalExperienceMonths);
+                }
+                // Total experiences of specific occupations.
+                else if (
+                    query.careerList &&
+                    query.careerList.length > 0 &&
+                    query.occupationList &&
+                    query.occupationList.length > 0
+                ) {
+                    const totalExperienceMonths = item.applications.reduce((sum, current) => {
+                        const today = new Date();
+                        const endDate = current.contract.endDate > today ? today : current.contract.endDate;
+                        return (
+                            sum +
+                            ((endDate.getFullYear() - current.contract.startDate.getFullYear()) * 12 +
+                                endDate.getMonth() -
+                                current.contract.startDate.getMonth() +
+                                1)
+                        );
+                    }, 0);
+                    return this.filterExperience(query.careerList, totalExperienceMonths);
+                }
+                return true;
+            })
+            .sort((a, b) => {
+                return query.salary ? Math.abs(a.desiredSalary - query.salary) - Math.abs(b.desiredSalary - query.salary) : 0;
+            })
+            .slice(0, 5 - (request?.recommendations ? request.recommendations.filter((item) => item.teamId).length : 0))
             .map((team) => {
                 return { teamId: team.id };
             });
+        if (teams.length + members.length === 0) {
+            throw new NotFoundException(Error.RECOMMENDATION_NOT_FOUND_RESULT);
+        }
         await this.prismaService.matchingRequest.upsert({
             where: {
                 date_companyId: {
@@ -307,20 +531,16 @@ export class MatchingCompanyService {
                 date: new Date(),
                 companyId: company.id,
                 recommendations: {
-                    ...(members.length + teams.length > 0 && {
-                        createMany: {
-                            data: [...(members.length > 0 && members), ...(teams.length > 0 && teams)],
-                        },
-                    }),
+                    createMany: {
+                        data: [...members, ...teams],
+                    },
                 },
             },
             update: {
                 recommendations: {
-                    ...(members.length + teams.length > 0 && {
-                        createMany: {
-                            data: [...(members.length > 0 && members), ...(teams.length > 0 && teams)],
-                        },
-                    }),
+                    createMany: {
+                        data: [...members, ...teams],
+                    },
                 },
             },
         });
