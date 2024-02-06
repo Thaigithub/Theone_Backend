@@ -127,7 +127,7 @@ export class MemberCompanyService {
                             cityKoreanName: true,
                         },
                     },
-                    memberInformationRequest: {
+                    memberInformationRequests: {
                         where: {
                             company: {
                                 accountId,
@@ -140,7 +140,7 @@ export class MemberCompanyService {
                 ...QueryPagingHelper.queryPaging(query),
             })
         ).map((item) => {
-            const isChecked = item.memberInformationRequest.length > 0;
+            const isChecked = item.memberInformationRequests.length > 0;
 
             return {
                 id: item.id,
@@ -200,7 +200,7 @@ export class MemberCompanyService {
                         file: true,
                     },
                 },
-                memberInformationRequest: {
+                memberInformationRequests: {
                     where: {
                         company: {
                             accountId: accountId,
@@ -214,7 +214,7 @@ export class MemberCompanyService {
             },
         });
 
-        const isChecked = member.memberInformationRequest.length > 0;
+        const isChecked = member.memberInformationRequests.length > 0;
 
         if (isChecked) {
             return {
