@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { HeadhuntingRequestStatus, PaymentStatus, PostCategory, Prisma, ProductType, RefundStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { HeadhuntingCompanyCreateRequestRequest } from './request/headhunting-company-create-request.request';
 import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
 import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
 import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class HeadhuntingCompanyService {
@@ -86,6 +86,11 @@ export class HeadhuntingCompanyService {
                                 cityKoreanName: true,
                             },
                         },
+                        account: {
+                            select: {
+                                isActive: true,
+                            },
+                        },
                     },
                 },
                 team: {
@@ -111,6 +116,11 @@ export class HeadhuntingCompanyService {
                                     },
                                 },
                                 desiredSalary: true,
+                                account: {
+                                    select: {
+                                        isActive: true,
+                                    },
+                                },
                             },
                         },
                         region: {
@@ -121,6 +131,7 @@ export class HeadhuntingCompanyService {
                                 cityKoreanName: true,
                             },
                         },
+                        isActive: true,
                     },
                 },
             },
@@ -136,16 +147,18 @@ export class HeadhuntingCompanyService {
             if (item.member) {
                 const region = item.member.region;
                 delete item.member.region;
-                const { licenses, ...rest } = item.member;
                 return {
-                    ...item,
                     team: null,
                     member: {
-                        ...rest,
-                        licenses: licenses.map((item) => {
+                        name: item.member.name,
+                        contact: item.member.contact,
+                        totalExperienceMonths: item.member.totalExperienceMonths,
+                        totalExperienceYears: item.member.totalExperienceYears,
+                        desiredSalary: item.member.desiredSalary,
+                        licenses: item.member.licenses.map((license) => {
                             return {
-                                name: item.code.name,
-                                licenseNumber: item.licenseNumber,
+                                name: license.code.name,
+                                licenseNumber: license.licenseNumber,
                             };
                         }),
                         city: {
@@ -156,25 +169,28 @@ export class HeadhuntingCompanyService {
                             englishName: region?.districtEnglishName || null,
                             koreanName: region?.districtKoreanName || null,
                         },
+                        isActive: item.member.account.isActive,
                     },
                 };
             } else {
                 const region = item.team.region;
                 delete item.team.region;
-                const { leader, ...restTeam } = item.team;
-                const { licenses, ...restLeader } = leader;
                 return {
                     member: null,
                     team: {
-                        ...restTeam,
+                        name: item.team.name,
                         leader: {
-                            ...restLeader,
-                            licenses: licenses.map((item) => {
+                            contact: item.team.leader.contact,
+                            licenses: item.team.leader.licenses.map((license) => {
                                 return {
-                                    name: item.code.name,
-                                    licenseNumber: item.licenseNumber,
+                                    name: license.code.name,
+                                    licenseNumber: license.licenseNumber,
                                 };
                             }),
+                            totalExperienceMonths: item.team.leader.totalExperienceMonths,
+                            totalExperienceYears: item.team.leader.totalExperienceYears,
+                            desiredSalary: item.team.leader.desiredSalary,
+                            isActive: item.team.leader.account.isActive,
                         },
                         city: {
                             englishName: region?.cityEnglishName || null,
@@ -184,6 +200,7 @@ export class HeadhuntingCompanyService {
                             englishName: region?.districtEnglishName || null,
                             koreanName: region?.districtKoreanName || null,
                         },
+                        isActive: item.team.isActive,
                     },
                 };
             }
