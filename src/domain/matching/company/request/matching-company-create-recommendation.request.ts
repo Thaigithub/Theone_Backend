@@ -1,6 +1,6 @@
 import { ExperienceType } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class MatchingCompanyCreateRecommendationRequest {
     @Expose()
@@ -12,7 +12,19 @@ export class MatchingCompanyCreateRecommendationRequest {
     regionList: string[];
 
     @Expose()
-    @IsEnum(ExperienceType)
+    @IsEnum(ExperienceType, { each: true })
+    @IsArray()
     @IsOptional()
-    career: ExperienceType;
+    careerList: ExperienceType[];
+
+    @Expose()
+    @IsNumber()
+    @IsOptional()
+    @Min(1)
+    salary: number;
+
+    @Expose()
+    @IsString()
+    @IsOptional()
+    keyword: string;
 }
