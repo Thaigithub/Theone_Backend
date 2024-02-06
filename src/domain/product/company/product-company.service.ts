@@ -8,8 +8,10 @@ import { FileResponse } from 'utils/generics/file.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ProductCompanyTaxInvoiceType } from './enum/product-company-tax-invoice-type.enum';
+import { ProductCompanyCheckAvailabilityRequest } from './request/product-company-check-availability.request';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyCheckAvailabilityResponse } from './response/product-company-check-availability.response';
 import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
@@ -342,9 +344,9 @@ export class ProductCompanyService {
                     data: {
                         cost: product.price,
                         productId: id,
-                        createdAt: date,
+                        createdAt: new Date(),
                         remainingTimes: product.countLimit,
-                        expirationDate: new Date(),
+                        expirationDate: new Date(date.setMonth(date.getMonth() + product.monthLimit)),
                         companyId,
                     },
                 })
@@ -436,5 +438,45 @@ export class ProductCompanyService {
                   }),
               }
             : { isAvailable: false, productList: [] };
+    }
+
+    async checkAvailability(
+        accountId: number,
+        query: ProductCompanyCheckAvailabilityRequest,
+    ): Promise<ProductCompanyCheckAvailabilityResponse> {
+        const paymentHistories = await this.prismaService.productPaymentHistory.findMany({
+            where: {
+                isActive: true,
+                status: PaymentStatus.COMPLETE,
+                company: {
+                    accountId,
+                },
+                product: {
+                    productType: query.productType,
+                },
+                remainingTimes: { gt: 0 },
+                expirationDate: { gte: new Date() },
+                OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
+            },
+            orderBy: [
+                {
+                    expirationDate: Prisma.SortOrder.asc,
+                },
+                {
+                    remainingTimes: Prisma.SortOrder.asc,
+                },
+            ],
+        });
+
+        return {
+            isAvailable: paymentHistories.length > 0,
+            paymentHistories: paymentHistories.map((item) => {
+                return {
+                    id: item.id,
+                    remainingTimes: item.remainingTimes,
+                    expirationDate: item.expirationDate,
+                };
+            }),
+        };
     }
 }

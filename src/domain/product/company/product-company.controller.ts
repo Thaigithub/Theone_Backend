@@ -8,10 +8,12 @@ import { FileResponse } from 'utils/generics/file.response';
 import { GetListType } from '../admin/enum/product-admin-get-list.enum';
 import { ProductAdminService } from '../admin/product-admin.service';
 import { ProductCompanyService } from './product-company.service';
+import { ProductCompanyCheckAvailabilityRequest } from './request/product-company-check-availability.request';
 import { ProductCompanyGetListFixedTermResponse } from './request/product-company-get-list-fixed-term.response';
 import { ProductCompanyGetListLimitedCountResponse } from './request/product-company-get-list-limited-count.response';
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
+import { ProductCompanyCheckAvailabilityResponse } from './response/product-company-check-availability.response';
 import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
@@ -89,5 +91,13 @@ export class ProductCompanyController {
         @Req() request: BaseRequest,
     ): Promise<BaseResponse<ProductCompanyCheckPremiumAvailabilityResponse>> {
         return BaseResponse.of(await this.productCompanyService.checkPremiumAvailability(request.user.accountId));
+    }
+
+    @Get('/availability')
+    async checkAvailability(
+        @Req() request: BaseRequest,
+        @Query() query: ProductCompanyCheckAvailabilityRequest,
+    ): Promise<BaseResponse<ProductCompanyCheckAvailabilityResponse>> {
+        return BaseResponse.of(await this.productCompanyService.checkAvailability(request.user.accountId, query));
     }
 }

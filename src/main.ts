@@ -6,7 +6,6 @@ import * as chalk from 'chalk';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import { cleanEnv, port, str } from 'envalid';
-import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { APP_SECRET, CREDENTIALS, HOST, NODE_ENV, ORIGIN, PORT } from './app.config';
 import { AppModule } from './app.module';

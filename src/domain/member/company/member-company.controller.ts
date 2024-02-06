@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -22,17 +22,28 @@ export class MemberCompanyController {
     }
 
     @Get('/:id')
-    async getDetail(@Param('id', ParseIntPipe) id: number): Promise<BaseResponse<MemberCompanyGetDetailResponse>> {
-        return BaseResponse.of(await this.memberCompanyService.getDetail(id));
+    async getDetail(
+        @Req() req: BaseRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<MemberCompanyGetDetailResponse>> {
+        return BaseResponse.of(await this.memberCompanyService.getDetail(req.user.accountId, id));
     }
 
     @Get()
     async getListMember(
+        @Req() req: BaseRequest,
         @Query() query: MemberCompanyGetListRequest,
         @Query('occupation', new ParseArrayPipe({ optional: true })) occupation: [string] | undefined,
         @Query('experienceTypeList', new ParseArrayPipe({ optional: true })) experienceTypeList: [string] | undefined,
         @Query('regionList', new ParseArrayPipe({ optional: true })) regionList: [string] | undefined,
     ): Promise<BaseResponse<MemberCompanyGetListResponse>> {
-        return BaseResponse.of(await this.memberCompanyService.getList({ ...query, experienceTypeList, occupation, regionList }));
+        return BaseResponse.of(
+            await this.memberCompanyService.getList(req.user.accountId, { ...query, experienceTypeList, occupation, regionList }),
+        );
+    }
+
+    @Post('/:id/check')
+    async verifyMember(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.memberCompanyService.checkMember(req.user.accountId, id));
     }
 }

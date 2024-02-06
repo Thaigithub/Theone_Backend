@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, Prisma } from '@prisma/client';
+import { ExperienceType, PaymentStatus, Prisma, ProductType, RefundStatus } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -79,28 +79,28 @@ export class MemberCompanyService {
                 {
                     ...(occupationList &&
                         occupationList.length > 0 && {
-                            licenses: {
-                                some: {
-                                    code: {
-                                        id: { in: occupationList },
-                                    },
+                        licenses: {
+                            some: {
+                                code: {
+                                    id: { in: occupationList },
                                 },
                             },
-                        }),
+                        },
+                    }),
                 },
                 {
                     ...(ids &&
                         ids.length > 0 && {
-                            region: {
-                                id: { in: ids },
-                            },
-                        }),
+                        region: {
+                            id: { in: ids },
+                        },
+                    }),
                 },
             ],
         };
     }
 
-    async getList(query: MemberCompanyGetListRequest): Promise<MemberCompanyGetListResponse> {
+    async getList(accountId: number, query: MemberCompanyGetListRequest): Promise<MemberCompanyGetListResponse> {
         const members = (
             await this.prismaService.member.findMany({
                 include: {
@@ -127,23 +127,33 @@ export class MemberCompanyService {
                             cityKoreanName: true,
                         },
                     },
+                    memberInformationRequest: {
+                        where: {
+                            company: {
+                                accountId,
+                            },
+                        },
+                    },
+
                 },
                 where: await this.parseConditionFromQuery(query),
                 ...QueryPagingHelper.queryPaging(query),
             })
         ).map((item) => {
+            const isChecked = item.memberInformationRequest.length > 0;
+
             return {
                 id: item.id,
                 name: item.name,
-                contact: item.contact,
+                contact: isChecked ? item.contact : null,
                 desiredSalary: item.desiredSalary,
                 cityKoreanName: item.region ? item.region.cityKoreanName : null,
                 districtKoreanName: item.region ? item.region.districtKoreanName : null,
                 totalExperienceYears: item.totalExperienceYears,
                 totalExperienceMonths: item.totalExperienceMonths,
-                licenses: item.licenses,
-                occupations: item.licenses.map((item)=>{return item.code.name;}),
-                isActive: item.account.isActive,
+                licenses: isChecked ? item.licenses : null,
+                occupations: item.licenses.map((item) => { return item.code.name; }),
+                isChecked,
             };
         });
         const total = await this.prismaService.member.count({
@@ -152,7 +162,7 @@ export class MemberCompanyService {
         return new PaginationResponse(members, new PageInfo(total));
     }
 
-    async getDetail(id: number): Promise<MemberCompanyGetDetailResponse> {
+    async getDetail(accountId: number, id: number): Promise<MemberCompanyGetDetailResponse> {
         const memberExist = await this.prismaService.member.count({
             where: {
                 isActive: true,
@@ -190,6 +200,13 @@ export class MemberCompanyService {
                         file: true,
                     },
                 },
+                memberInformationRequest: {
+                    where: {
+                        company: {
+                            accountId: accountId,
+                        },
+                    },
+                },
             },
             where: {
                 isActive: true,
@@ -197,57 +214,108 @@ export class MemberCompanyService {
             },
         });
 
-        return {
-            name: member.name,
-            username: member.account.username,
-            contact: member.contact,
-            email: member.email,
-            district: {
-                englishName: member.region ? member.region.districtEnglishName : null,
-                koreanName: member.region ? member.region.districtKoreanName : null,
-            },
-            city: {
-                englishName: member.region ? member.region.cityEnglishName : null,
-                koreanName: member.region ? member.region.cityKoreanName : null,
-            },
-            desiredSalary: member.desiredSalary,
-            totalExperienceYears: member.totalExperienceYears,
-            totalExperienceMonths: member.totalExperienceMonths,
-            careers: member.careers
-                ? member.careers.map((item) => {
-                      return {
-                          startDate: item.startDate,
-                          endDate: item.endDate,
-                          companyName: item.companyName,
-                          siteName: item.siteName,
-                          occupation: item.code.name,
-                      };
-                  })
-                : [],
-            licenses: member.licenses
-                ? member.licenses.map((item) => {
-                      return {
-                          codeName: item.code.name,
-                          licenseNumber: item.licenseNumber,
-                      };
-                  })
-                : [],
-                occupations:member.licenses.map(item=>item.code.name),
-            basicHealthSafetyCertificate: {
-                registrationNumber: member.basicHealthSafetyCertificate
-                    ? member.basicHealthSafetyCertificate.registrationNumber
-                    : null,
-                dateOfCompletion: member.basicHealthSafetyCertificate
-                    ? member.basicHealthSafetyCertificate.dateOfCompletion
-                    : null,
-                file: {
-                    fileName: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.fileName : null,
-                    type: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.type : null,
-                    key: member.basicHealthSafetyCertificate ? member.basicHealthSafetyCertificate.file.key : null,
-                    size: member.basicHealthSafetyCertificate ? Number(member.basicHealthSafetyCertificate.file.size) : null,
+        const isChecked = member.memberInformationRequest.length > 0;
+
+        if (isChecked) {
+            return {
+                name: member.name,
+                username: member.account.username,
+                contact: member.contact,
+                email: member.email,
+                district: {
+                    englishName: member.region ? member.region.districtEnglishName : null,
+                    koreanName: member.region ? member.region.districtKoreanName : null,
                 },
-            },
-        };
+                city: {
+                    englishName: member.region ? member.region.cityEnglishName : null,
+                    koreanName: member.region ? member.region.cityKoreanName : null,
+                },
+                desiredSalary: member.desiredSalary,
+                totalExperienceYears: member.totalExperienceYears,
+                totalExperienceMonths: member.totalExperienceMonths,
+                careers: member.careers
+                    ? member.careers.map((item) => {
+                        return {
+                            startDate: item.startDate,
+                            endDate: item.endDate,
+                            companyName: item.companyName,
+                            siteName: item.siteName,
+                            occupation: item.code.name,
+                        };
+                    })
+                    : [],
+                licenses: member.licenses
+                    ? member.licenses.map((item) => {
+                        return {
+                            codeName: item.code.name,
+                            licenseNumber: item.licenseNumber,
+                        };
+                    })
+                    : [],
+                occupations: member.licenses.map(item => item.code.name),
+                basicHealthSafetyCertificate: member.basicHealthSafetyCertificate ? {
+                    registrationNumber: member.basicHealthSafetyCertificate.registrationNumber,
+                    dateOfCompletion: member.basicHealthSafetyCertificate.dateOfCompletion,
+                    file: {
+                        fileName: member.basicHealthSafetyCertificate.file.fileName,
+                        type: member.basicHealthSafetyCertificate.file.type,
+                        key: member.basicHealthSafetyCertificate.file.key,
+                        size: Number(member.basicHealthSafetyCertificate.file.size),
+                    },
+                } : null,
+                isChecked,
+            };
+        }
+        else {
+            return {
+                name: member.name,
+                username: member.account.username,
+                contact: null,
+                email: null,
+                district: {
+                    englishName: member.region ? member.region.districtEnglishName : null,
+                    koreanName: member.region ? member.region.districtKoreanName : null,
+                },
+                city: {
+                    englishName: member.region ? member.region.cityEnglishName : null,
+                    koreanName: member.region ? member.region.cityKoreanName : null,
+                },
+                desiredSalary: member.desiredSalary,
+                totalExperienceYears: member.totalExperienceYears,
+                totalExperienceMonths: member.totalExperienceMonths,
+                careers: member.careers
+                    ? member.careers.map(() => {
+                        return {
+                            startDate: null,
+                            endDate: null,
+                            companyName: null,
+                            siteName: null,
+                            occupation: null,
+                        };
+                    })
+                    : [],
+                licenses: member.licenses
+                    ? member.licenses.map(() => {
+                        return {
+                            codeName: null,
+                            licenseNumber: null,
+                        };
+                    })
+                    : [],
+                occupations: member.licenses.map(item => item.code.name),
+                basicHealthSafetyCertificate: member.basicHealthSafetyCertificate ? {
+                    registrationNumber: null,
+                    dateOfCompletion: null,
+                    file: {
+                        fileName: null,
+                        type: null,
+                        key: null,
+                        size: null,
+                    },
+                } : null,
+                isChecked,
+            }
+        }
     }
 
     async countWorkers(accountId: number): Promise<MemberCompanyCountWorkersResponse> {
@@ -273,5 +341,92 @@ export class MemberCompanyService {
             },
         });
         return { countWorkers: workers };
+    }
+
+    async checkMember(accountId: number, id: number): Promise<void> {
+        const member = await this.prismaService.member.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+        if (!member) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
+
+        const memberInformationRequest = await this.prismaService.memberInformationRequest.count({
+            where: {
+                memberId: id,
+                company: {
+                    accountId: accountId,
+                },
+
+            },
+        });
+
+        if (memberInformationRequest) throw new NotFoundException(Error.MEMBER_ALREADY_CHECKED);
+
+        const productPaymentHistory = await this.prismaService.productPaymentHistory.findFirst({
+            where: {
+                product: {
+                    productType: ProductType.WORKER_VERIFICATION,
+                },
+                status: PaymentStatus.COMPLETE,
+                remainingTimes: { gt: 0 },
+                expirationDate: { gt: new Date() },
+                OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
+                company: {
+                    accountId,
+                },
+            },
+            select: {
+                id: true,
+                remainingTimes: true,
+                expirationDate: true,
+            },
+            orderBy: [
+                {
+                    expirationDate: Prisma.SortOrder.asc,
+                },
+                {
+                    remainingTimes: Prisma.SortOrder.asc,
+                },
+            ],
+        });
+
+        if (!productPaymentHistory) {
+            throw new NotFoundException(Error.PRODUCT_NOT_FOUND);
+        }
+
+        await this.prismaService.$transaction(async (tx) => {
+            await tx.memberInformationRequest.create({
+                data: {
+                    member: {
+                        connect: {
+                            id,
+                        },
+                    },
+                    company: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                    usageHistory: {
+                        create: {
+                            productPaymentHistoryId: productPaymentHistory.id,
+                            expirationDate: productPaymentHistory.expirationDate,
+                            remainNumbers: productPaymentHistory.remainingTimes - 1,
+                        }
+                    },
+                },
+            });
+
+            await tx.productPaymentHistory.update({
+                where: {
+                    id: productPaymentHistory.id,
+                },
+                data: {
+                    remainingTimes: productPaymentHistory.remainingTimes - 1,
+                },
+            });
+        })
     }
 }

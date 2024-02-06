@@ -150,6 +150,7 @@ export class HeadhuntingCompanyService {
                 return {
                     team: null,
                     member: {
+                        id: item.member.id,
                         name: item.member.name,
                         contact: item.member.contact,
                         totalExperienceMonths: item.member.totalExperienceMonths,
@@ -178,6 +179,7 @@ export class HeadhuntingCompanyService {
                 return {
                     member: null,
                     team: {
+                        id: item.team.id,
                         name: item.team.name,
                         leader: {
                             contact: item.team.leader.contact,
@@ -291,6 +293,9 @@ export class HeadhuntingCompanyService {
                 status: PaymentStatus.COMPLETE,
                 OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
                 expirationDate: { gt: new Date() },
+                company: {
+                    accountId,
+                },
             },
             select: {
                 id: true,

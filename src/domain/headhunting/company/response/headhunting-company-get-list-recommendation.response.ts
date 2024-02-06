@@ -2,6 +2,7 @@ import { Member, Region } from '@prisma/client';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 class GetListRecommendationMemberResponse {
+    id: Member['id'];
     name: Member['name'];
     contact: Member['contact'];
     totalExperienceMonths: Member['totalExperienceMonths'];
@@ -31,6 +32,7 @@ export class GetListRecommendationLeaderResponse {
 }
 
 class GetListRecommendationTeamResponse {
+    id: number;
     name: string;
     city: {
         englishName: Region['cityEnglishName'];
