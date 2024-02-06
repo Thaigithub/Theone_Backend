@@ -9,7 +9,8 @@ import {
     PostStatus,
     PostType,
     Prisma,
-    ProductType
+    ProductType,
+    RefundStatus
 } from '@prisma/client';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { ProductCompanyService } from 'domain/product/company/product-company.service';
@@ -40,7 +41,7 @@ export class PostCompanyService {
         private prismaService: PrismaService,
         private productCompanyService: ProductCompanyService,
         private notificationMemberService: NotificationMemberService
-    ) {}
+    ) { }
 
     private async checkPostExist(postId: number, accountId: number): Promise<Post> {
         const post = await this.prismaService.post.findUnique({
@@ -158,17 +159,17 @@ export class PostCompanyService {
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException(Error.SITE_NOT_FOUND);
         }
-        if(request.occupationId) {
+        if (request.occupationId) {
             await this.checkCodeType(request.occupationId);
         }
-        if(request.category === PostCategory.HEADHUNTING){
+        if (request.category === PostCategory.HEADHUNTING) {
             const site = request.siteId ? await this.prismaService.site.findUnique({
                 where: {
                     id: request.siteId,
                     isActive: true,
                 },
             }) : null;
-            if(!site) {
+            if (!site) {
                 throw new BadRequestException(Error.SITE_IS_REQURIED_FOR_HEADHUNTING_POST);
             }
         }
@@ -187,7 +188,7 @@ export class PostCompanyService {
                 endDate: new Date(request.endDate),
                 experienceType: request.experienceType,
                 numberOfPeoples: request.numberOfPeople,
-                ...(request.occupationId && { code:{connect:{id:request.occupationId}}  }),
+                ...(request.occupationId && { code: { connect: { id: request.occupationId } } }),
                 otherInformation: request.otherInformation || '',
                 salaryType: request.salaryType,
                 salaryAmount: request.salaryAmount,
@@ -202,16 +203,16 @@ export class PostCompanyService {
                         id: request.siteId
                     }
                 },
-                company:{
-                    connect:{
+                company: {
+                    connect: {
                         id: account.company.id,
                     }
                 },
                 headhunting:
                     request.category === PostCategory.HEADHUNTING
                         ? {
-                              create: {},
-                          }
+                            create: {},
+                        }
                         : undefined,
             },
             select: {
@@ -219,7 +220,7 @@ export class PostCompanyService {
                 siteId: true,
             },
         });
-        if(post.siteId) {
+        if (post.siteId) {
             const memberAccountIds = (
                 await this.prismaService.site.findUnique({
                     where: {
@@ -247,15 +248,15 @@ export class PostCompanyService {
             });
             for (const id of memberAccountIds) {
                 await this.notificationMemberService.create(
-                    id, 
-                    '관심 업체(현장) 공고 등록', 
-                    '관심 업체(현장)가 공고를 등록했습니다.', 
+                    id,
+                    '관심 업체(현장) 공고 등록',
+                    '관심 업체(현장)가 공고를 등록했습니다.',
                     NotificationType.POST,
                     post.id,
                 );
             }
         }
-        
+
 
 
     }
@@ -302,9 +303,9 @@ export class PostCompanyService {
             numberOfPeople: record.numberOfPeoples,
             occupation: record.code
                 ? {
-                      codeName: record.code.name,
-                      code: record.code.code,
-                  }
+                    codeName: record.code.name,
+                    code: record.code.code,
+                }
                 : null,
             otherInformation: record.otherInformation,
             salaryType: record.salaryType,
@@ -342,10 +343,10 @@ export class PostCompanyService {
         if (request.siteId && !account.company.sites.map((site) => site.id).includes(request.siteId)) {
             throw new BadRequestException(Error.SITE_NOT_FOUND);
         }
-        if(request.occupationId) {
+        if (request.occupationId) {
             await this.checkCodeType(request.occupationId);
         }
-        
+
         const post = await this.prismaService.post.findUnique({
             where: {
                 id,
@@ -419,14 +420,14 @@ export class PostCompanyService {
                     throw new BadRequestException(Error.HEADHUNTING_RECOMMENDATION_EXISTED);
             }
         }
-        if(request.category === PostCategory.HEADHUNTING && request.siteId){
+        if (request.category === PostCategory.HEADHUNTING && request.siteId) {
             const site = await this.prismaService.site.findUnique({
                 where: {
                     id: request.siteId,
                     isActive: true,
                 },
             });
-            if(!site) {
+            if (!site) {
                 throw new BadRequestException(Error.SITE_IS_REQURIED_FOR_HEADHUNTING_POST);
             }
         }
@@ -453,16 +454,16 @@ export class PostCompanyService {
                 numberOfPeoples: request.numberOfPeople,
                 ...(request.occupationId && request.occupationId !== post.codeId && {
                     code: {
-                        ...(post.codeId && {disconnect: { id: post.codeId} }),
+                        ...(post.codeId && { disconnect: { id: post.codeId } }),
                     },
                 }),
                 ...(request.occupationId && {
                     code: {
-                        connect: { id: request.occupationId},
+                        connect: { id: request.occupationId },
                     },
                 }),
-                ...(request.otherInformation && { otherInformation: request.otherInformation}),
-                ...(request.salaryType && { salaryType: request.salaryType}),
+                ...(request.otherInformation && { otherInformation: request.otherInformation }),
+                ...(request.salaryType && { salaryType: request.salaryType }),
                 salaryAmount: request.salaryAmount,
                 startWorkDate: request.startWorkDate && new Date(request.startWorkDate),
                 endWorkDate: request.endWorkDate && new Date(request.endWorkDate),
@@ -472,12 +473,12 @@ export class PostCompanyService {
                 postEditor: request.postEditor,
                 ...(request.siteId && request.siteId !== post.siteId && post.siteId && {
                     site: {
-                        disconnect: {id: post.siteId},
+                        disconnect: { id: post.siteId },
                     },
                 }),
                 ...(request.siteId && {
                     site: {
-                        connect: { id: request.siteId},
+                        connect: { id: request.siteId },
                     }
                 }),
                 headhunting:
@@ -486,14 +487,14 @@ export class PostCompanyService {
                             ? { update: { isActive: false } }
                             : undefined
                         : request.category === PostCategory.HEADHUNTING
-                          ? post.headhunting
-                              ? { update: { isActive: true } }
-                              : {
+                            ? post.headhunting
+                                ? { update: { isActive: true } }
+                                : {
                                     create: {},
                                 }
-                          : post.headhunting
-                            ? { update: { isActive: false } }
-                            : undefined,
+                            : post.headhunting
+                                ? { update: { isActive: false } }
+                                : undefined,
             },
         });
     }
@@ -624,7 +625,7 @@ export class PostCompanyService {
             }),
             ...(query.startDate && { startDate: { gte: new Date(query.startDate) } }),
             ...(query.endDate && { endDate: { lte: new Date(query.endDate) } }),
-            NOT:{
+            NOT: {
                 headhunting: null,
             },
         };
@@ -750,9 +751,9 @@ export class PostCompanyService {
 
             return availablePullUp._sum.remainingTimes
                 ? {
-                      pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE,
-                      remainingTimes: availablePullUp._sum.remainingTimes,
-                  }
+                    pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE,
+                    remainingTimes: availablePullUp._sum.remainingTimes,
+                }
                 : { pullUpAvailableStatus: PostCompanyCheckPullUpStatus.PULL_UP_NOT_AVAILABLE, remainingTimes: null };
         }
     }
@@ -784,12 +785,23 @@ export class PostCompanyService {
                         product: {
                             productType: ProductType.PULL_UP,
                         },
+                        status: PaymentStatus.COMPLETE,
+
                         expirationDate: { gte: new Date() },
                         remainingTimes: { gt: 0 },
+                        OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
+                        company: {
+                            accountId,
+                        },
                     },
-                    orderBy: {
-                        expirationDate: 'asc',
-                    },
+                    orderBy: [
+                        {
+                            expirationDate: Prisma.SortOrder.asc,
+                        },
+                        {
+                            remainingTimes: Prisma.SortOrder.asc,
+                        },
+                    ],
                 });
                 if (availablePullUp.pullUpAvailableStatus === PostCompanyCheckPullUpStatus.PRODUCT_PULL_UP_AVAILABLE) {
                     await this.prismaService.productPaymentHistory.update({

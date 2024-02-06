@@ -34,4 +34,5 @@ export class MemberCompanyGetDetailResponse {
         file: FileResponse;
     };
     occupations: Code['name'][];
+    isChecked: boolean;
 }

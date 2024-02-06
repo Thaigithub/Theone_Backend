@@ -114,41 +114,43 @@ model Member {
   memos                        Memo[]
   reports                      Report[]
   laborConsultations           LaborConsultation[]
+  memberInformationRequests    MemberInformationRequest[]
 
   @@map("members")
 }
 
 model Company {
-  id                      Int                     @id @default(autoincrement())
-  accountId               Int                     @unique @map("account_id")
-  name                    String
-  address                 String
-  estDate                 DateTime                @map("est_date")
-  businessRegNumber       String                  @unique @map("buss_reg_number")
-  corporateRegNumber      String                  @unique @map("corp_reg_number")
-  type                    CompanyType
-  email                   String                  @unique
-  phone                   String
-  contactPhone            String                  @map("contact_phone")
-  contactName             String                  @map("contact_name")
-  isActive                Boolean                 @default(true) @map("is_active")
-  createdAt               DateTime                @default(now()) @map("created_at")
-  updatedAt               DateTime                @updatedAt @map("updated_at")
-  presentativeName        String                  @map("presentative_name")
-  insurance               String?
-  attachments             Attachment[]
-  bannerRequests          BannerRequest[]
-  account                 Account                 @relation(fields: [accountId], references: [id])
-  logoId                  Int                     @unique
-  contactCardId           Int                     @unique
-  contactCard             File                    @relation("contact_card", references: [id], fields: [contactCardId])
-  logo                    File                    @relation("logo", references: [id], fields: [logoId])
-  matchingRequests        MatchingRequest[]
-  posts                   Post[]
-  productPaymentHistories ProductPaymentHistory[]
-  sites                   Site[]
-  inquiries               Inquiry[]
-  laborConsultations      LaborConsultation[]
+  id                        Int                        @id @default(autoincrement())
+  accountId                 Int                        @unique @map("account_id")
+  name                      String
+  address                   String
+  estDate                   DateTime                   @map("est_date")
+  businessRegNumber         String                     @unique @map("buss_reg_number")
+  corporateRegNumber        String                     @unique @map("corp_reg_number")
+  type                      CompanyType
+  email                     String                     @unique
+  phone                     String
+  contactPhone              String                     @map("contact_phone")
+  contactName               String                     @map("contact_name")
+  isActive                  Boolean                    @default(true) @map("is_active")
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
+  presentativeName          String                     @map("presentative_name")
+  insurance                 String?
+  attachments               Attachment[]
+  bannerRequests            BannerRequest[]
+  account                   Account                    @relation(fields: [accountId], references: [id])
+  logoId                    Int                        @unique
+  contactCardId             Int                        @unique
+  contactCard               File                       @relation("contact_card", references: [id], fields: [contactCardId])
+  logo                      File                       @relation("logo", references: [id], fields: [logoId])
+  matchingRequests          MatchingRequest[]
+  posts                     Post[]
+  productPaymentHistories   ProductPaymentHistory[]
+  sites                     Site[]
+  inquiries                 Inquiry[]
+  laborConsultations        LaborConsultation[]
+  memberInformationRequests MemberInformationRequest[]
 
   @@map("companies")
 }
@@ -1033,14 +1035,15 @@ model TaxBill {
 }
 
 model UsageHistory {
-  id                      Int                   @id @default(autoincrement())
-  productPaymentHistoryId Int                   @map("product_payment_history_id")
-  productPaymentHistory   ProductPaymentHistory @relation(fields: [productPaymentHistoryId], references: [id])
-  createdAt               DateTime              @default(now()) @map("created_at") @db.Date
-  expirationDate          DateTime              @map("expiration_date")
-  remainNumbers           Int                   @map("remain_number")
-  headHuntingRequest      HeadhuntingRequest?
-  matchingRequest         MatchingRequest?
+  id                       Int                       @id @default(autoincrement())
+  productPaymentHistoryId  Int                       @map("product_payment_history_id")
+  productPaymentHistory    ProductPaymentHistory     @relation(fields: [productPaymentHistoryId], references: [id])
+  createdAt                DateTime                  @default(now()) @map("created_at") @db.Date
+  expirationDate           DateTime                  @map("expiration_date")
+  remainNumbers            Int                       @map("remain_number")
+  headHuntingRequest       HeadhuntingRequest?
+  matchingRequest          MatchingRequest?
+  memberInformationRequest MemberInformationRequest?
 
   @@map("usage_histories")
 }
@@ -1264,6 +1267,18 @@ model FaqFile {
   file   File @relation(fields: [fileId], references: [id])
 
   @@map("faq_files")
+}
+
+model MemberInformationRequest {
+  id             Int          @id @default(autoincrement())
+  memberId       Int          @map("member_id")
+  companyId      Int          @map("company_id")
+  usageHistoryId Int          @unique @map("usage_history_id")
+  member         Member       @relation(fields: [memberId], references: [id])
+  company        Company      @relation(fields: [companyId], references: [id])
+  usageHistory   UsageHistory @relation(fields: [usageHistoryId], references: [id])
+
+  @@map("member_information_requests")
 }
 
 enum PointStatus {
