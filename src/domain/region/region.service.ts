@@ -21,51 +21,33 @@ export class RegionService {
                     cityId: true,
                 },
             })
-        ).reduce((accum, current) => {
-            if (accum.length === 0) {
-                accum.push({
+        ).reduce((result: RegionGetListResponse[], current) => {
+            if (result.some((item) => item.id === current.cityId)) {
+                const elementToUpdate = result.find((element) => element.id === current.cityId);
+                if (elementToUpdate) {
+                    elementToUpdate.district.push({
+                        id: current.id,
+                        englishName: current.districtEnglishName,
+                        koreanName: current.districtKoreanName,
+                        cityId: current.cityId,
+                    });
+                }
+            } else {
+                result.push({
                     id: current.cityId,
-                    koreanName: current.cityKoreanName,
                     englishName: current.cityEnglishName,
+                    koreanName: current.cityKoreanName,
                     district: [
                         {
                             id: current.id,
-                            cityId: accum.length,
-                            koreanName: current.districtKoreanName,
                             englishName: current.districtEnglishName,
+                            koreanName: current.districtKoreanName,
+                            cityId: current.cityId,
                         },
                     ],
-                });
-            } else {
-                const names = accum.map((item) => item.koreanName);
-                if (names.includes(current.cityKoreanName)) {
-                    accum = accum.map((item) => {
-                        if (item.koreanName === current.cityKoreanName)
-                            item.district.push({
-                                id: current.id,
-                                cityId: item.id,
-                                koreanName: current.districtKoreanName,
-                                englishName: current.districtEnglishName,
-                            });
-                        return item;
-                    });
-                } else {
-                    accum.push({
-                        id: current.cityId,
-                        koreanName: current.cityKoreanName,
-                        englishName: current.cityEnglishName,
-                        district: [
-                            {
-                                id: current.id,
-                                cityId: accum.length,
-                                koreanName: current.districtKoreanName,
-                                englishName: current.districtEnglishName,
-                            },
-                        ],
-                    });
-                }
+                } as RegionGetListResponse);
             }
-            return accum;
+            return result;
         }, []);
         return cities;
     }
