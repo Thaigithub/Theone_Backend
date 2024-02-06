@@ -19,6 +19,7 @@ class GetListRecommendationMemberResponse {
         englishName: Region['districtEnglishName'];
         koreanName: Region['districtKoreanName'];
     };
+    isActive: boolean;
 }
 
 export class GetListRecommendationLeaderResponse {
@@ -26,6 +27,7 @@ export class GetListRecommendationLeaderResponse {
     totalExperienceMonths: Member['totalExperienceMonths'];
     totalExperienceYears: Member['totalExperienceYears'];
     desiredSalary: Member['desiredSalary'];
+    isActive: boolean;
 }
 
 class GetListRecommendationTeamResponse {
@@ -39,6 +41,7 @@ class GetListRecommendationTeamResponse {
         koreanName: Region['districtKoreanName'];
     };
     leader: GetListRecommendationLeaderResponse;
+    isActive: boolean;
 }
 class GetListRecommendationResponse {
     member: GetListRecommendationMemberResponse;
