@@ -1,10 +1,11 @@
-import { Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
 import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { MemberCompanyService } from './member-company.service';
+import { MemberCompanyCheckMemberRequest } from './request/member-company-check-member.request';
 import { MemberCompanyGetListRequest } from './request/member-company-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyGetDetailResponse } from './response/member-company-get-detail.response';
@@ -43,7 +44,11 @@ export class MemberCompanyController {
     }
 
     @Post('/:id/check')
-    async verifyMember(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberCompanyService.checkMember(req.user.accountId, id));
+    async checkMember(
+        @Req() req: BaseRequest,
+        @Body() body: MemberCompanyCheckMemberRequest,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.memberCompanyService.checkMember(req.user.accountId, id, body));
     }
 }

@@ -6,6 +6,7 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
+import { MemberCompanyCheckMemberRequest } from './request/member-company-check-member.request';
 import { MemberCompanyGetListRequest } from './request/member-company-get-list.request';
 import { MemberCompanyCountWorkersResponse } from './response/member-company-get-count-worker.response';
 import { MemberCompanyGetDetailResponse } from './response/member-company-get-detail.response';
@@ -343,7 +344,7 @@ export class MemberCompanyService {
         return { countWorkers: workers };
     }
 
-    async checkMember(accountId: number, id: number): Promise<void> {
+    async checkMember(accountId: number, id: number, body: MemberCompanyCheckMemberRequest): Promise<void> {
         const member = await this.prismaService.member.count({
             where: {
                 isActive: true,
@@ -366,6 +367,7 @@ export class MemberCompanyService {
 
         const productPaymentHistory = await this.prismaService.productPaymentHistory.findFirst({
             where: {
+                id: body.productPaymentHistoryId,
                 product: {
                     productType: ProductType.WORKER_VERIFICATION,
                 },
@@ -382,14 +384,6 @@ export class MemberCompanyService {
                 remainingTimes: true,
                 expirationDate: true,
             },
-            orderBy: [
-                {
-                    expirationDate: Prisma.SortOrder.asc,
-                },
-                {
-                    remainingTimes: Prisma.SortOrder.asc,
-                },
-            ],
         });
 
         if (!productPaymentHistory) {
