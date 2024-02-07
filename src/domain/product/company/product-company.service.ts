@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentStatus, PaymentType, Prisma, ProductType, RefundStatus, TaxBillStatus } from '@prisma/client';
+import { PaymentStatus, PaymentType, Prisma, ProductType, RefundStatus, TaxBillStatus, UsageType } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -458,6 +458,9 @@ export class ProductCompanyService {
                 expirationDate: { gte: new Date() },
                 OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
             },
+            include: {
+                product: true,
+            },
             orderBy: [
                 {
                     expirationDate: Prisma.SortOrder.asc,
@@ -470,11 +473,12 @@ export class ProductCompanyService {
 
         return {
             isAvailable: paymentHistories.length > 0,
-            paymentHistories: paymentHistories.map((item) => {
+            productPaymentHistories: paymentHistories.map((item) => {
                 return {
                     id: item.id,
                     remainingTimes: item.remainingTimes,
-                    expirationDate: item.expirationDate,
+                    expirationDate: item.product.usageType === UsageType.FIX_TERM ? item.expirationDate : null,
+                    usageType: item.product.usageType,
                 };
             }),
         };
