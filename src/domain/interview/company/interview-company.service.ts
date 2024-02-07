@@ -465,7 +465,6 @@ export class InterviewCompanyService {
                             id: true,
                         },
                     });
-
                     break;
                 }
                 case InterviewCompanyType.TEAM: {

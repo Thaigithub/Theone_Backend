@@ -86,7 +86,15 @@ export class MatchingCompanyService {
                             },
                             team: {
                                 include: {
-                                    leader: true,
+                                    leader: {
+                                        select: {
+                                            account: {
+                                                select: {
+                                                    isActive: true,
+                                                },
+                                            },
+                                        },
+                                    },
                                     code: true,
                                     members: {
                                         include: {
@@ -103,6 +111,11 @@ export class MatchingCompanyService {
                                                     applications: {
                                                         include: {
                                                             contract: true,
+                                                        },
+                                                    },
+                                                    account: {
+                                                        select: {
+                                                            isActive: true,
                                                         },
                                                     },
                                                 },
