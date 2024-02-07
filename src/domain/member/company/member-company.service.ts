@@ -168,7 +168,7 @@ export class MemberCompanyService {
         return new PaginationResponse(members, new PageInfo(total));
     }
 
-    async getDetail(accountId: number, id: number): Promise<MemberCompanyGetDetailResponse> {
+    async getDetail(accountId: number, id: number, checkInformationRequired: boolean): Promise<MemberCompanyGetDetailResponse> {
         const memberExist = await this.prismaService.member.count({
             where: {
                 isActive: true,
@@ -220,7 +220,7 @@ export class MemberCompanyService {
             },
         });
 
-        const isChecked = member.memberInformationRequests.length > 0;
+        const isChecked = checkInformationRequired ? member.memberInformationRequests.length > 0 : true;
 
         if (isChecked) {
             return {

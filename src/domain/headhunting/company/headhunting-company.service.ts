@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { HeadhuntingRequestStatus, PaymentStatus, PostCategory, Prisma, ProductType, RefundStatus } from '@prisma/client';
+import { MemberCompanyService } from 'domain/member/company/member-company.service';
+import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -8,10 +10,15 @@ import { HeadhuntingCompanyCreateRequestRequest } from './request/headhunting-co
 import { HeadhuntingCompanyGetListRecommendationRequest } from './request/headhunting-company-get-list-recommendation.request';
 import { HeadhuntingCompanyGetDetailRequestResponse } from './response/headhunting-company-get-detail-request.response';
 import { HeadhuntingCompanyGetListRecommendationResponse } from './response/headhunting-company-get-list-recommendation.response';
+import { HeadhuntingCompanyGetRecommendationDetailResponse } from './response/headhunting-company-get-recommendation-detail.response';
 
 @Injectable()
 export class HeadhuntingCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private memberCompanyService: MemberCompanyService,
+        private teamCompanyService: TeamCompanyService,
+    ) {}
 
     async getListRecommendation(
         accountId: number,
@@ -57,6 +64,7 @@ export class HeadhuntingCompanyService {
 
         const list = await this.prismaService.headhuntingRecommendation.findMany({
             select: {
+                id: true,
                 member: {
                     select: {
                         id: true,
@@ -143,11 +151,14 @@ export class HeadhuntingCompanyService {
             ...QueryPagingHelper.queryPaging(query),
         });
 
+        console.log(list);
+
         const newList = list.map((item) => {
             if (item.member) {
                 const region = item.member.region;
                 delete item.member.region;
                 return {
+                    headhuntingRecommendationId: item.id,
                     team: null,
                     member: {
                         id: item.member.id,
@@ -177,6 +188,7 @@ export class HeadhuntingCompanyService {
                 const region = item.team.region;
                 delete item.team.region;
                 return {
+                    headhuntingRecommendationId: item.id,
                     member: null,
                     team: {
                         id: item.team.id,
@@ -383,6 +395,43 @@ export class HeadhuntingCompanyService {
                     });
                 });
             }
+        }
+    }
+
+    async getRecommendationDetail(accountId: number, id: number): Promise<HeadhuntingCompanyGetRecommendationDetailResponse> {
+        const headhuntingRecommendation = await this.prismaService.headhuntingRecommendation.findFirst({
+            where: {
+                id,
+                headhunting: {
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+            select: {
+                memberId: true,
+                teamId: true,
+            },
+        });
+
+        if (!headhuntingRecommendation) {
+            throw new NotFoundException(Error.HEADHUNTING_RECOMMENDATION_NOT_FOUND);
+        }
+
+        if (headhuntingRecommendation.memberId) {
+            const member = await this.memberCompanyService.getDetail(accountId, headhuntingRecommendation.memberId, false);
+            return {
+                member,
+                team: null,
+            };
+        } else {
+            const team = await this.teamCompanyService.getDetail(accountId, headhuntingRecommendation.teamId, false);
+            return {
+                member: null,
+                team,
+            };
         }
     }
 }
