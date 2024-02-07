@@ -208,9 +208,11 @@ export class MatchingCompanyService {
     }
 
     async create(accountId: number, query: MatchingCompanyCreateRecommendationRequest): Promise<void> {
-        const occupationIds = query.occupationList || undefined;
-        const regionIds =
+        const occupationIds = query.occupationList && query.occupationList.length > 0 ? query.occupationList : undefined;
+        const parseRegions =
             (query.regionList && query.regionList.map((item) => item.split('-')[1]).map((item) => parseInt(item))) || undefined;
+        const regionIds = parseRegions && parseRegions.length > 0 ? parseRegions : undefined;
+
         const company = await this.prismaService.company.findUnique({
             where: {
                 accountId: accountId,
@@ -301,6 +303,7 @@ export class MatchingCompanyService {
                                 },
                             },
                         }),
+                    isActive: true,
                 },
                 select: {
                     id: true,
@@ -426,6 +429,7 @@ export class MatchingCompanyService {
                             { leader: { contact: { contains: query.keyword, mode: 'insensitive' } } },
                         ],
                     }),
+                    isActive: true,
                 },
                 select: {
                     id: true,

@@ -19,18 +19,24 @@ import { ApplicationMemberGetListResponse } from './response/application-member-
 export class ApplicationMemberService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(id: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
+    async getList(accountId: number, query: ApplicationMemberGetListRequest): Promise<ApplicationMemberGetListResponse> {
         const teams = await this.prismaService.member.findUnique({
             where: {
-                accountId: id,
+                accountId,
             },
             select: {
                 teams: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
                         teamId: true,
                     },
                 },
                 leaders: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
                         id: true,
                     },
@@ -40,7 +46,7 @@ export class ApplicationMemberService {
         const teamIds = [...teams.leaders.map((item) => item.id), ...teams.teams.map((item) => item.teamId)];
         const status = {
             ...(query.status === ApplicationMemberStatus.FAIL && {
-                OR: [{ status: PostApplicationStatus.REJECT_BY_COMPANY }, { status: PostApplicationStatus.REJECT_BY_MEMBER }],
+                status: PostApplicationStatus.REJECT_BY_COMPANY,
                 interview: undefined,
             }),
             ...(query.status === ApplicationMemberStatus.PASS && {
@@ -64,9 +70,7 @@ export class ApplicationMemberService {
             OR: [
                 {
                     member: {
-                        account: {
-                            id,
-                        },
+                        accountId,
                     },
                     ...status,
                 },
@@ -96,7 +100,7 @@ export class ApplicationMemberService {
                             interests: {
                                 where: {
                                     member: {
-                                        accountId: id,
+                                        accountId,
                                     },
                                 },
                             },
@@ -162,35 +166,43 @@ export class ApplicationMemberService {
     }
 
     async getDetail(id: number, accountId: number): Promise<ApplicationMemberGetDetailResponse> {
-        const teams = (
-            await this.prismaService.member.findUnique({
-                where: {
-                    accountId: accountId,
-                },
-                select: {
-                    teams: {
-                        select: {
-                            teamId: true,
-                        },
+        const teams = await this.prismaService.member.findUnique({
+            where: {
+                accountId,
+            },
+            select: {
+                teams: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        teamId: true,
                     },
                 },
-            })
-        ).teams.map((item) => item.teamId);
+                leaders: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        const teamIds = teams.teams.map((item) => item.teamId).concat(teams.leaders.map((item) => item.id));
         const application = await this.prismaService.application.findFirst({
             where: {
                 OR: [
                     {
                         member: {
-                            account: {
-                                id: accountId,
-                            },
+                            accountId,
                         },
                         id,
                     },
                     {
                         team: {
                             id: {
-                                in: teams,
+                                in: teamIds,
                             },
                         },
                         id,
