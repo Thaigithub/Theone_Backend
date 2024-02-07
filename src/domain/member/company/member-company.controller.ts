@@ -27,7 +27,7 @@ export class MemberCompanyController {
         @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<MemberCompanyGetDetailResponse>> {
-        return BaseResponse.of(await this.memberCompanyService.getDetail(req.user.accountId, id));
+        return BaseResponse.of(await this.memberCompanyService.getDetail(req.user.accountId, id, true));
     }
 
     @Get()

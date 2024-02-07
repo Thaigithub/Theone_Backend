@@ -1,15 +1,22 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, RequestObject } from '@prisma/client';
+import { MemberCompanyService } from 'domain/member/company/member-company.service';
+import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { MatchingCompanyGetListDate } from './enum/matching-company-get-list-date.enum';
 import { MatchingCompanyCreateRecommendationRequest } from './request/matching-company-create-recommendation.request';
 import { MatchingCompanyGetListRecommendationRequest } from './request/matching-company-get-list-recommendation.request';
 import { MatchingCompanyGetListRecommendation } from './response/matching-company-get-list-recommendation.response';
+import { MatchingCompanyGetRecommendationDetailResponse } from './response/matching-company-get-recommendation-detail.response';
 
 @Injectable()
 export class MatchingCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private memberCompanyService: MemberCompanyService,
+        private teamCompanyService: TeamCompanyService,
+    ) {}
 
     filterExperience(types: ExperienceType[], totalExperienceMonths: number): boolean {
         for (const type of types) {
@@ -56,6 +63,7 @@ export class MatchingCompanyService {
                 select: {
                     recommendations: {
                         select: {
+                            id: true,
                             member: {
                                 select: {
                                     id: true,
@@ -134,12 +142,14 @@ export class MatchingCompanyService {
         }, []);
 
         if (existMatching.length > 0) {
-            const allMembers = existMatching.filter((matching) => !matching.team).map((matching) => matching.member);
-            const allTeams = existMatching.filter((matching) => !matching.member).map((matching) => matching.team);
+            const allMembers = existMatching.filter((matching) => !matching.team);
+            const allTeams = existMatching.filter((matching) => !matching.member);
             return {
                 data: [
-                    ...allMembers.map((member) => {
+                    ...allMembers.map((item) => {
+                        const member = item.member;
                         return {
+                            matchingRecommendationId: item.id,
                             id: member.id,
                             object: RequestObject.INDIVIDUAL,
                             name: member.name,
@@ -160,8 +170,11 @@ export class MatchingCompanyService {
                             teamDetail: null,
                         };
                     }),
-                    ...allTeams.map((team) => {
+                    ...allTeams.map((item) => {
+                        const team = item.team;
+
                         return {
+                            matchingRecommendationId: item.id,
                             id: team.id,
                             object: RequestObject.TEAM,
                             name: team.name,
@@ -561,5 +574,40 @@ export class MatchingCompanyService {
                 },
             },
         });
+    }
+
+    async getRecommendationDetail(accountId: number, id: number): Promise<MatchingCompanyGetRecommendationDetailResponse> {
+        const matchingRecommendation = await this.prismaService.matchingRecommendation.findUnique({
+            where: {
+                id,
+                matchingRequest: {
+                    company: {
+                        accountId,
+                    },
+                },
+            },
+            select: {
+                memberId: true,
+                teamId: true,
+            },
+        });
+
+        if (!matchingRecommendation) {
+            throw new NotFoundException(Error.MATCHING_RECOMMENDATION_NOT_FOUND);
+        }
+
+        if (matchingRecommendation.memberId) {
+            const member = await this.memberCompanyService.getDetail(accountId, matchingRecommendation.memberId, false);
+            return {
+                member,
+                team: null,
+            };
+        } else {
+            const team = await this.teamCompanyService.getDetail(accountId, matchingRecommendation.teamId, false);
+            return {
+                member: null,
+                team,
+            };
+        }
     }
 }

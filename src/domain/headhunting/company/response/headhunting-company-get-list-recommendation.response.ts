@@ -46,6 +46,7 @@ class GetListRecommendationTeamResponse {
     isActive: boolean;
 }
 class GetListRecommendationResponse {
+    headhuntingRecommendationId: number;
     member: GetListRecommendationMemberResponse;
     team: GetListRecommendationTeamResponse;
 }

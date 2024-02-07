@@ -1,6 +1,7 @@
 import { RequestObject } from '@prisma/client';
 
 class MatchingCompanyGetItemRecommendation {
+    matchingRecommendationId: number;
     id: number;
     object: RequestObject;
     name: string;

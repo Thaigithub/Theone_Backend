@@ -122,7 +122,7 @@ export class TeamCompanyService {
         return new PaginationResponse(teams, new PageInfo(total));
     }
 
-    async getDetail(accountId: number, id: number): Promise<TeamCompanyGetDetailResponse> {
+    async getDetail(accountId: number, id: number, checkInformationRequired: boolean): Promise<TeamCompanyGetDetailResponse> {
         const teamExist = await this.prismaService.team.count({
             where: {
                 isActive: true,
@@ -220,7 +220,7 @@ export class TeamCompanyService {
         });
         listMembers.unshift(team.leader);
 
-        const isAdminChecked = team.leader.memberInformationRequests.length > 0;
+        const isAdminChecked = checkInformationRequired ? team.leader.memberInformationRequests.length > 0 : true;
 
         return {
             name: team.name,
@@ -235,7 +235,7 @@ export class TeamCompanyService {
             leaderTotalExperienceMonths: team.leader.totalExperienceMonths,
             desiredSalary: team.desiredSalary,
             members: listMembers.map((item) => {
-                const isMemberChecked = item.memberInformationRequests.length > 0;
+                const isMemberChecked = checkInformationRequired ? item.memberInformationRequests.length > 0 : true;
 
                 return {
                     id: item.id,

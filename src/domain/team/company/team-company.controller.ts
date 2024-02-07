@@ -20,7 +20,7 @@ export class TeamCompanyController {
         @Req() req: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<BaseResponse<TeamCompanyGetDetailResponse>> {
-        return BaseResponse.of(await this.teamCompanyService.getDetail(req.user.accountId, id));
+        return BaseResponse.of(await this.teamCompanyService.getDetail(req.user.accountId, id, true));
     }
 
     @Get()
