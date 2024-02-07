@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateStatus, ExperienceType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { TeamCompanyGetListRequest } from './request/team-company-get-list.request';
 import { TeamCompanyGetDetailResponse } from './response/team-company-get-detail.response';
 import { TeamCompanyGetListResponse } from './response/team-company-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class TeamCompanyService {
@@ -73,7 +73,65 @@ export class TeamCompanyService {
         };
     }
 
-    private async getListLicensesOfTeam(teamId: number): Promise<{ licenseNumber: string; codeName: string }[]> {
+    async getList(accountId: number, query: TeamCompanyGetListRequest): Promise<TeamCompanyGetListResponse> {
+        const teams = (
+            await this.prismaService.team.findMany({
+                include: {
+                    leader: {
+                        include: {
+                            memberInformationRequests: {
+                                where: {
+                                    company: {
+                                        accountId,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    region: {
+                        select: {
+                            districtKoreanName: true,
+                            cityKoreanName: true,
+                        },
+                    },
+                },
+                where: this.parseConditionFromQuery(query),
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            const isChecked = item.leader.memberInformationRequests.length > 0;
+
+            return {
+                id: item.id,
+                name: item.name,
+                totalMembers: item.totalMembers,
+                cityKoreanName: item.region.cityKoreanName,
+                districtKoreanName: item.region.districtKoreanName,
+                leader: {
+                    contact: isChecked ? item.leader.contact : null,
+                    isChecked,
+                },
+                totalExperienceYears: item.totalExperienceYears,
+                totalExperienceMonths: item.totalExperienceMonths,
+                desiredSalary: item.desiredSalary,
+            };
+        });
+        const total = await this.prismaService.team.count({
+            where: this.parseConditionFromQuery(query),
+        });
+        return new PaginationResponse(teams, new PageInfo(total));
+    }
+
+    async getDetail(accountId: number, id: number): Promise<TeamCompanyGetDetailResponse> {
+        const teamExist = await this.prismaService.team.count({
+            where: {
+                isActive: true,
+                id,
+            },
+        });
+
+        if (!teamExist) throw new NotFoundException(Error.TEAM_NOT_FOUND);
+
         const team = await this.prismaService.team.findUnique({
             include: {
                 leader: {
@@ -87,117 +145,17 @@ export class TeamCompanyService {
                                 isActive: true,
                             },
                         },
-                    },
-                },
-                members: {
-                    include: {
-                        member: {
-                            include: {
-                                licenses: {
-                                    include: {
-                                        code: true,
-                                    },
-                                    where: {
-                                        status: CertificateStatus.APPROVED,
-                                        isActive: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            where: {
-                isActive: true,
-                id: teamId,
-            },
-        });
-
-        const leaderLicenses = team.leader.licenses
-            ? team.leader.licenses.map((item) => {
-                  return {
-                      licenseNumber: item.licenseNumber,
-                      codeName: item.code.name,
-                  };
-              })
-            : [];
-        let membersLicences = team.members
-            .map((item) => {
-                if (item.member.licenses) {
-                    return {
-                        licenseNumber: item.member.licenses.map((item) => {
-                            return {
-                                licenseNumber: item.licenseNumber,
-                                codeName: item.code.name,
-                            };
-                        }),
-                    };
-                }
-            })
-            .map((item) => {
-                return item.licenseNumber;
-            })
-            .flat(1);
-        membersLicences = membersLicences.concat(leaderLicenses);
-        return membersLicences;
-    }
-
-    async getList(query: TeamCompanyGetListRequest): Promise<TeamCompanyGetListResponse> {
-        const teams = (
-            await this.prismaService.team.findMany({
-                include: {
-                    leader: true,
-                    region: {
-                        select: {
-                            districtKoreanName: true,
-                            cityKoreanName: true,
-                        },
-                    },
-                },
-                where: this.parseConditionFromQuery(query),
-                ...QueryPagingHelper.queryPaging(query),
-            })
-        ).map((item) => {
-            return {
-                id: item.id,
-                name: item.name,
-                totalMembers: item.totalMembers,
-                cityKoreanName: item.region.cityKoreanName,
-                districtKoreanName: item.region.districtKoreanName,
-                leaderContact: item.leader.contact,
-                totalExperienceYears: item.totalExperienceYears,
-                totalExperienceMonths: item.totalExperienceMonths,
-                desiredSalary: item.desiredSalary,
-            };
-        });
-        const total = await this.prismaService.team.count({
-            where: this.parseConditionFromQuery(query),
-        });
-        return new PaginationResponse(teams, new PageInfo(total));
-    }
-
-    async getDetail(id: number): Promise<TeamCompanyGetDetailResponse> {
-        const teamExist = await this.prismaService.team.count({
-            where: {
-                isActive: true,
-                id,
-            },
-        });
-        if (!teamExist) throw new NotFoundException(Error.TEAM_NOT_FOUND);
-
-        const team = await this.prismaService.team.findUnique({
-            include: {
-                leader: {
-                    include: {
-                        licenses: {
-                            include: {
-                                code: true,
-                            },
-                        },
                         region: {
                             select: {
                                 cityKoreanName: true,
                                 districtKoreanName: true,
+                            },
+                        },
+                        memberInformationRequests: {
+                            where: {
+                                company: {
+                                    accountId,
+                                },
                             },
                         },
                     },
@@ -216,11 +174,22 @@ export class TeamCompanyService {
                                     include: {
                                         code: true,
                                     },
+                                    where: {
+                                        status: CertificateStatus.APPROVED,
+                                        isActive: true,
+                                    },
                                 },
                                 region: {
                                     select: {
                                         cityKoreanName: true,
                                         districtKoreanName: true,
+                                    },
+                                },
+                                memberInformationRequests: {
+                                    where: {
+                                        company: {
+                                            accountId,
+                                        },
                                     },
                                 },
                             },
@@ -251,20 +220,27 @@ export class TeamCompanyService {
         });
         listMembers.unshift(team.leader);
 
+        const isAdminChecked = team.leader.memberInformationRequests.length > 0;
+
         return {
             name: team.name,
             totalMembers: team.totalMembers,
             cityKoreanName: team.region.cityKoreanName,
             districtKoreanName: team.region.districtKoreanName,
-            leaderContact: team.leader.contact,
+            leader: {
+                contact: isAdminChecked ? team.leader.contact : null,
+                isChecked: isAdminChecked,
+            },
             leaderTotalExperienceYears: team.leader.totalExperienceYears,
             leaderTotalExperienceMonths: team.leader.totalExperienceMonths,
             desiredSalary: team.desiredSalary,
             members: listMembers.map((item) => {
+                const isMemberChecked = item.memberInformationRequests.length > 0;
+
                 return {
                     id: item.id,
                     name: item.name,
-                    contact: item.contact,
+                    contact: isMemberChecked ? item.contact : null,
                     totalExperienceYears: item.totalExperienceYears,
                     totalExperienceMonths: item.totalExperienceMonths,
                     desiredOccupations: item.licenses
@@ -272,9 +248,17 @@ export class TeamCompanyService {
                               return item.code.name;
                           })
                         : [],
+                    licenses: item.licenses
+                        ? item.licenses.map((license) => {
+                              return {
+                                  licenseNumber: isMemberChecked ? license.licenseNumber : null,
+                                  codeName: isMemberChecked ? license.code.name : null,
+                              };
+                          })
+                        : [],
+                    isChecked: isMemberChecked,
                 };
             }),
-            licenses: await this.getListLicensesOfTeam(team.id),
         };
     }
 }
