@@ -5,6 +5,7 @@ export class TeamCompanyGetDetailResponse {
     totalMembers: Team['totalMembers'];
     cityKoreanName: string;
     districtKoreanName: string;
+    leaderContact: Member['contact'];
     leader: {
         contact: Member['contact'];
         isChecked: boolean;
@@ -24,5 +25,9 @@ export class TeamCompanyGetDetailResponse {
             licenseNumber: License['licenseNumber'];
             codeName: Code['name'];
         }[];
+    }[];
+    licenses: {
+        licenseNumber: License['licenseNumber'];
+        codeName: Code['name'];
     }[];
 }

@@ -222,11 +222,25 @@ export class TeamCompanyService {
 
         const isAdminChecked = checkInformationRequired ? team.leader.memberInformationRequests.length > 0 : true;
 
+        const license = [];
+        for (const member of listMembers) {
+            const isChecked = checkInformationRequired ? member.memberInformationRequests.length > 0 : true;
+            if (member.licenses) {
+                for (const item of member.licenses) {
+                    license.push({
+                        licenseNumber: isChecked ? item.licenseNumber : null,
+                        codeName: isChecked ? item.code.name : null,
+                    });
+                }
+            }
+        }
+
         return {
             name: team.name,
             totalMembers: team.totalMembers,
             cityKoreanName: team.region.cityKoreanName,
             districtKoreanName: team.region.districtKoreanName,
+            leaderContact: isAdminChecked ? team.leader.contact : null,
             leader: {
                 contact: isAdminChecked ? team.leader.contact : null,
                 isChecked: isAdminChecked,
@@ -257,6 +271,12 @@ export class TeamCompanyService {
                           })
                         : [],
                     isChecked: isMemberChecked,
+                };
+            }),
+            licenses: team.leader.licenses.map((license) => {
+                return {
+                    licenseNumber: isAdminChecked ? license.licenseNumber : null,
+                    codeName: isAdminChecked ? license.code.name : null,
                 };
             }),
         };
