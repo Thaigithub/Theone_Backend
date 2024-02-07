@@ -7,7 +7,10 @@ export class GetListResponse {
     totalMembers: Team['totalMembers'];
     cityKoreanName: string;
     districtKoreanName: string;
-    leaderContact: Member['contact'];
+    leader: {
+        contact: Member['contact'];
+        isChecked: boolean;
+    };
     totalExperienceYears: Member['totalExperienceYears'];
     totalExperienceMonths: Member['totalExperienceMonths'];
     desiredSalary: Member['desiredSalary'];
