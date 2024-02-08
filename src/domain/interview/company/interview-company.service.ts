@@ -672,4 +672,28 @@ export class InterviewCompanyService {
             }
         });
     }
+
+    async getDetailTeamMember(
+        accountId: number,
+        id: number,
+        memberId: number,
+    ): Promise<ApplicationCompanyGetDetailMemberResponse> {
+        const interview = await this.prismaService.interview.findUnique({
+            where: {
+                id,
+                application: {
+                    post: {
+                        company: {
+                            accountId,
+                            isActive: true,
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!interview) throw new BadRequestException(Error.INTERVIEW_NOT_FOUND);
+
+        return await this.applicationCompanyService.getDetailTeamMember(accountId, interview.applicationId, memberId);
+    }
 }
