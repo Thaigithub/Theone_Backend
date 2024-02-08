@@ -550,4 +550,126 @@ export class ApplicationCompanyService {
             status: team.status,
         };
     }
+
+    async getDetailTeamMember(
+        accountId: number,
+        id: number,
+        memberId: number,
+    ): Promise<ApplicationCompanyGetDetailMemberResponse> {
+        const member = await this.prismaService.application.findFirst({
+            where: {
+                id: id,
+                team: {
+                    OR: [
+                        {
+                            members: {
+                                some: {
+                                    memberId: memberId,
+                                },
+                            },
+                        },
+                        {
+                            leaderId: memberId,
+                        },
+                    ],
+                },
+
+                post: {
+                    company: {
+                        accountId: accountId,
+                    },
+                },
+            },
+            select: {
+                memberId: true,
+                status: true,
+            },
+        });
+        if (!member) {
+            throw new NotFoundException(Error.MEMBER_NOT_FOUND);
+        }
+        const memberInfor = await this.prismaService.member.findUnique({
+            where: {
+                id: memberId,
+            },
+            include: {
+                region: true,
+                account: true,
+                careers: {
+                    include: {
+                        code: true,
+                    },
+                },
+                licenses: {
+                    where: {
+                        isActive: true,
+                    },
+                    include: {
+                        code: true,
+                    },
+                },
+                basicHealthSafetyCertificate: {
+                    select: {
+                        registrationNumber: true,
+                        dateOfCompletion: true,
+                        file: true,
+                    },
+                },
+            },
+        });
+
+        return {
+            id: member.memberId,
+            name: memberInfor.name,
+            username: memberInfor.account.username,
+            contact: memberInfor.contact,
+            email: memberInfor.email,
+            city: {
+                englishName: memberInfor.region?.cityEnglishName || null,
+                koreanName: memberInfor.region?.cityKoreanName || null,
+            },
+            district: {
+                englishName: memberInfor.region?.districtEnglishName || null,
+                koreanName: memberInfor.region?.districtKoreanName || null,
+            },
+            desiredSalary: memberInfor.desiredSalary,
+            totalExperienceMonths: memberInfor.totalExperienceMonths,
+            totalExperienceYears: memberInfor.totalExperienceYears,
+            careers: memberInfor.careers.map((item) => {
+                return {
+                    startDate: item.startDate,
+                    endDate: item.endDate,
+                    companyName: item.companyName,
+                    siteName: item.siteName,
+                    occupation: item.code ? item.code.name : null,
+                };
+            }),
+            licenses: memberInfor.licenses.map((item) => {
+                return {
+                    id: item.id,
+                    codeName: item.code ? item.code.name : null,
+                    licenseNumber: item.licenseNumber,
+                };
+            }),
+            basicHealthSafetyCertificate: {
+                registrationNumber: memberInfor.basicHealthSafetyCertificate
+                    ? memberInfor.basicHealthSafetyCertificate.registrationNumber
+                    : null,
+                dateOfCompletion: memberInfor.basicHealthSafetyCertificate
+                    ? memberInfor.basicHealthSafetyCertificate.dateOfCompletion
+                    : null,
+                file: {
+                    fileName: memberInfor.basicHealthSafetyCertificate
+                        ? memberInfor.basicHealthSafetyCertificate.file.fileName
+                        : null,
+                    type: memberInfor.basicHealthSafetyCertificate ? memberInfor.basicHealthSafetyCertificate.file.type : null,
+                    key: memberInfor.basicHealthSafetyCertificate ? memberInfor.basicHealthSafetyCertificate.file.key : null,
+                    size: memberInfor.basicHealthSafetyCertificate
+                        ? Number(memberInfor.basicHealthSafetyCertificate.file.size)
+                        : null,
+                },
+            },
+            status: member.status,
+        };
+    }
 }
