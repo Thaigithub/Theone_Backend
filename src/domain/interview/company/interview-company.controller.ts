@@ -42,13 +42,12 @@ export class InterviewCompanyController {
         return BaseResponse.of(await this.interviewCompanyService.getDetailTeam(request.user.accountId, id));
     }
 
-    @Get('/:id/team/member/:memberId')
+    @Get('/member/:memberId')
     async getDetailTeamMember(
         @Req() request: BaseRequest,
-        @Param('id', ParseIntPipe) id: number,
         @Param('memberId', ParseIntPipe) memberId: number,
     ): Promise<BaseResponse<ApplicationCompanyGetDetailMemberResponse>> {
-        return BaseResponse.of(await this.interviewCompanyService.getDetailTeamMember(request.user.accountId, id, memberId));
+        return BaseResponse.of(await this.interviewCompanyService.getDetailTeamMember(request.user.accountId, memberId));
     }
 
     @Patch('/:id/status')

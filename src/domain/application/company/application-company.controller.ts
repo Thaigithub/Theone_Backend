@@ -57,13 +57,12 @@ export class ApplicationCompanyController {
         return BaseResponse.of(await this.applicationCompanyService.getDetailTeam(request.user.accountId, id));
     }
 
-    @Get('/:id/team/member/:memberId')
+    @Get('/member/:memberId')
     async getDetailTeamMember(
         @Req() request: BaseRequest,
-        @Param('id', ParseIntPipe) id: number,
         @Param('memberId', ParseIntPipe) memberId: number,
     ): Promise<BaseResponse<ApplicationCompanyGetDetailMemberResponse>> {
-        return BaseResponse.of(await this.applicationCompanyService.getDetailTeamMember(request.user.accountId, id, memberId));
+        return BaseResponse.of(await this.applicationCompanyService.getDetailTeamMember(request.user.accountId, memberId));
     }
 
     @Patch('/:id/status')

@@ -673,18 +673,27 @@ export class InterviewCompanyService {
         });
     }
 
-    async getDetailTeamMember(
-        accountId: number,
-        id: number,
-        memberId: number,
-    ): Promise<ApplicationCompanyGetDetailMemberResponse> {
-        const interview = await this.prismaService.interview.findUnique({
+    async getDetailTeamMember(accountId: number, memberId: number): Promise<ApplicationCompanyGetDetailMemberResponse> {
+        const interview = await this.prismaService.interview.findFirst({
             where: {
-                id,
                 application: {
+                    team: {
+                        OR: [
+                            {
+                                members: {
+                                    some: {
+                                        memberId: memberId,
+                                    },
+                                },
+                            },
+                            {
+                                leaderId: memberId,
+                            },
+                        ],
+                    },
                     post: {
                         company: {
-                            accountId,
+                            accountId: accountId,
                             isActive: true,
                         },
                     },
@@ -694,6 +703,6 @@ export class InterviewCompanyService {
 
         if (!interview) throw new BadRequestException(Error.INTERVIEW_NOT_FOUND);
 
-        return await this.applicationCompanyService.getDetailTeamMember(accountId, interview.applicationId, memberId);
+        return await this.applicationCompanyService.getDetailTeamMember(accountId, memberId);
     }
 }

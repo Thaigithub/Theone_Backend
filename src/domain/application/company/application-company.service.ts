@@ -551,14 +551,9 @@ export class ApplicationCompanyService {
         };
     }
 
-    async getDetailTeamMember(
-        accountId: number,
-        id: number,
-        memberId: number,
-    ): Promise<ApplicationCompanyGetDetailMemberResponse> {
+    async getDetailTeamMember(accountId: number, memberId: number): Promise<ApplicationCompanyGetDetailMemberResponse> {
         const member = await this.prismaService.application.findFirst({
             where: {
-                id: id,
                 team: {
                     OR: [
                         {
@@ -573,10 +568,10 @@ export class ApplicationCompanyService {
                         },
                     ],
                 },
-
                 post: {
                     company: {
                         accountId: accountId,
+                        isActive: true,
                     },
                 },
             },
