@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
 export class TermAdminUpdateRequest {
     @Expose()
@@ -13,4 +13,12 @@ export class TermAdminUpdateRequest {
     @IsString()
     @IsNotEmpty()
     content: string;
+
+    @Expose()
+    @IsDateString()
+    @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+        message: 'Date must be in the format yyyy-mm-dd.',
+    })
+    @IsNotEmpty()
+    revisionDate: string;
 }

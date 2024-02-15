@@ -11,24 +11,48 @@ export class TermMemberService {
     constructor(private prismaService: PrismaService) {}
 
     async getList(query: TermMemberGetListRequest): Promise<TermMemberGetListResponse> {
-        const queryFilter: Prisma.TermWhereInput = {
-            isActive: true,
+        const search = {
+            select: {
+                title: true,
+                terms: {
+                    select: {
+                        id: true,
+                        content: true,
+                        revisionDate: true,
+                    },
+                    where: {
+                        isActive: true,
+                    },
+                    orderBy: {
+                        revisionDate: Prisma.SortOrder.desc,
+                    },
+                    take: 1,
+                },
+            },
+            where: {
+                isActive: true,
+                terms: {
+                    some: {
+                        isActive: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: Prisma.SortOrder.asc,
+            },
+            ...QueryPagingHelper.queryPaging(query),
         };
-        const list = (
-            await this.prismaService.term.findMany({
-                where: queryFilter,
-                ...QueryPagingHelper.queryPaging(query),
-            })
-        ).map((item) => {
+
+        const terms = (await this.prismaService.term.findMany(search)).map((item) => {
             return {
-                id: item.id,
+                id: item.terms[0].id,
                 title: item.title,
-                content: item.content,
+                content: item.terms[0].content,
+                revisionDate: item.terms[0].revisionDate,
             };
         });
-        const total = await this.prismaService.term.count({
-            where: queryFilter,
-        });
-        return new PaginationResponse(list, new PageInfo(total));
+        const total = await this.prismaService.term.count({ where: search.where });
+
+        return new PaginationResponse(terms, new PageInfo(total));
     }
 }
