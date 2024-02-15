@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BannerType, Prisma, RequestBannerStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { BannerCompanyBannerStatus } from './enum/banner-company-banner-status.enum';
@@ -9,7 +10,6 @@ import { BannerCompanyGetListRequestRequest } from './request/banner-company-get
 import { BannerCompanyUpsertRequestRequest } from './request/banner-company-upsert.request';
 import { BannerCompanyGetDetailRequestResponse } from './response/banner-company-get-detail-request.response';
 import { BannerCompanyGetListRequestResponse } from './response/banner-company-get-list-request.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class BannerCompanyService {
@@ -18,58 +18,79 @@ export class BannerCompanyService {
         accountId: number,
         query: BannerCompanyGetListRequestRequest,
     ): Promise<BannerCompanyGetListRequestResponse> {
-        const search = {
-            ...QueryPagingHelper.queryPaging(query),
-            select: {
-                status: true,
-                requestDate: true,
-                id: true,
-                postBanner: {
-                    select: {
+        const queryFilter: Prisma.BannerRequestWhereInput = {
+            company: {
+                accountId,
+            },
+            isActive: true,
+            OR: [
+                {
+                    postBanner: {
                         post: {
-                            select: {
-                                name: true,
-                                site: {
-                                    select: {
-                                        name: true,
+                            isActive: true,
+                        },
+                        banner: {
+                            isActive: true,
+                        },
+                    },
+                },
+                {
+                    advertisingBanner: {
+                        banner: {
+                            isActive: true,
+                        },
+                    },
+                },
+            ],
+        };
+        const banner = (
+            await this.prismaService.bannerRequest.findMany({
+                where: queryFilter,
+                select: {
+                    status: true,
+                    requestDate: true,
+                    id: true,
+                    postBanner: {
+                        select: {
+                            post: {
+                                select: {
+                                    name: true,
+                                    site: {
+                                        select: {
+                                            name: true,
+                                        },
                                     },
                                 },
                             },
+                            banner: {
+                                select: {
+                                    startDate: true,
+                                    endDate: true,
+                                    status: true,
+                                },
+                            },
                         },
-                        banner: {
-                            select: {
-                                startDate: true,
-                                endDate: true,
-                                status: true,
+                    },
+                    advertisingBanner: {
+                        select: {
+                            urlLink: true,
+                            title: true,
+                            banner: {
+                                select: {
+                                    startDate: true,
+                                    endDate: true,
+                                    status: true,
+                                },
                             },
                         },
                     },
                 },
-                advertisingBanner: {
-                    select: {
-                        urlLink: true,
-                        title: true,
-                        banner: {
-                            select: {
-                                startDate: true,
-                                endDate: true,
-                                status: true,
-                            },
-                        },
-                    },
+                ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    requestDate: Prisma.SortOrder.desc,
                 },
-            },
-            where: {
-                company: {
-                    accountId,
-                },
-                isActive: true,
-            },
-            orderBy: {
-                requestDate: Prisma.SortOrder.desc,
-            },
-        };
-        const banner = (await this.prismaService.bannerRequest.findMany(search)).map((item) => {
+            })
+        ).map((item) => {
             let status = null;
             if (item.status === RequestBannerStatus.DENY) status = BannerCompanyBannerStatus.REJECT;
             if (item.status === RequestBannerStatus.PENDING) status = BannerCompanyBannerStatus.WAITING_FOR_APPROVAL;
@@ -115,7 +136,7 @@ export class BannerCompanyService {
                 };
             }
         });
-        const total = await this.prismaService.bannerRequest.count({ where: search.where });
+        const total = await this.prismaService.bannerRequest.count({ where: queryFilter });
         return new PaginationResponse(banner, new PageInfo(total));
     }
 
@@ -190,6 +211,25 @@ export class BannerCompanyService {
                     accountId,
                 },
                 isActive: true,
+                OR: [
+                    {
+                        advertisingBanner: {
+                            banner: {
+                                isActive: true,
+                            },
+                        },
+                    },
+                    {
+                        postBanner: {
+                            post: {
+                                isActive: true,
+                            },
+                            banner: {
+                                isActive: true,
+                            },
+                        },
+                    },
+                ],
             },
             select: {
                 detail: true,

@@ -59,63 +59,63 @@ export class BannerAdminService {
     }
 
     async getListAdvertising(query: BannerAdminGetListAdvertisingRequest): Promise<BannerAdminGetListAdvertisingResponse> {
-        const search = {
-            where: {
-                banner: {
-                    isActive: true,
-                    status: query.status,
-                    startDate: query.startDate && new Date(query.startDate),
-                    endDate: query.endDate && new Date(query.endDate),
-                },
-                title:
-                    query.category &&
-                    (query.category === BannerAdminAdvertisingSearchCategory.TITLE
-                        ? {
-                              contains: query.keyword,
-                              mode: Prisma.QueryMode.insensitive,
-                          }
-                        : undefined),
-                urlLink:
-                    query.category &&
-                    (query.category === BannerAdminAdvertisingSearchCategory.URL
-                        ? {
-                              contains: query.keyword,
-                              mode: Prisma.QueryMode.insensitive,
-                          }
-                        : undefined),
-                OR: [
-                    {
-                        type: BannerType.ADMIN,
+        const queryFilter: Prisma.AdvertisingBannerWhereInput = {
+            banner: {
+                isActive: true,
+                status: query.status,
+                startDate: query.startDate && new Date(query.startDate),
+                endDate: query.endDate && new Date(query.endDate),
+            },
+            ...(query.keyword &&
+                query.category === BannerAdminAdvertisingSearchCategory.TITLE && {
+                    title: {
+                        contains: query.keyword,
+                        mode: Prisma.QueryMode.insensitive,
                     },
-                    {
-                        type: BannerType.COMPANY,
-                        request: {
-                            status: RequestBannerStatus.APPROVED,
+                }),
+            ...(query.keyword &&
+                query.category === BannerAdminAdvertisingSearchCategory.URL && {
+                    url: {
+                        contains: query.keyword,
+                        mode: Prisma.QueryMode.insensitive,
+                    },
+                }),
+            OR: [
+                {
+                    type: BannerType.ADMIN,
+                },
+                {
+                    type: BannerType.COMPANY,
+                    request: {
+                        status: RequestBannerStatus.APPROVED,
+                    },
+                },
+            ],
+        };
+        const banners = (
+            await this.prismaService.advertisingBanner.findMany({
+                where: queryFilter,
+                select: {
+                    banner: {
+                        select: {
+                            status: true,
+                            file: true,
+                            startDate: true,
+                            endDate: true,
+                            createdAt: true,
                         },
                     },
-                ],
-            },
-            ...QueryPagingHelper.queryPaging(query),
-            select: {
-                banner: {
-                    select: {
-                        status: true,
-                        file: true,
-                        startDate: true,
-                        endDate: true,
-                        createdAt: true,
-                    },
+                    id: true,
+                    title: true,
+                    urlLink: true,
+                    priority: true,
                 },
-                id: true,
-                title: true,
-                urlLink: true,
-                priority: true,
-            },
-            orderBy: {
-                priority: Prisma.SortOrder.asc,
-            },
-        };
-        const banners = (await this.prismaService.advertisingBanner.findMany(search)).map((item) => {
+                ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    priority: Prisma.SortOrder.asc,
+                },
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 file: {
@@ -133,75 +133,75 @@ export class BannerAdminService {
                 priority: item.priority,
             };
         });
-        const total = await this.prismaService.advertisingBanner.count({ where: search.where });
+        const total = await this.prismaService.advertisingBanner.count({ where: queryFilter });
         return new PaginationResponse(banners, new PageInfo(total));
     }
 
     async getListAdvertisingRequest(
         query: BannerAdminGetListAdvertisingRequestRequest,
     ): Promise<BannerAdminGetListAdvertisingRequestResponse> {
-        const querySearch = {
-            where: {
-                banner: {
-                    isActive: true,
-                    createdAt: query.requestDate && new Date(query.requestDate),
-                },
-                title:
-                    query.category &&
-                    (query.category === BannerAdminAdvertisingSearchCategory.TITLE
-                        ? {
-                              contains: query.keyword,
-                              mode: Prisma.QueryMode.insensitive,
-                          }
-                        : undefined),
-                urlLink:
-                    query.category &&
-                    (query.category === BannerAdminAdvertisingSearchCategory.URL
-                        ? {
-                              contains: query.keyword,
-                              mode: Prisma.QueryMode.insensitive,
-                          }
-                        : undefined),
-                type: BannerType.COMPANY,
-                request: {
-                    isActive: true,
-                    company: {
-                        name:
-                            query.category &&
-                            (query.category === BannerAdminAdvertisingSearchCategory.COMPANY
-                                ? {
-                                      contains: query.keyword,
-                                      mode: Prisma.QueryMode.insensitive,
-                                  }
-                                : undefined),
-                    },
-                },
+        const queryFilter: Prisma.AdvertisingBannerWhereInput = {
+            banner: {
+                isActive: true,
+                createdAt: query.requestDate && new Date(query.requestDate),
             },
-            ...QueryPagingHelper.queryPaging(query),
-            select: {
-                banner: {
-                    select: {
-                        file: true,
+            ...(query.keyword &&
+                query.category === BannerAdminAdvertisingSearchCategory.TITLE && {
+                    title: {
+                        contains: query.keyword,
+                        mode: Prisma.QueryMode.insensitive,
                     },
-                },
-                request: {
-                    select: {
-                        acceptDate: true,
-                        id: true,
-                        requestDate: true,
-                        status: true,
+                }),
+            ...(query.keyword &&
+                query.category === BannerAdminAdvertisingSearchCategory.URL && {
+                    urlLink: {
+                        contains: query.keyword,
+                        mode: Prisma.QueryMode.insensitive,
                     },
-                },
-                title: true,
-            },
-            orderBy: {
-                banner: {
-                    createdAt: Prisma.SortOrder.desc,
+                }),
+            type: BannerType.COMPANY,
+            request: {
+                isActive: true,
+                company: {
+                    isActive: true,
+                    ...(query.keyword &&
+                        query.category === BannerAdminAdvertisingSearchCategory.COMPANY && {
+                            name: {
+                                contains: query.keyword,
+                                mode: Prisma.QueryMode.insensitive,
+                            },
+                        }),
                 },
             },
         };
 
-        const search = (await this.prismaService.advertisingBanner.findMany(querySearch)).map((item) => {
+        const search = (
+            await this.prismaService.advertisingBanner.findMany({
+                where: queryFilter,
+                select: {
+                    banner: {
+                        select: {
+                            file: true,
+                        },
+                    },
+                    request: {
+                        select: {
+                            acceptDate: true,
+                            id: true,
+                            requestDate: true,
+                            status: true,
+                        },
+                    },
+                    title: true,
+                },
+                ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    banner: {
+                        createdAt: Prisma.SortOrder.desc,
+                    },
+                },
+            })
+        ).map((item) => {
             return {
                 id: item.request.id,
                 title: item.title,
@@ -216,7 +216,7 @@ export class BannerAdminService {
                 status: item.request.status,
             };
         });
-        const total = await this.prismaService.advertisingBanner.count({ where: querySearch.where });
+        const total = await this.prismaService.advertisingBanner.count({ where: queryFilter });
         return new PaginationResponse(search, new PageInfo(total));
     }
 
@@ -445,61 +445,63 @@ export class BannerAdminService {
     }
 
     async getListPost(query: BannerAdminGetListPostRequest): Promise<BannerAdminGetListPostResponse> {
-        const search = {
-            where: {
-                banner: {
-                    isActive: true,
-                    status: query.status,
-                    startDate: query.startDate && new Date(query.startDate),
-                    endDate: query.endDate && new Date(query.endDate),
+        const queryFilter: Prisma.PostBannerWhereInput = {
+            banner: {
+                isActive: true,
+                status: query.status,
+                startDate: query.startDate && new Date(query.startDate),
+                endDate: query.endDate && new Date(query.endDate),
+            },
+            post: {
+                isActive: true,
+                ...(query.keyword &&
+                    query.category === BannerAdminAdvertisingSearchCategory.TITLE && {
+                        name: {
+                            contains: query.keyword,
+                            mode: Prisma.QueryMode.insensitive,
+                        },
+                    }),
+            },
+            OR: [
+                {
+                    type: BannerType.ADMIN,
                 },
-                post: {
-                    name:
-                        query.category &&
-                        (query.category === BannerAdminAdvertisingSearchCategory.TITLE
-                            ? {
-                                  contains: query.keyword,
-                                  mode: Prisma.QueryMode.insensitive,
-                              }
-                            : undefined),
-                },
-                OR: [
-                    {
-                        type: BannerType.ADMIN,
+                {
+                    type: BannerType.COMPANY,
+                    request: {
+                        status: RequestBannerStatus.APPROVED,
                     },
-                    {
-                        type: BannerType.COMPANY,
-                        request: {
-                            status: RequestBannerStatus.APPROVED,
+                },
+            ],
+        };
+        const result = (
+            await this.prismaService.postBanner.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    priority: true,
+                    postId: true,
+                    post: {
+                        select: {
+                            name: true,
                         },
                     },
-                ],
-            },
-            ...QueryPagingHelper.queryPaging(query),
-            select: {
-                id: true,
-                priority: true,
-                postId: true,
-                post: {
-                    select: {
-                        name: true,
+                    banner: {
+                        select: {
+                            startDate: true,
+                            endDate: true,
+                            status: true,
+                            file: true,
+                            createdAt: true,
+                        },
                     },
                 },
-                banner: {
-                    select: {
-                        startDate: true,
-                        endDate: true,
-                        status: true,
-                        file: true,
-                        createdAt: true,
-                    },
+                ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    priority: Prisma.SortOrder.asc,
                 },
-            },
-            orderBy: {
-                priority: Prisma.SortOrder.asc,
-            },
-        };
-        const result = (await this.prismaService.postBanner.findMany(search)).map((item) => {
+            })
+        ).map((item) => {
             return {
                 id: item.id,
                 postName: item.post.name,
@@ -516,75 +518,77 @@ export class BannerAdminService {
                 priority: item.priority,
             };
         });
-        const total = await this.prismaService.postBanner.count({ where: search.where });
+        const total = await this.prismaService.postBanner.count({ where: queryFilter });
         return new PaginationResponse(result, new PageInfo(total));
     }
 
     async getListPostRequest(query: BannerAdminGetListPostRequestRequest): Promise<BannerAdminGetListPostRequestResponse> {
-        const querySearch = {
-            ...QueryPagingHelper.queryPaging(query),
-            where: {
-                banner: {
-                    isActive: true,
-                    createdAt: query.requestDate && new Date(query.requestDate),
-                },
-                type: BannerType.COMPANY,
-                post: {
-                    name:
-                        query.category &&
-                        (query.category === BannerAdminPostSearchCategory.POST
-                            ? {
-                                  contains: query.keyword,
-                                  mode: Prisma.QueryMode.insensitive,
-                              }
-                            : undefined),
-                    site: {
-                        name:
-                            query.category &&
-                            (query.category === BannerAdminPostSearchCategory.SITE
-                                ? {
-                                      contains: query.keyword,
-                                      mode: Prisma.QueryMode.insensitive,
-                                  }
-                                : undefined),
-                    },
-                },
-                request: {
-                    isActive: true,
-                    company: {
-                        name:
-                            query.category &&
-                            (query.category === BannerAdminPostSearchCategory.COMPANY
-                                ? {
-                                      contains: query.keyword,
-                                      mode: Prisma.QueryMode.insensitive,
-                                  }
-                                : undefined),
-                    },
-                },
+        const queryFilter: Prisma.PostBannerWhereInput = {
+            banner: {
+                isActive: true,
+                createdAt: query.requestDate && new Date(query.requestDate),
             },
-            select: {
-                request: {
-                    select: {
-                        id: true,
-                        requestDate: true,
-                        status: true,
-                        acceptDate: true,
-                    },
-                },
-                post: {
-                    select: {
-                        name: true,
-                    },
-                },
-                banner: {
-                    select: {
-                        file: true,
-                    },
-                },
+            type: BannerType.COMPANY,
+            post: {
+                isActive: true,
+                ...(query.keyword &&
+                    query.category === BannerAdminPostSearchCategory.POST && {
+                        name: {
+                            contains: query.keyword,
+                            mode: Prisma.QueryMode.insensitive,
+                        },
+                    }),
+                ...(query.keyword &&
+                    query.category === BannerAdminPostSearchCategory.SITE && {
+                        site: {
+                            isActive: true,
+                            name: {
+                                contains: query.keyword,
+                                mode: Prisma.QueryMode.insensitive,
+                            },
+                        },
+                    }),
+            },
+            request: {
+                isActive: true,
+                ...(query.keyword &&
+                    query.category === BannerAdminPostSearchCategory.COMPANY && {
+                        company: {
+                            isActive: true,
+                            name: {
+                                contains: query.keyword,
+                                mode: Prisma.QueryMode.insensitive,
+                            },
+                        },
+                    }),
             },
         };
-        const search = (await this.prismaService.postBanner.findMany(querySearch)).map((item) => {
+        const search = (
+            await this.prismaService.postBanner.findMany({
+                where: queryFilter,
+                select: {
+                    request: {
+                        select: {
+                            id: true,
+                            requestDate: true,
+                            status: true,
+                            acceptDate: true,
+                        },
+                    },
+                    post: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    banner: {
+                        select: {
+                            file: true,
+                        },
+                    },
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 id: item.request.id,
                 postName: item.post.name,
@@ -599,7 +603,7 @@ export class BannerAdminService {
                 acceptDate: item.request.acceptDate,
             };
         });
-        const total = await this.prismaService.postBanner.count({ where: querySearch.where });
+        const total = await this.prismaService.postBanner.count({ where: queryFilter });
         return new PaginationResponse(search, new PageInfo(total));
     }
 
@@ -635,9 +639,12 @@ export class BannerAdminService {
     }
 
     async getDetailPost(id: number): Promise<BannerAdminGetDetailPostResponse> {
-        const count = await this.prismaService.postBanner.count({
+        const banner = await this.prismaService.postBanner.findUnique({
             where: {
                 id,
+                post: {
+                    isActive: true,
+                },
                 banner: { isActive: true },
                 OR: [
                     {
@@ -651,10 +658,6 @@ export class BannerAdminService {
                     },
                 ],
             },
-        });
-        if (count === 0) throw new NotFoundException(Error.BANNER_NOT_FOUND);
-        const banner = await this.prismaService.postBanner.findUnique({
-            where: { id },
             select: {
                 post: {
                     select: {
@@ -663,7 +666,6 @@ export class BannerAdminService {
                         id: true,
                     },
                 },
-                postId: true,
                 banner: {
                     select: {
                         file: {
@@ -682,6 +684,7 @@ export class BannerAdminService {
                 },
             },
         });
+        if (!banner) throw new NotFoundException(Error.BANNER_NOT_FOUND);
         return {
             postBanner: {
                 postName: banner.post.name,
@@ -739,7 +742,7 @@ export class BannerAdminService {
     }
 
     async getDetailPostRequest(id: number): Promise<BannerAdminGetDetailPostRequestResponse> {
-        const count = await this.prismaService.bannerRequest.count({
+        const banner = await this.prismaService.bannerRequest.findUnique({
             where: {
                 id,
                 postBanner: {
@@ -749,10 +752,6 @@ export class BannerAdminService {
                     },
                 },
             },
-        });
-        if (count === 0) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
-        const banner = await this.prismaService.bannerRequest.findUnique({
-            where: { id },
             select: {
                 postBanner: {
                     select: {
@@ -793,6 +792,7 @@ export class BannerAdminService {
                 },
             },
         });
+        if (!banner) throw new NotFoundException(Error.BANNER_REQUEST_NOT_FOUND);
         return {
             request: {
                 companyName: banner.postBanner.request.company.name,
