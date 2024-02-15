@@ -79,6 +79,9 @@ export class BannerMemberService {
                             isActive: true,
                             status: BannerStatus.EXPOSE,
                         },
+                        post: {
+                            isActive: true,
+                        },
                     },
                     orderBy: {
                         priority: 'asc',
