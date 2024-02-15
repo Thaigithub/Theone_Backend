@@ -1,7 +1,8 @@
-import { Term } from '@prisma/client';
+import { Term, TermVersion } from '@prisma/client';
 
 export class TermAdminGetDetailResponse {
-    id: Term['id'];
+    id: TermVersion['id'];
     title: Term['title'];
-    content: Term['content'];
+    content: TermVersion['content'];
+    revisionDate: TermVersion['revisionDate'];
 }

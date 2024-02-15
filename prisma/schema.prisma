@@ -1220,14 +1220,27 @@ model LaborConsultationFile {
 }
 
 model Term {
-  id        Int      @id @default(autoincrement())
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        Int           @id @default(autoincrement())
+  isActive  Boolean       @default(true) @map("is_active")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
   title     String
-  content   String
+  terms     TermVersion[]
 
   @@map("terms")
+}
+
+model TermVersion {
+  id           Int      @id @default(autoincrement())
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  revisionDate DateTime @map("revision_date")
+  content      String
+  termId       Int      @map("term_id")
+  term         Term     @relation(fields: [termId], references: [id])
+
+  @@map("term_versions")
 }
 
 model Memo {
