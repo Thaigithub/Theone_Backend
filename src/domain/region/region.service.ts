@@ -21,34 +21,46 @@ export class RegionService {
                     cityId: true,
                 },
             })
-        ).reduce((result: RegionGetListResponse[], current) => {
-            if (result.some((item) => item.id === current.cityId)) {
-                const elementToUpdate = result.find((element) => element.id === current.cityId);
-                if (elementToUpdate) {
-                    elementToUpdate.district.push({
-                        id: current.id,
-                        englishName: current.districtEnglishName,
-                        koreanName: current.districtKoreanName,
-                        cityId: current.cityId,
-                    });
-                }
-            } else {
-                result.push({
-                    id: current.cityId,
-                    englishName: current.cityEnglishName,
-                    koreanName: current.cityKoreanName,
-                    district: [
-                        {
+        )
+            .reduce((result: RegionGetListResponse[], current) => {
+                if (result.some((item) => item.id === current.cityId)) {
+                    const elementToUpdate = result.find((element) => element.id === current.cityId);
+                    if (elementToUpdate) {
+                        elementToUpdate.district.push({
                             id: current.id,
                             englishName: current.districtEnglishName,
                             koreanName: current.districtKoreanName,
                             cityId: current.cityId,
-                        },
-                    ],
-                } as RegionGetListResponse);
-            }
-            return result;
-        }, []);
+                        });
+                    }
+                } else {
+                    result.push({
+                        id: current.cityId,
+                        englishName: current.cityEnglishName,
+                        koreanName: current.cityKoreanName,
+                        district: [
+                            {
+                                id: current.id,
+                                englishName: current.districtEnglishName,
+                                koreanName: current.districtKoreanName,
+                                cityId: current.cityId,
+                            },
+                        ],
+                    } as RegionGetListResponse);
+                }
+                return result;
+            }, [])
+            .map((item) => {
+                item.district = item.district.sort((a, b) => {
+                    if (b.englishName === 'All') {
+                        return 1;
+                    } else if (a.englishName === 'All') {
+                        return -1;
+                    }
+                    return 0;
+                });
+                return item;
+            });
         return cities;
     }
 

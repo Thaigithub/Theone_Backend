@@ -290,7 +290,7 @@ export class InterviewCompanyService {
     }
 
     async create(body: InterviewCompanyProposeRequest, accountId: number): Promise<void> {
-        const postExist = await this.prismaService.post.count({
+        const postExist = await this.prismaService.post.findUnique({
             where: {
                 isActive: true,
                 id: body.postId,
@@ -341,9 +341,10 @@ export class InterviewCompanyService {
                         },
                     });
 
-                    if (!record) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
+                    if (!record && body.category === ApplicationCategory.NORMAL)
+                        throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
 
-                    if (record.status !== PostApplicationStatus.APPLY) {
+                    if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
 
@@ -382,7 +383,7 @@ export class InterviewCompanyService {
                                     },
                                 },
                             });
-                            if (count === 0) {
+                            if (count === 0 && body.category !== ApplicationCategory.MANPOWER) {
                                 const countMatching = await prisma.post.count({
                                     where: {
                                         id: body.postId,
@@ -396,9 +397,10 @@ export class InterviewCompanyService {
                                             id: body.postId,
                                             category: ApplicationCategory.HEADHUNTING,
                                         },
+                                        isActive: true,
                                     },
                                 });
-                                if (countHeadhunting === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                                if (countHeadhunting !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             }
                             break;
                         }
