@@ -6,7 +6,6 @@ import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { StorageService } from 'services/storage/storage.service';
 import { Error } from 'utils/error.enum';
-import { BaseResponse } from 'utils/generics/base.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PostMemberGetListPremiumRequest } from './request/post-member-get-list-premium.request';
@@ -15,6 +14,7 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 
 @Injectable()
 export class PostMemberService {
@@ -23,6 +23,7 @@ export class PostMemberService {
         private regionService: RegionService,
         private storageService: StorageService,
         private notificationMemberService: NotificationMemberService,
+        private notificationCompanyService: NotificationCompanyService,
     ) {}
 
     async getList(
@@ -296,7 +297,7 @@ export class PostMemberService {
         };
     }
 
-    async addApplyPostMember(accountId: number, id: number) {
+    async addApplyPostMember(accountId: number, id: number): Promise<void> {
         const account = await this.prismaService.account.findUnique({
             where: {
                 id: accountId,
@@ -321,6 +322,11 @@ export class PostMemberService {
             select: {
                 id: true,
                 name: true,
+                company: {
+                    select: {
+                        accountId: true,
+                    }
+                }
             }
         });
         if (!post) {
@@ -346,6 +352,13 @@ export class PostMemberService {
         });
         this.notificationMemberService.create(
             accountId,
+            post.name + ' 을(를) 신청하셨습니다.',
+            '',
+            NotificationType.POST,
+            id,
+        );
+        this.notificationCompanyService.create(
+            post.company.accountId,
             account.member.name + ' ' + post.name + ' 공고에 지원했습니다.',
             '',
             NotificationType.POST,
@@ -353,7 +366,7 @@ export class PostMemberService {
         );
     }
 
-    async addApplyPostTeam(accountId: number, postId: number, teamId: number) {
+    async addApplyPostTeam(accountId: number, postId: number, teamId: number): Promise<void> {
         const isTeamLeader = await this.prismaService.team.findUnique({
             where: {
                 leader: {
@@ -365,7 +378,9 @@ export class PostMemberService {
                 name: true,
             }
         });
-        if (!isTeamLeader) return BaseResponse.error('You are not leader of this team');
+        if (!isTeamLeader) {
+            throw new BadRequestException(Error.PERMISSION_DENIED);
+        };
         //Check exist post
         const post = await this.prismaService.post.findUnique({
             where: {
@@ -395,12 +410,13 @@ export class PostMemberService {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
 
-        const newApplication = await this.prismaService.application.create({
+        await this.prismaService.application.create({
             data: {
                 team: { connect: { id: teamId } },
                 post: { connect: { id: postId } },
             },
         });
+        
         await this.notificationMemberService.create(
             accountId,
             isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.',
@@ -408,9 +424,13 @@ export class PostMemberService {
             NotificationType.POST,
             postId,
         );
-        const memberOnTeams = await this.prismaService.membersOnTeams.findMany({
+        const memberOnTeams = (await this.prismaService.membersOnTeams.findMany({
             where: {
                 teamId,
+                isActive: true,
+                member: {
+                    isActive: true,
+                }
             },
             select: {
                 member: {
@@ -419,18 +439,16 @@ export class PostMemberService {
                     }
                 }
             }
-        });
+        })).map((item) => item.member.accountId);
         memberOnTeams.forEach(async (item)=> {
             await this.notificationMemberService.create(
-                item.member.accountId, 
+                item, 
                 isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.', 
                 '', 
                 NotificationType.POST, 
                 postId
             );
         });
-
-        return BaseResponse.of(newApplication);
     }
 
     async updateInterest(accountId: number, id: number): Promise<PostMemberUpdateInterestResponse> {
