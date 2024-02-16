@@ -256,10 +256,10 @@ export class AccountCompanyService {
                         },
                         contactCard: {
                             update: {
-                                fileName: body.logo.fileName,
-                                type: body.logo.type,
-                                size: body.logo.size,
-                                key: body.logo.key,
+                                fileName: body.contactCard.fileName,
+                                type: body.contactCard.type,
+                                size: body.contactCard.size,
+                                key: body.contactCard.key,
                             },
                         },
                     },

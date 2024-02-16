@@ -3,6 +3,7 @@ import { AnswerStatus, InquirerType, NotificationType, Prisma } from '@prisma/cl
 import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
 import { LaborConsultationAdminGetListCategory } from './enum/labor-consultation-admin-get-list-category.enum';
@@ -10,7 +11,6 @@ import { LaborConsultationAdminAnswerRequest } from './request/labor-consultatio
 import { LaborConsultationAdminGetListRequest } from './request/labor-consultation-admin-get-list.request';
 import { LaborConsultationAdminGetDetailResponse } from './response/labor-consultation-admin-get-detail.response';
 import { LaborConsultationAdminGetListResponse } from './response/labor-consultation-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborConsultationAdminService {
@@ -166,7 +166,7 @@ export class LaborConsultationAdminService {
                     size: Number(item.questionFile.size),
                 };
             }),
-            asnweredAt: laborConsultation.answeredAt,
+            answeredAt: laborConsultation.answeredAt,
             answerTitle: laborConsultation.answerTitle,
             answerContent: laborConsultation.answerContent,
             answerFiles: laborConsultation.answerFiles.map((item) => {
@@ -203,33 +203,39 @@ export class LaborConsultationAdminService {
         if (!laborConsultation) throw new NotFoundException(Error.LABOR_CONSULTATION_NOT_FOUND);
 
         await this.prismaService.$transaction(async (tx) => {
-            await tx.file.updateMany({
+            await tx.file.deleteMany({
                 where: {
+                    key: {
+                        notIn: body.files.map((item) => item.key),
+                    },
                     answerLaborConsultationFile: {
                         answerLaborConsultationId: id,
                     },
                 },
-                data: {
-                    isActive: false,
-                },
             });
 
-            await tx.laborConsultationFile.deleteMany({
-                where: {
-                    answerLaborConsultationId: id,
-                },
-            });
-
-            const files = await Promise.all(
+            await Promise.all(
                 body.files.map(async (item) => {
-                    return (
-                        await tx.file.create({
-                            data: item,
-                            select: {
-                                id: true,
+                    await tx.file.upsert({
+                        create: {
+                            fileName: item.fileName,
+                            size: item.size,
+                            type: item.type,
+                            key: item.key,
+                            answerLaborConsultationFile: {
+                                create: {
+                                    answerLaborConsultationId: id,
+                                },
                             },
-                        })
-                    ).id;
+                        },
+                        update: {},
+                        where: {
+                            key: item.key,
+                        },
+                        select: {
+                            id: true,
+                        },
+                    });
                 }),
             );
 
@@ -240,20 +246,12 @@ export class LaborConsultationAdminService {
                 data: {
                     answerTitle: body.title,
                     answerContent: body.content,
-                    answerFiles: {
-                        createMany: {
-                            data: files.map((item) => {
-                                return {
-                                    answerFileId: item,
-                                };
-                            }),
-                        },
-                    },
-                    answeredAt: new Date().toISOString(),
+                    answeredAt: new Date(),
                     status: AnswerStatus.COMPLETE,
                 },
             });
         });
+
         if (laborConsultation.company) {
             await this.notificationCompanyService.create(
                 laborConsultation.company.accountId,
@@ -264,7 +262,7 @@ export class LaborConsultationAdminService {
             );
         } else if (laborConsultation.member) {
             await this.notifcationMemberService.create(
-                laborConsultation.company.accountId,
+                laborConsultation.member.accountId,
                 '노무상담에 대한 답변이 달렸습니다.',
                 '',
                 NotificationType.LABOR_CONSULTATION,

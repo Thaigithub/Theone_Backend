@@ -9,7 +9,7 @@ export class LaborConsultationMemberGetDetailResponse {
     questionTitle: LaborConsultation['questionTitle'];
     questionContent: LaborConsultation['questionContent'];
     questionFiles: FileResponse[];
-    asnweredAt: LaborConsultation['answeredAt'];
+    answeredAt: LaborConsultation['answeredAt'];
     answerTitle: LaborConsultation['answerTitle'];
     answerContent: LaborConsultation['answerContent'];
     answerFiles: FileResponse[];

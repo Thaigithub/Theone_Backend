@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborConsultationMemberCreateRequest } from './request/labor-consultation-member-create.request';
 import { LaborConsultationMemberGetListRequest } from './request/labor-consultation-member-get-list.request';
 import { LaborConsultationMemberGetDetailResponse } from './response/labor-consultation-member-get-detail.response';
 import { LaborConsultationMemberGetListResponse } from './response/labor-consultation-member-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborConsultationMemberService {
@@ -138,7 +138,7 @@ export class LaborConsultationMemberService {
                     size: Number(item.questionFile.size),
                 };
             }),
-            asnweredAt: laborConsultation.answeredAt,
+            answeredAt: laborConsultation.answeredAt,
             answerTitle: laborConsultation.answerTitle,
             answerContent: laborConsultation.answerContent,
             answerFiles: laborConsultation.answerFiles.map((item) => {

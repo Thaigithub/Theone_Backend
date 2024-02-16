@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InquirerType, Prisma } from '@prisma/client';
+import { InquirerType, PaymentStatus, Prisma, ProductType, RefundStatus } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborConsultationCompanyCreateRequest } from './request/labor-consultation-company-create.request';
 import { LaborConsultationCompanyGetListRequest } from './request/labor-consultation-company-get-list.request';
 import { LaborConsultationCompanyGetDetailResponse } from './response/labor-consultation-company-get-detail.response';
 import { LaborConsultationCompanyGetListResponse } from './response/labor-consultation-company-get-list-response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborConsultationCompanyService {
@@ -59,6 +59,30 @@ export class LaborConsultationCompanyService {
     }
 
     async create(accountId: number, body: LaborConsultationCompanyCreateRequest): Promise<void> {
+        const productPaymentHistory = await this.prismaService.productPaymentHistory.findFirst({
+            where: {
+                product: {
+                    productType: ProductType.LABOR_CONSULTATION,
+                },
+                status: PaymentStatus.COMPLETE,
+                remainingTimes: { gt: 0 },
+                expirationDate: { gt: new Date() },
+                OR: [{ refund: null }, { refund: { NOT: { status: RefundStatus.APPROVED } } }],
+                company: {
+                    accountId,
+                },
+            },
+            select: {
+                id: true,
+                remainingTimes: true,
+                expirationDate: true,
+            },
+        });
+
+        if (!productPaymentHistory) {
+            throw new NotFoundException(Error.PRODUCT_NOT_FOUND);
+        }
+
         await this.prismaService.$transaction(async (tx) => {
             const files = await Promise.all(
                 body.files.map(async (item) => {
@@ -73,7 +97,7 @@ export class LaborConsultationCompanyService {
                 }),
             );
 
-            await tx.laborConsultation.create({
+            const laborConsultation = await tx.laborConsultation.create({
                 data: {
                     company: {
                         connect: {
@@ -93,6 +117,37 @@ export class LaborConsultationCompanyService {
                             }),
                         },
                     },
+                },
+            });
+
+            await tx.laborConsultationRequest.create({
+                data: {
+                    laborConsultation: {
+                        connect: {
+                            id: laborConsultation.id,
+                        },
+                    },
+                    company: {
+                        connect: {
+                            accountId,
+                        },
+                    },
+                    usageHistory: {
+                        create: {
+                            productPaymentHistoryId: productPaymentHistory.id,
+                            expirationDate: productPaymentHistory.expirationDate,
+                            remainNumbers: productPaymentHistory.remainingTimes - 1,
+                        },
+                    },
+                },
+            });
+
+            await tx.productPaymentHistory.update({
+                where: {
+                    id: productPaymentHistory.id,
+                },
+                data: {
+                    remainingTimes: productPaymentHistory.remainingTimes - 1,
                 },
             });
         });
@@ -138,7 +193,7 @@ export class LaborConsultationCompanyService {
                     size: Number(item.questionFile.size),
                 };
             }),
-            asnweredAt: laborConsultation.answeredAt,
+            answeredAt: laborConsultation.answeredAt,
             answerTitle: laborConsultation.answerTitle,
             answerContent: laborConsultation.answerContent,
             answerFiles: laborConsultation.answerFiles.map((item) => {
