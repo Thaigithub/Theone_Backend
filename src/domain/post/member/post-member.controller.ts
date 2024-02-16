@@ -102,8 +102,8 @@ export class PostMemberController {
         @Req() request: BaseRequest,
         @Param('id', ParseIntPipe) id: number,
         @Param('teamId', ParseIntPipe) teamId: number,
-    ): Promise<BaseResponse<any>> {
-        return await this.postMemberService.addApplyPostTeam(request.user.accountId, id, teamId);
+    ): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.postMemberService.addApplyPostTeam(request.user.accountId, id, teamId));
     }
 
     // Interest

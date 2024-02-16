@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PostApplicationStatus } from '@prisma/client';
+import { PostApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -12,156 +12,127 @@ import { InterviewMemberGetListResponse } from './response/interview-member-get-
 export class InterviewMemberService {
     constructor(private prismaService: PrismaService) {}
     async getList(accountId: number, query: InterviewMemberGetListRequest): Promise<InterviewMemberGetListResponse> {
-        const teams = (
-            await this.prismaService.member.findUnique({
-                where: {
-                    accountId,
-                },
-                select: {
-                    teams: {
-                        select: {
-                            teamId: true,
-                        },
-                    },
-                },
-            })
-        ).teams.map((item) => item.teamId);
-        const search = {
-            ...QueryPagingHelper.queryPaging(query),
+        const teams = await this.prismaService.member.findUnique({
             where: {
-                OR: [
-                    {
-                        member: {
-                            accountId,
-                        },
-                        assignedAt: {
-                            gte: query.startDate && new Date(query.startDate),
-                            lte: query.endDate && new Date(query.endDate),
-                        },
-                    },
-                    {
-                        team: {
-                            id: {
-                                in: teams,
-                            },
-                        },
-                        assignedAt: {
-                            gte: query.startDate && new Date(query.startDate),
-                            lte: query.endDate && new Date(query.endDate),
-                        },
-                    },
-                ],
-                NOT: {
-                    interview: null,
-                },
+                accountId,
             },
             select: {
-                id: true,
-                status: true,
-                assignedAt: true,
-                post: {
+                teams: {
+                    where: {
+                        isActive: true,
+                    },
                     select: {
-                        interests: {
-                            where: {
-                                member: {
-                                    accountId,
+                        teamId: true,
+                    },
+                },
+                leaders: {
+                    where: {
+                        isActive: true,
+                    },
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        const teamIds = [...teams.teams.map((item) => item.teamId), ...teams.leaders.map((item) => item.id)];
+        const queryFilter: Prisma.ApplicationWhereInput = {
+            OR: [
+                {
+                    member: {
+                        accountId,
+                    },
+                },
+                {
+                    team: {
+                        id: {
+                            in: teamIds,
+                        },
+                    },
+                },
+            ],
+            assignedAt: {
+                gte: query.startDate && new Date(query.startDate),
+                lte: query.endDate && new Date(query.endDate),
+            },
+            NOT: {
+                interview: null,
+            },
+            ...(query.status === InterviewMemberGetListStatus.INTERVIEW_COMPLETED && {
+                status: {
+                    in: [PostApplicationStatus.APPROVE_BY_COMPANY, PostApplicationStatus.REJECT_BY_COMPANY],
+                },
+            }),
+            ...(query.status === InterviewMemberGetListStatus.PASS && {
+                status: PostApplicationStatus.APPROVE_BY_COMPANY,
+            }),
+            ...(query.status === InterviewMemberGetListStatus.FAIL && {
+                status: PostApplicationStatus.REJECT_BY_COMPANY,
+            }),
+            ...(query.status === InterviewMemberGetListStatus.DEADLINE && {
+                post: {
+                    isActive: true,
+                    endDate: {
+                        gt: new Date(),
+                    },
+                },
+            }),
+            ...(query.status === InterviewMemberGetListStatus.INTERVIEW_PROPOSAL && {
+                status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+            }),
+            ...(!query.status && {
+                status: {
+                    in: [
+                        PostApplicationStatus.PROPOSAL_INTERVIEW,
+                        PostApplicationStatus.APPROVE_BY_COMPANY,
+                        PostApplicationStatus.REJECT_BY_COMPANY,
+                    ],
+                },
+            }),
+        };
+        const application = (
+            await this.prismaService.application.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    status: true,
+                    assignedAt: true,
+                    post: {
+                        select: {
+                            interests: {
+                                where: {
+                                    member: {
+                                        accountId,
+                                    },
+                                },
+                            },
+                            id: true,
+                            name: true,
+                            endDate: true,
+                            status: true,
+                            code: true,
+                            site: {
+                                select: {
+                                    name: true,
+                                    contact: true,
+                                    address: true,
+                                    personInCharge: true,
+                                    originalBuilding: true,
+                                },
+                            },
+                            company: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    logo: true,
                                 },
                             },
                         },
-                        id: true,
-                        name: true,
-                        endDate: true,
-                        status: true,
-                        code: true,
-                        site: {
-                            select: {
-                                name: true,
-                                contact: true,
-                                address: true,
-                                personInCharge: true,
-                                originalBuilding: true,
-                            },
-                        },
-                        company: {
-                            select: {
-                                id: true,
-                                name: true,
-                                logo: true,
-                            },
-                        },
                     },
                 },
-            },
-        };
-        switch (query.status) {
-            case InterviewMemberGetListStatus.INTERVIEW_COMPLETED: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        status: {
-                            in: [PostApplicationStatus.APPROVE_BY_COMPANY, PostApplicationStatus.REJECT_BY_COMPANY],
-                        },
-                    };
-                });
-                break;
-            }
-            case InterviewMemberGetListStatus.PASS: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        status: PostApplicationStatus.APPROVE_BY_COMPANY,
-                    };
-                });
-                break;
-            }
-            case InterviewMemberGetListStatus.FAIL: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        status: PostApplicationStatus.REJECT_BY_COMPANY,
-                    };
-                });
-                break;
-            }
-            case InterviewMemberGetListStatus.DEADLINE: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        post: {
-                            endDate: {
-                                gt: new Date(),
-                            },
-                        },
-                    };
-                });
-                break;
-            }
-            case InterviewMemberGetListStatus.INTERVIEW_PROPOSAL: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        status: PostApplicationStatus.PROPOSAL_INTERVIEW,
-                    };
-                });
-                break;
-            }
-            default: {
-                search.where.OR = search.where.OR.map((item) => {
-                    return {
-                        ...item,
-                        status: {
-                            in: [
-                                PostApplicationStatus.PROPOSAL_INTERVIEW,
-                                PostApplicationStatus.APPROVE_BY_COMPANY,
-                                PostApplicationStatus.REJECT_BY_COMPANY,
-                            ],
-                        },
-                    };
-                });
-                break;
-            }
-        }
-        const application = (await this.prismaService.application.findMany(search)).map((item) => {
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             return {
                 applicationId: item.id,
                 companyLogo: {
@@ -183,7 +154,7 @@ export class InterviewMemberService {
                 isInterested: item.post.interests.length === 0 ? false : true,
             };
         });
-        const total = await this.prismaService.application.count({ where: search.where });
+        const total = await this.prismaService.application.count({ where: queryFilter });
         return new PaginationResponse(application, new PageInfo(total));
     }
 
