@@ -1,6 +1,12 @@
 import { Body, Controller, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { AccountType } from '@prisma/client';
+import { DeviceMemberService } from 'domain/device/member/device-member.service';
 import { Request } from 'express';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
+import { DeviceTokenRequest } from 'utils/generics/device-token.request';
+import { AuthJwtGuard } from '../auth-jwt.guard';
+import { AuthRoleGuard, Roles } from '../auth-role.guard';
 import { MemberAuthService } from './auth-member.service';
 import { AuthMemberLoginRequest } from './request/auth-member-login-normal.request';
 import { AuthMemberLoginSocialRequest } from './request/auth-member-login-social.request';
@@ -11,15 +17,13 @@ import { AuthMemberUpdatePasswordRequest } from './request/auth-member-update-pa
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
 import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
-import { DeviceTokenRequest } from 'utils/generics/device-token.request';
-import { BaseRequest } from 'utils/generics/base.request';
-import { AccountType } from '@prisma/client';
-import { AuthRoleGuard, Roles } from '../auth-role.guard';
-import { AuthJwtGuard } from '../auth-jwt.guard';
 
 @Controller('/member/auth')
 export class MemberAuthController {
-    constructor(private memberAuthService: MemberAuthService) {}
+    constructor(
+        private memberAuthService: MemberAuthService,
+        private deviceMemberService: DeviceMemberService,
+    ) {}
 
     @Post('/login/google')
     async googlelogin(@Body() authUserDto: AuthMemberLoginSocialRequest): Promise<BaseResponse<AuthMemberLoginResponse>> {
@@ -50,7 +54,7 @@ export class MemberAuthController {
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/logout')
     async logout(@Req() req: BaseRequest, @Body() body: DeviceTokenRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberAuthService.deleteDeviceToken(req.user.accountId, body.deviceToken));
+        return BaseResponse.of(await this.deviceMemberService.delete(req.user.accountId, body));
     }
 
     @Post('/otp/username')

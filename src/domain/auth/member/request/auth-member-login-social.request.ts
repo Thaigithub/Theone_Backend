@@ -1,8 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
-import { DeviceTokenRequest } from 'utils/generics/device-token.request';
 
-export class AuthMemberLoginSocialRequest extends DeviceTokenRequest {
+export class AuthMemberLoginSocialRequest {
     @Expose()
     @IsString()
     idToken: string;

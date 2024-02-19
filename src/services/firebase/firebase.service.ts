@@ -23,22 +23,26 @@ export class FirebaseService {
         type: NotificationType,
         typeId: number,
     ): Promise<void> {
-        const tokens = (
-            await this.prismaService.device.findMany({
-                where: {
-                    accountId,
-                    isActive: true,
+        const tokens = await this.prismaService.device.findMany({
+            where: {
+                accountId,
+                isActive: true,
+            },
+            select: {
+                token: true,
+                account: {
+                    select: {
+                        type: true,
+                    },
                 },
-                select: {
-                    token: true,
-                },
-            })
-        ).map((item) => item.token);
+            },
+        });
         for (const item of tokens) {
             await firebase.messaging().send({
                 data: {
                     type: type,
                     typeId: typeId.toString(),
+                    accountType: item.account.type,
                 },
                 notification: {
                     title,
@@ -48,13 +52,14 @@ export class FirebaseService {
                     data: {
                         type: type,
                         typeId: typeId.toString(),
+                        accountType: item.account.type,
                     },
                     notification: {
                         title,
                         body: content,
                     },
                 },
-                token: item,
+                token: item.token,
             });
         }
     }

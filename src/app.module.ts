@@ -39,6 +39,7 @@ import { CompanyModule } from './domain/company/company.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { TeamModule } from './domain/team/team.module';
 import { PrismaModule } from './services/prisma/prisma.module';
+import { DeviceModule } from 'domain/device/device.module';
 
 @Module({
     imports: [
@@ -82,6 +83,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         LicenseModule,
         SettlementModule,
         FireBaseModule,
+        DeviceModule,
     ],
 })
 export class AppModule {}

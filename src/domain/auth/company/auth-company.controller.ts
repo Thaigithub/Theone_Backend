@@ -1,7 +1,12 @@
 import { Body, Controller, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { AccountType } from '@prisma/client';
+import { DeviceMemberService } from 'domain/device/member/device-member.service';
 import { Request } from 'express';
+import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
-import { MemberAuthService } from '../member/auth-member.service';
+import { DeviceTokenRequest } from 'utils/generics/device-token.request';
+import { AuthJwtGuard } from '../auth-jwt.guard';
+import { AuthRoleGuard, Roles } from '../auth-role.guard';
 import { CompanyAuthService } from './auth-company.service';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
@@ -11,17 +16,12 @@ import { AuthCompanyUpdatePasswordRequest } from './request/auth-company-update-
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
-import { DeviceTokenRequest } from 'utils/generics/device-token.request';
-import { BaseRequest } from 'utils/generics/base.request';
-import { AuthRoleGuard, Roles } from '../auth-role.guard';
-import { AuthJwtGuard } from '../auth-jwt.guard';
-import { AccountType } from '@prisma/client';
 
 @Controller('/company/auth')
 export class CompanyAuthController {
     constructor(
         private companyAuthService: CompanyAuthService,
-        private memberAuthService: MemberAuthService,
+        private deviceMemberService: DeviceMemberService,
     ) {}
 
     @Post('/login')
@@ -33,7 +33,7 @@ export class CompanyAuthController {
     @UseGuards(AuthJwtGuard, AuthRoleGuard)
     @Post('/logout')
     async logout(@Req() req: BaseRequest, @Body() body: DeviceTokenRequest): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.memberAuthService.deleteDeviceToken(req.user.accountId, body.deviceToken));
+        return BaseResponse.of(await this.deviceMemberService.delete(req.user.accountId, body));
     }
 
     @Post('/otp/username')

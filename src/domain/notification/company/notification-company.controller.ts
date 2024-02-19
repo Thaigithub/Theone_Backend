@@ -1,30 +1,30 @@
 import { Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
-import { PaginationRequest } from 'utils/generics/pagination.request';
 import { BaseRequest } from '../../../utils/generics/base.request';
 import { BaseResponse } from '../../../utils/generics/base.response';
 import { AuthJwtGuard } from '../../auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from '../../auth/auth-role.guard';
-import { NotificationCompanyService } from './notification-company.service';
-import { NotificationCompanyGetListResponse } from './response/company-notification.response';
+import { NotificationMemberService } from '../member/notification-member.service';
+import { NotificationMemberGetListRequest } from '../member/request/notification-member-get-list.request';
+import { NotificationMemberGetListResponse } from '../member/response/notification-member-get-list.response';
 
 @Controller('/company/notifications')
 @Roles(AccountType.COMPANY)
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class NotificationCompanyController {
-    constructor(private notificationCompanyService: NotificationCompanyService) {}
+    constructor(private notificationMemberService: NotificationMemberService) {}
 
     @Get()
     async getList(
-        @Query() query: PaginationRequest,
+        @Query() query: NotificationMemberGetListRequest,
         @Request() request: BaseRequest,
-    ): Promise<BaseResponse<NotificationCompanyGetListResponse>> {
-        return BaseResponse.of(await this.notificationCompanyService.getList(query, request.user.accountId));
+    ): Promise<BaseResponse<NotificationMemberGetListResponse>> {
+        return BaseResponse.of(await this.notificationMemberService.getList(request.user.accountId, query));
     }
 
     @Patch('/:id/status')
     async update(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationCompanyService.update(req.user.accountId, id));
+        return BaseResponse.of(await this.notificationMemberService.update(req.user.accountId, id));
     }
 
     @Delete('/:id')
@@ -32,6 +32,6 @@ export class NotificationCompanyController {
         @Param('id', ParseIntPipe) id: number,
         @Request() request: BaseRequest,
     ): Promise<BaseResponse<void>> {
-        return BaseResponse.of(await this.notificationCompanyService.delete(id, request.user.accountId));
+        return BaseResponse.of(await this.notificationMemberService.delete(id, request.user.accountId));
     }
 }

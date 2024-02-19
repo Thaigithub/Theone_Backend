@@ -11,6 +11,7 @@ import { CompanyAuthController } from './company/auth-company.controller';
 import { CompanyAuthService } from './company/auth-company.service';
 import { MemberAuthController } from './member/auth-member.controller';
 import { MemberAuthService } from './member/auth-member.service';
+import { DeviceModule } from 'domain/device/device.module';
 @Module({
     imports: [
         PrismaModule,
@@ -22,6 +23,7 @@ import { MemberAuthService } from './member/auth-member.service';
         }),
         PrismaModule,
         OtpModule,
+        DeviceModule,
     ],
     controllers: [AdminAuthController, CompanyAuthController, MemberAuthController],
     providers: [AuthJwtStrategy, AdminAuthService, CompanyAuthService, MemberAuthService],

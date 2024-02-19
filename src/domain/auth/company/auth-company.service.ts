@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountType, OtpType } from '@prisma/client';
 import { OTP_VERIFICATION_VALID_TIME } from 'app.config';
 import { compare, hash } from 'bcrypt';
+import { DeviceMemberService } from 'domain/device/member/device-member.service';
 import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -26,6 +27,7 @@ export class CompanyAuthService {
         private jwtService: JwtService,
         private otpService: OtpService,
         private memberAuthService: MemberAuthService,
+        private deviceMemberService: DeviceMemberService,
     ) {}
 
     async login(loginData: AuthCompanyLoginRequest): Promise<AuthCompanyLoginResponse> {
@@ -57,9 +59,6 @@ export class CompanyAuthService {
             type,
         };
         const token = this.signToken(payload);
-        if (loginData.deviceToken) {
-            await this.memberAuthService.createDeviceToken(account.id, loginData.deviceToken);
-        }
         return { token, uid, type };
     }
 

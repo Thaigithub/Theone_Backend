@@ -6,7 +6,10 @@ import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
-import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
+import {
+    NotificationMemberGetListResponse,
+    NotificationMemberGetResponse,
+} from './response/notification-member-get-list.response';
 
 @Injectable()
 export class NotificationMemberService {
@@ -78,26 +81,55 @@ export class NotificationMemberService {
         const queryFilter: Prisma.NotificationWhereInput = {
             account: {
                 id: accountId,
-                member: {
-                    isActive: true,
-                },
+                OR: [
+                    {
+                        member: {
+                            isActive: true,
+                        },
+                        company: null,
+                    },
+                    {
+                        company: {
+                            isActive: true,
+                        },
+                        member: null,
+                    },
+                ],
             },
             isActive: true,
             ...(query.status && { status: query.status }),
         };
-        const notifications = await this.prismaService.notification.findMany({
-            select: {
-                id: true,
-                createdAt: true,
-                title: true,
-                content: true,
-                status: true,
-                type: true,
-                typeId: true,
-            },
-            where: queryFilter,
-            orderBy: { createdAt: 'desc' },
-            ...QueryPagingHelper.queryPaging(query),
+        const notifications = (
+            await this.prismaService.notification.findMany({
+                select: {
+                    id: true,
+                    createdAt: true,
+                    title: true,
+                    content: true,
+                    status: true,
+                    type: true,
+                    typeId: true,
+                    account: {
+                        select: {
+                            type: true,
+                        },
+                    },
+                },
+                where: queryFilter,
+                orderBy: { createdAt: 'desc' },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
+            return {
+                id: item.id,
+                createdAt: item.createdAt,
+                title: item.title,
+                content: item.content,
+                status: item.status,
+                type: item.type,
+                typeId: item.typeId,
+                accountType: item.account.type,
+            } as NotificationMemberGetResponse;
         });
         const count = await this.prismaService.notification.count({
             where: queryFilter,
@@ -111,9 +143,18 @@ export class NotificationMemberService {
             isActive: true,
             account: {
                 id: accountId,
-                member: {
-                    isActive: true,
-                },
+                OR: [
+                    {
+                        member: {
+                            isActive: true,
+                        },
+                    },
+                    {
+                        company: {
+                            isActive: true,
+                        },
+                    },
+                ],
             },
         };
         const notification = await this.prismaService.notification.findUnique({
@@ -142,9 +183,18 @@ export class NotificationMemberService {
                 isActive: true,
                 account: {
                     id: accountId,
-                    member: {
-                        isActive: true,
-                    },
+                    OR: [
+                        {
+                            member: {
+                                isActive: true,
+                            },
+                        },
+                        {
+                            company: {
+                                isActive: true,
+                            },
+                        },
+                    ],
                 },
             },
         });
