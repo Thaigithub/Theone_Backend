@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, NotificationType, PostType, Prisma } from '@prisma/client';
+import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -14,7 +15,6 @@ import { PostMemberGetDetailResponse } from './response/post-member-get-detail.r
 import { PostMemberGetListPremiumResponse } from './response/post-member-get-list-premium.response';
 import { PostMemberGetListResponse } from './response/post-member-get-list.response';
 import { PostMemberUpdateInterestResponse } from './response/post-member-update-interest.response';
-import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 
 @Injectable()
 export class PostMemberService {
@@ -344,26 +344,23 @@ export class PostMemberService {
         if (application) {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
-        await this.prismaService.application.create({
+        const newApplication = await this.prismaService.application.create({
             data: {
                 member: { connect: { id: account.member.id } },
                 post: { connect: { id: id } },
             },
+            select: {
+                id: true,
+            }
         });
         this.notificationMemberService.create(
             accountId,
             post.name + ' 을(를) 신청하셨습니다.',
             '',
-            NotificationType.POST,
-            id,
+            NotificationType.APPLICATION,
+            newApplication.id,
         );
-        this.notificationCompanyService.create(
-            post.company.accountId,
-            account.member.name + ' ' + post.name + ' 공고에 지원했습니다.',
-            '',
-            NotificationType.POST,
-            id,
-        );
+
     }
 
     async addApplyPostTeam(accountId: number, postId: number, teamId: number): Promise<void> {
@@ -390,6 +387,11 @@ export class PostMemberService {
             select: {
                 id: true,
                 name: true,
+                company: {
+                    select: {
+                        accountId: true,
+                    }
+                }
             }
         });
 
@@ -410,19 +412,23 @@ export class PostMemberService {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
 
-        await this.prismaService.application.create({
+        const newApplication = await this.prismaService.application.create({
             data: {
                 team: { connect: { id: teamId } },
                 post: { connect: { id: postId } },
             },
+            select: {
+                id: true,
+            }
         });
         
         await this.notificationMemberService.create(
             accountId,
-            isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.',
+            post.name + ' 을(를) 신청하셨습니다.',
             '',
-            NotificationType.POST,
-            postId,
+            NotificationType.APPLICATION,
+            newApplication.id,
+
         );
         const memberOnTeams = (await this.prismaService.membersOnTeams.findMany({
             where: {
@@ -443,10 +449,10 @@ export class PostMemberService {
         memberOnTeams.forEach(async (item)=> {
             await this.notificationMemberService.create(
                 item, 
-                isTeamLeader.name + ' '+post.name + ' 을 신청하였습니다.', 
+                `${isTeamLeader.name} 팀이 ${post.name}를 신청했습니다.`, 
                 '', 
-                NotificationType.POST, 
-                postId
+                NotificationType.APPLICATION, 
+                newApplication.id,
             );
         });
     }

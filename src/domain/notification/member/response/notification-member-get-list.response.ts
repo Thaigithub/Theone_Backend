@@ -7,6 +7,8 @@ export class NotificationMemberGetResponse {
     title: Notification['title'];
     content: Notification['content'];
     status: Notification['status'];
+    type: Notification['type'];
+    typeId: Notification['typeId'];
 }
 
 export class NotificationMemberGetListResponse extends PaginationResponse<NotificationMemberGetResponse> {}

@@ -22,6 +22,7 @@ import { OtpService } from 'domain/otp/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
@@ -35,7 +36,6 @@ import { AuthMemberUpdatePasswordRequest } from './request/auth-member-update-pa
 import { AuthMemberLoginResponse } from './response/auth-member-login.response';
 import { AuthMemberOtpSendResponse } from './response/auth-member-otp-send.response';
 import { AuthMemberOtpVerifyResponse } from './response/auth-member-otp-verify.response';
-import { Error } from 'utils/error.enum';
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 const appleClient = new JwksClient({
@@ -138,6 +138,9 @@ export class MemberAuthService {
         };
 
         const token = this.signToken(payload);
+        if (loginData.deviceToken) {
+            await this.createDeviceToken(account.id, loginData.deviceToken);
+        }
 
         return { token, uid, type };
     }
@@ -202,6 +205,7 @@ export class MemberAuthService {
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
+            deviceToken: request.deviceToken,
         });
     }
 
@@ -233,6 +237,7 @@ export class MemberAuthService {
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
+            deviceToken: request.deviceToken,
         });
     }
 
@@ -266,6 +271,7 @@ export class MemberAuthService {
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
+            deviceToken: request.deviceToken,
         });
     }
 
@@ -299,16 +305,20 @@ export class MemberAuthService {
         return this.loginSignupSocialFlow({
             id: profile.account.id,
             type: profile.account.type,
+            deviceToken: request.deviceToken,
         });
     }
 
     async loginSignupSocialFlow(profile: AccountDTO): Promise<AuthMemberLoginResponse> {
-        await this.prismaService.account.update({
+        const account = await this.prismaService.account.update({
             where: {
                 id: profile.id,
             },
             data: {
                 lastAccessAt: new Date(),
+            },
+            select: {
+                id: true,
             },
         });
         const uid = this.fakeUidAccount(profile.id);
@@ -319,7 +329,65 @@ export class MemberAuthService {
         };
 
         const token = this.signToken(payload);
+        if (profile.deviceToken) {
+            await this.createDeviceToken(account.id, profile.deviceToken);
+        }
 
         return { token, uid, type };
+    }
+
+    async createDeviceToken(accountId: number, token: string): Promise<void> {
+        const device = await this.prismaService.device.findFirst({
+            where: {
+                accountId,
+                token,
+            },
+            select: {
+                id: true,
+                isActive: true,
+            },
+        });
+        if (device && !device.isActive) {
+            await this.prismaService.device.update({
+                where: {
+                    id: device.id,
+                },
+                data: {
+                    isActive: true,
+                },
+            });
+        } else if (!device) {
+            await this.prismaService.device.create({
+                data: {
+                    accountId,
+                    token,
+                },
+            });
+        }
+    }
+
+    async deleteDeviceToken(accountId: number, token: string): Promise<void> {
+        const device = await this.prismaService.device.findUnique({
+            where: {
+                token_accountId: {
+                    accountId,
+                    token,
+                },
+            },
+            select: {
+                id: true,
+                isActive: true,
+            },
+        });
+        if (device && device.isActive) {
+            await this.prismaService.device.update({
+                where: {
+                    id: device.id,
+                },
+                data: {
+                    isActive: false,
+                },
+            });
+        }
     }
 }

@@ -1,15 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, NotificationStatus, NotificationType, Prisma } from '@prisma/client';
+import { FirebaseService } from 'services/firebase/firebase.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { NotificationMemberGetListRequest } from './request/notification-member-get-list.request';
 import { NotificationMemberGetListResponse } from './response/notification-member-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class NotificationMemberService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private firebaseService: FirebaseService,
+    ) {}
     async create(
         accountId: number,
         title: string,
@@ -36,24 +40,12 @@ export class NotificationMemberService {
                     memberId: account.member.id,
                 },
             });
-            if (!preference) {
-                await this.prismaService.notification.create({
-                    data: {
-                        title,
-                        ...(content && { content }),
-                        type,
-                        accountId,
-                        ...(typeId && { typeId }),
-                    },
-                });
-                console.log('ok');
-                return;
-            }
-            if (!preference.isNoticeNotificationActive) {
+            if (preference && !preference.isNoticeNotificationActive) {
                 // console.log('Turn off all notifications');
                 return;
             }
             if (
+                preference &&
                 !preference.isServiceNotificationActive &&
                 Array<NotificationType>(
                     NotificationType.POST,
@@ -65,7 +57,7 @@ export class NotificationMemberService {
                 // console.log('turn off POST, APPLICATION, INTERVIEW, CONTACT');
                 return;
             }
-            if (!preference.isTeamNotificationActive && type === NotificationType.TEAM) {
+            if (preference && !preference.isTeamNotificationActive && type === NotificationType.TEAM) {
                 // console.log('Turn off Team & Invitation notification');
                 return;
             }
@@ -78,6 +70,7 @@ export class NotificationMemberService {
                     ...(typeId && { typeId }),
                 },
             });
+            await this.firebaseService.pushNotification(accountId, title, content, type, typeId);
         }
     }
 
@@ -99,6 +92,8 @@ export class NotificationMemberService {
                 title: true,
                 content: true,
                 status: true,
+                type: true,
+                typeId: true,
             },
             where: queryFilter,
             orderBy: { createdAt: 'desc' },

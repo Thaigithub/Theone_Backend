@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PointStatus, Prisma } from '@prisma/client';
+import { NotificationType, PointStatus, Prisma } from '@prisma/client';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { FileResponse } from 'utils/generics/file.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -8,11 +10,13 @@ import { PointAdminCategoryFilter } from './enum/point-admin-category-filter';
 import { PointAdminGetListRequest } from './request/point-admin-get-list.request';
 import { PointAdminUpdateRequest } from './request/point-admin-update.request';
 import { PointAdminGetListResponse } from './response/point-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PointAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationMemberService: NotificationMemberService,
+    ) {}
 
     async getList(query: PointAdminGetListRequest): Promise<PointAdminGetListResponse> {
         const queryFilter: Prisma.PointWhereInput = {
@@ -102,6 +106,7 @@ export class PointAdminService {
                 member: {
                     select: {
                         id: true,
+                        accountId: true,
                     },
                 },
             },
@@ -155,6 +160,21 @@ export class PointAdminService {
                             remainAmount: record.member.totalPoint,
                         },
                     });
+                    await this.notificationMemberService.create(
+                        point.member.accountId,
+                        '축적 요청이 승인되었습니다',
+                        '귀하의 적립 요청이 승인되었습니다. 적립 포인트를 확인하세요!',
+                        NotificationType.POINT,
+                        id,
+                    );
+                } else if (body.status === PointStatus.REJECTED) {
+                    await this.notificationMemberService.create(
+                        point.member.accountId,
+                        '누적 요청이 거절되었습니다',
+                        '누적 요청이 거절되었습니다. 다시 확인하고 수정해주세요!',
+                        NotificationType.POINT,
+                        id,
+                    );
                 }
             });
         }

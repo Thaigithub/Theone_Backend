@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MAIL_REFHRESH_TOKEN, MAIL_SYSTEM } from 'app.config';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MAIL_REFRESH_TOKEN, MAIL_SYSTEM } from 'app.config';
 import { google } from 'googleapis';
 import { MailContext } from './dto/mail.context';
 @Injectable()
@@ -10,7 +10,7 @@ export class MailService {
         const OAuth2 = google.auth.OAuth2;
         const oauth2Client = new OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
         oauth2Client.setCredentials({
-            refresh_token: MAIL_REFHRESH_TOKEN,
+            refresh_token: MAIL_REFRESH_TOKEN,
         });
 
         const accessToken: string = await new Promise((resolve) => {

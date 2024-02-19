@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationType, PostHistoryType, PostType, Prisma } from '@prisma/client';
 import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
@@ -23,7 +24,6 @@ import { PostAdminUpdateRequest } from './request/post-admin-update.request';
 import { PostAdminGetDetailResponse } from './response/post-admin-get-detail.response';
 import { PostAdminGetListForApplicationResponse } from './response/post-admin-get-list-application.response';
 import { PostAdminGetListResponse } from './response/post-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class PostAdminService {
@@ -359,7 +359,13 @@ export class PostAdminService {
                 }
             }
         });
-        await this.notificationCompanyService.create(post.company.accountId, '공고가 반려되었습니다', '', NotificationType.POST, id);
+        await this.notificationCompanyService.create(
+            post.company.accountId, 
+            '공고가 반려되었습니다', 
+            '', 
+            NotificationType.POST, 
+            id,
+        );
     }
 
     async updateExposure(id: number, payload: PostAdminUpdateExposureRequest) {
@@ -382,9 +388,20 @@ export class PostAdminService {
                 }
             });
             if(payload.isHidden === true) {
-                await this.notificationCompanyService.create(post.company.accountId, '공고가 반려되었습니다', '', NotificationType.POST, id);
+                await this.notificationCompanyService.create(
+                    post.company.accountId, 
+                    '공고가 반려되었습니다', 
+                    '', 
+                    NotificationType.POST, 
+                    id,
+                );
             } else {
-                await this.notificationCompanyService.create(post.company.accountId, '공고가 처리되었습니다', '', NotificationType.POST, id);
+                await this.notificationCompanyService.create(
+                    post.company.accountId, 
+                    '귀하의 채용 게시물이 승인되었습니다', 
+                    '', NotificationType.POST, 
+                    id,
+                );
             }
         }
     }

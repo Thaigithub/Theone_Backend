@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { BaseRequest } from '../../../utils/generics/base.request';
@@ -20,6 +20,11 @@ export class NotificationCompanyController {
         @Request() request: BaseRequest,
     ): Promise<BaseResponse<NotificationCompanyGetListResponse>> {
         return BaseResponse.of(await this.notificationCompanyService.getList(query, request.user.accountId));
+    }
+
+    @Patch('/:id/status')
+    async update(@Req() req: BaseRequest, @Param('id', ParseIntPipe) id: number): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.notificationCompanyService.update(req.user.accountId, id));
     }
 
     @Delete('/:id')

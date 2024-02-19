@@ -187,7 +187,7 @@ export class SiteAdminService {
                         '관리자가 현장을 정지시켰습니다.', 
                         '', 
                         NotificationType.SITE, 
-                        id
+                        id,
                     );
                 }
             });

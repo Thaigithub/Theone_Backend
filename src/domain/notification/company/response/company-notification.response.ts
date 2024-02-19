@@ -8,6 +8,7 @@ export class CompanyGetNotificationResponse {
     createdAt: Notification['createdAt'];
     updatedAt: Notification['updatedAt'];
     type: Notification['type'];
+    typeId: Notification['typeId'];
 }
 
 export class NotificationCompanyGetListResponse extends PaginationResponse<CompanyGetNotificationResponse> {}

@@ -1,17 +1,21 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PointStatus, Prisma } from '@prisma/client';
+import { NotificationType, PointStatus, Prisma } from '@prisma/client';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { CurrencyExchangeAdminGetListCategory } from './dto/currency-exchange-admin-get-list-category.enum';
 import { CurrencyExchangeAdminGetExchangeListRequest } from './request/currency-exchange-admin-get-list.request';
 import { CurrencyExchangeAdminUpdateRequest } from './request/currency-exchange-admin-update.request';
 import { CurrencyExchangeAdminGetListResponse } from './response/currency-exchange-admin-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class CurrencyExchangeAdminService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private notificationMemberService: NotificationMemberService,
+    ) {}
     async getList(query: CurrencyExchangeAdminGetExchangeListRequest): Promise<CurrencyExchangeAdminGetListResponse> {
         const queryFilter: Prisma.CurrencyExchangeWhereInput = {
             isActive: true,
@@ -91,6 +95,11 @@ export class CurrencyExchangeAdminService {
                 status: true,
                 amount: true,
                 memberId: true,
+                member: {
+                    select: {
+                        accountId: true,
+                    },
+                },
             },
         });
         if (!currencyExchange) {
@@ -123,6 +132,21 @@ export class CurrencyExchangeAdminService {
                             totalPoint: { increment: currencyExchange.amount },
                         },
                     });
+                    await this.notificationMemberService.create(
+                        currencyExchange.member.accountId,
+                        '화폐 교환 요청이 거절되었습니다',
+                        '화폐 교환 요청이 거절되었습니다. 다시 확인하고 수정해주세요.',
+                        NotificationType.CURRENCY_EXCHANGE,
+                        id,
+                    );
+                } else if (body.status === PointStatus.APPROVED) {
+                    await this.notificationMemberService.create(
+                        currencyExchange.member.accountId,
+                        '귀하의 환전 요청이 승인되었습니다.',
+                        '귀하의 환전 요청이 승인되었습니다. 등록된 은행 계좌를 확인하세요!',
+                        NotificationType.CURRENCY_EXCHANGE,
+                        id,
+                    );
                 }
             });
         }
