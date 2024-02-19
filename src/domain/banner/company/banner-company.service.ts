@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { BannerType, Prisma, RequestBannerStatus } from '@prisma/client';
+import { BannerType, Prisma, ProductType, RequestBannerStatus } from '@prisma/client';
+import { ProductCompanyService } from 'domain/product/company/product-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -13,7 +14,10 @@ import { BannerCompanyGetListRequestResponse } from './response/banner-company-g
 
 @Injectable()
 export class BannerCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private productCompanyService: ProductCompanyService,
+    ) {}
     async getListRequest(
         accountId: number,
         query: BannerCompanyGetListRequestRequest,
@@ -154,6 +158,34 @@ export class BannerCompanyService {
             });
             if (!post) throw new NotFoundException(Error.POST_NOT_FOUND);
         }
+        const availablePremium = await this.productCompanyService.checkAvailability(accountId, {
+            productType: ProductType.BANNER,
+        });
+
+        if (availablePremium.isAvailable) {
+            const productPaymentHistory = await this.prismaService.productPaymentHistory.findUnique({
+                where: {
+                    isActive: true,
+                    id: body.productPaymentHistoryId,
+                    product: {
+                        productType: ProductType.BANNER,
+                    },
+                    expirationDate: { gte: new Date() },
+                    remainingTimes: { gt: 0 },
+                },
+            });
+            if (!productPaymentHistory) throw new NotFoundException(Error.PRODUCT_NOT_FOUND);
+
+            await this.prismaService.productPaymentHistory.update({
+                data: {
+                    remainingTimes: productPaymentHistory.remainingTimes - 1,
+                },
+                where: {
+                    isActive: true,
+                    id: productPaymentHistory.id,
+                },
+            });
+        } else throw new BadRequestException(Error.PRODUCT_NOT_FOUND);
         const companyId = (await this.prismaService.company.findUnique({ where: { accountId }, select: { id: true } })).id;
         if (body.advertisingBanner) {
             await this.prismaService.banner.create({

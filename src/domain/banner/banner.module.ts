@@ -8,9 +8,10 @@ import { BannerCompanyService } from './company/banner-company.service';
 import { BannerGuestController } from './guest/banner-guest.controller';
 import { BannerMemberController } from './member/banner-member.controller';
 import { BannerMemberService } from './member/banner-member.service';
+import { ProductModule } from 'domain/product/product.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, ProductModule],
     controllers: [BannerAdminController, BannerCompanyController, BannerMemberController, BannerGuestController],
     providers: [BannerAdminService, BannerCompanyService, BannerMemberService, StorageService],
 })

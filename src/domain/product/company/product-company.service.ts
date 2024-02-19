@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentStatus, PaymentType, Prisma, ProductType, RefundStatus, TaxBillStatus, UsageType } from '@prisma/client';
+import { PaymentStatus, PaymentType, Prisma, RefundStatus, TaxBillStatus, UsageType } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import { PortoneService } from 'services/portone/portone.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -12,7 +12,6 @@ import { ProductCompanyCheckAvailabilityRequest } from './request/product-compan
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
 import { ProductCompanyCheckAvailabilityResponse } from './response/product-company-check-availability.response';
-import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
@@ -92,6 +91,9 @@ export class ProductCompanyService {
                     },
                 },
                 ...QueryPagingHelper.queryPaging(query),
+                orderBy: {
+                    updatedAt: 'desc',
+                },
             })
         ).map((item) => {
             let taxIssuanceStatus = null;
@@ -408,36 +410,6 @@ export class ProductCompanyService {
         } else {
             throw new BadRequestException(Error.REFUND_REQUEST_HAS_BEEN_HANDLED);
         }
-    }
-
-    async checkPremiumAvailability(accountId: number): Promise<ProductCompanyCheckPremiumAvailabilityResponse> {
-        const availablePremiumList = await this.prismaService.productPaymentHistory.findMany({
-            where: {
-                isActive: true,
-                status: PaymentStatus.COMPLETE,
-                company: {
-                    accountId,
-                },
-                product: {
-                    productType: ProductType.PREMIUM_POST,
-                },
-                remainingTimes: { gt: 0 },
-            },
-        });
-        return availablePremiumList
-            ? {
-                  isAvailable: true,
-                  productList: availablePremiumList.map((item) => {
-                      return {
-                          id: item.id,
-                          remainingTimes: item.remainingTimes,
-                          remainingDates: Math.floor(
-                              (new Date(item.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24),
-                          ),
-                      };
-                  }),
-              }
-            : { isAvailable: false, productList: [] };
     }
 
     async checkAvailability(

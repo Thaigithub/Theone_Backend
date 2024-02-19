@@ -834,7 +834,7 @@ export class PostCompanyService {
 
     async updateType(postId: number, accountId: number, body: PostCompanyUpdateTypeRequest): Promise<void> {
         const post = await this.checkPostExist(postId, accountId);
-        const availablePremium = await this.productCompanyService.checkPremiumAvailability(accountId);
+        const availablePremium = await this.productCompanyService.checkAvailability(accountId, {productType: ProductType.PREMIUM_POST});
 
         if (availablePremium.isAvailable) {
             const productPaymentHistory = await this.prismaService.productPaymentHistory.findUnique({
