@@ -106,8 +106,80 @@ export class MemberCompanyService {
         };
     }
 
+    private async isMemberInformationRevealable(accountId: number, memberId: number): Promise<boolean> {
+        const headhuntingRecommendation = await this.prismaService.headhuntingRecommendation.findFirst({
+            where: {
+                OR: [
+                    {
+                        memberId,
+                    },
+                    {
+                        team: {
+                            OR: [
+                                {
+                                    leaderId: memberId,
+                                },
+                                {
+                                    members: {
+                                        some: {
+                                            memberId,
+                                        },
+                                    },
+                                }
+                            ]
+                        }
+                    }
+                ],
+                headhunting: {
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                }
+            },
+        });
+
+        if (headhuntingRecommendation) return true;
+
+        const matchingReommendation = await this.prismaService.matchingRecommendation.findFirst({
+            where: {
+                OR: [
+                    {
+                        memberId,
+                    },
+                    {
+                        team: {
+                            OR: [
+                                {
+                                    leaderId: memberId,
+                                },
+                                {
+                                    members: {
+                                        some: {
+                                            memberId,
+                                        },
+                                    },
+                                }
+                            ]
+                        }
+                    }
+                ],
+                matchingRequest: {
+                    company: {
+                        accountId,
+                    },
+                }
+            },
+        });
+
+        if (matchingReommendation) return true;
+
+        return false;
+    }
+
     async getList(accountId: number, query: MemberCompanyGetListRequest): Promise<MemberCompanyGetListResponse> {
-        const members = (
+        const records = (
             await this.prismaService.member.findMany({
                 include: {
                     account: {
@@ -140,13 +212,14 @@ export class MemberCompanyService {
                             },
                         },
                     },
-
                 },
                 where: await this.parseConditionFromQuery(query),
                 ...QueryPagingHelper.queryPaging(query),
             })
-        ).map((item) => {
-            const isChecked = item.memberInformationRequests.length > 0;
+        )
+        
+        const members = await Promise.all(records.map(async (item) => {
+            const isChecked = item.memberInformationRequests.length > 0 || await this.isMemberInformationRevealable(accountId, item.id);
 
             return {
                 id: item.id,
@@ -161,7 +234,7 @@ export class MemberCompanyService {
                 occupations: item.licenses.map((item) => { return item.code.name; }),
                 isChecked,
             };
-        });
+        }));
         const total = await this.prismaService.member.count({
             where: await this.parseConditionFromQuery(query),
         });
@@ -220,7 +293,7 @@ export class MemberCompanyService {
             },
         });
 
-        const isChecked = checkInformationRequired ? member.memberInformationRequests.length > 0 : true;
+        const isChecked = checkInformationRequired ? (member.memberInformationRequests.length > 0) || (await this.isMemberInformationRevealable(accountId, id)) : true;
 
         if (isChecked) {
             return {

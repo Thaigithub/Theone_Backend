@@ -73,49 +73,89 @@ export class TeamCompanyService {
         };
     }
 
+    private async isTeamInformationRevealable(accountId: number, teamId: number): Promise<boolean> {
+        const headhuntingRecommendation = await this.prismaService.headhuntingRecommendation.findFirst({
+            where: {
+                teamId,
+                headhunting: {
+                    post: {
+                        company: {
+                            accountId,
+                        },
+                    },
+                },
+            },
+        });
+
+        console.log(headhuntingRecommendation);
+
+        if (headhuntingRecommendation) return true;
+
+        const matchingReommendation = await this.prismaService.matchingRecommendation.findFirst({
+            where: {
+                teamId,
+                matchingRequest: {
+                    company: {
+                        accountId,
+                    },
+                },
+            },
+        });
+
+        console.log(matchingReommendation);
+
+        if (matchingReommendation) return true;
+
+        return false;
+    }
+
     async getList(accountId: number, query: TeamCompanyGetListRequest): Promise<TeamCompanyGetListResponse> {
-        const teams = (
-            await this.prismaService.team.findMany({
-                include: {
-                    leader: {
-                        include: {
-                            memberInformationRequests: {
-                                where: {
-                                    company: {
-                                        accountId,
-                                    },
+        const records = await this.prismaService.team.findMany({
+            include: {
+                leader: {
+                    include: {
+                        memberInformationRequests: {
+                            where: {
+                                company: {
+                                    accountId,
                                 },
                             },
                         },
                     },
-                    region: {
-                        select: {
-                            districtKoreanName: true,
-                            cityKoreanName: true,
-                        },
+                },
+                region: {
+                    select: {
+                        districtKoreanName: true,
+                        cityKoreanName: true,
                     },
                 },
-                where: this.parseConditionFromQuery(query),
-                ...QueryPagingHelper.queryPaging(query),
-            })
-        ).map((item) => {
-            const isChecked = item.leader.memberInformationRequests.length > 0;
-
-            return {
-                id: item.id,
-                name: item.name,
-                totalMembers: item.totalMembers,
-                cityKoreanName: item.region.cityKoreanName,
-                districtKoreanName: item.region.districtKoreanName,
-                leader: {
-                    contact: isChecked ? item.leader.contact : null,
-                    isChecked,
-                },
-                totalExperienceYears: item.totalExperienceYears,
-                totalExperienceMonths: item.totalExperienceMonths,
-                desiredSalary: item.desiredSalary,
-            };
+            },
+            where: this.parseConditionFromQuery(query),
+            ...QueryPagingHelper.queryPaging(query),
         });
+
+        const teams = await Promise.all(
+            records.map(async (item) => {
+                const isChecked =
+                    item.leader.memberInformationRequests.length > 0 ||
+                    (await this.isTeamInformationRevealable(accountId, item.id));
+
+                return {
+                    id: item.id,
+                    name: item.name,
+                    totalMembers: item.totalMembers,
+                    cityKoreanName: item.region.cityKoreanName,
+                    districtKoreanName: item.region.districtKoreanName,
+                    leader: {
+                        contact: isChecked ? item.leader.contact : null,
+                        isChecked,
+                    },
+                    totalExperienceYears: item.totalExperienceYears,
+                    totalExperienceMonths: item.totalExperienceMonths,
+                    desiredSalary: item.desiredSalary,
+                };
+            }),
+        );
         const total = await this.prismaService.team.count({
             where: this.parseConditionFromQuery(query),
         });
@@ -219,6 +259,8 @@ export class TeamCompanyService {
             return item.member;
         });
         listMembers.unshift(team.leader);
+
+        if (await this.isTeamInformationRevealable(accountId, id)) checkInformationRequired = false;
 
         const isAdminChecked = checkInformationRequired ? team.leader.memberInformationRequests.length > 0 : true;
 
