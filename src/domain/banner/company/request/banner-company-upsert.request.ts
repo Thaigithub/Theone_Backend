@@ -49,4 +49,8 @@ export class BannerCompanyUpsertRequestRequest {
     @Expose()
     @IsOptional()
     advertisingBanner: AdvertisingType;
+
+    @Expose()
+    @IsNumber()
+    productPaymentHistoryId: number;
 }

@@ -14,7 +14,6 @@ import { ProductCompanyGetListLimitedCountResponse } from './request/product-com
 import { ProductCompanyGetPaymentHistoryListRequest } from './request/product-company-payment-history-get-list-list.request';
 import { ProductCompanyUsageHistoryGetListRequest } from './request/product-company-usage-history-get-list.request';
 import { ProductCompanyCheckAvailabilityResponse } from './response/product-company-check-availability.response';
-import { ProductCompanyCheckPremiumAvailabilityResponse } from './response/product-company-check-premium-availability.response';
 import { ProductCompanyPaymentCreateResponse } from './response/product-company-payment-create.response';
 import { ProductCompanyPaymentHistoryGetListResponse } from './response/product-company-payment-history-get-list-response';
 import { ProductCompanyUsageHistoryGetListResponse } from './response/product-company-usage-history-get-list.response';
@@ -84,13 +83,6 @@ export class ProductCompanyController {
         return BaseResponse.of(
             (await this.productAdminService.getList(GetListType.FIXED_TERM)) as ProductCompanyGetListFixedTermResponse,
         );
-    }
-
-    @Get('/premium/availability')
-    async checkPremiumAvailability(
-        @Req() request: BaseRequest,
-    ): Promise<BaseResponse<ProductCompanyCheckPremiumAvailabilityResponse>> {
-        return BaseResponse.of(await this.productCompanyService.checkPremiumAvailability(request.user.accountId));
     }
 
     @Get('/availability')
