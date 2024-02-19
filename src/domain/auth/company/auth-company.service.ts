@@ -5,9 +5,11 @@ import { OTP_VERIFICATION_VALID_TIME } from 'app.config';
 import { compare, hash } from 'bcrypt';
 import { OtpService } from 'domain/otp/otp.service';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { getTimeDifferenceInMinutes } from 'utils/time-calculator';
 import { UID } from 'utils/uid-generator';
 import { AuthJwtFakePayloadData, AuthJwtPayloadData } from '../auth-jwt.strategy';
+import { MemberAuthService } from '../member/auth-member.service';
 import { AuthCompanyLoginRequest } from './request/auth-company-login-normal.request';
 import { AuthCompanyPasswordRequest } from './request/auth-company-otp-send-password.request';
 import { AuthCompanyUserIdRequest } from './request/auth-company-otp-send-username.request';
@@ -16,7 +18,6 @@ import { AuthCompanyUpdatePasswordRequest } from './request/auth-company-update-
 import { AuthCompanyLoginResponse } from './response/auth-company-login.response';
 import { AuthCompanyOtpSendResponse } from './response/auth-company-otp-send.response';
 import { AuthCompanyOtpVerifyResponse } from './response/auth-company-otp-verify.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class CompanyAuthService {
@@ -24,6 +25,7 @@ export class CompanyAuthService {
         private prismaService: PrismaService,
         private jwtService: JwtService,
         private otpService: OtpService,
+        private memberAuthService: MemberAuthService,
     ) {}
 
     async login(loginData: AuthCompanyLoginRequest): Promise<AuthCompanyLoginResponse> {
@@ -55,6 +57,9 @@ export class CompanyAuthService {
             type,
         };
         const token = this.signToken(payload);
+        if (loginData.deviceToken) {
+            await this.memberAuthService.createDeviceToken(account.id, loginData.deviceToken);
+        }
         return { token, uid, type };
     }
 

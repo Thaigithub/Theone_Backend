@@ -248,31 +248,6 @@ export class CronJobService {
                 }
             }
         }
-
-        // Notify for member that the interest post has been closed
-        for (const post of posts) {
-            for (const interest of post.interests) {
-                const notification = await this.prismaService.notification.findFirst({
-                    where: {
-                        type: NotificationType.POST,
-                        typeId: post.id,
-                        accountId: interest.member.accountId,
-                    },
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                });
-                if (!notification) {
-                    await this.notificationMemberService.create(
-                        interest.member.accountId,
-                        '관심 공고 마감',
-                        '관심 공고가 마감되었습니다',
-                        NotificationType.POST,
-                        post.id,
-                    );
-                }
-            }
-        }
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

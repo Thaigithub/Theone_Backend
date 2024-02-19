@@ -232,6 +232,7 @@ export class InterviewCompanyService {
                 status: true,
                 application: {
                     select: {
+                        id: true,
                         member: {
                             select: {
                                 accountId: true,
@@ -256,16 +257,16 @@ export class InterviewCompanyService {
                     afterUpdateInterview.application.member.accountId,
                     '출근일정 확인',
                     '지원현장에 지정일에 출근해 주세요.',
-                    NotificationType.INTERVIEW,
-                    id,
+                    NotificationType.APPLICATION,
+                    afterUpdateInterview.application.id,
                 );
             } else if (afterUpdateInterview.application.team) {
                 await this.notificationMemberService.create(
                     afterUpdateInterview.application.team.leader.accountId,
                     '출근일정 확인',
                     '지원현장에 지정일에 출근해 주세요.',
-                    NotificationType.INTERVIEW,
-                    id,
+                    NotificationType.APPLICATION,
+                    afterUpdateInterview.application.id,
                 );
             }
         } else if (afterUpdateInterview.status === InterviewStatus.FAIL) {

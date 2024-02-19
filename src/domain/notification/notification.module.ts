@@ -4,9 +4,10 @@ import { NotificationCompanyController } from './company/notification-company.co
 import { NotificationCompanyService } from './company/notification-company.service';
 import { NotificationMemberController } from './member/notification-member.controller';
 import { NotificationMemberService } from './member/notification-member.service';
+import { FireBaseModule } from 'services/firebase/firebase.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, FireBaseModule],
     controllers: [NotificationCompanyController, NotificationMemberController],
     providers: [NotificationCompanyService, NotificationMemberService],
     exports: [NotificationMemberService, NotificationCompanyService],

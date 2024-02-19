@@ -25,6 +25,7 @@ model Account {
   company                Company?
   member                 Member?
   notifications          Notification[]
+  devices                Device[]
   announcements          Announcement[]
 
   @@map("accounts")
@@ -908,9 +909,21 @@ model Notification {
   accountId Int                @map("account_id")
   status    NotificationStatus @default(NOT_READ) @map("status")
   account   Account            @relation(fields: [accountId], references: [id])
-  typeId    Int?
+  typeId    Int?               @map("type_id")
 
   @@map("notifications")
+}
+
+model Device {
+  id        Int      @id @default(autoincrement())
+  isActive  Boolean  @default(true) @map("is_active")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  accountId Int      @map("account_id")
+  account   Account  @relation(fields: [accountId], references: [id])
+  token     String
+
+  @@unique([token, accountId])
+  @@map("devices")
 }
 
 model Announcement {
@@ -1330,6 +1343,7 @@ enum NotificationType {
   CONTRACT
   SalaryHistory
   POINT
+  CURRENCY_EXCHANGE
   HEADHUNTING
   MATCHING
   PRODUCT_PAYMENT

@@ -30,6 +30,7 @@ import { SettlementModule } from 'domain/settlement/settlement.module';
 import { SiteModule } from 'domain/site/site.module';
 import { TermModule } from 'domain/term/term.module';
 import { CrobJobModule } from 'services/crobjob/cronjob.module';
+import { FireBaseModule } from 'services/firebase/firebase.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { AuthModule } from './domain/auth/auth.module';
@@ -80,6 +81,7 @@ import { PrismaModule } from './services/prisma/prisma.module';
         LaborConsultationModule,
         LicenseModule,
         SettlementModule,
+        FireBaseModule,
     ],
 })
 export class AppModule {}

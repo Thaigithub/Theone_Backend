@@ -13,6 +13,7 @@ import { NotificationMemberGetListResponse } from './response/notification-membe
 @UseGuards(AuthJwtGuard, AuthRoleGuard)
 export class NotificationMemberController {
     constructor(private notificationMemberService: NotificationMemberService) {}
+
     @Get()
     async getList(
         @Req() req: BaseRequest,
