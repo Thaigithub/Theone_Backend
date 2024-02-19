@@ -17,13 +17,20 @@ export class LaborConsultationCompanyService {
         accountId: number,
         query: LaborConsultationCompanyGetListRequest,
     ): Promise<LaborConsultationCompanyGetListResponse> {
-        const search = {
-            where: {
-                isActive: true,
-                company: {
-                    accountId,
-                },
+        const queryFilter: Prisma.LaborConsultationWhereInput = {
+            isActive: true,
+            company: {
+                accountId,
             },
+            ...(query.startDate &&
+                query.endDate && {
+                    createdAt: { gte: new Date(query.startDate), lte: new Date(query.endDate) },
+                }),
+            ...(query.status && { status: query.status }),
+        };
+
+        const search = {
+            where: queryFilter,
             include: {
                 questionFiles: {
                     include: {
