@@ -40,7 +40,7 @@ export class NotificationCompanyService {
                     ...(typeId && { typeId }),
                 },
             });
-            await this.firebaseService.pushNotification(accountId, title, content, type, typeId);
+            await this.firebaseService.pushNotification(accountId, title, content, type, typeId, undefined);
         } else {
             return;
         }

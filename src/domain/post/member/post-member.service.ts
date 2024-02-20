@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, NotificationType, PostType, Prisma } from '@prisma/client';
+import { ExperienceType, MemberLevel, NotificationType, PostCategory, PostType, Prisma } from '@prisma/client';
 import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { RegionService } from 'domain/region/region.service';
@@ -308,6 +308,7 @@ export class PostMemberService {
                     select:{
                         id: true,
                         name: true,
+                        level: true,
                     }
                 }
             },
@@ -326,7 +327,8 @@ export class PostMemberService {
                     select: {
                         accountId: true,
                     }
-                }
+                },
+                category: true,
             }
         });
         if (!post) {
@@ -343,6 +345,9 @@ export class PostMemberService {
         });
         if (application) {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
+        }
+        if (post.category === PostCategory.HEADHUNTING && account.member.level !== MemberLevel.PLATINUM) {
+            throw new BadRequestException(Error.MEMBER_IS_NOT_PLATINUM);
         }
         const newApplication = await this.prismaService.application.create({
             data: {
@@ -373,6 +378,11 @@ export class PostMemberService {
             },
             select: {
                 name: true,
+                leader: {
+                    select: {
+                        level: true,
+                    }
+                }
             }
         });
         if (!isTeamLeader) {
@@ -391,7 +401,8 @@ export class PostMemberService {
                     select: {
                         accountId: true,
                     }
-                }
+                },
+                category: true,
             }
         });
 
@@ -411,7 +422,9 @@ export class PostMemberService {
         if (application) {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
-
+        if (post.category === PostCategory.HEADHUNTING && isTeamLeader.leader.level !== MemberLevel.PLATINUM) {
+            throw new BadRequestException(Error.LEADER_IS_NOT_PLATINUM);
+        }
         const newApplication = await this.prismaService.application.create({
             data: {
                 team: { connect: { id: teamId } },

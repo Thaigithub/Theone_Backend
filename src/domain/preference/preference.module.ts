@@ -7,5 +7,6 @@ import { PreferenceMemberService } from './member/preference-member.service';
     imports: [PrismaModule],
     controllers: [PreferenceMemberController],
     providers: [PreferenceMemberService],
+    exports: [PreferenceMemberService],
 })
 export class PreferenceModule {}
