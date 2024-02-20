@@ -1341,7 +1341,6 @@ enum NotificationType {
   APPLICATION
   INTERVIEW
   CONTRACT
-  SalaryHistory
   POINT
   CURRENCY_EXCHANGE
   HEADHUNTING
@@ -1350,10 +1349,6 @@ enum NotificationType {
   LABOR_CONSULTATION
   INQUIRY
   OTHERS
-}
-
-enum ObjectStatus {
-  APPROVED
 }
 
 enum RequestBannerStatus {

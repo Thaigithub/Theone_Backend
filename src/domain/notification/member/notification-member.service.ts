@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, AccountType, NotificationStatus, NotificationType, Prisma } from '@prisma/client';
+import { PreferenceMemberService } from 'domain/preference/member/preference-member.service';
 import { FirebaseService } from 'services/firebase/firebase.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -16,6 +17,7 @@ export class NotificationMemberService {
     constructor(
         private prismaService: PrismaService,
         private firebaseService: FirebaseService,
+        private readonly preferenceMemberService: PreferenceMemberService,
     ) {}
     async create(
         accountId: number,
@@ -38,11 +40,7 @@ export class NotificationMemberService {
             return;
         }
         if (account.type === AccountType.MEMBER && account.member) {
-            const preference = await this.prismaService.preference.findUnique({
-                where: {
-                    memberId: account.member.id,
-                },
-            });
+            const preference = await this.preferenceMemberService.getDetail(accountId);
             if (preference && !preference.isNoticeNotificationActive) {
                 // console.log('Turn off all notifications');
                 return;
@@ -73,7 +71,14 @@ export class NotificationMemberService {
                     ...(typeId && { typeId }),
                 },
             });
-            await this.firebaseService.pushNotification(accountId, title, content, type, typeId);
+            await this.firebaseService.pushNotification(
+                accountId,
+                title,
+                content,
+                type,
+                typeId,
+                preference.isNotificationSoundActive,
+            );
         }
     }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationType } from '@prisma/client';
+import { AccountType, NotificationType } from '@prisma/client';
 import { FIRE_BASE_CLIENT_EMAIL, FIRE_BASE_PRIVATE_KEY, FIRE_BASE_PROJECT_ID } from 'app.config';
 import * as firebase from 'firebase-admin';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -22,6 +22,7 @@ export class FirebaseService {
         content: string,
         type: NotificationType,
         typeId: number,
+        isNotificationSoundActive: boolean | undefined,
     ): Promise<void> {
         const tokens = await this.prismaService.device.findMany({
             where: {
@@ -43,6 +44,9 @@ export class FirebaseService {
                     type: type,
                     typeId: typeId.toString(),
                     accountType: item.account.type,
+                    ...(item.account.type === AccountType.MEMBER && {
+                        isNotificationSoundActive: String(isNotificationSoundActive),
+                    }),
                 },
                 notification: {
                     title,
@@ -53,6 +57,9 @@ export class FirebaseService {
                         type: type,
                         typeId: typeId.toString(),
                         accountType: item.account.type,
+                        ...(item.account.type === AccountType.MEMBER && {
+                            isNotificationSoundActive: String(isNotificationSoundActive),
+                        }),
                     },
                     notification: {
                         title,
