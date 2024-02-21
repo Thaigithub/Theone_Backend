@@ -24,38 +24,40 @@ export class CareerMemberService {
         query: CareerMemberGetListGeneralRequest,
         accountId: number,
     ): Promise<CareerMemberGetListGeneralResponse> {
-        const search = {
-            select: {
-                id: true,
-                type: true,
-                certificationType: true,
-                companyName: true,
-                siteName: true,
-                startDate: true,
-                endDate: true,
-                code: true,
+        const queryFilter: Prisma.CareerWhereInput = {
+            isActive: true,
+            type: CareerType.GENERAL,
+            certificationType: CareerCertificationType.NONE,
+            member: {
+                accountId,
             },
-            where: {
-                isActive: true,
-                type: CareerType.GENERAL,
-                certificationType: CareerCertificationType.NONE,
-                member: {
-                    accountId,
-                },
-            },
-            orderBy: {
-                startDate: Prisma.SortOrder.desc,
-            },
-            ...QueryPagingHelper.queryPaging(query),
         };
-        const careers = (await this.prismaService.career.findMany(search)).map((item) => {
+        const careers = (
+            await this.prismaService.career.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    type: true,
+                    certificationType: true,
+                    companyName: true,
+                    siteName: true,
+                    startDate: true,
+                    endDate: true,
+                    code: true,
+                },
+                orderBy: {
+                    startDate: Prisma.SortOrder.desc,
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((item) => {
             const { code, ...rest } = item;
             return {
                 ...rest,
                 occupationName: code.name,
             };
         });
-        const total = await this.prismaService.career.count({ where: search.where });
+        const total = await this.prismaService.career.count({ where: queryFilter });
         return new PaginationResponse(careers, new PageInfo(total));
     }
 

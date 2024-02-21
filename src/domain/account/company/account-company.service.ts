@@ -175,6 +175,28 @@ export class AccountCompanyService {
                 },
             },
         });
+        const businessRegNum = await this.prismaService.company.findFirst({
+            where: {
+                NOT: {
+                    accountId,
+                },
+                businessRegNumber: body.businessRegNum,
+            },
+        });
+        if (businessRegNum) {
+            throw new BadRequestException(Error.BUSSINESS_REGISTRATION_NUMBER_EXISTED);
+        }
+        const corporateRegNum = await this.prismaService.company.findFirst({
+            where: {
+                NOT: {
+                    accountId,
+                },
+                corporateRegNumber: body.corporateRegNum,
+            },
+        });
+        if (corporateRegNum) {
+            throw new BadRequestException(Error.CORPORATE_REGISTRATION_NUMBER_EXISTED);
+        }
         if (userCount !== 0) throw new BadRequestException(Error.USERNAME_EXISTED);
         await this.prismaService.$transaction(async (tx) => {
             const listFile = (

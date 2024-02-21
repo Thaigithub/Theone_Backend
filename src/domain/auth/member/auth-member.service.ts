@@ -18,7 +18,6 @@ import {
 } from 'app.config';
 import Axios from 'axios';
 import { compare, hash } from 'bcrypt';
-import { DeviceMemberService } from 'domain/device/member/device-member.service';
 import { OtpService } from 'domain/otp/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import { JwksClient } from 'jwks-rsa';
@@ -49,7 +48,6 @@ export class MemberAuthService {
         private prismaService: PrismaService,
         private jwtService: JwtService,
         private otpService: OtpService,
-        private deviceMemberService: DeviceMemberService,
     ) {}
     async sendOtp(request: AuthMemberUserIdRequest | AuthMemberPasswordRequest, ip: string): Promise<AuthMemberOtpSendResponse> {
         const passwordRequest = request as AuthMemberPasswordRequest;
