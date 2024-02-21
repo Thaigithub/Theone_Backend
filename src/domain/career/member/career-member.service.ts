@@ -292,26 +292,19 @@ export class CareerMemberService {
                 member: {
                     accountId,
                 },
-                status: CareerCertificationRequestStatus.APPROVED,
             },
         });
-        if (request < 1) throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
 
-        await this.prismaService.member.update({
-            where: {
-                accountId,
-            },
+        if (request) throw new BadRequestException(Error.CAREER_REQUEST_ALREADY_EXISTED);
+
+        await this.prismaService.careerCertificationRequest.create({
             data: {
-                careerCertificationRequest: {
-                    upsert: {
-                        create: {
-                            status: CareerCertificationRequestStatus.REQUESTING,
-                        },
-                        update: {
-                            status: CareerCertificationRequestStatus.REQUESTING,
-                        },
+                member: {
+                    connect: {
+                        accountId,
                     },
                 },
+                status: CareerCertificationRequestStatus.REQUESTING,
             },
         });
     }
