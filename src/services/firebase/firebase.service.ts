@@ -30,6 +30,7 @@ export class FirebaseService {
                 isActive: true,
             },
             select: {
+                id: true,
                 token: true,
                 account: {
                     select: {
@@ -39,20 +40,8 @@ export class FirebaseService {
             },
         });
         for (const item of tokens) {
-            await firebase.messaging().send({
-                data: {
-                    type: type,
-                    typeId: typeId.toString(),
-                    accountType: item.account.type,
-                    ...(item.account.type === AccountType.MEMBER && {
-                        isNotificationSoundActive: String(isNotificationSoundActive),
-                    }),
-                },
-                notification: {
-                    title,
-                    body: content,
-                },
-                webpush: {
+            try {
+                await firebase.messaging().send({
                     data: {
                         type: type,
                         typeId: typeId.toString(),
@@ -65,9 +54,32 @@ export class FirebaseService {
                         title,
                         body: content,
                     },
-                },
-                token: item.token,
-            });
+                    webpush: {
+                        data: {
+                            type: type,
+                            typeId: typeId.toString(),
+                            accountType: item.account.type,
+                            ...(item.account.type === AccountType.MEMBER && {
+                                isNotificationSoundActive: String(isNotificationSoundActive),
+                            }),
+                        },
+                        notification: {
+                            title,
+                            body: content,
+                        },
+                    },
+                    token: item.token,
+                });
+            } catch (error) {
+                await this.prismaService.device.update({
+                    where: {
+                        id: item.id,
+                    },
+                    data: {
+                        isActive: false,
+                    },
+                });
+            }
         }
     }
 }

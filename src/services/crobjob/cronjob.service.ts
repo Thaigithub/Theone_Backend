@@ -55,7 +55,7 @@ export class CronJobService {
         // Calculate the datetime that is 1 day ago
         const currentDate = new Date();
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getDate() - 1);
+        previousDate.setDate(currentDate.getTime() - 24 * 60 * 60 * 1000);
         const sites = await this.prismaService.site.findMany({
             where: {
                 endDate: {
@@ -88,9 +88,9 @@ export class CronJobService {
     async notifyPost() {
         const currentDate = new Date();
         const nextDay = new Date(currentDate);
-        nextDay.setDate(currentDate.getDate() + 1);
+        nextDay.setDate(currentDate.getTime() + 24 * 60 * 60 * 1000);
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getDate() - 1);
+        previousDate.setDate(currentDate.getDate() - 24 * 60 * 60 * 1000);
         const posts = await this.prismaService.post.findMany({
             where: {
                 endDate: {
@@ -179,7 +179,7 @@ export class CronJobService {
     async changePostStatus() {
         const currentDate = new Date();
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getDate() - 1);
+        previousDate.setDate(currentDate.getTime() - 24 * 60 * 60 * 1000);
         await this.prismaService.post.updateMany({
             data: {
                 status: PostStatus.DEADLINE,
@@ -342,6 +342,23 @@ export class CronJobService {
                 isActive: true,
                 status: BannerStatus.EXPOSE,
                 endDate: { lt: new Date() },
+            },
+        });
+    }
+
+    @Cron(CronExpression.EVERY_MINUTE)
+    async deleteDevice() {
+        const currentTime = new Date();
+        const previusHour = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000);
+        await this.prismaService.device.updateMany({
+            where: {
+                updatedAt: {
+                    lt: previusHour,
+                },
+                isActive: true,
+            },
+            data: {
+                isActive: false,
             },
         });
     }
