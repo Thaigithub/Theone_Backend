@@ -26,6 +26,7 @@ export class DeviceMemberService {
             },
             update: {
                 isActive: true,
+                updatedAt: new Date(),
             },
         });
     }
