@@ -6,33 +6,28 @@ export class DeviceMemberService {
     constructor(private prismaService: PrismaService) {}
 
     async create(accountId: number, body: DeviceTokenRequest): Promise<void> {
-        const device = await this.prismaService.device.findFirst({
+        await this.prismaService.device.upsert({
             where: {
-                accountId,
-                token: body.deviceToken,
-            },
-            select: {
-                id: true,
-                isActive: true,
-            },
-        });
-        if (device && !device.isActive) {
-            await this.prismaService.device.update({
-                where: {
-                    id: device.id,
-                },
-                data: {
-                    isActive: true,
-                },
-            });
-        } else if (!device) {
-            await this.prismaService.device.create({
-                data: {
+                token_accountId: {
                     accountId,
                     token: body.deviceToken,
                 },
-            });
-        }
+                account: {
+                    isActive: true,
+                    OR: [
+                        { member: { isActive: true }, company: null },
+                        { company: { isActive: true }, member: null },
+                    ],
+                },
+            },
+            create: {
+                accountId,
+                token: body.deviceToken,
+            },
+            update: {
+                isActive: true,
+            },
+        });
     }
 
     async delete(accountId: number, body: DeviceTokenRequest): Promise<void> {

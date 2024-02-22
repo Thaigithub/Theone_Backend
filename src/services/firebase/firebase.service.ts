@@ -24,37 +24,26 @@ export class FirebaseService {
         typeId: number,
         isNotificationSoundActive: boolean | undefined,
     ): Promise<void> {
-        const tokens = await this.prismaService.device.findMany({
-            where: {
-                accountId,
-                isActive: true,
-            },
-            select: {
-                id: true,
-                token: true,
-                account: {
+        await Promise.all(
+            (
+                await this.prismaService.device.findMany({
+                    where: {
+                        accountId,
+                        isActive: true,
+                    },
                     select: {
-                        type: true,
+                        id: true,
+                        token: true,
+                        account: {
+                            select: {
+                                type: true,
+                            },
+                        },
                     },
-                },
-            },
-        });
-        for (const item of tokens) {
-            try {
-                await firebase.messaging().send({
-                    data: {
-                        type: type,
-                        typeId: typeId.toString(),
-                        accountType: item.account.type,
-                        ...(item.account.type === AccountType.MEMBER && {
-                            isNotificationSoundActive: String(isNotificationSoundActive),
-                        }),
-                    },
-                    notification: {
-                        title,
-                        body: content,
-                    },
-                    webpush: {
+                })
+            ).map(async (item) => {
+                try {
+                    await firebase.messaging().send({
                         data: {
                             type: type,
                             typeId: typeId.toString(),
@@ -67,19 +56,33 @@ export class FirebaseService {
                             title,
                             body: content,
                         },
-                    },
-                    token: item.token,
-                });
-            } catch (error) {
-                await this.prismaService.device.update({
-                    where: {
-                        id: item.id,
-                    },
-                    data: {
-                        isActive: false,
-                    },
-                });
-            }
-        }
+                        webpush: {
+                            data: {
+                                type: type,
+                                typeId: typeId.toString(),
+                                accountType: item.account.type,
+                                ...(item.account.type === AccountType.MEMBER && {
+                                    isNotificationSoundActive: String(isNotificationSoundActive),
+                                }),
+                            },
+                            notification: {
+                                title,
+                                body: content,
+                            },
+                        },
+                        token: item.token,
+                    });
+                } catch (error) {
+                    await this.prismaService.device.update({
+                        where: {
+                            id: item.id,
+                        },
+                        data: {
+                            isActive: false,
+                        },
+                    });
+                }
+            }),
+        );
     }
 }
