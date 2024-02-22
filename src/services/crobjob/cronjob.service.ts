@@ -55,7 +55,7 @@ export class CronJobService {
         // Calculate the datetime that is 1 day ago
         const currentDate = new Date();
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        previousDate.setDate(currentDate.getDay() - 1);
         const sites = await this.prismaService.site.findMany({
             where: {
                 endDate: {
@@ -88,9 +88,9 @@ export class CronJobService {
     async notifyPost() {
         const currentDate = new Date();
         const nextDay = new Date(currentDate);
-        nextDay.setDate(currentDate.getTime() + 24 * 60 * 60 * 1000);
+        nextDay.setDate(currentDate.getDay() + 1);
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getDate() - 24 * 60 * 60 * 1000);
+        previousDate.setDate(currentDate.getDay() - 1);
         const posts = await this.prismaService.post.findMany({
             where: {
                 endDate: {
@@ -179,7 +179,7 @@ export class CronJobService {
     async changePostStatus() {
         const currentDate = new Date();
         const previousDate = new Date(currentDate);
-        previousDate.setDate(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        previousDate.setDate(currentDate.getDay() - 1);
         await this.prismaService.post.updateMany({
             data: {
                 status: PostStatus.DEADLINE,
@@ -348,8 +348,8 @@ export class CronJobService {
 
     @Cron(CronExpression.EVERY_MINUTE)
     async deleteDevice() {
-        const currentTime = new Date();
-        const previusHour = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000);
+        const previusHour = new Date();
+        previusHour.setHours(previusHour.getHours() - 1);
         await this.prismaService.device.updateMany({
             where: {
                 updatedAt: {
