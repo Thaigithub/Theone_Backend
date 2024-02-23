@@ -1,6 +1,7 @@
 import { InvitationStatus } from '@prisma/client';
 
 export class TeamMemberGetDetailResponse {
+    isLeader: boolean;
     team: {
         name: string;
         city: {

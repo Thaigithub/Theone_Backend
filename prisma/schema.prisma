@@ -1507,6 +1507,7 @@ enum ExperienceType {
 
 enum SalaryType {
   DAILY
+  WEEKLY
   MONTHLY
 }
 

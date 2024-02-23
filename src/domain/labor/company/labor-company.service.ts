@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, RequestObject, SalaryType } from '@prisma/client';
+import { Prisma, RequestObject } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { LaborCompanyCreateRequest } from './request/labor-company-create.request';
@@ -12,7 +13,6 @@ import { LaborCompanyGetDetailSalaryResponse } from './response/labor-company-ge
 import { LaborCompanyGetDetailResponse } from './response/labor-company-get-detail.response';
 import { LaborCompanyGetListWorkDateResponse } from './response/labor-company-get-list-workdates.response';
 import { LaborCompanyGetListResponse } from './response/labor-company-get-list.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class LaborCompanyService {
@@ -134,31 +134,6 @@ export class LaborCompanyService {
         });
         if (!contract) throw new NotFoundException(Error.CONTRACT_NOT_FOUND);
         if (contract.labor) throw new BadRequestException(Error.LABOR_EXISTED);
-        if (contract.salaryType === SalaryType.MONTHLY) {
-            const count = body.salaryHistory
-                .map((item) => {
-                    const month = new Date(item.date).getMonth();
-                    const year = new Date(item.date).getFullYear();
-                    return `${year}-${month}`;
-                })
-                .reduce((accum, current) => {
-                    if (!accum.includes(current)) {
-                        accum.push(current);
-                        return accum;
-                    } else return accum;
-                }, []);
-            if (count.length !== body.salaryHistory.length) throw new BadRequestException(Error.SALARY_PAYMENT_REQUEST_IS_NOT_APPROPRIATE);
-        } else if (contract.salaryType === SalaryType.DAILY) {
-            const count = body.salaryHistory
-                .map((item) => item.date)
-                .reduce((accum, current) => {
-                    if (!accum.includes(current)) {
-                        accum.push(current);
-                        return accum;
-                    } else return accum;
-                }, []);
-            if (count.length !== body.salaryHistory.length) throw new BadRequestException(Error.SALARY_PAYMENT_REQUEST_IS_NOT_APPROPRIATE);
-        }
         const labor = await this.prismaService.labor.create({
             data: {
                 contractId: body.contractId,
