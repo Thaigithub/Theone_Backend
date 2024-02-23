@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InquirerType, Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InquirerType, MemberLevel, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -59,6 +59,18 @@ export class LaborConsultationMemberService {
     }
 
     async create(accountId: number, body: LaborConsultationMemberCreateRequest): Promise<void> {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                accountId,
+                isActive: true,
+            },
+            select: {
+                level: true,
+            },
+        });
+        if (member && !Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(member.level)) {
+            throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+        }
         await this.prismaService.$transaction(async (tx) => {
             const files = await Promise.all(
                 body.files.map(async (item) => {
