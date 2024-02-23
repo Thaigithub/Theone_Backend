@@ -75,90 +75,94 @@ export class TeamMemberService {
     }
 
     async getList(accountId: number, query: PaginationRequest): Promise<TeamMemberGetListResponse> {
-        const search = {
-            where: {
-                OR: [
-                    {
-                        leader: {
-                            accountId,
-                        },
-                    },
-                    {
-                        members: {
-                            some: {
-                                member: {
-                                    accountId,
-                                },
-                                isActive: true,
-                            },
-                        },
-                    },
-                ],
-                isActive: true,
-            },
-            include: {
-                leader: true,
-                code: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
+        const queryFilter: Prisma.TeamWhereInput = {
+            OR: [
+                {
+                    leader: {
+                        accountId,
                     },
                 },
-                members: {
-                    where: {
-                        isActive: true,
-                    },
-                    select: {
-                        member: {
-                            select: {
-                                id: true,
-                                isActive: true,
-                                name: true,
-                                contact: true,
+                {
+                    members: {
+                        some: {
+                            member: {
+                                accountId,
                             },
+                            isActive: true,
                         },
                     },
                 },
-            },
-            orderBy: {
-                createdAt: Prisma.SortOrder.desc,
-            },
-            ...QueryPagingHelper.queryPaging(query),
+            ],
+            isActive: true,
         };
-        const teams = (await this.prismaService.team.findMany(search)).map((team) => ({
-            id: team.id,
-            name: team.name,
-            status: team.status,
-            code: {
-                id: team.code.id,
-                codeName: team.code.name,
-                code: team.code.code,
-            },
-            exposureStatus: team.exposureStatus,
-            isActive: team.isActive,
-            numberOfRecruitments: team.numberOfRecruitments,
-            leaderName: team.leader.name,
-            isLeader: accountId === team.leader.id ? true : false,
-            totalMembers: team.totalMembers,
-            createdAt: team.createdAt,
-            memberInfors: team.members
-                .filter((item) => item.member.isActive)
-                .map((item) => {
-                    return {
-                        id: item.member.id,
-                        name: item.member.name,
-                        contact: item.member.contact,
-                    };
-                })
-                .concat({
-                    id: team.leaderId,
-                    name: team.leader.name,
-                    contact: team.leader.contact,
-                }),
-        }));
+        const teams = (
+            await this.prismaService.team.findMany({
+                where: queryFilter,
+                include: {
+                    leader: true,
+                    code: {
+                        select: {
+                            id: true,
+                            name: true,
+                            code: true,
+                        },
+                    },
+                    members: {
+                        where: {
+                            isActive: true,
+                        },
+                        select: {
+                            member: {
+                                select: {
+                                    id: true,
+                                    isActive: true,
+                                    name: true,
+                                    contact: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: Prisma.SortOrder.desc,
+                },
+                ...QueryPagingHelper.queryPaging(query),
+            })
+        ).map((team) => {
+            return {
+                id: team.id,
+                name: team.name,
+                status: team.status,
+                code: {
+                    id: team.code.id,
+                    codeName: team.code.name,
+                    code: team.code.code,
+                },
+                exposureStatus: team.leader.accountId === accountId ? team.exposureStatus : null,
+                isActive: team.leader.accountId === accountId ? team.isActive : null,
+                numberOfRecruitments: team.numberOfRecruitments,
+                leaderName: team.leader.name,
+                isLeader: accountId === team.leader.accountId,
+                totalMembers: team.totalMembers,
+                createdAt: team.createdAt,
+                memberInfors: team.members
+                    .filter((item) => item.member.isActive)
+                    .map((item) => {
+                        return {
+                            id: item.member.id,
+                            name: item.member.name,
+                            contact: item.member.contact,
+                        };
+                    })
+                    .concat({
+                        id: team.leaderId,
+                        name: team.leader.name,
+                        contact: team.leader.contact,
+                    }),
+            };
+        });
         const teamListCount = await this.prismaService.team.count({
-            where: search.where,
+            where: queryFilter,
         });
         return new PaginationResponse(teams, new PageInfo(teamListCount));
     }
@@ -211,6 +215,7 @@ export class TeamMemberService {
                         id: true,
                         name: true,
                         contact: true,
+                        accountId: true,
                     },
                 },
             },
@@ -232,24 +237,29 @@ export class TeamMemberService {
                 },
             },
         });
-        const memberInvitaions = await this.prismaService.teamInvitation.findMany({
-            where: {
-                teamId: id,
-                isActive: true,
-            },
-            select: {
-                id: true,
-                member: {
-                    select: {
-                        id: true,
-                        name: true,
-                        contact: true,
-                    },
-                },
-                status: true,
-            },
-        });
+
+        const memberInvitaions =
+            team.leader.accountId === accountId
+                ? await this.prismaService.teamInvitation.findMany({
+                      where: {
+                          teamId: id,
+                          isActive: true,
+                      },
+                      select: {
+                          id: true,
+                          member: {
+                              select: {
+                                  id: true,
+                                  name: true,
+                                  contact: true,
+                              },
+                          },
+                          status: true,
+                      },
+                  })
+                : [];
         return {
+            isLeader: team.leader.accountId === accountId,
             team: {
                 name: team.name,
                 city: {
@@ -272,7 +282,6 @@ export class TeamMemberService {
                 leaderName: team.leader.name,
                 leaderContact: team.leader.contact,
             },
-
             members: members
                 .filter((memberInfor) => memberInfor.member.id !== team.leader.id)
                 .map((memberInfo) => ({
