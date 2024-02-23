@@ -19,7 +19,8 @@ import { AccountMemberUpsertForeignWorkerRequest } from './request/account-membe
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
-import { AccountMemberGetBankDetailResponse } from './response/account-member-get-bank-detail.response';
+import { AccountMemberGetDetailBankResponse } from './response/account-member-get-detail-bank.response';
+import { AccountMemberGetDetailLevelResponse } from './response/account-member-get-detail-level.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
@@ -372,7 +373,7 @@ export class AccountMemberService {
         });
     }
 
-    async getBankAccount(accountId: number): Promise<AccountMemberGetBankDetailResponse> {
+    async getBankAccount(accountId: number): Promise<AccountMemberGetDetailBankResponse> {
         return await this.prismaService.bankAccount.findFirst({
             where: {
                 member: {
@@ -386,6 +387,18 @@ export class AccountMemberService {
                 accountHolder: true,
                 bankName: true,
                 accountNumber: true,
+            },
+        });
+    }
+
+    async getLevel(accountId: number): Promise<AccountMemberGetDetailLevelResponse> {
+        return await this.prismaService.member.findUnique({
+            where: {
+                accountId,
+                isActive: true,
+            },
+            select: {
+                level: true,
             },
         });
     }
