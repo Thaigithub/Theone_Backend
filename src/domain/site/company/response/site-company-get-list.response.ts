@@ -6,7 +6,6 @@ export class GetListResponse {
     name: Site['name'];
     personInCharge: Site['personInCharge'];
     personInChargeContact: Site['personInChargeContact'];
-    originalBuilding: Site['originalBuilding'];
     startDate: Site['startDate'];
     endDate: Site['endDate'];
     cityKoreanName: Region['cityKoreanName'];

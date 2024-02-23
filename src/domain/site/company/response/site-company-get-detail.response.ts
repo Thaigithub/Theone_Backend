@@ -15,7 +15,6 @@ export class SiteCompanyGetDetailResponse {
     endDate: Site['endDate'];
     longitude: Site['longitude'];
     latitude: Site['latitude'];
-    originalBuilding: Site['originalBuilding'];
     city: number;
     cityKorean: string;
     district: number;

@@ -121,7 +121,6 @@ export class ApplicationMemberService {
                                     contact: true,
                                     address: true,
                                     personInCharge: true,
-                                    originalBuilding: true,
                                 },
                             },
                             company: {
