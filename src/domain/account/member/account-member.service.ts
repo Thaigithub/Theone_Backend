@@ -231,8 +231,7 @@ export class AccountMemberService {
             foreignWorker: {
                 englishName: foreignWorker ? foreignWorker.englishName : null,
                 registrationNumber: foreignWorker ? foreignWorker.registrationNumber : null,
-                serialNumber: foreignWorker ? foreignWorker.serialNumber : null,
-                dateOfIssue: foreignWorker ? foreignWorker.dateOfIssue : null,
+                residenceStatus: foreignWorker ? foreignWorker.residenceStatus : null,
                 file: {
                     fileName: foreignWorker ? foreignWorker.file.fileName : null,
                     type: foreignWorker ? foreignWorker.file.type : null,
@@ -425,18 +424,16 @@ export class AccountMemberService {
                     upsert: {
                         update: {
                             englishName: request.englishName,
-                            serialNumber: request.serialNumber,
+                            residenceStatus: request.residenceStatus,
                             registrationNumber: request.registrationNumber,
-                            dateOfIssue: new Date(request.dateOfIssue).toISOString(),
                             file: {
                                 update: request.file,
                             },
                         },
                         create: {
                             englishName: request.englishName,
-                            serialNumber: request.serialNumber,
+                            residenceStatus: request.residenceStatus,
                             registrationNumber: request.registrationNumber,
-                            dateOfIssue: new Date(request.dateOfIssue).toISOString(),
                             file: {
                                 create: request.file,
                             },

@@ -264,8 +264,7 @@ export class MemberAdminService {
             },
             foreignWorker: {
                 registrationNumber: member.foreignWorker ? member.foreignWorker.registrationNumber : null,
-                serialNumber: member.foreignWorker ? member.foreignWorker.serialNumber : null,
-                dateOfIssue: member.foreignWorker ? member.foreignWorker.dateOfIssue : null,
+                residenceStatus: member.foreignWorker ? member.foreignWorker.residenceStatus : null,
             },
             teams: member.teams
                 ? member.teams.map((item) => {
