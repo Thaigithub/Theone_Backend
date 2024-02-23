@@ -290,11 +290,20 @@ export class AccountMemberService {
             });
             if (isEntireCityId) throw new BadRequestException(Error.ENTIRE_CITY_CANNOT_BE_USED);
         }
+        if (body.email) {
+            const email = await this.prismaService.member.count({
+                where: {
+                    email: body.email,
+                },
+            });
+            if (email > 0) throw new BadRequestException(Error.EMAIL_EXISTED);
+        }
 
         await this.prismaService.member.update({
             data: {
                 desiredSalary: body.desiredSalary,
                 regionId: body.districtId,
+                email: body.email,
             },
             where: {
                 accountId,

@@ -16,12 +16,12 @@ import { AccountMemberUpsertForeignWorkerRequest } from './request/account-membe
 import { AccountMemberUpsertHSTCertificateRequest } from './request/account-member-upsert-hstcertificate.request';
 import { AccountMemberVerifyOtpVerifyPhoneRequest } from './request/account-member-verify-otp.request';
 import { AccountMemberCheckExistedResponse } from './response/account-member-check-existed.response';
+import { AccountMemberGetDetailBankResponse } from './response/account-member-get-detail-bank.response';
 import { AccountMemberGetDetailLevelResponse } from './response/account-member-get-detail-level.response';
 import { AccountMemberGetDetailResponse } from './response/account-member-get-detail.response';
 import { AccountMemberSendOtpVerifyPhoneResponse } from './response/account-member-send-otp-verify-phone.response';
 import { AccountMemberUpdatePasswordResponse } from './response/account-member-update-password.response';
 import { AccountMemberVerifyOtpVerifyPhoneResponse } from './response/account-member-verify-otp.response';
-import { AccountMemberGetDetailBankResponse } from './response/account-member-get-detail-bank.response';
 
 @Controller('/member/accounts')
 export class AccountMemberController {
