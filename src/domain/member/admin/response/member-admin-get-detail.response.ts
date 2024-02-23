@@ -25,8 +25,7 @@ export class MemberAdminGetDetailResponse {
     };
     foreignWorker: {
         registrationNumber: ForeignWorker['registrationNumber'];
-        serialNumber: ForeignWorker['serialNumber'];
-        dateOfIssue: ForeignWorker['dateOfIssue'];
+        residenceStatus: ForeignWorker['residenceStatus'];
     };
     teams: {
         id: Team['id'];

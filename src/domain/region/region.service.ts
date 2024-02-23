@@ -20,6 +20,9 @@ export class RegionService {
                     cityEnglishName: true,
                     cityId: true,
                 },
+                orderBy: {
+                    cityId: 'asc',
+                },
             })
         )
             .reduce((result: RegionGetListResponse[], current) => {

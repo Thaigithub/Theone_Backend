@@ -18,8 +18,7 @@ class BankAccountType {
 class ForeignWorkerType {
     englishName: ForeignWorker['englishName'];
     registrationNumber: ForeignWorker['registrationNumber'];
-    serialNumber: ForeignWorker['serialNumber'];
-    dateOfIssue: ForeignWorker['dateOfIssue'];
+    residenceStatus: ForeignWorker['residenceStatus'];
     file: FileResponse;
 }
 class DisabilityType extends FileResponse {}
