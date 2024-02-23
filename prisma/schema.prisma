@@ -484,7 +484,6 @@ model Site {
   contact                    String
   personInCharge             String                      @map("person_in_charge")
   personInChargeContact      String                      @map("person_in_charge_contact")
-  originalBuilding           String                      @map("original_building")
   email                      String
   taxInvoiceEmail            String                      @map("tax_invoice_email")
   siteManagementNumber       String                      @map("site_management_number")

@@ -1,6 +1,6 @@
 import { ContractStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
-import { IsDateString, IsEmail, IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNumber, IsString, Matches } from 'class-validator';
 
 export class SiteCompanyUpsertRequest {
     @IsString()
@@ -14,11 +14,6 @@ export class SiteCompanyUpsertRequest {
     @Expose()
     @IsNumber()
     districtId: number;
-
-    @IsString()
-    @Expose()
-    @IsOptional()
-    originalBuilding: string;
 
     @IsString()
     @Expose()

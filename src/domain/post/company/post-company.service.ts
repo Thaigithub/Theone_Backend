@@ -285,7 +285,6 @@ export class PostCompanyService {
                         name: true,
                         contact: true,
                         address: true,
-                        originalBuilding: true,
                         personInCharge: true,
                     },
                 },

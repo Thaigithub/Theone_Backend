@@ -28,7 +28,6 @@ export class PostMemberGetDetailResponse {
         endDate: string;
         longitude: Site['longitude'];
         latitude: Site['latitude'];
-        originalBuilding: Site['originalBuilding'];
         originalContractor: Site['contractStatus'];
         isInterest: boolean;
     };

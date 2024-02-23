@@ -99,7 +99,6 @@ export class PostAdminService {
                         name: true,
                         contact: true,
                         address: true,
-                        originalBuilding: true,
                         personInCharge: true,
                     },
                 },
@@ -213,7 +212,6 @@ export class PostAdminService {
                         name: true,
                         contact: true,
                         address: true,
-                        originalBuilding: true,
                         personInCharge: true,
                         region: {
                             select: {
@@ -256,7 +254,6 @@ export class PostAdminService {
                 name: item.site.name,
                 contact: item.site.contact,
                 personInCharge: item.site.personInCharge,
-                originalBuilding: item.site.originalBuilding,
                 address: item.site.address,
                 district: {
                     englishName: item.site.region.districtEnglishName,

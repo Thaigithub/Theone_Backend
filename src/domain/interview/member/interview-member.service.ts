@@ -117,7 +117,6 @@ export class InterviewMemberService {
                                     contact: true,
                                     address: true,
                                     personInCharge: true,
-                                    originalBuilding: true,
                                 },
                             },
                             company: {
