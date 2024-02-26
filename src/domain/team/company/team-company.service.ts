@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CertificateStatus, ExperienceType, Prisma } from '@prisma/client';
+import { CertificateStatus, ExperienceType, MemberLevel, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -70,7 +70,10 @@ export class TeamCompanyService {
                     totalMembers: query.numberOfMembers && { lte: query.numberOfMembers },
                 },
             ],
-        };
+            leader: {
+                NOT: { level: { in: Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER) } },
+            },
+        } as Prisma.TeamWhereInput;
     }
 
     private async isTeamInformationRevealable(accountId: number, teamId: number): Promise<boolean> {
@@ -167,6 +170,39 @@ export class TeamCompanyService {
             where: {
                 isActive: true,
                 id,
+                OR: [
+                    {
+                        headhuntingRecommendations: {
+                            some: {
+                                headhunting: {
+                                    post: {
+                                        company: {
+                                            accountId,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        matchingRecommendations: {
+                            some: {
+                                matchingRequest: {
+                                    company: {
+                                        accountId,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        leader: {
+                            NOT: {
+                                level: { in: Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER) },
+                            },
+                        },
+                    },
+                ],
             },
         });
 

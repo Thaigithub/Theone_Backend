@@ -2,8 +2,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import {
     ApplicationCategory,
     InterviewStatus,
+    MemberLevel,
     NotificationType,
     PostApplicationStatus,
+    PostCategory,
     Prisma,
     RequestObject,
 } from '@prisma/client';
@@ -300,6 +302,9 @@ export class InterviewCompanyService {
                     isActive: true,
                 },
             },
+            select: {
+                category: true,
+            },
         });
         if (!postExist) throw new NotFoundException(Error.POST_NOT_FOUND);
         const interview = await this.prismaService.interview.count({
@@ -328,6 +333,9 @@ export class InterviewCompanyService {
                             id: body.id,
                             isActive: true,
                         },
+                        select: {
+                            level: true,
+                        },
                     });
                     if (!member) throw new NotFoundException(Error.MEMBER_NOT_FOUND);
                     const record = await prisma.application.findUnique({
@@ -342,13 +350,9 @@ export class InterviewCompanyService {
                         },
                     });
 
-                    if (!record && body.category === ApplicationCategory.NORMAL)
-                        throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
-
                     if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
-
                     switch (body.category) {
                         case ApplicationCategory.HEADHUNTING: {
                             const count = await prisma.headhunting.count({
@@ -370,9 +374,16 @@ export class InterviewCompanyService {
                                 },
                             });
                             if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    member.level,
+                                )
+                            ) {
+                                throw new BadRequestException(Error.MEMBER_IS_CERTIFIED_LEVEL);
+                            }
                             break;
                         }
-                        default: {
+                        case ApplicationCategory.MANPOWER: {
                             const count = await this.prismaService.application.count({
                                 where: {
                                     postId: body.postId,
@@ -384,31 +395,29 @@ export class InterviewCompanyService {
                                     },
                                 },
                             });
-                            if (count === 0 && body.category !== ApplicationCategory.MANPOWER) {
-                                const countMatching = await prisma.post.count({
-                                    where: {
-                                        id: body.postId,
-                                        category: ApplicationCategory.MATCHING,
-                                    },
-                                });
-                                if (countMatching !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
-                                const countHeadhunting = await prisma.headhunting.count({
-                                    where: {
-                                        post: {
-                                            id: body.postId,
-                                            category: ApplicationCategory.HEADHUNTING,
-                                        },
-                                        isActive: true,
-                                    },
-                                });
-                                if (countHeadhunting !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (count !== 0) {
+                                if (count === 0) throw new BadRequestException(Error.APPLICATION_EXISTED);
                             }
+                            if (postExist.category === PostCategory.HEADHUNTING) {
+                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+                            }
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    member.level,
+                                )
+                            ) {
+                                throw new BadRequestException(Error.MEMBER_IS_CERTIFIED_LEVEL);
+                            }
+                            break;
+                        }
+                        default: {
+                            if (!record) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
                             break;
                         }
                     }
                     const headhunting = await prisma.member.findUnique({
                         where: {
-                            id: member.id,
+                            id: body.id,
                             headhuntingRecommendations: {
                                 some: {
                                     headhunting: {
@@ -476,6 +485,13 @@ export class InterviewCompanyService {
                             id: body.id,
                             isActive: true,
                         },
+                        select: {
+                            leader: {
+                                select: {
+                                    level: true,
+                                },
+                            },
+                        },
                     });
                     if (!team) throw new NotFoundException(Error.TEAM_NOT_FOUND);
                     const record = await prisma.application.findUnique({
@@ -514,44 +530,53 @@ export class InterviewCompanyService {
                                 },
                             });
                             if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    team.leader.level,
+                                )
+                            ) {
+                                throw new BadRequestException(Error.LEADER_IS_CERTIFIED_LEVEL);
+                            }
                             break;
                         }
-                        default: {
-                            const count = await this.prismaService.application.count({
+                        case ApplicationCategory.MANPOWER: {
+                            const count = await prisma.application.count({
                                 where: {
-                                    postId: body.postId,
                                     teamId: body.id,
                                     post: {
+                                        id: body.postId,
+                                        isActive: true,
                                         company: {
                                             accountId: accountId,
                                         },
                                     },
                                 },
                             });
-                            if (count === 0) {
-                                const countMatching = await prisma.post.count({
-                                    where: {
-                                        id: body.postId,
-                                        category: ApplicationCategory.MATCHING,
-                                    },
-                                });
-                                if (countMatching !== 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
-                                const countHeadhunting = await prisma.headhunting.count({
-                                    where: {
-                                        post: {
-                                            id: body.postId,
-                                            category: ApplicationCategory.HEADHUNTING,
-                                        },
-                                    },
-                                });
-                                if (countHeadhunting === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (count !== 0) {
+                                throw new BadRequestException(Error.APPLICATION_EXISTED);
+                            }
+                            if (postExist.category === PostCategory.HEADHUNTING) {
+                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+                            }
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    team.leader.level,
+                                )
+                            ) {
+                                throw new BadRequestException(Error.LEADER_IS_CERTIFIED_LEVEL);
+                            }
+                            break;
+                        }
+                        default: {
+                            if (!record) {
+                                throw new BadRequestException(Error.APPLICATION_NOT_FOUND);
                             }
                             break;
                         }
                     }
                     const headhunting = await prisma.member.findUnique({
                         where: {
-                            id: team.id,
+                            id: body.id,
                             headhuntingRecommendations: {
                                 some: {
                                     headhunting: {

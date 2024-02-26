@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostApplicationStatus, RequestObject } from '@prisma/client';
+import { AccountMemberService } from 'domain/account/member/account-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -13,7 +14,10 @@ import { ContractCompanyGetTotalResponse } from './response/contract-company-get
 
 @Injectable()
 export class ContractCompanyService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private accountMemberService: AccountMemberService,
+    ) {}
     async getListSite(
         siteId: number,
         accountId: number,
@@ -128,6 +132,15 @@ export class ContractCompanyService {
                                 members: true,
                             },
                         },
+                        leaderId: true,
+                        members: {
+                            where: {
+                                isActive: true,
+                            },
+                            select: {
+                                memberId: true,
+                            },
+                        },
                     },
                 },
                 member: {
@@ -199,6 +212,17 @@ export class ContractCompanyService {
                 },
             });
         });
+
+        if (application.member) {
+            await this.accountMemberService.upgradeMember(application.member.id);
+        } else if (application.team) {
+            await this.accountMemberService.upgradeMember(application.team.leaderId);
+            await Promise.all(
+                application.team.members.map(async (item) => {
+                    await this.accountMemberService.upgradeMember(item.memberId);
+                }),
+            );
+        }
     }
 
     async count(accountId: number): Promise<ContractCompanyGetTotalResponse> {

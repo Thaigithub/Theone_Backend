@@ -4,6 +4,7 @@ import { PaginationResponse } from 'utils/generics/pagination.response';
 export class GetListPostResponse {
     id: Application['id'];
     assignedAt: Application['assignedAt'];
+    status: Application['status'];
     member: {
         name: Member['name'];
         contact: Member['contact'];

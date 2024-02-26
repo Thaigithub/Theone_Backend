@@ -23,12 +23,14 @@ import { MemberAdminGetListResponse } from './response/member-admin-get-list.res
 import { MemberAdminGetPointDetailListResponse } from './response/member-admin-get-point-detail-list.response';
 import { MemberAdminGetPointDetailResponse } from './response/member-admin-get-point-detail.response';
 import { MemberAdminGetPointListResponse } from './response/member-admin-get-point-list.response';
+import { AccountMemberService } from 'domain/account/member/account-member.service';
 
 @Injectable()
 export class MemberAdminService {
     constructor(
         private prismaService: PrismaService,
         private excelService: ExcelService,
+        private accountMemberService: AccountMemberService,
     ) {}
 
     private parseConditionsFromQuery(query: GetMembersListRequest) {
@@ -539,9 +541,12 @@ export class MemberAdminService {
     }
 
     async updateMember(id: number, body: ChangeMemberRequest): Promise<void> {
-        const memberExist = await this.prismaService.member.count({
+        const memberExist = await this.prismaService.member.findUnique({
             where: {
                 id,
+            },
+            select: {
+                level: true,
             },
         });
 
@@ -562,7 +567,6 @@ export class MemberAdminService {
                 id,
             },
             data: {
-                level: body.level,
                 account: {
                     update: {
                         status: body.status,
@@ -570,6 +574,9 @@ export class MemberAdminService {
                 },
             },
         });
+        if (body.level && memberExist.level !== body.level) {
+            await this.accountMemberService.upgradeLevel(id, body.level);
+        }
         if (body.status !== undefined) {
             if (body.message !== undefined) {
                 await this.prismaService.accountStatusHistory.create({

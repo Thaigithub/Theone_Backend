@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, PaymentStatus, Prisma, ProductType, RefundStatus } from '@prisma/client';
+import { ExperienceType, MemberLevel, PaymentStatus, Prisma, ProductType, RefundStatus } from '@prisma/client';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -103,7 +103,10 @@ export class MemberCompanyService {
                     }),
                 },
             ],
-        };
+            NOT: {
+                level: { in: Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER)},
+            }
+        } as Prisma.MemberWhereInput;
     }
 
     private async isMemberInformationRevealable(accountId: number, memberId: number): Promise<boolean> {
@@ -246,6 +249,37 @@ export class MemberCompanyService {
             where: {
                 isActive: true,
                 id,
+                OR: [
+                    {
+                        headhuntingRecommendations: {
+                            some: {
+                                headhunting: {
+                                    post: {
+                                        company: {
+                                            accountId,
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                    },
+                    {
+                        matchingRecommendations: {
+                            some: {
+                                matchingRequest: {
+                                    company: {
+                                        accountId,
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        NOT: {
+                            level: { in: Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER)}
+                        }
+                    }
+                ],
             },
         });
         if (!memberExist) throw new NotFoundException(Error.MEMBER_NOT_FOUND);

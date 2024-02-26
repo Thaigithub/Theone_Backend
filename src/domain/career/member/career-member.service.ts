@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CareerCertificationRequestStatus, CareerCertificationType, CareerType, Prisma } from '@prisma/client';
+import { AccountMemberService } from 'domain/account/member/account-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { BaseResponse } from 'utils/generics/base.response';
@@ -18,6 +19,7 @@ export class CareerMemberService {
     constructor(
         private prismaService: PrismaService,
         private governmentService: GovernmentService,
+        private accountMemberService: AccountMemberService,
     ) {}
 
     async getListGeneral(
@@ -116,7 +118,7 @@ export class CareerMemberService {
         }
         const codeId = body.occupationId;
         delete body.occupationId;
-        await this.prismaService.member.update({
+        const member = await this.prismaService.member.update({
             where: {
                 accountId,
             },
@@ -134,7 +136,12 @@ export class CareerMemberService {
                     },
                 },
             },
+            select: {
+                id: true,
+            },
         });
+        await this.accountMemberService.upgradeMember(member.id);
+
         return BaseResponse.ok();
     }
 
@@ -297,7 +304,7 @@ export class CareerMemberService {
 
         if (request) throw new BadRequestException(Error.CAREER_REQUEST_ALREADY_EXISTED);
 
-        await this.prismaService.careerCertificationRequest.create({
+        const certificate = await this.prismaService.careerCertificationRequest.create({
             data: {
                 member: {
                     connect: {
@@ -306,7 +313,11 @@ export class CareerMemberService {
                 },
                 status: CareerCertificationRequestStatus.REQUESTING,
             },
+            select: {
+                memberId: true,
+            },
         });
+        await this.accountMemberService.upgradeMember(certificate.memberId);
     }
 
     async getCertExperienceByHealthInsurance(accountId: number): Promise<void> {
@@ -317,6 +328,7 @@ export class CareerMemberService {
                 },
                 select: {
                     careerCertificationRequest: true,
+                    id: true,
                 },
             })
         ).careerCertificationRequest;
@@ -324,6 +336,7 @@ export class CareerMemberService {
         if (application.status != CareerCertificationRequestStatus.APPROVED)
             throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationExperienceHealthInsurance(accountId);
+        await this.accountMemberService.upgradeMember(application.memberId);
     }
 
     async getCertExperienceByEmploymentInsurance(accountId: number): Promise<void> {
@@ -341,6 +354,7 @@ export class CareerMemberService {
         if (application.status != CareerCertificationRequestStatus.APPROVED)
             throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationExperienceEmploymentInsurance(accountId);
+        await this.accountMemberService.upgradeMember(application.memberId);
     }
 
     async getCertExperienceByTheOneSite(accountId: number): Promise<void> {
@@ -358,5 +372,6 @@ export class CareerMemberService {
         if (application.status != CareerCertificationRequestStatus.APPROVED)
             throw new BadRequestException(Error.CAREER_REQUEST_STATUS_IS_NOT_APPROPRIATE);
         await this.governmentService.saveCertificationTheOneSite(accountId);
+        await this.accountMemberService.upgradeMember(application.memberId);
     }
 }

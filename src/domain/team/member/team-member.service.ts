@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InvitationStatus, NotificationType, Prisma, TeamStatus } from '@prisma/client';
+import { InvitationStatus, MemberLevel, NotificationType, Prisma, TeamStatus } from '@prisma/client';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
@@ -51,6 +51,18 @@ export class TeamMemberService {
     }
 
     async create(accountId: number, request: TeamMemberUpsertRequest): Promise<void> {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                accountId,
+                isActive: true,
+            },
+            select: {
+                level: true,
+            },
+        });
+        if (!Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(member.level)) {
+            throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+        }
         await this.prismaService.team.create({
             data: {
                 name: request.teamName,
