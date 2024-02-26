@@ -3,14 +3,14 @@ import { FaqCategory, InquirerType, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { FaqMemberGetListRequest } from './request/faq-member-get-list.request';
-import { FaqMemberGetListResponse } from './response/faq-member-get-list.response';
+import { FaqGuestGetListRequest } from './request/faq-guest-get-list.request';
+import { FaqGuestGetListResponse } from './response/faq-guest-get-list.response';
 
 @Injectable()
-export class FaqMemberService {
+export class FaqGuestService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: FaqMemberGetListRequest): Promise<FaqMemberGetListResponse> {
+    async getList(query: FaqGuestGetListRequest): Promise<FaqGuestGetListResponse> {
         const queryFilter: Prisma.FaqWhereInput = {
             isActive: true,
             inquirerType: InquirerType.MEMBER,

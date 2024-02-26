@@ -1,3 +1,3 @@
 import { PaginationRequest } from 'utils/generics/pagination.request';
 
-export class TermMemberGetListRequest extends PaginationRequest {}
+export class TermGuestGetListRequest extends PaginationRequest {}

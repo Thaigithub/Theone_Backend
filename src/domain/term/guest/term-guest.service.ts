@@ -3,14 +3,14 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
-import { TermMemberGetListRequest } from './request/term-member-get-list.request';
-import { TermMemberGetListResponse } from './response/term-member-get-list.response';
+import { TermGuestGetListRequest } from './request/term-guest-get-list.request';
+import { TermGuestGetListResponse } from './response/term-guest-get-list.response';
 
 @Injectable()
-export class TermMemberService {
+export class TermGuestService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: TermMemberGetListRequest): Promise<TermMemberGetListResponse> {
+    async getList(query: TermGuestGetListRequest): Promise<TermGuestGetListResponse> {
         const search = {
             select: {
                 title: true,

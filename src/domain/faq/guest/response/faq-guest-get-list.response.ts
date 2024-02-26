@@ -12,4 +12,4 @@ class FaqResponse {
     files: FileResponse[];
 }
 
-export class FaqMemberGetListResponse extends PaginationResponse<FaqResponse> {}
+export class FaqGuestGetListResponse extends PaginationResponse<FaqResponse> {}
