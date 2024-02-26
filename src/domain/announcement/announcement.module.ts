@@ -4,13 +4,13 @@ import { AnnouncementAdminController } from './admin/announcement-admin.controll
 import { AnnouncementAdminService } from './admin/announcement-admin.service';
 import { AnnouncementCompanyController } from './company/announcement-company.controller';
 import { AnnouncementCompanyService } from './company/announcement-company.service';
-import { AnnouncementMemberController } from './member/announcement-member.controller';
-import { AnnouncementMemberService } from './member/announcement-member.service';
+import { AnnouncementGuestService } from './guest/announcement-guest.service';
+import { AnnouncementGuestController } from './guest/announcement-guest.controller';
 
 @Module({
     imports: [PrismaModule],
-    controllers: [AnnouncementAdminController, AnnouncementCompanyController, AnnouncementMemberController],
-    providers: [AnnouncementAdminService, AnnouncementCompanyService, AnnouncementMemberService],
+    controllers: [AnnouncementAdminController, AnnouncementCompanyController, AnnouncementGuestController],
+    providers: [AnnouncementAdminService, AnnouncementCompanyService, AnnouncementGuestService],
     exports: [],
 })
 export class AnnouncementModule {}

@@ -4,15 +4,15 @@ import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { PageInfo, PaginationResponse } from '../../../utils/generics/pagination.response';
-import { AnnouncementMemberGetListRequest } from './request/announcement-member-get-list.request';
-import { AnnouncementMemberGetDetailResponse } from './response/announcement-member-get-detail.response';
-import { AnnouncementMemberGetListResponse } from './response/announcement-member-get-list.response';
+import { AnnouncementGuestGetListRequest } from './request/announcement-guest-get-list.request';
+import { AnnouncementGuestGetDetailResponse } from './response/announcement-guest-get-detail.response';
+import { AnnouncementGuestGetListResponse } from './response/announcement-guest-get-list.response';
 
 @Injectable()
-export class AnnouncementMemberService {
+export class AnnouncementGuestService {
     constructor(private prismaService: PrismaService) {}
 
-    async getList(query: AnnouncementMemberGetListRequest): Promise<AnnouncementMemberGetListResponse> {
+    async getList(query: AnnouncementGuestGetListRequest): Promise<AnnouncementGuestGetListResponse> {
         const queryFilter: Prisma.AnnouncementWhereInput = {
             isActive: true,
             ...(query.keyword && {
@@ -74,7 +74,7 @@ export class AnnouncementMemberService {
         return new PaginationResponse(announcements, new PageInfo(total));
     }
 
-    async getDetail(id: number): Promise<AnnouncementMemberGetDetailResponse> {
+    async getDetail(id: number): Promise<AnnouncementGuestGetDetailResponse> {
         const announcement = await this.prismaService.announcement.findUnique({
             where: {
                 id: id,

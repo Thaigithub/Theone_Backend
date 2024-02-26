@@ -8,4 +8,4 @@ class TermResponse {
     revisionDate: TermVersion['revisionDate'];
 }
 
-export class TermMemberGetListResponse extends PaginationResponse<TermResponse> {}
+export class TermGuestGetListResponse extends PaginationResponse<TermResponse> {}
