@@ -8,9 +8,10 @@ import { MemberCompanyController } from './company/member-company.controller';
 import { MemberCompanyService } from './company/member-company.service';
 import { MemberMemberController } from './member/member-member.controller';
 import { MemberMemberService } from './member/member-member.service';
+import { AccountModule } from 'domain/account/account.module';
 
 @Module({
-    imports: [PrismaModule, ExcelModule, RegionModule],
+    imports: [PrismaModule, ExcelModule, RegionModule, AccountModule],
     controllers: [MemberAdminController, MemberCompanyController, MemberMemberController],
     providers: [MemberAdminService, MemberCompanyService, MemberMemberService],
     exports: [MemberCompanyService],

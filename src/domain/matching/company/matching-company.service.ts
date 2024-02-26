@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExperienceType, RequestObject } from '@prisma/client';
+import { ExperienceType, MemberLevel, RequestObject } from '@prisma/client';
 import { MemberCompanyService } from 'domain/member/company/member-company.service';
 import { TeamCompanyService } from 'domain/team/company/team-company.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -294,11 +294,11 @@ export class MatchingCompanyService {
                 teamId: item.teamId,
             };
         });
-
         // Get Member and Team match the conditions
         const members = (
             await this.prismaService.member.findMany({
                 where: {
+                    level: MemberLevel.SECOND,
                     ...(regionIds && {
                         regionId: {
                             in: regionIds,
@@ -429,6 +429,9 @@ export class MatchingCompanyService {
         const teams = (
             await this.prismaService.team.findMany({
                 where: {
+                    leader: {
+                        level: MemberLevel.SECOND,
+                    },
                     ...(regionIds && {
                         regionId: {
                             in: regionIds,

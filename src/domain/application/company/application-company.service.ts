@@ -48,6 +48,7 @@ export class ApplicationCompanyService {
             select: {
                 id: true,
                 assignedAt: true,
+                status: true,
                 member: {
                     include: {
                         licenses: {
@@ -90,6 +91,7 @@ export class ApplicationCompanyService {
             return {
                 id: item.id,
                 assignedAt: item.assignedAt,
+                status: item.status,
                 member: item.member
                     ? {
                           id: item.member.id,

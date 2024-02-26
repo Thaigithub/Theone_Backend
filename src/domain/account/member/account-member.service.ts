@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccountStatus, AccountType, MemberLevel, OtpType, SignupMethodType } from '@prisma/client';
+import { AccountStatus, AccountType, CareerType, MemberLevel, NotificationType, OtpType, SignupMethodType } from '@prisma/client';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from 'app.config';
 import { compare, hash } from 'bcrypt';
+import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { OtpService } from 'domain/otp/otp.service';
 import { OtpStatus } from 'domain/otp/response/otp-verify.response';
 import { OAuth2Client } from 'google-auth-library';
@@ -32,6 +33,7 @@ export class AccountMemberService {
     constructor(
         private prismaService: PrismaService,
         private otpService: OtpService,
+        private notificationMemberService: NotificationMemberService,
     ) {}
 
     async verifyOtpVerifyPhone(
@@ -41,7 +43,7 @@ export class AccountMemberService {
     ): Promise<AccountMemberVerifyOtpVerifyPhoneResponse> {
         const verify = await this.otpService.checkValidOtp(body, ip);
         if (verify.isVerified) {
-            await this.prismaService.member.update({
+            const member = await this.prismaService.member.update({
                 where: {
                     accountId,
                 },
@@ -49,8 +51,12 @@ export class AccountMemberService {
                     contact: verify.data,
                     isContactVerfied: true,
                 },
+                select: {
+                    id: true,
+                },
             });
             verify.data = null;
+            await this.upgradeMember(member.id);
             return verify;
         }
         verify.data = null;
@@ -439,7 +445,7 @@ export class AccountMemberService {
     }
 
     async upsertForeignWorker(id: number, request: AccountMemberUpsertForeignWorkerRequest): Promise<void> {
-        await this.prismaService.member.update({
+        const member = await this.prismaService.member.update({
             where: { accountId: id },
             data: {
                 foreignWorker: {
@@ -463,7 +469,11 @@ export class AccountMemberService {
                     },
                 },
             },
+            select: {
+                id: true,
+            },
         });
+        await this.upgradeMember(member.id);
     }
 
     async upsertDisability(id: number, request: AccountMemberUpsertDisabilityRequest): Promise<void> {
@@ -597,5 +607,131 @@ export class AccountMemberService {
                 },
             });
         });
+    }
+
+    /**
+     * Upgrade Member
+     * Level 3        -> Level 2         : Verified contact (or foreignwork registration), health safety certificate, register careers.
+     *
+     * Level 2        -> Level 1 Silver  : Career certification & number of contract >= 0.
+     *
+     * Level 1 Silver -> Level 1 Golden  : Number of contract >= 50.
+     *
+     * Level 1 Golden -> Level 1 Platinum: Number of contract > 100.
+     *
+     * @param id: Id of Member.
+     * @return Promise<void>
+     */
+    async upgradeMember(id: number): Promise<void> {
+        const countContract = await this.prismaService.contract.count({
+            where: {
+                application: {
+                    memberId: id,
+                    team: {
+                        OR: [{ leaderId: id }, { members: { some: { memberId: id } } }],
+                    },
+                },
+            },
+        });
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                id: id,
+                isActive: true,
+            },
+            select: {
+                level: true,
+                isContactVerfied: true,
+                foreignWorker: true,
+                basicHealthSafetyCertificate: true,
+                careers: true,
+                careerCertificationRequest: true,
+                accountId: true,
+            },
+        });
+        if (member) {
+            let upgradeLevel = null;
+            if (countContract > 100 && member.level === MemberLevel.GOLD) {
+                upgradeLevel = MemberLevel.PLATINUM;
+            } else if (countContract >= 50 && member.level === MemberLevel.SILVER) {
+                upgradeLevel = MemberLevel.GOLD;
+            } else if (countContract >= 0 && member.level === MemberLevel.SECOND) {
+                const countCareerCertifications = await this.prismaService.career.count({
+                    where: {
+                        type: CareerType.CERTIFICATION,
+                        isActive: true,
+                    },
+                });
+                if (countCareerCertifications > 0) {
+                    upgradeLevel = MemberLevel.SILVER;
+                }
+            } else if (member.level === MemberLevel.THIRD) {
+                if (
+                    (member.isContactVerfied || member.foreignWorker) &&
+                    member.basicHealthSafetyCertificate &&
+                    (member.careerCertificationRequest || member.careers.length > 0)
+                ) {
+                    upgradeLevel = MemberLevel.SECOND;
+                }
+            }
+            if (upgradeLevel !== null) {
+                await this.upgradeLevel(id, upgradeLevel);
+            }
+        }
+    }
+
+    async upgradeLevel(id: number, level: MemberLevel) {
+        const member = await this.prismaService.member.update({
+            where: {
+                id: id,
+            },
+            data: {
+                level: level,
+            },
+            select: {
+                accountId: true,
+            },
+        });
+        switch (level) {
+            case MemberLevel.PLATINUM: {
+                await this.notificationMemberService.create(
+                    member.accountId,
+                    '[축하] 인증 회원 (다이아몬드) 레벨 달성!',
+                    '축하드립니다! 회원님은 인증 회원 (다이아몬드) 레벨로 성공적으로 업그레이드되셨습니다. 이제부터 최상위 회원 등급의 특전과 혜택을 누리실 수 있습니다.',
+                    NotificationType.ACCOUNT,
+                    member.accountId,
+                );
+                break;
+            }
+            case MemberLevel.GOLD: {
+                await this.notificationMemberService.create(
+                    member.accountId,
+                    '[축하] 인증 회원 (골든) 레벨 달성!',
+                    '축하드립니다! 회원님은 인증 회원 (골든) 레벨로 성공적으로 업그레이드되셨습니다. 이제부터 특별한 혜택과 우수한 서비스를 누리실 수 있습니다.',
+                    NotificationType.ACCOUNT,
+                    member.accountId,
+                );
+                break;
+            }
+            case MemberLevel.SILVER: {
+                await this.notificationMemberService.create(
+                    member.accountId,
+                    '[축하] 인증 회원 (실버) 레벨 달성!',
+                    '축하드립니다! 회원님은 인증 회원 (실버) 레벨로 성공적으로 업그레이드되셨습니다. 이제부터 다양한 혜택을 누리실 수 있습니다.',
+                    NotificationType.ACCOUNT,
+                    member.accountId,
+                );
+                break;
+            }
+            case MemberLevel.SECOND: {
+                await this.notificationMemberService.create(
+                    member.accountId,
+                    '[축하] 경험 많은 회원 레벨 달성!',
+                    '축하드립니다! 회원님은 경험 많은 회원 레벨로 성공적으로 업그레이드되셨습니다. 이제부터 더 많은 기능과 특전을 이용하실 수 있습니다.',
+                    NotificationType.ACCOUNT,
+                    member.accountId,
+                );
+                break;
+            }
+        }
     }
 }

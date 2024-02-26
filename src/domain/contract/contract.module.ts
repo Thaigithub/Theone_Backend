@@ -6,9 +6,10 @@ import { ContractCompanyService } from './company/contract-company.service';
 import { ContractMemberController } from './member/contract-member.controller';
 import { ContractMemberService } from './member/contract-member.service';
 import { ContractAdminService } from './admin/contract-admin.service';
+import { AccountModule } from 'domain/account/account.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, AccountModule],
     controllers: [ContractAdminController, ContractCompanyController, ContractMemberController],
     providers: [ContractAdminService, ContractCompanyService, ContractMemberService],
     exports: [ContractAdminService, ContractCompanyService],
