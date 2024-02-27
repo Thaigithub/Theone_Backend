@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ExperienceType, MemberLevel, NotificationType, PostCategory, PostType, Prisma } from '@prisma/client';
-import { NotificationCompanyService } from 'domain/notification/company/notification-company.service';
 import { NotificationMemberService } from 'domain/notification/member/notification-member.service';
 import { RegionService } from 'domain/region/region.service';
 import { PrismaService } from 'services/prisma/prisma.service';
@@ -23,7 +22,6 @@ export class PostMemberService {
         private regionService: RegionService,
         private storageService: StorageService,
         private notificationMemberService: NotificationMemberService,
-        private notificationCompanyService: NotificationCompanyService,
     ) {}
 
     async getList(
@@ -79,6 +77,7 @@ export class PostMemberService {
             ],
             startDate: { lte: new Date() },
             endDate: { gte: new Date() },
+            ...(query.category && { category: query.category }),
         };
         const posts = (
             await this.prismaService.post.findMany({
@@ -107,6 +106,18 @@ export class PostMemberService {
                                 },
                             },
                         },
+                    },
+                    company: {
+                        select: {
+                            logo: {
+                                select: {
+                                    fileName: true,
+                                    key: true,
+                                    size: true,
+                                    type: true,
+                                }
+                            }
+                        }
                     },
                     interests: {
                         where: {
@@ -155,6 +166,12 @@ export class PostMemberService {
                 siteAddress: site ? site.address : null,
                 siteAddressCity: site?.region ? site.region.cityEnglishName : null,
                 siteAddressDistrict: site?.region ? site.region.districtEnglishName : null,
+                logo: {
+                    fileName: item.company.logo.fileName,
+                    type: item.company.logo.type,
+                    key: item.company.logo.key,
+                    size: Number(item.company.logo.size),
+                },
                 isInterested: accountId && item.interests.length > 0 ? true : false,
             };
         });
@@ -245,6 +262,22 @@ export class PostMemberService {
                         },
                     },
                 },
+                ...(accountId && {
+                    applications: {
+                        where: {
+                            member: {
+                                accountId,
+                            }
+                        },
+                        select: {
+                            id: true,
+                        },
+                        orderBy: {
+                            updatedAt: 'desc',
+                        },
+                        take: 1,
+                    },   
+                }),
             },
             where: {
                 isActive: true,
@@ -293,6 +326,7 @@ export class PostMemberService {
                 isInterest: post.site && accountId && post.site?.interests.length !== 0 ? true : false,
             },
             isInterest: accountId && post.interests.length !== 0 ? true : false,
+            applicationId: (accountId && post.applications.length > 0 ) ? post.applications[0].id : null,
         };
     }
 

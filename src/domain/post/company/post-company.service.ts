@@ -69,6 +69,7 @@ export class PostCompanyService {
             isActive: true,
             ...(query.type && { type: query.type }),
             ...(query.status && { status: query.status }),
+            ...(query.category && { category: query.category}),
             name: query.name && { contains: query.name, mode: 'insensitive' },
             company: {
                 accountId,
