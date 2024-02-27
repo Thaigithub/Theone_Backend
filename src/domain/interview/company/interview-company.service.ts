@@ -344,6 +344,11 @@ export class InterviewCompanyService {
                                 memberId: body.id,
                                 postId: body.postId,
                             },
+                            post: {
+                                company: {
+                                    accountId,
+                                },
+                            },
                         },
                         select: {
                             status: true,
@@ -353,65 +358,38 @@ export class InterviewCompanyService {
                     if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
+                    switch (postExist.category) {
+                        case PostCategory.HEADHUNTING: {
+                            if (Array<MemberLevel>(MemberLevel.THIRD, MemberLevel.SECOND).includes(member.level))
+                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+                            break;
+                        }
+                        case PostCategory.MATCHING: {
+                            if (member.level !== MemberLevel.SECOND)
+                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+                            break;
+                        }
+                    }
                     switch (body.category) {
                         case ApplicationCategory.HEADHUNTING: {
-                            const count = await prisma.headhunting.count({
-                                where: {
-                                    post: {
-                                        id: body.postId,
-                                        category: ApplicationCategory.HEADHUNTING,
-                                    },
-                                },
-                            });
-                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (postExist.category !== ApplicationCategory.HEADHUNTING)
+                                throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         case ApplicationCategory.MATCHING: {
-                            const count = await prisma.post.count({
-                                where: {
-                                    id: body.postId,
-                                    category: ApplicationCategory.MATCHING,
-                                },
-                            });
-                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
-                            if (
-                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
-                                    member.level,
-                                )
-                            ) {
-                                throw new BadRequestException(Error.MEMBER_IS_CERTIFIED_LEVEL);
-                            }
-                            break;
-                        }
-                        case ApplicationCategory.MANPOWER: {
-                            const count = await this.prismaService.application.count({
-                                where: {
-                                    postId: body.postId,
-                                    memberId: body.id,
-                                    post: {
-                                        company: {
-                                            accountId: accountId,
-                                        },
-                                    },
-                                },
-                            });
-                            if (count !== 0) {
-                                if (count === 0) throw new BadRequestException(Error.APPLICATION_EXISTED);
-                            }
-                            if (postExist.category === PostCategory.HEADHUNTING) {
-                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
-                            }
-                            if (
-                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
-                                    member.level,
-                                )
-                            ) {
-                                throw new BadRequestException(Error.MEMBER_IS_CERTIFIED_LEVEL);
-                            }
+                            if (postExist.category !== ApplicationCategory.MATCHING)
+                                throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         default: {
-                            if (!record) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    member.level,
+                                ) &&
+                                !record
+                            ) {
+                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
+                            }
                             break;
                         }
                     }
@@ -456,7 +434,6 @@ export class InterviewCompanyService {
                                   }
                                 : undefined,
                         },
-
                         update: {
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
                             interview: {
@@ -470,6 +447,11 @@ export class InterviewCompanyService {
                             memberId_postId: {
                                 memberId: body.id,
                                 postId: body.postId,
+                            },
+                            post: {
+                                company: {
+                                    accountId,
+                                },
                             },
                             status: PostApplicationStatus.APPLY,
                         },
@@ -500,81 +482,56 @@ export class InterviewCompanyService {
                                 teamId: body.id,
                                 postId: body.postId,
                             },
+                            post: {
+                                company: {
+                                    accountId,
+                                },
+                            },
                         },
                         select: {
                             status: true,
                         },
                     });
+
                     if (record && record.status !== PostApplicationStatus.APPLY) {
                         throw new BadRequestException(Error.APPLICATION_STATUS_IS_NOT_APPROPRIATE);
                     }
-
+                    switch (postExist.category) {
+                        case PostCategory.HEADHUNTING: {
+                            if (Array<MemberLevel>(MemberLevel.THIRD, MemberLevel.SECOND).includes(team.leader.level))
+                                throw new BadRequestException(Error.LEADER_IS_NOT_CERTIFIED_LEVEL);
+                            break;
+                        }
+                        case PostCategory.MATCHING: {
+                            if (team.leader.level !== MemberLevel.SECOND)
+                                throw new BadRequestException(Error.LEADER_IS_NOT_CERTIFIED_LEVEL);
+                            break;
+                        }
+                    }
                     switch (body.category) {
                         case ApplicationCategory.HEADHUNTING: {
-                            const count = await prisma.headhunting.count({
-                                where: {
-                                    post: {
-                                        id: body.postId,
-                                        category: ApplicationCategory.HEADHUNTING,
-                                    },
-                                },
-                            });
-                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
+                            if (postExist.category !== ApplicationCategory.HEADHUNTING)
+                                throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         case ApplicationCategory.MATCHING: {
-                            const count = await prisma.post.count({
-                                where: {
-                                    id: body.postId,
-                                    category: ApplicationCategory.MATCHING,
-                                },
-                            });
-                            if (count === 0) throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
-                            if (
-                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
-                                    team.leader.level,
-                                )
-                            ) {
-                                throw new BadRequestException(Error.LEADER_IS_CERTIFIED_LEVEL);
-                            }
-                            break;
-                        }
-                        case ApplicationCategory.MANPOWER: {
-                            const count = await prisma.application.count({
-                                where: {
-                                    teamId: body.id,
-                                    post: {
-                                        id: body.postId,
-                                        isActive: true,
-                                        company: {
-                                            accountId: accountId,
-                                        },
-                                    },
-                                },
-                            });
-                            if (count !== 0) {
-                                throw new BadRequestException(Error.APPLICATION_EXISTED);
-                            }
-                            if (postExist.category === PostCategory.HEADHUNTING) {
-                                throw new BadRequestException(Error.MEMBER_IS_NOT_CERTIFIED_LEVEL);
-                            }
-                            if (
-                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
-                                    team.leader.level,
-                                )
-                            ) {
-                                throw new BadRequestException(Error.LEADER_IS_CERTIFIED_LEVEL);
-                            }
+                            if (postExist.category !== ApplicationCategory.MATCHING)
+                                throw new BadRequestException(Error.POST_IS_NOT_AT_CORRECT_CATEGORY);
                             break;
                         }
                         default: {
-                            if (!record) {
-                                throw new BadRequestException(Error.APPLICATION_NOT_FOUND);
+                            if (
+                                Array<MemberLevel>(MemberLevel.GOLD, MemberLevel.PLATINUM, MemberLevel.SILVER).includes(
+                                    team.leader.level,
+                                ) &&
+                                !record
+                            ) {
+                                throw new BadRequestException(Error.LEADER_IS_NOT_CERTIFIED_LEVEL);
                             }
                             break;
                         }
                     }
-                    const headhunting = await prisma.member.findUnique({
+                    const headhunting = await prisma.team.findUnique({
                         where: {
                             id: body.id,
                             headhuntingRecommendations: {
@@ -601,6 +558,11 @@ export class InterviewCompanyService {
                             teamId: body.id,
                             postId: body.postId,
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            interview: {
+                                create: {
+                                    status: InterviewStatus.INTERVIEWING,
+                                },
+                            },
                             category: body.category,
                             headhuntingRecommendation: headhunting
                                 ? {
@@ -612,6 +574,11 @@ export class InterviewCompanyService {
                         },
                         update: {
                             status: PostApplicationStatus.PROPOSAL_INTERVIEW,
+                            interview: {
+                                create: {
+                                    status: InterviewStatus.INTERVIEWING,
+                                },
+                            },
                             category: body.category,
                         },
                         where: {
@@ -619,35 +586,17 @@ export class InterviewCompanyService {
                                 teamId: body.id,
                                 postId: body.postId,
                             },
+                            post: {
+                                company: {
+                                    accountId,
+                                },
+                            },
                             status: PostApplicationStatus.APPLY,
                         },
                         select: {
                             id: true,
-                            interview: {
-                                select: {
-                                    id: true,
-                                },
-                            },
                         },
                     });
-                    if (application.interview) {
-                        await prisma.interview.update({
-                            where: {
-                                id: application.interview.id,
-                            },
-                            data: {
-                                isActive: true,
-                                status: InterviewStatus.INTERVIEWING,
-                            },
-                        });
-                    } else {
-                        await prisma.interview.create({
-                            data: {
-                                applicationId: application.id,
-                                status: InterviewStatus.INTERVIEWING,
-                            },
-                        });
-                    }
                     break;
                 }
             }
