@@ -9,4 +9,4 @@ import { CronJobService } from './cronjob.service';
     imports: [PrismaModule, ScheduleModule.forRoot(), NotificationModule],
     providers: [CronJobService, StorageService],
 })
-export class CrobJobModule {}
+export class CronJobModule {}

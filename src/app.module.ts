@@ -29,7 +29,7 @@ import { SalaryReportModule } from 'domain/salary-report/salary-report.module';
 import { SettlementModule } from 'domain/settlement/settlement.module';
 import { SiteModule } from 'domain/site/site.module';
 import { TermModule } from 'domain/term/term.module';
-import { CrobJobModule } from 'services/crobjob/cronjob.module';
+import { CronJobModule } from 'services/cronjob/cronjob.module';
 import { FireBaseModule } from 'services/firebase/firebase.module';
 import { AccountModule } from './domain/account/account.module';
 import { AdminModule } from './domain/admin/admin.module';
@@ -78,7 +78,7 @@ import { DeviceModule } from 'domain/device/device.module';
         FaqModule,
         ReportModule,
         MemoModule,
-        CrobJobModule,
+        CronJobModule,
         LaborConsultationModule,
         LicenseModule,
         SettlementModule,

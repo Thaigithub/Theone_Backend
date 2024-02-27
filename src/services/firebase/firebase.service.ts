@@ -51,24 +51,8 @@ export class FirebaseService {
                             ...(item.account.type === AccountType.MEMBER && {
                                 isNotificationSoundActive: String(isNotificationSoundActive),
                             }),
-                        },
-                        notification: {
                             title,
                             body: content,
-                        },
-                        webpush: {
-                            data: {
-                                type: type,
-                                typeId: typeId.toString(),
-                                accountType: item.account.type,
-                                ...(item.account.type === AccountType.MEMBER && {
-                                    isNotificationSoundActive: String(isNotificationSoundActive),
-                                }),
-                            },
-                            notification: {
-                                title,
-                                body: content,
-                            },
                         },
                         token: item.token,
                     });

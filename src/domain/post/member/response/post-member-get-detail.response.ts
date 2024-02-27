@@ -1,4 +1,4 @@
-import { Code, Company, File, Post, Site } from '@prisma/client';
+import { Application, Code, Company, File, Post, Site } from '@prisma/client';
 
 export class PostMemberGetDetailResponse {
     postInformation: {
@@ -32,4 +32,5 @@ export class PostMemberGetDetailResponse {
         isInterest: boolean;
     };
     isInterest: boolean;
+    applicationId: Application['id'];
 }

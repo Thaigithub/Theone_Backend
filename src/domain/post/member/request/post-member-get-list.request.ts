@@ -1,4 +1,4 @@
-import { PostType } from '@prisma/client';
+import { PostCategory, PostType } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { PaginationRequest } from 'utils/generics/pagination.request';
@@ -36,4 +36,9 @@ export class PostMemberGetListRequest extends PaginationRequest {
     })
     @IsOptional()
     regionList: string[];
+
+    @Expose()
+    @IsEnum(PostCategory)
+    @IsOptional()
+    category: PostCategory;
 }

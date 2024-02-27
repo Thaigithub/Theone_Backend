@@ -1,4 +1,5 @@
 import { Region, Code, Post, Site } from '@prisma/client';
+import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
 export class ConstructionMachinaryResponse {
@@ -10,6 +11,7 @@ export class PostResponse {
     id: Post['id'];
     name: Post['name'];
     occupation: Code['name'];
+    logo: FileResponse;
     siteAddress: Site['address'];
     siteAddressCity: Region['cityEnglishName'];
     siteAddressDistrict: Region['districtEnglishName'];
