@@ -7,6 +7,7 @@ import { PaginationRequest } from 'utils/generics/pagination.request';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { TeamMemberCreateInvitationRequest } from './request/team-member-get-invite.request';
+import { TeamMemberGetListRequest } from './request/team-member-get-list.request';
 import { TeamMemberUpdateExposureRequest } from './request/team-member-update-exposure.request';
 import { TeamMemberUpdateInvitationStatus } from './request/team-member-update-invitation-status.request';
 import { TeamMemberUpsertRequest } from './request/team-member-upsert.request';
@@ -86,8 +87,9 @@ export class TeamMemberService {
         });
     }
 
-    async getList(accountId: number, query: PaginationRequest): Promise<TeamMemberGetListResponse> {
+    async getList(accountId: number, query: TeamMemberGetListRequest): Promise<TeamMemberGetListResponse> {
         const queryFilter: Prisma.TeamWhereInput = {
+            ...(query.isLeader && { leader: { accountId } }),
             OR: [
                 {
                     leader: {
