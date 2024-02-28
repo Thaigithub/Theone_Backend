@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InquirerType, MemberLevel, Prisma } from '@prisma/client';
+import { AnswerStatus, InquirerType, MemberLevel, Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
 import { Error } from 'utils/error.enum';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
@@ -162,5 +162,28 @@ export class LaborConsultationMemberService {
                 };
             }),
         };
+    }
+
+    async getTotal(accountId: number): Promise<number> {
+        return await this.prismaService.laborConsultation.count({
+            where: {
+                isActive: true,
+                member: {
+                    accountId,
+                },
+            },
+        });
+    }
+
+    async getTotalInProgress(accountId: number): Promise<number> {
+        return await this.prismaService.laborConsultation.count({
+            where: {
+                isActive: true,
+                member: {
+                    accountId,
+                },
+                status: AnswerStatus.WAITING,
+            },
+        });
     }
 }
