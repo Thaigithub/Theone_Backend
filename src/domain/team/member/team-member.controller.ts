@@ -20,6 +20,7 @@ import { BaseRequest } from 'utils/generics/base.request';
 import { BaseResponse } from 'utils/generics/base.response';
 import { PaginationRequest } from 'utils/generics/pagination.request';
 import { TeamMemberCreateInvitationRequest } from './request/team-member-get-invite.request';
+import { TeamMemberGetListRequest } from './request/team-member-get-list.request';
 import { TeamMemberUpdateExposureRequest } from './request/team-member-update-exposure.request';
 import { TeamMemberUpdateInvitationStatus } from './request/team-member-update-invitation-status.request';
 import { TeamMemberUpsertRequest } from './request/team-member-upsert.request';
@@ -106,7 +107,10 @@ export class TeamMemberController {
     }
 
     @Get()
-    async getList(@Req() req: BaseRequest, @Query() query: PaginationRequest): Promise<BaseResponse<TeamMemberGetListResponse>> {
+    async getList(
+        @Req() req: BaseRequest,
+        @Query() query: TeamMemberGetListRequest,
+    ): Promise<BaseResponse<TeamMemberGetListResponse>> {
         return BaseResponse.of(await this.teamMemberService.getList(req.user.accountId, query));
     }
 }

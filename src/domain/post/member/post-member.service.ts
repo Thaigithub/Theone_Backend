@@ -262,22 +262,32 @@ export class PostMemberService {
                         },
                     },
                 },
-                ...(accountId && {
-                    applications: {
-                        where: {
-                            member: {
-                                accountId,
+                ...(accountId && {applications: {
+                    where: {
+                        OR: [
+                            {
+                                member: {
+                                    accountId,
+                                }
+                            },
+                            {
+                                team:{
+                                    leader:{
+                                        accountId
+                                    }
+                                }
                             }
-                        },
-                        select: {
-                            id: true,
-                        },
-                        orderBy: {
-                            updatedAt: 'desc',
-                        },
-                        take: 1,
-                    },   
-                }),
+                        ]
+                    },
+                    select: {
+                        id: true,
+                        team: {
+                            select:{
+                                id: true
+                            }
+                        }
+                    },
+                },})
             },
             where: {
                 isActive: true,
@@ -326,7 +336,12 @@ export class PostMemberService {
                 isInterest: post.site && accountId && post.site?.interests.length !== 0 ? true : false,
             },
             isInterest: accountId && post.interests.length !== 0 ? true : false,
-            applicationId: (accountId && post.applications.length > 0 ) ? post.applications[0].id : null,
+            application: accountId ? post.applications.map(item=>{
+                return {
+                    id: item.id,
+                    teamId: item.team?.id || null
+                }
+            }) : null,
         };
     }
 

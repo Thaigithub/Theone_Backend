@@ -1,4 +1,4 @@
-import { Region, Code, Post, Site } from '@prisma/client';
+import { Code, Post, Region, Site } from '@prisma/client';
 import { FileResponse } from 'utils/generics/file.response';
 import { PaginationResponse } from 'utils/generics/pagination.response';
 
