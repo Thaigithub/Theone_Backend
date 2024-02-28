@@ -32,6 +32,16 @@ export class LaborConsultationMemberController {
         return BaseResponse.of(await this.laboConsultationMemberService.create(req.user.accountId, body));
     }
 
+    @Get('/count')
+    async getTotal(@Req() req: BaseRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.laboConsultationMemberService.getTotal(req.user.accountId));
+    }
+
+    @Get('/in-progress/count')
+    async getTotalInProgress(@Req() req: BaseRequest): Promise<BaseResponse<number>> {
+        return BaseResponse.of(await this.laboConsultationMemberService.getTotalInProgress(req.user.accountId));
+    }
+
     @Get('/:id')
     async getDetail(
         @Param('id', ParseIntPipe) id: number,
