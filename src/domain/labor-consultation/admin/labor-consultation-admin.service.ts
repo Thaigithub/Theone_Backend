@@ -23,10 +23,8 @@ export class LaborConsultationAdminService {
     async getList(query: LaborConsultationAdminGetListRequest): Promise<LaborConsultationAdminGetListResponse> {
         const queryFilter: Prisma.LaborConsultationWhereInput = {
             isActive: true,
-            ...(query.startDate &&
-                query.endDate && {
-                    createdAt: { gte: new Date(query.startDate), lte: new Date(query.endDate) },
-                }),
+            ...(query.startDate && { createdAt: { gte: new Date(query.startDate) } }),
+            ...(query.endDate && { createdAt: { lte: new Date(query.endDate) } }),
             ...(query.status && { status: query.status }),
             ...(query.inquirerType && { inquirerType: query.inquirerType }),
             ...(query.laborConsultationType && { laborConsultationType: query.laborConsultationType }),
