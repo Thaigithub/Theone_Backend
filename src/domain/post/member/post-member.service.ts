@@ -392,7 +392,6 @@ export class PostMemberService {
             },
             select: {
                 isActive: true,
-                id: true,
             }
         });
         if (application && application.isActive) {
@@ -403,7 +402,10 @@ export class PostMemberService {
         }
         const newApplication = await this.prismaService.application.upsert({
             where: {
-                id: application.id,
+                memberId_postId: {
+                    memberId: account.member.id,
+                    postId: post.id,
+                },            
             },
             create: {
                 member: { connect: { id: account.member.id } },
@@ -479,7 +481,6 @@ export class PostMemberService {
             },
             select: {
                 isActive: true,
-                id: true,
             }
         });
         if (application && application.isActive) {
@@ -490,7 +491,10 @@ export class PostMemberService {
         }
         const newApplication = await this.prismaService.application.upsert({
             where: {
-                id: application.id,
+                teamId_postId: {
+                    teamId: teamId,
+                    postId: post.id,
+                },            
             },
             update: {
                 isActive: true,
