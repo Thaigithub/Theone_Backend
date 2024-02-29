@@ -43,6 +43,7 @@ export class ApplicationCompanyService {
                     },
                 },
             ],
+            isActive: true,
         };
         const applicationList = await this.prismaService.application.findMany({
             select: {
@@ -160,6 +161,7 @@ export class ApplicationCompanyService {
                         accountId: accountId,
                     },
                 },
+                isActive: true,
             },
         });
         return { countApplications: applications };
@@ -174,6 +176,7 @@ export class ApplicationCompanyService {
                         accountId,
                     },
                 },
+                isActive: true,
             },
         });
         if (!application) throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
@@ -225,6 +228,7 @@ export class ApplicationCompanyService {
                         },
                     },
                     status: PostApplicationStatus.APPROVE_BY_MEMBER,
+                    isActive: true,
                 },
                 select: {
                     id: true,
@@ -277,6 +281,7 @@ export class ApplicationCompanyService {
                         accountId: accountId,
                     },
                 },
+                isActive: true,
             },
             select: {
                 memberId: true,
@@ -381,6 +386,7 @@ export class ApplicationCompanyService {
                         accountId: accountId,
                     },
                 },
+                isActive: true,
             },
             select: {
                 teamId: true,
@@ -576,6 +582,7 @@ export class ApplicationCompanyService {
                         isActive: true,
                     },
                 },
+                isActive: true,
             },
             select: {
                 memberId: true,

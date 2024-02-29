@@ -349,6 +349,7 @@ export class InterviewCompanyService {
                                     accountId,
                                 },
                             },
+                            isActive: true,
                         },
                         select: {
                             status: true,
@@ -442,6 +443,14 @@ export class InterviewCompanyService {
                                 },
                             },
                             category: body.category,
+                            isActive: true,
+                            headhuntingRecommendation: headhunting
+                                ? {
+                                      connect: {
+                                          id: headhunting.headhuntingRecommendations[0].id,
+                                      },
+                                  }
+                                : undefined,
                         },
                         where: {
                             memberId_postId: {
@@ -487,6 +496,7 @@ export class InterviewCompanyService {
                                     accountId,
                                 },
                             },
+                            isActive: true,
                         },
                         select: {
                             status: true,
@@ -580,6 +590,14 @@ export class InterviewCompanyService {
                                 },
                             },
                             category: body.category,
+                            isActive: true,
+                            headhuntingRecommendation: headhunting
+                                ? {
+                                      connect: {
+                                          id: headhunting.headhuntingRecommendations[0].id,
+                                      },
+                                  }
+                                : undefined,
                         },
                         where: {
                             teamId_postId: {

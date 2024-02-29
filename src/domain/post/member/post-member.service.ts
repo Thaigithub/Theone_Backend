@@ -390,17 +390,28 @@ export class PostMemberService {
                     postId: post.id,
                 },
             },
+            select: {
+                isActive: true,
+                id: true,
+            }
         });
-        if (application) {
+        if (application && application.isActive) {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
         if (post.category === PostCategory.HEADHUNTING && account.member.level !== MemberLevel.PLATINUM) {
             throw new BadRequestException(Error.MEMBER_IS_NOT_PLATINUM);
         }
-        const newApplication = await this.prismaService.application.create({
-            data: {
+        const newApplication = await this.prismaService.application.upsert({
+            where: {
+                id: application.id,
+            },
+            create: {
                 member: { connect: { id: account.member.id } },
                 post: { connect: { id: id } },
+            },
+            update: {
+                isActive: true,
+                assignedAt: new Date(),
             },
             select: {
                 id: true,
@@ -466,15 +477,26 @@ export class PostMemberService {
                     postId: post.id,
                 },
             },
+            select: {
+                isActive: true,
+                id: true,
+            }
         });
-        if (application) {
+        if (application && application.isActive) {
             throw new BadRequestException(Error.APPLICATION_EXISTED);
         }
         if (post.category === PostCategory.HEADHUNTING && isTeamLeader.leader.level !== MemberLevel.PLATINUM) {
             throw new BadRequestException(Error.LEADER_IS_NOT_PLATINUM);
         }
-        const newApplication = await this.prismaService.application.create({
-            data: {
+        const newApplication = await this.prismaService.application.upsert({
+            where: {
+                id: application.id,
+            },
+            update: {
+                isActive: true,
+                assignedAt: new Date(),
+            },
+            create: {
                 team: { connect: { id: teamId } },
                 post: { connect: { id: postId } },
             },

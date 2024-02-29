@@ -37,6 +37,7 @@ export class InterviewMemberService {
         });
         const teamIds = [...teams.teams.map((item) => item.teamId), ...teams.leaders.map((item) => item.id)];
         const queryFilter: Prisma.ApplicationWhereInput = {
+            isActive: true,
             OR: [
                 {
                     member: {
