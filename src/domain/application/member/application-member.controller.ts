@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AccountType } from '@prisma/client';
 import { AuthJwtGuard } from 'domain/auth/auth-jwt.guard';
 import { AuthRoleGuard, Roles } from 'domain/auth/auth-role.guard';
@@ -51,6 +51,11 @@ export class ApplicationMemberController {
         @Req() req: BaseRequest,
     ): Promise<BaseResponse<ApplicationMemberGetDetailResponse>> {
         return BaseResponse.of(await this.applicationMemberService.getDetail(id, req.user.accountId));
+    }
+
+    @Delete('/:id')
+    async delete(@Param('id', ParseIntPipe) id: number, @Req() request: BaseRequest): Promise<BaseResponse<void>> {
+        return BaseResponse.of(await this.applicationMemberService.delete(request.user.accountId, id));
     }
 
     @Get()

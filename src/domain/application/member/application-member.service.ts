@@ -23,6 +23,7 @@ export class ApplicationMemberService {
         const teams = await this.prismaService.member.findUnique({
             where: {
                 accountId,
+                isActive: true,
             },
             select: {
                 teams: {
@@ -87,6 +88,7 @@ export class ApplicationMemberService {
                 { assignedAt: { gte: query.startDate && new Date(query.startDate) } },
                 { assignedAt: { lte: query.endDate && new Date(query.endDate) } },
             ],
+            isActive: true,
         };
         const application = (
             await this.prismaService.application.findMany({
@@ -207,6 +209,7 @@ export class ApplicationMemberService {
                         id,
                     },
                 ],
+                isActive: true,
             },
             select: {
                 assignedAt: true,
@@ -341,6 +344,7 @@ export class ApplicationMemberService {
                         },
                     },
                 ],
+                isActive: true,
             },
             select: {
                 status: true,
@@ -513,6 +517,7 @@ export class ApplicationMemberService {
                     },
                 },
             }),
+            isActive: true,
         };
 
         const offer = (
@@ -617,6 +622,46 @@ export class ApplicationMemberService {
                     accountId,
                 },
                 contract: isInProgress ? null : undefined,
+                isActive: true,
+            },
+        });
+    }
+
+    async delete(accountId: number, id: number): Promise<void> {
+        const application = await this.prismaService.application.findUnique({
+            where: {
+                id,
+                isActive: true,
+            },
+            select: {
+                team: {
+                    select: {
+                        leader: {
+                            select: {
+                                accountId: true,
+                            },
+                        },
+                    },
+                },
+                interview: true,
+            },
+        });
+        if (!application) {
+            throw new NotFoundException(Error.APPLICATION_NOT_FOUND);
+        }
+        if (application && application.team && application.team.leader.accountId !== accountId) {
+            throw new BadRequestException(Error.PERMISSION_DENIED);
+        }
+
+        if (application && application.interview) {
+            throw new BadRequestException(Error.INTERVIEW_EXISTED);
+        }
+        await this.prismaService.application.update({
+            where: {
+                id,
+            },
+            data: {
+                isActive: false,
             },
         });
     }

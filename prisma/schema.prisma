@@ -640,6 +640,7 @@ model Application {
   status                    PostApplicationStatus      @default(APPLY)
   assignedAt                DateTime                   @default(now()) @db.Date
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
+  isActive                  Boolean                    @default(true)
   category                  ApplicationCategory        @default(NORMAL)
   member                    Member?                    @relation(fields: [memberId], references: [id])
   post                      Post                       @relation(fields: [postId], references: [id])

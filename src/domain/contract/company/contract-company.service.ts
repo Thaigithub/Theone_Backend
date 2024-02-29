@@ -100,6 +100,7 @@ export class ContractCompanyService {
                         accountId,
                     },
                 },
+                isActive: true,
             },
             select: {
                 post: {

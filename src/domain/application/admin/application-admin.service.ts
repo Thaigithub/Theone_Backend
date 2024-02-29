@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'services/prisma/prisma.service';
+import { Error } from 'utils/error.enum';
+import { CountResponse } from 'utils/generics/count.response';
 import { PageInfo, PaginationResponse } from 'utils/generics/pagination.response';
 import { QueryPagingHelper } from 'utils/pagination-query';
 import { ApplicationAdminContractStatus } from './enum/application-admin-contract-status.enum';
+import { ApplicationAdminGetCountRequest } from './request/application-admin-get-count.request';
 import { ApplicationAdminGetListPostRequest } from './request/application-admin-get-list-post.request';
 import { ApplicationAdminGetDetailResponse } from './response/application-admin-get-detail.response';
 import { ApplicationAdminGetLisPostResponse } from './response/application-admin-get-list-post.response';
-import { ApplicationAdminGetCountRequest } from './request/application-admin-get-count.request';
-import { CountResponse } from 'utils/generics/count.response';
-import { Error } from 'utils/error.enum';
 
 @Injectable()
 export class ApplicationAdminService {
@@ -17,7 +17,11 @@ export class ApplicationAdminService {
 
     async getListPost(postId: number, query: ApplicationAdminGetListPostRequest): Promise<ApplicationAdminGetLisPostResponse> {
         const applications = await this.prismaService.application.findMany({
-            where: { postId, post: { isActive: true } },
+            where: {
+                postId,
+                post: { isActive: true },
+                isActive: true,
+            },
             select: {
                 id: true,
                 member: {
@@ -65,7 +69,11 @@ export class ApplicationAdminService {
 
     async getDetail(id: number): Promise<ApplicationAdminGetDetailResponse> {
         const application = await this.prismaService.application.findUnique({
-            where: { id: id, post: { isActive: true } },
+            where: {
+                id: id,
+                post: { isActive: true },
+                isActive: true,
+            },
             select: {
                 status: true,
                 member: {
@@ -134,6 +142,7 @@ export class ApplicationAdminService {
                     type: query.postType,
                 },
             }),
+            isActive: true,
         };
         const count = await this.prismaService.application.count({
             where: queryFilter,
