@@ -277,7 +277,8 @@ export class PostMemberService {
                                     }
                                 }
                             }
-                        ]
+                        ],
+                        isActive: true,
                     },
                     select: {
                         id: true,
